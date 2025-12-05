@@ -1,0 +1,149 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.createBtn {
+    background-color: #0070f3;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.createBtn:hover {
+    background-color: #0051a2;
+}
+
+.tableContainer {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    padding: 1rem;
+    border-bottom: 1px solid #eaeaea;
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #444;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eaeaea;
+    color: #333;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.open {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.in_progress {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.waiting_for_parts {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.resolved {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.closed {
+    background-color: #eceff1;
+    color: #455a64;
+}
+
+.viewLink {
+    color: #0070f3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.viewLink:hover {
+    text-decoration: underline;
+}
+
+.empty {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .tableContainer {
+        background: #1a1a1a;
+        border-color: #333;
+    }
+
+    .table th {
+        background-color: #222;
+        border-bottom-color: #333;
+        color: #aaa;
+    }
+
+    .table td {
+        border-bottom-color: #333;
+        color: #ddd;
+    }
+
+    .open {
+        background-color: #0d47a1;
+        color: #bbdefb;
+    }
+
+    .in_progress {
+        background-color: #e65100;
+        color: #ffe0b2;
+    }
+
+    .waiting_for_parts {
+        background-color: #4a148c;
+        color: #e1bee7;
+    }
+
+    .resolved {
+        background-color: #1b5e20;
+        color: #c8e6c9;
+    }
+
+    .closed {
+        background-color: #263238;
+        color: #cfd8dc;
+    }
+}

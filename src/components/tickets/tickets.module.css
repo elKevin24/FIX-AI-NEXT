@@ -1,0 +1,28 @@
+.statusPill {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
+
+.statusOpen {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.statusInProgress {
+    background-color: #ffedd5;
+    color: #9a3412;
+}
+
+.statusResolved {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.statusClosed {
+    background-color: #f3f4f6;
+    color: #374151;
+}
