@@ -116,3 +116,5 @@
  POST /dashboard 303 in 77ms (compile: 2ms, proxy.ts: 9ms, render: 65ms)
  GET /dashboard 200 in 279ms (compile: 2ms, proxy.ts: 6ms, render: 271ms)
  POST /login?callbackUrl=http%3A%2F%2Flocalhost%3A3000%2Fdashboard 303 in 1021ms (compile: 1851µs, proxy.ts: 3ms, render: 1016ms)
+   Reload env: .env
+ GET /dashboard 200 in 1290ms (compile: 104ms, proxy.ts: 104ms, render: 1081ms)
