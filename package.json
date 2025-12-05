@@ -17,6 +17,7 @@
     "db:studio": "npx prisma studio",
     "neon:migrate": "dotenv -e .env.neon -- npx prisma migrate deploy",
     "neon:seed": "dotenv -e .env.neon -- npx prisma db seed",
+    "neon:superadmin": "dotenv -e .env.neon -- npx tsx scripts/seed-superadmin.ts",
     "neon:studio": "dotenv -e .env.neon -- npx prisma studio"
   },
   "dependencies": {

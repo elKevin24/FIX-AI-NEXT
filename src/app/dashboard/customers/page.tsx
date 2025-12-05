@@ -35,15 +35,8 @@ export default async function CustomersPage() {
             <div className={styles.header}>
                 <h1>Customers</h1>
                 {isSuperAdmin && (
-                    <span style={{
-                        background: '#d4edda',
-                        color: '#155724',
-                        padding: '5px 10px',
-                        borderRadius: '15px',
-                        fontSize: '0.8rem',
-                        border: '1px solid #c3e6cb'
-                    }}>
-                        👑 Super Admin Mode
+                    <span className={styles.superAdminBadge}>
+                        👑 Super Admin
                     </span>
                 )}
             </div>
