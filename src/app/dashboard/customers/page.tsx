@@ -6,12 +6,14 @@ import styles from '../tickets/tickets.module.css';
 export default async function CustomersPage() {
     const session = await auth();
 
-    if (!session?.user?.tenantId) {
+    if (!session?.user) {
         redirect('/login');
     }
 
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+
     const customers = await prisma.customer.findMany({
-        where: {
+        where: isSuperAdmin ? {} : {
             tenantId: session.user.tenantId,
         },
         include: {
@@ -21,6 +23,7 @@ export default async function CustomersPage() {
                     status: true,
                 },
             },
+            tenant: true, // Incluir tenant para mostrarlo si es admin
         },
         orderBy: {
             createdAt: 'desc',
@@ -31,6 +34,18 @@ export default async function CustomersPage() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1>Customers</h1>
+                {isSuperAdmin && (
+                    <span style={{
+                        background: '#d4edda',
+                        color: '#155724',
+                        padding: '5px 10px',
+                        borderRadius: '15px',
+                        fontSize: '0.8rem',
+                        border: '1px solid #c3e6cb'
+                    }}>
+                        👑 Super Admin Mode
+                    </span>
+                )}
             </div>
 
             <div className={styles.tableContainer}>
@@ -40,6 +55,7 @@ export default async function CustomersPage() {
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
+                            {isSuperAdmin && <th>Tenant</th>}
                             <th>Total Tickets</th>
                             <th>Active Tickets</th>
                         </tr>
@@ -55,6 +71,7 @@ export default async function CustomersPage() {
                                     <td>{customer.name}</td>
                                     <td>{customer.email || '-'}</td>
                                     <td>{customer.phone || '-'}</td>
+                                    {isSuperAdmin && <td>{customer.tenant.name}</td>}
                                     <td>{customer.tickets.length}</td>
                                     <td>{activeTickets}</td>
                                 </tr>
@@ -62,7 +79,7 @@ export default async function CustomersPage() {
                         })}
                         {customers.length === 0 && (
                             <tr>
-                                <td colSpan={5} className={styles.empty}>No customers found</td>
+                                <td colSpan={isSuperAdmin ? 6 : 5} className={styles.empty}>No customers found</td>
                             </tr>
                         )}
                     </tbody>
