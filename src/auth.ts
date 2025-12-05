@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { z } from "zod";
+import { authConfig } from "./auth.config";
 
 async function getUser(email: string) {
     try {
@@ -18,6 +19,7 @@ async function getUser(email: string) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials) {
@@ -40,6 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
+        ...authConfig.callbacks,
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
@@ -59,8 +62,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return token;
         },
-    },
-    pages: {
-        signIn: "/login",
     },
 });
