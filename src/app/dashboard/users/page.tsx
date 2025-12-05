@@ -6,9 +6,11 @@ import styles from '../tickets/tickets.module.css';
 export default async function UsersPage() {
     const session = await auth();
 
-    if (!session?.user?.tenantId) {
+    if (!session?.user) {
         redirect('/login');
     }
+
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     // Solo admins pueden ver la lista de usuarios
     if (session.user.role !== 'ADMIN') {
@@ -16,7 +18,7 @@ export default async function UsersPage() {
     }
 
     const users = await prisma.user.findMany({
-        where: {
+        where: isSuperAdmin ? {} : {
             tenantId: session.user.tenantId,
         },
         select: {
@@ -25,6 +27,11 @@ export default async function UsersPage() {
             email: true,
             role: true,
             createdAt: true,
+            tenant: {
+                select: {
+                    name: true,
+                },
+            },
             _count: {
                 select: {
                     assignedTickets: true,
@@ -40,6 +47,11 @@ export default async function UsersPage() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1>Users</h1>
+                {isSuperAdmin && (
+                    <span className={styles.superAdminBadge}>
+                        👑 Super Admin
+                    </span>
+                )}
             </div>
 
             <div className={styles.tableContainer}>
@@ -48,6 +60,7 @@ export default async function UsersPage() {
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
+                            {isSuperAdmin && <th>Tenant</th>}
                             <th>Role</th>
                             <th>Assigned Tickets</th>
                             <th>Joined</th>
@@ -58,6 +71,7 @@ export default async function UsersPage() {
                             <tr key={user.id}>
                                 <td>{user.name || '-'}</td>
                                 <td>{user.email}</td>
+                                {isSuperAdmin && <td>{user.tenant.name}</td>}
                                 <td>
                                     <span className={`${styles.status}`}>
                                         {user.role}
@@ -69,7 +83,7 @@ export default async function UsersPage() {
                         ))}
                         {users.length === 0 && (
                             <tr>
-                                <td colSpan={5} className={styles.empty}>No users found</td>
+                                <td colSpan={isSuperAdmin ? 6 : 5} className={styles.empty}>No users found</td>
                             </tr>
                         )}
                     </tbody>
