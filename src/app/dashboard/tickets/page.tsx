@@ -13,15 +13,6 @@ export default async function TicketsPage() {
     // Super Admin: adminkev@example.com puede ver TODO
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
-    // Debug: Ver todos los tickets sin filtro
-    const allTickets = await prisma.ticket.findMany({
-        include: {
-            customer: true,
-            assignedTo: true,
-            tenant: true, // Incluir tenant para mostrar a cuál pertenece
-        },
-    });
-
     // Query condicional: Super admin ve todo, otros solo su tenant
     const tickets = await prisma.ticket.findMany({
         where: isSuperAdmin ? {} : {
@@ -37,37 +28,23 @@ export default async function TicketsPage() {
         },
     });
 
-    // Debug info
-    console.log('🔍 DEBUG INFO:');
-    console.log('User email:', session.user.email);
-    console.log('Is Super Admin:', isSuperAdmin);
-    console.log('Session tenantId:', session.user.tenantId);
-    console.log('All tickets in DB:', allTickets.length);
-    console.log('Filtered tickets:', tickets.length);
-
+    // Debug info (console only)
+    if (isSuperAdmin) {
+        console.log('👑 Super Admin accessing all tickets');
+    }
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1>Tickets</h1>
+                {isSuperAdmin && (
+                    <span className={styles.superAdminBadge}>
+                        👑 Super Admin
+                    </span>
+                )}
                 <Link href="/dashboard/tickets/create" className={styles.createBtn}>
                     New Ticket
                 </Link>
-            </div>
-
-            {/* Debug Info - Temporal */}
-            <div style={{ background: isSuperAdmin ? '#d4edda' : '#fff3cd', padding: '10px', marginBottom: '15px', borderRadius: '5px', border: `1px solid ${isSuperAdmin ? '#28a745' : '#ffc107'}` }}>
-                <strong>{isSuperAdmin ? '� SUPER ADMIN MODE' : '�🔍 Debug Info:'}</strong>
-                <br />
-                User: {session.user.email}
-                <br />
-                {isSuperAdmin ? (
-                    <>Viewing ALL tickets from ALL tenants</>
-                ) : (
-                    <>Viewing only tickets from your tenant: {session.user.tenantId}</>
-                )}
-                <br />
-                Total tickets showing: {tickets.length}
             </div>
 
             <div className={styles.tableContainer}>
