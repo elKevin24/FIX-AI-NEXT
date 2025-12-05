@@ -1,0 +1,20 @@
+🐳 Iniciando Docker daemon...
+✅ Docker está activo
+🐘 Iniciando PostgreSQL con docker compose...
+⏳ Esperando a PostgreSQL (5 segundos)...
+📦 Ejecutando migraciones de Prisma (si aplica)...
+⚠️  Migraciones fallaron (ignorando, continuando con servidor)
+🚀 Iniciando Next.js dev server...
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+   ▲ Next.js 16.0.7 (Turbopack)
+   - Local:         http://localhost:3001
+   - Network:       http://10.210.196.235:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+Unhandled Rejection: Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+    at ignore-listed frames
+ ✓ Ready in 36.8s
+ ✓ Compiled in 343ms
+[?25h

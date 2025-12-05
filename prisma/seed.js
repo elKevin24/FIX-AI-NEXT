@@ -1,5 +1,5 @@
-import { PrismaClient, UserRole } from '@prisma/client';
-import bcryptjs from 'bcryptjs';
+const { PrismaClient, UserRole } = require('@prisma/client');
+const { hash } = require('bcryptjs');
 
 console.log('🌱 [SEED] Initializing...');
 const prisma = new PrismaClient();
@@ -20,7 +20,7 @@ async function main() {
     console.log('🌱 [SEED] Tenant upserted successfully.');
 
     console.log('🌱 [SEED] Hashing password...');
-    const password = await bcryptjs.hash('password123', 12);
+    const password = await hash('password123', 12);
     console.log('🌱 [SEED] Password hashed successfully.');
 
     console.log('🌱 [SEED] Upserting admin user...');
