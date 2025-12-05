@@ -2,6 +2,24 @@
 
 Esta aplicación está configurada para usar Neon como base de datos PostgreSQL en producción.
 
+## 🔐 Importante: Manejo de credenciales
+
+**NUNCA commitees credenciales en el repositorio.**
+
+- `.env` - Valores por defecto para desarrollo local (SE COMMITEA)
+- `.env.local` - Credenciales reales (NO SE COMMITEA, está en .gitignore)
+- `.env.example` - Template de variables necesarias (SE COMMITEA)
+
+### Configuración local
+
+1. Copia tus credenciales de Neon a `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+2. Edita `.env.local` con tus credenciales reales de Neon
+
 ## ✅ Base de datos Neon configurada
 
 Tu proyecto ya está conectado a Neon:
