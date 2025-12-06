@@ -47,12 +47,13 @@ model User {
   password  String   // Hashed
   name      String?
   role      UserRole @default(TECHNICIAN)
-  
+
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   assignedTickets Ticket[]
   auditLogs       AuditLog[]
+  ticketNotes     TicketNote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,7 +96,8 @@ model Ticket {
   assignedTo   User?       @relation(fields: [assignedToId], references: [id])
 
   partsUsed    PartUsage[]
-  
+  notes        TicketNote[]
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -140,7 +142,7 @@ model AuditLog {
   id        String   @id @default(uuid())
   action    String
   details   String?  // JSON string or text
-  
+
   userId    String?
   user      User?    @relation(fields: [userId], references: [id])
 
@@ -150,4 +152,21 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+model TicketNote {
+  id        String   @id @default(uuid())
+  content   String   // Note content (can be multiline)
+  isInternal Boolean @default(true) // Internal notes vs customer-visible
+
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ticket_notes")
 }
