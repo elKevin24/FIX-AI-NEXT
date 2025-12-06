@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import styles from '../tickets/tickets.module.css';
+import Link from 'next/link';
 
 export default async function CustomersPage() {
     const session = await auth();
@@ -23,7 +24,7 @@ export default async function CustomersPage() {
                     status: true,
                 },
             },
-            tenant: true, // Incluir tenant para mostrarlo si es admin
+            tenant: true,
         },
         orderBy: {
             createdAt: 'desc',
@@ -33,24 +34,28 @@ export default async function CustomersPage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1>Customers</h1>
+                <h1>Clientes</h1>
                 {isSuperAdmin && (
                     <span className={styles.superAdminBadge}>
                         👑 Super Admin
                     </span>
                 )}
+                <Link href="/dashboard/customers/create" className={styles.createBtn}>
+                    + Nuevo Cliente
+                </Link>
             </div>
 
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Nombre</th>
                             <th>Email</th>
-                            <th>Phone</th>
+                            <th>Teléfono</th>
                             {isSuperAdmin && <th>Tenant</th>}
                             <th>Total Tickets</th>
-                            <th>Active Tickets</th>
+                            <th>Tickets Activos</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,13 +71,27 @@ export default async function CustomersPage() {
                                     <td>{customer.phone || '-'}</td>
                                     {isSuperAdmin && <td>{customer.tenant.name}</td>}
                                     <td>{customer.tickets.length}</td>
-                                    <td>{activeTickets}</td>
+                                    <td>
+                                        <span className={`${styles.status} ${activeTickets > 0 ? styles.in_progress : styles.closed}`}>
+                                            {activeTickets}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <Link
+                                            href={`/dashboard/customers/${customer.id}/edit`}
+                                            className={styles.viewLink}
+                                        >
+                                            Editar
+                                        </Link>
+                                    </td>
                                 </tr>
                             );
                         })}
                         {customers.length === 0 && (
                             <tr>
-                                <td colSpan={isSuperAdmin ? 6 : 5} className={styles.empty}>No customers found</td>
+                                <td colSpan={isSuperAdmin ? 7 : 6} className={styles.empty}>
+                                    No se encontraron clientes
+                                </td>
                             </tr>
                         )}
                     </tbody>

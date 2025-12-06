@@ -2,28 +2,29 @@
 
 Este documento define el alcance y la hoja de ruta del proyecto, dividido en Features (Características) principales. Actualmente nos enfocaremos exclusivamente en el **Feature 1**.
 
-## Feature 1: Gestión Core de Taller (MVP) - [EN PROGRESO]
+## Feature 1: Gestión Core de Taller (MVP) - [COMPLETADO]
 **Objetivo:** Establecer la infraestructura base y permitir el flujo completo de reparación de dispositivos en un entorno multi-tenant. Es lo "alcanzable" a corto plazo.
 
 ### Etapa 1: Fundamentos y Arquitectura
 - [x] **Configuración del Proyecto**: Next.js 16, TypeScript, ESLint.
 - [x] **Base de Datos**: Configuración de PostgreSQL y Prisma ORM.
 - [x] **Autenticación**: Implementación de NextAuth v5 con Login.
-- [ ] **Multi-tenancy**: Asegurar aislamiento de datos por `tenantId` en todas las consultas.
-- [ ] **Roles y Permisos**: Middleware para proteger rutas según rol (Admin, Técnico, Recepción).
+- [x] **Multi-tenancy**: Aislamiento de datos por `tenantId` en todas las consultas.
+- [x] **Roles y Permisos**: Control de acceso por rol (Admin, Técnico, Recepción).
 
 ### Etapa 2: Gestión de Entidades Principales
-- [ ] **Módulo de Usuarios**: Crear, editar y listar empleados del taller.
-- [ ] **Módulo de Clientes**: Registro de clientes y sus dispositivos.
-- [ ] **Módulo de Tickets (Reparaciones)**:
+- [x] **Módulo de Usuarios**: Crear, editar y listar empleados del taller.
+- [x] **Módulo de Clientes**: Registro y edición de clientes.
+- [x] **Módulo de Tickets (Reparaciones)**:
     - Creación de ticket con detalles del dispositivo y falla.
-    - Flujo de estados: *Recibido -> En Revisión -> Esperando Repuesto -> Reparado -> Entregado*.
+    - Flujo de estados: *Abierto -> En Progreso -> Esperando Repuestos -> Resuelto -> Cerrado*.
     - Asignación de tickets a técnicos.
+    - Edición completa de tickets (estado, prioridad, asignación).
 
 ### Etapa 3: Interfaz y Experiencia de Usuario
-- [ ] **Dashboard Principal**: Vista resumen con contadores (Tickets abiertos, urgentes, etc.).
-- [ ] **Buscador Global**: Buscar tickets por ID, cliente o dispositivo.
-- [ ] **Comentarios/Notas**: Agregar notas internas al ticket (bitácora de reparación).
+- [x] **Dashboard Principal**: Vista resumen con contadores (Tickets abiertos, urgentes, etc.).
+- [x] **Buscador Global**: Buscar tickets por ID, cliente o dispositivo.
+- [x] **Comentarios/Notas**: Bitácora de reparación con notas internas.
 
 ---
 
