@@ -33,6 +33,17 @@ export default async function TicketsPage() {
         console.log('👑 Super Admin accessing all tickets');
     }
 
+    const getStatusLabel = (status: string) => {
+        const labels: Record<string, string> = {
+            'OPEN': 'Abierto',
+            'IN_PROGRESS': 'En Progreso',
+            'WAITING_FOR_PARTS': 'Esperando Repuestos',
+            'RESOLVED': 'Resuelto',
+            'CLOSED': 'Cerrado',
+        };
+        return labels[status] || status;
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -43,7 +54,7 @@ export default async function TicketsPage() {
                     </span>
                 )}
                 <Link href="/dashboard/tickets/create" className={styles.createBtn}>
-                    New Ticket
+                    + Nuevo Ticket
                 </Link>
             </div>
 
@@ -52,13 +63,13 @@ export default async function TicketsPage() {
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Title</th>
-                            <th>Customer</th>
+                            <th>Título</th>
+                            <th>Cliente</th>
                             {isSuperAdmin && <th>Tenant</th>}
-                            <th>Status</th>
-                            <th>Assigned To</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <th>Estado</th>
+                            <th>Asignado a</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,21 +81,21 @@ export default async function TicketsPage() {
                                 {isSuperAdmin && <td>{ticket.tenant.name}</td>}
                                 <td>
                                     <span className={`${styles.status} ${styles[ticket.status.toLowerCase()]}`}>
-                                        {ticket.status.replace('_', ' ')}
+                                        {getStatusLabel(ticket.status)}
                                     </span>
                                 </td>
-                                <td>{ticket.assignedTo?.name || 'Unassigned'}</td>
-                                <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                                <td>{ticket.assignedTo?.name || 'Sin asignar'}</td>
+                                <td>{new Date(ticket.createdAt).toLocaleDateString('es-ES')}</td>
                                 <td>
                                     <Link href={`/dashboard/tickets/${ticket.id}`} className={styles.viewLink}>
-                                        View
+                                        Ver
                                     </Link>
                                 </td>
                             </tr>
                         ))}
                         {tickets.length === 0 && (
                             <tr>
-                                <td colSpan={isSuperAdmin ? 8 : 7} className={styles.empty}>No tickets found</td>
+                                <td colSpan={isSuperAdmin ? 8 : 7} className={styles.empty}>No se encontraron tickets</td>
                             </tr>
                         )}
                     </tbody>
