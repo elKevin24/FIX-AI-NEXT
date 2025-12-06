@@ -1,107 +1,202 @@
-
 import Link from 'next/link';
 import { Ticket, Tenant, User } from '@prisma/client';
-import styles from './tickets.module.css';
-
-// Este componente es un Server Component (por defecto en Next.js App Router).
-// No contiene efectos cliente (`useEffect`) ni estado local que requiera
-// `useOptimistic`. Por eso NO añadimos `use client` aquí.
+import { Badge } from '@/components/ui';
+import styles from './TicketStatusCard.module.css';
 
 interface TicketWithTenant extends Ticket {
     tenant: Tenant;
     assignedTo?: User | null;
 }
 
-// Cachea el Intl.DateTimeFormat a nivel de módulo para evitar recrearlo
-// en cada render y mejorar rendimiento en renders repetidos.
-const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+const dateTimeFormatter = new Intl.DateTimeFormat('es-ES', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
 });
 
 const formatDate = (date: Date | string) => {
-    // Acepta Date o string (por seguridad si el dato viene serializado)
     const d = typeof date === 'string' ? new Date(date) : date;
     return dateTimeFormatter.format(d);
 };
 
+const getRelativeTime = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) return `hace ${days} día${days > 1 ? 's' : ''}`;
+    if (hours > 0) return `hace ${hours} hora${hours > 1 ? 's' : ''}`;
+    if (minutes > 0) return `hace ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+    return 'Ahora mismo';
+};
+
 export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant }) {
-    const getStatusClass = (status: string) => {
-        switch (status) {
-            case 'OPEN':
-                return styles.statusOpen;
-            case 'IN_PROGRESS':
-                return styles.statusInProgress;
-            case 'RESOLVED':
-                return styles.statusResolved;
-            case 'CLOSED':
-                return styles.statusClosed;
-            default:
-                return '';
-        }
+    const getStatusBadge = (status: string) => {
+        const statusMap: Record<string, { variant: 'success' | 'warning' | 'error' | 'info' | 'default' | 'primary', label: string, icon: string }> = {
+            'OPEN': { variant: 'info', label: 'Abierto', icon: '🔵' },
+            'IN_PROGRESS': { variant: 'warning', label: 'En Progreso', icon: '⚡' },
+            'RESOLVED': { variant: 'success', label: 'Resuelto', icon: '✓' },
+            'CLOSED': { variant: 'default', label: 'Cerrado', icon: '✓' },
+        };
+        return statusMap[status] || { variant: 'default' as const, label: status, icon: '•' };
     };
 
+    const getPriorityBadge = (priority: string) => {
+        const priorityMap: Record<string, { variant: 'success' | 'warning' | 'error' | 'info' | 'default' | 'primary', icon: string, label: string }> = {
+            'LOW': { variant: 'success', icon: '↓', label: 'Baja' },
+            'MEDIUM': { variant: 'warning', icon: '→', label: 'Media' },
+            'HIGH': { variant: 'error', icon: '↑', label: 'Alta' },
+            'URGENT': { variant: 'error', icon: '⚠', label: 'Urgente' },
+        };
+        return priorityMap[priority] || { variant: 'default' as const, icon: '•', label: priority };
+    };
+
+    const statusInfo = getStatusBadge(ticket.status);
+    const priorityInfo = getPriorityBadge(ticket.priority);
+
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-24">
-            <div className="w-full max-w-3xl p-8 border rounded-lg shadow-2xl bg-white dark:bg-zinc-900 transition-shadow duration-300 hover:shadow-xl">
-                <div className="mb-6 border-b pb-4">
-                    <h1 className="text-3xl font-bold mb-2 text-zinc-800 dark:text-zinc-100">{ticket.tenant.name}</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Ticket Status Check</p>
-                </div>
+        <div className={styles.container}>
+            <div className={styles.wrapper}>
+                {/* Back Button */}
+                <Link href="/tickets/status" className={styles.backButton}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Consultar Otro Ticket</span>
+                </Link>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div className="md:col-span-2">
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Ticket ID</h2>
-                        <p className="font-mono text-lg text-zinc-700 dark:text-zinc-300">{ticket.id}</p>
-                    </div>
+                {/* Main Card */}
+                <div className={styles.mainCard}>
+                    {/* Header Section */}
+                    <div className={styles.header}>
+                        <div className={styles.headerContent}>
+                            <div className={styles.headerTop}>
+                                <div className={styles.iconContainer}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                                <div className={styles.titleSection}>
+                                    <p className={styles.tenantName}>
+                                        {ticket.tenant.name}
+                                    </p>
+                                    <h1 className={styles.ticketTitle}>
+                                        {ticket.title}
+                                    </h1>
+                                </div>
+                            </div>
 
-                    <div className="md:col-span-2">
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Title</h2>
-                        <p className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100">{ticket.title}</p>
-                    </div>
-
-                    <div>
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Status</h2>
-                        <div className={`${styles.statusPill} ${getStatusClass(ticket.status)}`}>
-                            {ticket.status.replace('_', ' ')}
+                            <div className={styles.badgesContainer}>
+                                <div className={styles.statusBadge}>
+                                    <span>{statusInfo.icon}</span>
+                                    <span>{statusInfo.label}</span>
+                                </div>
+                                <div className={styles.statusBadge}>
+                                    <span>{priorityInfo.icon}</span>
+                                    <span>{priorityInfo.label}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Priority</h2>
-                        <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300">{ticket.priority}</p>
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Description</h2>
-                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{ticket.description}</p>
-                    </div>
-
-                    {ticket.assignedTo && (
-                        <div>
-                            <h2 className="text-sm uppercase text-gray-500 font-bold">Assigned To</h2>
-                            <p className="text-lg text-zinc-700 dark:text-zinc-300">{ticket.assignedTo.name}</p>
+                    {/* Content Section */}
+                    <div className={styles.content}>
+                        {/* Ticket ID */}
+                        <div className={styles.ticketIdCard}>
+                            <p className={styles.ticketIdLabel}>
+                                ID del Ticket
+                            </p>
+                            <p className={styles.ticketIdValue}>
+                                {ticket.id}
+                            </p>
                         </div>
-                    )}
 
-                    <div>
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Created At</h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(ticket.createdAt)}</p>
-                    </div>
+                        {/* Description */}
+                        <div className={styles.section}>
+                            <h3 className={styles.sectionTitle}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Descripción
+                            </h3>
+                            <p className={styles.description}>
+                                {ticket.description}
+                            </p>
+                        </div>
 
-                    <div>
-                        <h2 className="text-sm uppercase text-gray-500 font-bold">Last Updated</h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(ticket.updatedAt)}</p>
-                    </div>
+                        {/* Info Grid */}
+                        <div className={styles.infoGrid}>
+                            {/* Assigned To */}
+                            {ticket.assignedTo && (
+                                <div className={styles.infoCard}>
+                                    <div className={styles.infoCardHeader}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-gray-700)" strokeWidth="2">
+                                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <p className={styles.infoCardLabel}>
+                                            Asignado a
+                                        </p>
+                                    </div>
+                                    <p className={styles.infoCardValue}>
+                                        {ticket.assignedTo.name || ticket.assignedTo.email}
+                                    </p>
+                                </div>
+                            )}
 
-                    <div className="pt-6 border-t mt-4 md:col-span-2">
-                        <Link href="/tickets/status" className="text-blue-500 hover:underline">
-                            &larr; Check another ticket
-                        </Link>
+                            {/* Created */}
+                            <div className={styles.infoCard}>
+                                <div className={styles.infoCardHeader}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-gray-700)" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 6v6l4 2" />
+                                    </svg>
+                                    <p className={styles.infoCardLabel}>
+                                        Creado
+                                    </p>
+                                </div>
+                                <p className={styles.infoCardSecondary}>
+                                    {formatDate(ticket.createdAt)}
+                                </p>
+                                <p className={styles.infoCardTertiary}>
+                                    {getRelativeTime(ticket.createdAt)}
+                                </p>
+                            </div>
+
+                            {/* Last Updated */}
+                            <div className={styles.infoCard}>
+                                <div className={styles.infoCardHeader}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-gray-700)" strokeWidth="2">
+                                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <p className={styles.infoCardLabel}>
+                                        Última Actualización
+                                    </p>
+                                </div>
+                                <p className={styles.infoCardSecondary}>
+                                    {formatDate(ticket.updatedAt)}
+                                </p>
+                                <p className={styles.infoCardTertiary}>
+                                    {getRelativeTime(ticket.updatedAt)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Status Help */}
+                        <div className={styles.helpAlert}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-info-600)" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4m0-4h.01" />
+                            </svg>
+                            <p className={styles.helpAlertText}>
+                                <strong>¿Necesitas ayuda?</strong><br/>
+                                Si tienes preguntas sobre tu ticket, por favor contacta a nuestro equipo de soporte con el ID de tu ticket.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
