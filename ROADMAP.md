@@ -1,6 +1,8 @@
 # Roadmap: Sistema de Gestión de Talleres Electrónicos (FIX-AI-NEXT)
 
-Este documento define el alcance y la hoja de ruta del proyecto, dividido en Features (Características) principales. Actualmente nos enfocaremos exclusivamente en el **Feature 1**.
+Este documento define el alcance y la hoja de ruta del proyecto, dividido en Features (Características) principales.
+
+**Estado actual:** Feature 1 completado. Próximo objetivo: **Feature 2** (Operaciones Esenciales).
 
 ## Feature 1: Gestión Core de Taller (MVP) - [COMPLETADO]
 **Objetivo:** Establecer la infraestructura base y permitir el flujo completo de reparación de dispositivos en un entorno multi-tenant. Es lo "alcanzable" a corto plazo.
@@ -28,22 +30,58 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 
 ---
 
-## Feature 2: Ecosistema Avanzado y Automatización - [FUTURO]
-**Objetivo:** Agregar valor mediante automatización, comunicación externa e inteligencia. Es "alcanzable pero más difícil".
+## Feature 2: Operaciones Esenciales del Taller - [PRÓXIMO]
+**Objetivo:** Funcionalidades críticas para la operación diaria de un taller de reparaciones.
 
-### Etapa 1: Comunicación y Transparencia
-- [ ] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con un código único (sin login).
-- [ ] **Notificaciones Automáticas**: Envío de correos/WhatsApp al cambiar el estado del ticket.
-- [ ] **Generación de Documentos**: PDF de orden de ingreso y comprobante de entrega.
+### Etapa 1: Documentación y Comunicación
+- [ ] **Generación de PDF**: Orden de ingreso para imprimir/enviar al cliente con datos del equipo, falla reportada y firma.
+- [ ] **Comprobante de Entrega**: PDF al cerrar ticket con resumen de trabajo realizado.
 
-### Etapa 2: Control Administrativo Avanzado
-- [ ] **Inventario de Repuestos**: Control de stock, asignación de repuestos a tickets.
-- [ ] **Módulo de Caja/Facturación**: Costos de reparación, mano de obra, ganancias.
-- [ ] **Métricas Avanzadas**: Reportes de productividad por técnico, ingresos mensuales.
+### Etapa 2: Notificaciones Automáticas
+- [ ] **Notificaciones por Email**: Envío automático al cambiar estado del ticket.
+- [ ] **Integración WhatsApp API**: Notificaciones por WhatsApp (usando API oficial o servicios como Twilio).
+- [ ] **Plantillas de Mensajes**: Mensajes personalizables por tipo de notificación.
 
-### Etapa 3: Inteligencia (FIX-AI)
-- [ ] **Base de Conocimiento**: Sugerencias de solución basadas en fallas similares previas.
-- [ ] **Estimación de Tiempos**: Predicción de fecha de entrega basada en carga de trabajo.
+### Etapa 3: Control de Inventario
+- [ ] **Catálogo de Repuestos**: CRUD de repuestos con SKU, costo, precio de venta.
+- [ ] **Control de Stock**: Entradas, salidas, alertas de stock bajo.
+- [ ] **Asignación a Tickets**: Vincular repuestos usados en cada reparación con cálculo automático de costos.
+
+---
+
+## Feature 3: Administración Avanzada - [FUTURO]
+**Objetivo:** Herramientas para el control financiero y análisis del negocio.
+
+### Etapa 1: Facturación y Finanzas
+- [ ] **Módulo de Caja**: Registro de cobros, métodos de pago, caja chica.
+- [ ] **Facturación**: Generación de facturas/recibos con desglose de repuestos y mano de obra.
+- [ ] **Reportes Financieros**: Ingresos, gastos, ganancias por período.
+
+### Etapa 2: Métricas y Reportes
+- [ ] **Productividad por Técnico**: Tickets completados, tiempo promedio de reparación.
+- [ ] **Estadísticas de Negocio**: Tipos de fallas más comunes, marcas más reparadas.
+- [ ] **Exportación de Datos**: Exportar reportes a Excel/CSV.
+
+### Etapa 3: Portal Público
+- [ ] **Consulta de Estado**: Página pública donde el cliente consulta su ticket con código único.
+- [ ] **Aprobación de Presupuesto**: Cliente aprueba/rechaza presupuesto desde enlace.
+
+---
+
+## Feature 4: Inteligencia Artificial (FIX-AI) - [VISIÓN]
+**Objetivo:** Diferenciador competitivo mediante IA aplicada a diagnósticos.
+
+### Etapa 1: Base de Conocimiento
+- [ ] **Historial de Soluciones**: Registro estructurado de fallas y soluciones aplicadas.
+- [ ] **Búsqueda Inteligente**: Buscar soluciones por síntomas similares.
+
+### Etapa 2: Asistente de Diagnóstico
+- [ ] **Sugerencias Automáticas**: Al describir falla, sugerir posibles causas basadas en historial.
+- [ ] **Probabilidad de Diagnóstico**: Mostrar % de coincidencia con casos anteriores.
+
+### Etapa 3: Automatización Avanzada
+- [ ] **Dictado por Voz**: Técnico dicta notas desde móvil.
+- [ ] **Estimación de Tiempos**: Predicción de fecha de entrega según carga de trabajo.
 
 ---
 
