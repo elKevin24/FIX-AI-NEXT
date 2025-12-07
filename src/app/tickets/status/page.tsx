@@ -1,19 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardHeader, CardBody, Input, Button } from '@/components/ui';
+import { searchTicket } from '@/lib/actions';
+import TicketStatusCard from '@/components/tickets/TicketStatusCard';
 
 export default function TicketSearchPage() {
     const [ticketId, setTicketId] = useState('');
-    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [ticket, setTicket] = useState<any | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (ticketId.trim()) {
-            router.push(`/tickets/status/${ticketId.trim()}`);
+        if (!ticketId.trim()) return;
+
+        setLoading(true);
+        setError('');
+        setTicket(null);
+
+        try {
+            const result = await searchTicket(ticketId.trim());
+            if (result) {
+                setTicket(result);
+            } else {
+                setError('No se encontró ningún ticket con ese ID. Verifique e intente nuevamente.');
+            }
+        } catch (err) {
+            setError('Ocurrió un error al consultar el ticket. Intente nuevamente.');
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleReset = () => {
+        setTicket(null);
+        setTicketId('');
+        setError('');
     };
 
     // Quick access example IDs
@@ -26,14 +50,20 @@ export default function TicketSearchPage() {
         setTicketId(id);
     };
 
+    if (ticket) {
+        return <TicketStatusCard ticket={ticket} onBack={handleReset} />;
+    }
+
     return (
         <div style={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: ticket ? 'flex-start' : 'center', // Alinea arriba si hay ticket, centra si no
             justifyContent: 'center',
-            padding: 'var(--spacing-4)'
+            padding: 'var(--spacing-4)',
+            paddingTop: ticket ? 'var(--spacing-8)' : 'var(--spacing-4)', // Más padding superior si hay ticket
+            transition: 'padding-top 0.3s ease-out' // Transición suave
         }}>
             <div style={{ width: '100%', maxWidth: '600px' }}>
                 {/* Back to Home - Floating button style */}
@@ -54,9 +84,9 @@ export default function TicketSearchPage() {
                     </Link>
                 </div>
 
-                {/* Main Card */}
+                {/* Main Card (Search Form) */}
                 <Card
-                    style={{ background: 'white', border: 'none' }}
+                    style={{ background: 'white', border: 'none', marginBottom: ticket ? 'var(--spacing-8)' : '0' }}
                     onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
                         e.currentTarget.style.transform = 'translateY(-4px)';
                         e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
@@ -118,22 +148,37 @@ export default function TicketSearchPage() {
                                     label="ID del Ticket"
                                     type="text"
                                     value={ticketId}
-                                    onChange={(e) => setTicketId(e.target.value)}
+                                    onChange={(e) => {
+                                        setTicketId(e.target.value);
+                                        setError('');
+                                    }}
                                     placeholder="Ej: 90287b37"
                                     required
                                     style={{ 
                                         fontSize: 'var(--font-size-lg)', 
                                         padding: 'var(--spacing-4)',
                                         letterSpacing: '0.05em',
-                                        fontFamily: 'var(--font-family-mono)'
+                                        fontFamily: 'var(--font-family-mono)',
+                                        borderColor: error ? 'var(--color-error-500)' : undefined
                                     }}
                                 />
+                                {error && (
+                                    <p style={{ 
+                                        color: 'var(--color-error-600)', 
+                                        fontSize: 'var(--font-size-sm)', 
+                                        marginTop: 'var(--spacing-2)',
+                                        fontWeight: '500'
+                                    }}>
+                                        {error}
+                                    </p>
+                                )}
                             </div>
 
                             <Button
                                 type="submit"
                                 variant="primary"
                                 fullWidth
+                                disabled={loading}
                                 style={{
                                     height: '54px',
                                     fontSize: 'var(--font-size-base)',
@@ -142,10 +187,16 @@ export default function TicketSearchPage() {
                                     boxShadow: '0 4px 12px var(--color-primary-200)'
                                 }}
                             >
-                                <span>Consultar Estado</span>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: '8px' }}>
-                                    <path d="M5 12h14m-7-7l7 7-7 7" />
-                                </svg>
+                                {loading ? (
+                                    <span>Buscando...</span>
+                                ) : (
+                                    <>
+                                        <span>Consultar Estado</span>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: '8px' }}>
+                                            <path d="M5 12h14m-7-7l7 7-7 7" />
+                                        </svg>
+                                    </>
+                                )}
                             </Button>
                         </form>
 
@@ -252,6 +303,13 @@ export default function TicketSearchPage() {
                         </div>
                     </CardBody>
                 </Card>
+
+                {/* Ticket Details Card (conditionally rendered below form) */}
+                {ticket && (
+                    <div style={{ marginTop: 'var(--spacing-8)' }}>
+                        <TicketStatusCard ticket={ticket} onBack={handleReset} />
+                    </div>
+                )}
             </div>
         </div>
     );

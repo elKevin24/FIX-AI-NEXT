@@ -68,6 +68,44 @@ export async function getTicketById(id: string) {
 }
 
 /**
+ * Search ticket safely for client-side usage
+ * 
+ * @description Wrapper around getTicketById that catches errors and returns null
+ * instead of triggering a 404 page redirect.
+ */
+export async function searchTicket(id: string) {
+    try {
+        // Try to find by exact ID first (full UUID)
+        let ticket = await prisma.ticket.findUnique({
+            where: { id },
+            include: {
+                tenant: true,
+                assignedTo: true,
+            },
+        });
+
+        // If not found and ID looks like a short ID, try partial match
+        if (!ticket && id.length >= 8) {
+            ticket = await prisma.ticket.findFirst({
+                where: {
+                    id: {
+                        startsWith: id,
+                    },
+                },
+                include: {
+                    tenant: true,
+                    assignedTo: true,
+                },
+            });
+        }
+        return ticket;
+    } catch (error) {
+        console.error("Error searching ticket:", error);
+        return null;
+    }
+}
+
+/**
  * Authenticate user with credentials (Server Action)
  *
  * @description Processes login form submission using NextAuth credentials provider.
