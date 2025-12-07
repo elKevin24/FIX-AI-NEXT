@@ -315,6 +315,11 @@ a:hover {
   user-select: none;
 }
 
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-200);
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -383,6 +388,51 @@ a:hover {
 
 .btn-ghost:hover {
   background: var(--color-surface-hover);
+}
+
+.btn-glass {
+  /* Base: Subtle gradient for depth + slight transparency */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  /* Border: Semi-transparent white to catch light */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  
+  /* Typography: Richer gray (Zinc 600) and tight tracking */
+  color: #52525b; 
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-full);
+  
+  /* Shadows: Layered for premium depth */
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.03), /* Micro-border for definition */
+    0 1px 2px rgba(0, 0, 0, 0.05), /* Drop shadow */
+    0 4px 12px rgba(0, 0, 0, 0.02); /* Ambient glow */
+    
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smooth 'spring' easing */
+}
+
+.btn-glass:hover {
+  /* Hover: Brighten and lift */
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #09090b; /* Zinc 950 - Sharp contrast */
+  transform: translateY(-1px);
+  
+  /* Enhanced shadow on lift */
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    
+  text-decoration: none;
+}
+
+.btn-glass:active {
+  transform: translateY(0) scale(0.98); /* Subtle press effect */
+  background: #f1f5f9;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Button Sizes */
