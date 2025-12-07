@@ -11,6 +11,10 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
 
+    permissions:
+          issues: write          # Para comentar en issues
+          pull-requests: write   # Para comentar en Pull Requests
+   
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
