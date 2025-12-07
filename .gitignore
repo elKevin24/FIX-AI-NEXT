@@ -26,6 +26,7 @@ pnpm-debug.log*
 .env*.local
 .env
 .env.neon
+.env.vercel
 
 # Keep .env.example for documentation
 
@@ -42,3 +43,6 @@ dev.log
 
 # Tool-specific files
 .claude/
+
+.gemini/
+gha-creds-*.json
