@@ -57,7 +57,7 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
     };
 
     const statusInfo = getStatusBadge(ticket.status);
-    const priorityInfo = getPriorityBadge(ticket.priority);
+    const priorityInfo = getPriorityBadge(ticket.priority || 'LOW');
 
     return (
         <div className={styles.container}>

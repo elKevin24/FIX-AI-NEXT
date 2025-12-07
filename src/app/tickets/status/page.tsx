@@ -81,7 +81,7 @@ export default function TicketSearchPage() {
                         </div>
 
                         <CardHeader>
-                            <CardTitle style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-2)' }}>
+                            <CardTitle className="text-2xl mb-2">
                                 Track Your Ticket
                             </CardTitle>
                         </CardHeader>
