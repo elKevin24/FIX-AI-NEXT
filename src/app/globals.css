@@ -438,17 +438,6 @@ a:hover {
 /* Button Sizes */
 .btn-sm {
   padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-xs);
-}
-
-.btn-lg {
-  padding: var(--spacing-4) var(--spacing-8);
-  font-size: var(--font-size-base);
-}
-
-.btn-full {
-  width: 100%;
-}
 
 /* ========================================
    COMPONENT: CARDS
@@ -699,6 +688,19 @@ a:hover {
 .ml-4 { margin-left: var(--spacing-4); }
 .mr-2 { margin-right: var(--spacing-2); }
 .mr-4 { margin-right: var(--spacing-4); }
+
+.text-2xl {
+  font-size: var(--font-size-2xl);
+}
+
+.mb-2 {
+  margin-bottom: var(--spacing-2);
+}
+
+.mb-4 {
+  margin-bottom: var(--spacing-4);
+}
+
 
 /* Spacing - Padding */
 .p-0 { padding: var(--spacing-0); }
