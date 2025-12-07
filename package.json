@@ -8,7 +8,7 @@
     "dev:next": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d",
