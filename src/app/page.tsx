@@ -18,7 +18,7 @@ export default function Home() {
                         <Link href="/login" className={styles.primaryBtn}>
                             Acceder al Sistema
                         </Link>
-                        <Link href="/tickets/status" className={styles.secondaryBtn}>
+                        <Link href="/tickets/status" className="btn btn-glass">
                             Consultar Ticket
                         </Link>
                     </div>
