@@ -92,9 +92,11 @@ export default function TicketDetailView({ ticket, availableUsers, isSuperAdmin,
     // Refresh page when note is added successfully
     useEffect(() => {
         if (noteState?.success) {
-            setNoteContent('');
-            formRef.current?.reset();
-            router.refresh();
+            setTimeout(() => {
+                setNoteContent('');
+                formRef.current?.reset();
+                router.refresh();
+            }, 0);
         }
     }, [noteState, router]);
 
