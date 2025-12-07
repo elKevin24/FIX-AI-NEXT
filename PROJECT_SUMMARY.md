@@ -199,6 +199,45 @@ const activeTickets = await prisma.ticket.count({
 
 ---
 
+## 🏛️ Nota sobre la Arquitectura Multi-Inquilino
+
+El proyecto incluye una utilidad avanzada para la gestión de multi-tenancy en `src/lib/tenant-prisma.ts`.
+
+### `getTenantPrisma`
+Esta función utiliza **extensiones de Prisma** para crear un cliente de base de datos dinámico y filtrado por `tenantId`.
+
+**Ventajas:**
+- **Centraliza la lógica de aislamiento:** Evita tener que añadir manualmente `where: { tenantId: '...' }` en cada consulta.
+- **Reduce errores:** Disminuye el riesgo de fugas de datos entre inquilinos por un descuido del desarrollador.
+- **Código más limpio:** Las rutas de API y los servicios se vuelven más legibles al no tener que repetir la lógica de filtrado.
+
+**Ejemplo de uso recomendado:**
+```typescript
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { auth } from '@/auth';
+
+export async function GET(request: Request) {
+    const session = await auth();
+    // ... validación de sesión ...
+
+    const tenantPrisma = getTenantPrisma(session.user.tenantId);
+
+    // La consulta ya no necesita el 'where' de tenantId, es automático.
+    const tickets = await tenantPrisma.ticket.findMany({
+        include: { customer: true },
+    });
+
+    return NextResponse.json(tickets);
+}
+```
+
+### Oportunidad de Refactorización
+Actualmente, las rutas de la API (ej. `src/app/api/tickets/route.ts`) usan el cliente de Prisma global y aplican el filtro de `tenantId` manualmente.
+
+Se recomienda **refactorizar estas rutas para que utilicen `getTenantPrisma`**. Esto alineará la implementación con la arquitectura diseñada, mejorando la seguridad y la mantenibilidad del proyecto a largo plazo.
+
+---
+
 ## 🔧 Tecnologías Utilizadas
 
 | Categoría | Tecnología | Versión |
@@ -226,6 +265,7 @@ const activeTickets = await prisma.ticket.count({
 - [ ] Integración con servicios de pago
 
 ### Mejoras Técnicas
+- [ ] **Refactorizar `data-access`**: Adoptar `getTenantPrisma` en todas las rutas de API para centralizar la lógica multi-inquilino y mejorar la seguridad.
 - [ ] Tests unitarios (Jest)
 - [ ] Tests E2E (Playwright/Cypress)
 - [ ] CI/CD con GitHub Actions
