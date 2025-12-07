@@ -60,7 +60,7 @@ export default function TicketStatusCard({ ticket, onBack }: { ticket: TicketWit
     const priorityInfo = getPriorityBadge(ticket.priority || 'MEDIUM');
 
     return (
-        <div style={{ width: '100%', maxWidth: '600px', padding: 'var(--spacing-4)' }}>
+        <>
             {/* Botón de Regreso */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
                 {onBack ? (
