@@ -27,6 +27,25 @@ export default function LoginPage() {
 
       {/* Contenedor principal */}
       <div className={styles.cardWrapper}>
+        {/* Back to Home Link */}
+        <div style={{ marginBottom: 'var(--spacing-4)', textAlign: 'center' }}>
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-2)',
+              color: 'var(--color-text-secondary)',
+              textDecoration: 'none',
+              fontSize: 'var(--font-size-sm)',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-primary-600)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+          >
+            <span>←</span> Back to Home
+          </Link>
+        </div>
         {/* Card */}
         <div className={styles.card}>
           {/* Header */}
