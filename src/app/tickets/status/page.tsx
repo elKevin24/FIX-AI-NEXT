@@ -306,7 +306,7 @@ export default function TicketSearchPage() {
 
                 {/* Ticket Details Card (conditionally rendered below form) */}
                 {ticket && (
-                    <div style={{ marginTop: 'var(--spacing-8)' }}>
+                    <div style={{ marginTop: 'var(--spacing-8)', padding: 'var(--spacing-4)' }}>
                         <TicketStatusCard ticket={ticket} onBack={handleReset} />
                     </div>
                 )}
