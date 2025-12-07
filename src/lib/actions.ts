@@ -3,6 +3,7 @@
 import { signIn, auth } from '@/auth';
 import { AuthError } from 'next-auth';
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 
@@ -11,9 +12,10 @@ import bcrypt from 'bcryptjs';
  *
  * @description Retrieves a ticket including tenant and assigned user information.
  * Used for public ticket status lookup (no authentication required).
+ * Supports both full UUID and short ID (first 8 characters).
  * Throws 404 if ticket doesn't exist.
  *
- * @param {string} id - UUID of the ticket to retrieve
+ * @param {string} id - UUID or short ID (8+ chars) of the ticket to retrieve
  *
  * @returns {Promise<Ticket & { tenant: Tenant, assignedTo: User | null }>}
  * Ticket object with related tenant and optionally assigned user
@@ -21,10 +23,12 @@ import bcrypt from 'bcryptjs';
  * @throws {404} Next.js notFound() - When ticket with given ID doesn't exist
  *
  * @example
- * const ticket = await getTicketById('t1000000-0000-0000-0000-000000000001');
+ * // Full UUID
+ * const ticket = await getTicketById('90287b37-6ba2-4cad-803c-cb26a25db027');
+ *
+ * // Short ID (first 8 chars)
+ * const ticket = await getTicketById('90287b37');
  * console.log(ticket.title); // "Laptop no enciende"
- * console.log(ticket.tenant.name); // "Default Workshop"
- * console.log(ticket.assignedTo?.name); // "Technician User" or null
  *
  * @security
  * - No authentication required (public endpoint)
@@ -32,13 +36,29 @@ import bcrypt from 'bcryptjs';
  * - Safe for customer self-service status checks
  */
 export async function getTicketById(id: string) {
-    const ticket = await prisma.ticket.findUnique({
+    // Try to find by exact ID first (full UUID)
+    let ticket = await prisma.ticket.findUnique({
         where: { id },
         include: {
             tenant: true,
             assignedTo: true,
         },
     });
+
+    // If not found and ID looks like a short ID, try partial match
+    if (!ticket && id.length >= 8) {
+        ticket = await prisma.ticket.findFirst({
+            where: {
+                id: {
+                    startsWith: id,
+                },
+            },
+            include: {
+                tenant: true,
+                assignedTo: true,
+            },
+        });
+    }
 
     if (!ticket) {
         notFound();
@@ -178,30 +198,32 @@ export async function createTicket(prevState: any, formData: FormData) {
     }
 
     try {
+        const tenantDb = getTenantPrisma(session.user.tenantId);
+
         // Simple customer creation/lookup for demo
-        let customer = await prisma.customer.findFirst({
+        // tenantId is automatically injected by tenantDb
+        let customer = await tenantDb.customer.findFirst({
             where: {
                 name: customerName,
-                tenantId: session.user.tenantId
             }
         });
 
         if (!customer) {
-            customer = await prisma.customer.create({
+            customer = await tenantDb.customer.create({
                 data: {
                     name: customerName,
-                    tenantId: session.user.tenantId,
+                    tenantId: session.user.tenantId, // Satisfy TS, enforced by extension
                 }
             });
         }
 
-        await prisma.ticket.create({
+        await tenantDb.ticket.create({
             data: {
                 title,
                 description,
-                tenantId: session.user.tenantId,
                 customerId: customer.id,
                 status: 'OPEN',
+                tenantId: session.user.tenantId, // Satisfy TS, enforced by extension
             }
         });
 
