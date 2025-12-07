@@ -14,7 +14,10 @@ export default function TicketSearchPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!ticketId.trim()) return;
+        if (!ticketId.trim()) {
+            setError('Por favor, ingresa un ID de ticket.');
+            return;
+        }
 
         setLoading(true);
         setError('');
@@ -28,6 +31,7 @@ export default function TicketSearchPage() {
                 setError('No se encontró ningún ticket con ese ID. Verifique e intente nuevamente.');
             }
         } catch (err) {
+            console.error("Error al consultar el ticket:", err);
             setError('Ocurrió un error al consultar el ticket. Intente nuevamente.');
         } finally {
             setLoading(false);
@@ -48,45 +52,41 @@ export default function TicketSearchPage() {
 
     const handleExampleClick = (id: string) => {
         setTicketId(id);
+        setError(''); // Clear error when selecting example
     };
-
-    if (ticket) {
-        return <TicketStatusCard ticket={ticket} onBack={handleReset} />;
-    }
 
     return (
         <div style={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%)',
             display: 'flex',
-            alignItems: ticket ? 'flex-start' : 'center', // Alinea arriba si hay ticket, centra si no
+            alignItems: 'center', // Alineado siempre al centro
             justifyContent: 'center',
             padding: 'var(--spacing-4)',
-            paddingTop: ticket ? 'var(--spacing-8)' : 'var(--spacing-4)', // Más padding superior si hay ticket
-            transition: 'padding-top 0.3s ease-out' // Transición suave
+            position: 'relative' // Necesario para el posicionamiento absoluto del botón de Home
         }}>
-            <div style={{ width: '100%', maxWidth: '600px' }}>
-                {/* Back to Home - Floating button style */}
-                <div style={{
-                    marginBottom: 'var(--spacing-6)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <Link
-                        href="/"
-                        className="btn btn-glass btn-sm"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                        <span>Inicio</span>
-                    </Link>
-                </div>
+            {/* Botón de Home flotante */}
+            <div style={{
+                position: 'absolute', // Posicionamiento flotante
+                top: 'var(--spacing-4)',
+                left: 'var(--spacing-4)',
+                zIndex: 10 // Asegura que esté encima de otros elementos
+            }}>
+                <Link
+                    href="/"
+                    className="btn btn-glass btn-sm"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Inicio</span>
+                </Link>
+            </div>
 
-                {/* Main Card (Search Form) */}
+            <div style={{ width: '100%', maxWidth: ticket ? '900px' : '600px', transition: 'max-width 0.3s ease-out' }}>
+                {/* Main Card (Search Form & Results) */}
                 <Card
-                    style={{ background: 'white', border: 'none', marginBottom: ticket ? 'var(--spacing-8)' : '0' }}
+                    style={{ background: 'white', border: 'none', display: ticket ? 'flex' : 'block' }} // Flex si hay ticket para columnas
                     onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
                         e.currentTarget.style.transform = 'translateY(-4px)';
                         e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
@@ -142,7 +142,8 @@ export default function TicketSearchPage() {
                     </div>
 
                     <CardBody style={{ padding: '0 var(--spacing-2)' }}>
-                        <form onSubmit={handleSubmit} style={{ marginBottom: 'var(--spacing-8)' }}>
+                        {/* Search Form */}
+                        <form onSubmit={handleSubmit} style={{ marginBottom: ticket ? 'var(--spacing-6)' : 'var(--spacing-8)' }}> {/* Ajuste de margin */}
                             <div style={{ marginBottom: 'var(--spacing-6)' }}>
                                 <Input
                                     label="ID del Ticket"
@@ -204,7 +205,7 @@ export default function TicketSearchPage() {
                         <div style={{
                             borderTop: '1px solid var(--color-gray-100)',
                             paddingTop: 'var(--spacing-6)',
-                            marginBottom: 'var(--spacing-6)'
+                            marginBottom: ticket ? 'var(--spacing-6)' : 'var(--spacing-8)' // Ajuste de margin
                         }}>
                             <p style={{
                                 fontSize: 'var(--font-size-xs)',
