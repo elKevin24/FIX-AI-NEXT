@@ -117,6 +117,12 @@
     padding: 2rem;
 }
 
+.resultsInfo {
+    margin-bottom: var(--spacing-4);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
 @media (prefers-color-scheme: dark) {
     .tableContainer {
         background: #1a1a1a;
