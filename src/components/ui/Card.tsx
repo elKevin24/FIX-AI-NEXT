@@ -1,55 +1,49 @@
 import React from 'react';
 
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function Card({ children, className = '' }: CardProps) {
-  return <div className={`card ${className}`}>{children}</div>;
+export function Card({ children, className = '', ...props }: CardProps) {
+  return <div className={`card ${className}`} {...props}>{children}</div>;
 }
 
-export interface CardHeaderProps {
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function CardHeader({ children, className = '' }: CardHeaderProps) {
-  return <div className={`card-header ${className}`}>{children}</div>;
+export function CardHeader({ children, className = '', ...props }: CardHeaderProps) {
+  return <div className={`card-header ${className}`} {...props}>{children}</div>;
 }
 
-export interface CardTitleProps {
+export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function CardTitle({ children, className = '' }: CardTitleProps) {
-  return <h3 className={`card-title ${className}`}>{children}</h3>;
+export function CardTitle({ children, className = '', ...props }: CardTitleProps) {
+  return <h3 className={`card-title ${className}`} {...props}>{children}</h3>;
 }
 
-export interface CardDescriptionProps {
+export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function CardDescription({ children, className = '' }: CardDescriptionProps) {
-  return <p className={`card-description ${className}`}>{children}</p>;
+export function CardDescription({ children, className = '', ...props }: CardDescriptionProps) {
+  return <p className={`card-description ${className}`} {...props}>{children}</p>;
 }
 
-export interface CardBodyProps {
+export interface CardBodyProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function CardBody({ children, className = '' }: CardBodyProps) {
-  return <div className={`card-body ${className}`}>{children}</div>;
+export function CardBody({ children, className = '', ...props }: CardBodyProps) {
+  return <div className={`card-body ${className}`} {...props}>{children}</div>;
 }
 
-export interface CardFooterProps {
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export function CardFooter({ children, className = '' }: CardFooterProps) {
-  return <div className={`card-footer ${className}`}>{children}</div>;
+export function CardFooter({ children, className = '', ...props }: CardFooterProps) {
+  return <div className={`card-footer ${className}`} {...props}>{children}</div>;
 }
