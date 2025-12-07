@@ -5,29 +5,31 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 **Estado actual:** Feature 1 completado. Próximo objetivo: **Feature 2** (Operaciones Esenciales).
 
 ## Feature 1: Gestión Core de Taller (MVP) - [COMPLETADO]
-## Feature 1: Gestión Core de Taller (MVP) - [EN PROGRESO - 85%]
 **Objetivo:** Establecer la infraestructura base y permitir el flujo completo de reparación de dispositivos en un entorno multi-tenant. Es lo "alcanzable" a corto plazo.
 
 ### Etapa 1: Fundamentos y Arquitectura ✅ COMPLETADO
-- [x] **Configuración del Proyecto**: Next.js 15, TypeScript, ESLint.
+- [x] **Configuración del Proyecto**: Next.js 16, TypeScript, ESLint.
 - [x] **Base de Datos**: Configuración de PostgreSQL y Prisma ORM.
 - [x] **Autenticación**: Implementación de NextAuth v5 con Login.
-- [x] **Multi-tenancy**: Aislamiento de datos por `tenantId` en todas las consultas.
-- [x] **Roles y Permisos**: Control de acceso por rol (Admin, Técnico, Recepción).
+- [x] **Multi-tenancy**: Aislamiento de datos por `tenantId` con `tenant-prisma.ts` y validación en todas las consultas.
+- [x] **Roles y Permisos**: Middleware para proteger rutas según rol (Admin, Técnico, Recepción).
 
-### Etapa 2: Gestión de Entidades Principales
-- [x] **Módulo de Usuarios**: Crear, editar y listar empleados del taller.
-- [x] **Módulo de Clientes**: Registro y edición de clientes.
+### Etapa 2: Gestión de Entidades Principales ✅ COMPLETADO
+- [x] **Módulo de Usuarios**: Crear, editar, listar y eliminar empleados del taller.
+- [x] **Módulo de Clientes**: Registro de clientes con CRUD completo.
 - [x] **Módulo de Tickets (Reparaciones)**:
-    - Creación de ticket con detalles del dispositivo y falla.
-    - Flujo de estados: *Abierto -> En Progreso -> Esperando Repuestos -> Resuelto -> Cerrado*.
-    - Asignación de tickets a técnicos.
-    - Edición completa de tickets (estado, prioridad, asignación).
+    - [x] Creación de ticket con detalles del dispositivo y falla.
+    - [x] Flujo de estados: *OPEN -> IN_PROGRESS -> WAITING_FOR_PARTS -> RESOLVED -> CLOSED*.
+    - [x] Asignación de tickets a técnicos.
+    - [x] Prioridades: LOW, MEDIUM, HIGH, URGENT.
+    - [x] Edición completa de tickets (estado, prioridad, asignación).
 
-### Etapa 3: Interfaz y Experiencia de Usuario
+### Etapa 3: Interfaz y Experiencia de Usuario ✅ COMPLETADO
 - [x] **Dashboard Principal**: Vista resumen con contadores (Tickets abiertos, urgentes, etc.).
-- [x] **Buscador Global**: Buscar tickets por ID, cliente o dispositivo.
+- [x] **Buscador Global (Dashboard)**: Buscar tickets por ID, cliente o dispositivo. **Requiere autenticación** - Para usuarios del taller.
 - [x] **Comentarios/Notas**: Bitácora de reparación con notas internas.
+- [x] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con código único (sin login). **NO requiere autenticación** - Para clientes.
+- [x] **Mejoras de UI/UX**: Diseño mejorado de la página de estado del ticket con contrastes optimizados.
 
 ---
 
@@ -35,6 +37,7 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 **Objetivo:** Funcionalidades críticas para la operación diaria de un taller de reparaciones.
 
 ### Etapa 1: Documentación y Comunicación
+- [x] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con un código único (sin login). ✅ Mejorado con diseño optimizado.
 - [ ] **Generación de PDF**: Orden de ingreso para imprimir/enviar al cliente con datos del equipo, falla reportada y firma.
 - [ ] **Comprobante de Entrega**: PDF al cerrar ticket con resumen de trabajo realizado.
 
@@ -64,26 +67,7 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 - [ ] **Exportación de Datos**: Exportar reportes a Excel/CSV.
 
 ### Etapa 3: Portal Público
-- [ ] **Consulta de Estado**: Página pública donde el cliente consulta su ticket con código único.
 - [ ] **Aprobación de Presupuesto**: Cliente aprueba/rechaza presupuesto desde enlace.
-- [x] **Multi-tenancy**: Aislamiento de datos por `tenantId` con `tenant-prisma.ts` y validación en todas las consultas.
-- [x] **Roles y Permisos**: Middleware para proteger rutas según rol (Admin, Técnico, Recepción).
-
-### Etapa 2: Gestión de Entidades Principales ✅ COMPLETADO
-- [x] **Módulo de Usuarios**: Crear, editar, listar y eliminar empleados del taller.
-- [x] **Módulo de Clientes**: Registro de clientes con CRUD completo.
-- [x] **Módulo de Tickets (Reparaciones)**:
-    - [x] Creación de ticket con detalles del dispositivo y falla.
-    - [x] Flujo de estados: *OPEN -> IN_PROGRESS -> WAITING_FOR_PARTS -> RESOLVED -> CLOSED*.
-    - [x] Asignación de tickets a técnicos.
-    - [x] Prioridades: LOW, MEDIUM, HIGH, URGENT.
-
-### Etapa 3: Interfaz y Experiencia de Usuario 🟡 EN PROGRESO
-- [x] **Dashboard Principal**: Vista resumen con contadores (Tickets abiertos, urgentes, etc.).
-- [ ] **Buscador Global (Dashboard)**: Buscar tickets por ID, cliente o dispositivo. **Requiere autenticación** - Para usuarios del taller.
-- [ ] **Comentarios/Notas**: Agregar notas internas al ticket (bitácora de reparación).
-- [x] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con código único (sin login). **NO requiere autenticación** - Para clientes.
-- [x] **Mejoras de UI/UX**: Diseño mejorado de la página de estado del ticket con contrastes optimizados.
 
 ---
 
@@ -93,10 +77,6 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 ### Etapa 1: Base de Conocimiento
 - [ ] **Historial de Soluciones**: Registro estructurado de fallas y soluciones aplicadas.
 - [ ] **Búsqueda Inteligente**: Buscar soluciones por síntomas similares.
-### Etapa 1: Comunicación y Transparencia
-- [x] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con un código único (sin login). ✅ Mejorado con diseño optimizado.
-- [ ] **Notificaciones Automáticas**: Envío de correos/WhatsApp al cambiar el estado del ticket.
-- [ ] **Generación de Documentos**: PDF de orden de ingreso y comprobante de entrega.
 
 ### Etapa 2: Asistente de Diagnóstico
 - [ ] **Sugerencias Automáticas**: Al describir falla, sugerir posibles causas basadas en historial.
@@ -178,4 +158,3 @@ Estas tareas se realizan en paralelo a todo el desarrollo para garantizar un pro
    - CRUD completo de repuestos
    - Asignación de repuestos a tickets
    - Control de stock
-
