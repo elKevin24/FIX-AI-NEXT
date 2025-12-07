@@ -1,69 +1,23 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { Suspense } from 'react';
-import TicketSearchFilters from './TicketSearchFilters';
 import styles from './tickets.module.css';
 
-interface TicketsPageProps {
-    searchParams: Promise<{
-        search?: string;
-        status?: string;
-        priority?: string;
-        assignedTo?: string;
-    }>;
-}
-
-export default async function TicketsPage({ searchParams }: TicketsPageProps) {
+export default async function TicketsPage() {
     const session = await auth();
 
     if (!session?.user) {
         return <div>Error: Not authenticated</div>;
     }
 
-    const params = await searchParams;
-    const { search, status, priority, assignedTo } = params;
-
     // Super Admin: adminkev@example.com puede ver TODO
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
-    // Construir el where clause dinámicamente
-    const where: any = isSuperAdmin ? {} : {
-        tenantId: session.user.tenantId,
-    };
-
-    // Filtro de búsqueda (ID, título o cliente)
-    if (search) {
-        where.AND = where.AND || [];
-        where.AND.push({
-            OR: [
-                { id: { contains: search } },
-                { title: { contains: search, mode: 'insensitive' } },
-                { customer: { name: { contains: search, mode: 'insensitive' } } },
-            ],
-        });
-    }
-
-    // Filtro de estado
-    if (status) {
-        where.status = status;
-    }
-
-    // Filtro de prioridad
-    if (priority) {
-        where.priority = priority;
-    }
-
-    // Filtro de asignado
-    if (assignedTo) {
-        where.assignedTo = {
-            email: { contains: assignedTo, mode: 'insensitive' },
-        };
-    }
-
-    // Query con filtros
+    // Query condicional: Super admin ve todo, otros solo su tenant
     const tickets = await prisma.ticket.findMany({
-        where,
+        where: isSuperAdmin ? {} : {
+            tenantId: session.user.tenantId,
+        },
         include: {
             customer: true,
             assignedTo: true,
@@ -102,18 +56,6 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                 <Link href="/dashboard/tickets/create" className={styles.createBtn}>
                     + Nuevo Ticket
                 </Link>
-            </div>
-
-            <Suspense fallback={<div>Cargando filtros...</div>}>
-                <TicketSearchFilters />
-            </Suspense>
-
-            <div className={styles.resultsInfo}>
-                {tickets.length > 0 ? (
-                    <p>Mostrando {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</p>
-                ) : (
-                    <p>No se encontraron tickets</p>
-                )}
             </div>
 
             <div className={styles.tableContainer}>
