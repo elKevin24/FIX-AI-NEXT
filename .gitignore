@@ -26,6 +26,7 @@ pnpm-debug.log*
 .env*.local
 .env
 .env.neon
+.env.vercel
 
 # Keep .env.example for documentation
 
