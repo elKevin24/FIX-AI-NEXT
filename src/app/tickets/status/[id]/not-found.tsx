@@ -19,7 +19,7 @@ export default function NotFound() {
                         El ticket que estás buscando no existe o ha sido eliminado.
                         Por favor, verifica el ID del ticket e intenta nuevamente.
                     </p>
-                    <Link href="/tickets/status" className="btn btn-glass">
+                    <Link href="/tickets/status" className={styles.button}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
@@ -30,4 +30,3 @@ export default function NotFound() {
         </div>
     );
 }
-
