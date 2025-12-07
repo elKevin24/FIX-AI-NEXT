@@ -10,6 +10,7 @@ jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+
     permissions:
           issues: write          # Para comentar en issues
           pull-requests: write   # Para comentar en Pull Requests
