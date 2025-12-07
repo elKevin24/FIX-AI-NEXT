@@ -43,3 +43,6 @@ dev.log
 
 # Tool-specific files
 .claude/
+
+.gemini/
+gha-creds-*.json
