@@ -65,14 +65,15 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
             background: 'linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%)',
             padding: 'var(--spacing-4)',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingTop: 'var(--spacing-12)'
         }}>
             <div style={{ width: '100%', maxWidth: '900px' }}>
                 {/* Back Button */}
-                <div style={{ marginBottom: 'var(--spacing-6)' }}>
+                <div style={{ position: 'fixed', top: 'var(--spacing-6)', left: 'var(--spacing-2)', zIndex: 10 }}>
                     <Link
-                        href="/tickets/status"
+                        href="/"
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -101,7 +102,7 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
-                        <span>Check Another Ticket</span>
+                        <span>Inicio</span>
                     </Link>
                 </div>
 
