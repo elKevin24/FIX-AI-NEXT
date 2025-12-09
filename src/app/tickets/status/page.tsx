@@ -31,17 +31,17 @@ export default function TicketSearchPage() {
             minHeight: '100vh',
             background: 'linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
-            padding: 'var(--spacing-4)'
+            padding: 'var(--spacing-4)',
+            paddingTop: 'var(--spacing-20)'
         }}>
-            <div style={{ width: '100%', maxWidth: '600px' }}>
+            <div style={{ width: '100%', maxWidth: '600px', position: 'relative' }}>
                 {/* Back to Home - Floating button style */}
                 <div style={{
-                    marginBottom: 'var(--spacing-6)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
+                    position: 'absolute',
+                    top: 'var(--spacing-4)',
+                    left: 'calc(100% + var(--spacing-4))'
                 }}>
                     <Link
                         href="/"
