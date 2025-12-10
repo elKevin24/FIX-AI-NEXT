@@ -98,7 +98,7 @@ export default function CreatePartPage() {
                     </div>
 
                     {state?.message && (
-                        <div className={`p-3 rounded ${state.success ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+                        <div className="p-3 rounded bg-red-50 border border-red-200 text-red-700">
                             {state.message}
                         </div>
                     )}

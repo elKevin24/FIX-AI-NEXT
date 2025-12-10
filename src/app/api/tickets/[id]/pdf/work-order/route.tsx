@@ -52,9 +52,9 @@ export async function GET(
         const stream = await renderToStream(<WorkOrderPDF ticket={ticket} />);
 
         // Convertir el stream a buffer
-        const chunks: Uint8Array[] = [];
+        const chunks: Buffer[] = [];
         for await (const chunk of stream) {
-            chunks.push(chunk);
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         }
         const buffer = Buffer.concat(chunks);
 

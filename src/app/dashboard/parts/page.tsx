@@ -42,8 +42,8 @@ export default async function PartsPage() {
 
     // Calculate total value and low stock count
     const lowStockThreshold = 5;
-    const lowStockCount = parts.filter(p => p.quantity <= lowStockThreshold).length;
-    const totalValue = parts.reduce((sum, part) => {
+    const lowStockCount = parts.filter((p: typeof parts[number]) => p.quantity <= lowStockThreshold).length;
+    const totalValue = parts.reduce((sum: number, part: typeof parts[number]) => {
         return sum + (Number(part.price) * part.quantity);
     }, 0);
 
@@ -140,12 +140,12 @@ export default async function PartsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {parts.map((part) => {
+                        {parts.map((part: typeof parts[number]) => {
                             const cost = Number(part.cost);
                             const price = Number(part.price);
                             const margin = cost > 0 ? ((price - cost) / cost * 100) : 0;
                             const isLowStock = part.quantity <= lowStockThreshold;
-                            const timesUsed = part.usages.reduce((sum, usage) => sum + usage.quantity, 0);
+                            const timesUsed = part.usages.reduce((sum: number, usage: typeof part.usages[number]) => sum + usage.quantity, 0);
 
                             return (
                                 <tr key={part.id} style={isLowStock ? { backgroundColor: '#fef2f2' } : undefined}>

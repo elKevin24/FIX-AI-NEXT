@@ -127,29 +127,29 @@ export default async function DashboardPage() {
     ]);
 
     // Transform tickets by status for chart
-    const statusChartData = ticketsByStatus.map(item => ({
+    const statusChartData = ticketsByStatus.map((item: typeof ticketsByStatus[number]) => ({
         status: item.status,
         count: item._count.id,
     }));
 
     // Calculate technician metrics
-    const technicianMetrics = technicianStats.map(tech => {
-        const completed = tech.assignedTickets.filter(t =>
+    const technicianMetrics = technicianStats.map((tech: typeof technicianStats[number]) => {
+        const completed = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
             t.status === 'RESOLVED' || t.status === 'CLOSED'
         ).length;
 
-        const inProgress = tech.assignedTickets.filter(t =>
+        const inProgress = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
             t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS'
         ).length;
 
         // Calculate average days to complete
-        const completedTickets = tech.assignedTickets.filter(t =>
+        const completedTickets = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
             t.status === 'RESOLVED' || t.status === 'CLOSED'
         );
 
         let avgDays = 0;
         if (completedTickets.length > 0) {
-            const totalDays = completedTickets.reduce((sum, ticket) => {
+            const totalDays = completedTickets.reduce((sum: number, ticket: typeof completedTickets[number]) => {
                 const days = Math.floor(
                     (new Date(ticket.updatedAt).getTime() - new Date(ticket.createdAt).getTime()) /
                     (1000 * 60 * 60 * 24)
@@ -269,7 +269,7 @@ export default async function DashboardPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {recentTickets.map((ticket) => (
+                                {recentTickets.map((ticket: typeof recentTickets[number]) => (
                                     <tr key={ticket.id}>
                                         <td>
                                             <a href={`/dashboard/tickets/${ticket.id}`} className={styles.ticketLink}>
