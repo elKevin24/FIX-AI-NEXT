@@ -33,23 +33,23 @@ Este documento define el alcance y la hoja de ruta del proyecto, dividido en Fea
 
 ---
 
-## Feature 2: Operaciones Esenciales del Taller - [PRÓXIMO]
+## Feature 2: Operaciones Esenciales del Taller - [EN PROGRESO]
 **Objetivo:** Funcionalidades críticas para la operación diaria de un taller de reparaciones.
 
-### Etapa 1: Documentación y Comunicación
+### Etapa 1: Documentación y Comunicación ✅ COMPLETADO
 - [x] **Portal Público de Consulta**: Página donde el cliente consulta el estado de su equipo con un código único (sin login). ✅ Mejorado con diseño optimizado.
-- [ ] **Generación de PDF**: Orden de ingreso para imprimir/enviar al cliente con datos del equipo, falla reportada y firma.
-- [ ] **Comprobante de Entrega**: PDF al cerrar ticket con resumen de trabajo realizado.
+- [x] **Generación de PDF**: Orden de ingreso para imprimir/enviar al cliente con datos del equipo, falla reportada y firma. ✅ Implementado con @react-pdf/renderer.
+- [x] **Comprobante de Entrega**: PDF al cerrar ticket con resumen de trabajo realizado. ✅ Implementado con diseño profesional.
 
 ### Etapa 2: Notificaciones Automáticas
 - [ ] **Notificaciones por Email**: Envío automático al cambiar estado del ticket.
 - [ ] **Integración WhatsApp API**: Notificaciones por WhatsApp (usando API oficial o servicios como Twilio).
 - [ ] **Plantillas de Mensajes**: Mensajes personalizables por tipo de notificación.
 
-### Etapa 3: Control de Inventario
-- [ ] **Catálogo de Repuestos**: CRUD de repuestos con SKU, costo, precio de venta.
-- [ ] **Control de Stock**: Entradas, salidas, alertas de stock bajo.
-- [ ] **Asignación a Tickets**: Vincular repuestos usados en cada reparación con cálculo automático de costos.
+### Etapa 3: Control de Inventario ✅ COMPLETADO
+- [x] **Catálogo de Repuestos**: CRUD de repuestos con SKU, costo, precio de venta.
+- [x] **Control de Stock**: Entradas, salidas, alertas de stock bajo.
+- [x] **Asignación a Tickets**: Vincular repuestos usados en cada reparación con cálculo automático de costos.
 
 ---
 
@@ -126,35 +126,49 @@ Estas tareas se realizan en paralelo a todo el desarrollo para garantizar un pro
 
 ## 📋 Próximas Tareas Prioritarias
 
-### Corto Plazo (Sprint Actual)
-1. **Buscador Global de Tickets (Dashboard - Requiere Autenticación)**
-   - Buscar por ID, cliente, dispositivo
-   - Filtros avanzados (estado, prioridad, fecha)
-   - Implementar en `/dashboard/tickets`
-   - **Nota**: Diferente del portal público que ya existe sin autenticación
+### ✅ Completadas Recientemente
+1. ~~**Buscador Global de Tickets (Dashboard)**~~ ✅
+   - ✅ Buscar por ID, cliente, dispositivo
+   - ✅ Filtros avanzados (estado, prioridad, asignado)
+   - ✅ Implementado en `/dashboard/tickets`
 
-2. **Sistema de Comentarios/Notas en Tickets**
-   - Agregar campo `notes` o tabla `TicketComment`
-   - UI para agregar notas internas
-   - Historial de comentarios visible
+2. ~~**Sistema de Comentarios/Notas en Tickets**~~ ✅
+   - ✅ Tabla `TicketNote` con autor y timestamps
+   - ✅ UI para agregar notas internas
+   - ✅ Historial de comentarios visible
+   - ✅ Permisos de eliminación (autor o admin)
 
-3. **Mejoras en Dashboard**
-   - Gráficos de tickets por estado
-   - Métricas de productividad
-   - Filtros por fecha
+3. ~~**Generación de PDFs**~~ ✅
+   - ✅ Orden de ingreso con diseño profesional
+   - ✅ Comprobante de entrega con bitácora
+   - ✅ Implementado con `@react-pdf/renderer`
+   - ✅ Botones de descarga en detalle del ticket
+
+### Corto Plazo (Recientemente Completado)
+4. ~~**Mejoras en Dashboard**~~ ✅
+   - ✅ Gráficos de tickets por estado (Pie Chart interactivo)
+   - ✅ Métricas de productividad por técnico (Bar Chart + Tabla)
+   - ✅ Widget de tickets urgentes con prioridad
+   - ✅ Tabla de tickets recientes
+   - ✅ Cards mejorados con iconos y animaciones
+   - ✅ Diseño responsive y dark mode
 
 ### Medio Plazo
-4. **Notificaciones por Email**
+5. ~~**Inventario de Repuestos**~~ ✅
+   - ✅ CRUD completo de repuestos
+   - ✅ Asignación de repuestos a tickets
+   - ✅ Control de stock y alertas de stock bajo
+   - ✅ Cálculo automático de costos en tickets
+   - ✅ Visualización de margen y ganancias
+
+6. ~~**Migración a Base de Datos Neon**~~ ✅
+   - ✅ Configuración de Neon PostgreSQL
+   - ✅ Migración de esquema con Prisma
+   - ✅ Seed de datos iniciales
+   - ✅ Actualización de variables de entorno
+
+7. **Notificaciones por Email**
    - Configurar servicio de email (Resend/SendGrid)
    - Notificaciones al cambiar estado de ticket
-   - Templates de email
-
-5. **Generación de PDFs**
-   - Orden de ingreso
-   - Comprobante de entrega
-   - Usar librería como `react-pdf` o `pdfkit`
-
-6. **Inventario de Repuestos**
-   - CRUD completo de repuestos
-   - Asignación de repuestos a tickets
-   - Control de stock
+   - Templates de email profesionales
+   - Opción de enviar PDFs por email

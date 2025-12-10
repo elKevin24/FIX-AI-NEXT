@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
+import { z } from 'zod'; // Import Zod
+import { CreateTicketSchema } from './schemas'; // Import new Zod schema
 
 /**
  * Get ticket by ID for public status check
@@ -221,58 +223,142 @@ export async function authenticate(
  * @todo Add input sanitization/validation with Zod
  * @todo Support customer email/phone lookup
  */
-export async function createTicket(prevState: any, formData: FormData) {
-    const session = await auth();
-    if (!session?.user?.tenantId) {
-        return { message: 'Unauthorized' };
-    }
-
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const customerName = formData.get('customerName') as string;
-
-    if (!title || !description || !customerName) {
-        return { message: 'Missing fields' };
+export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema>, tenantId: string) {
+    if (!tenantId) {
+        throw new Error('Tenant ID is required to create a ticket.');
     }
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId);
+        const tenantDb = getTenantPrisma(tenantId);
 
         // Simple customer creation/lookup for demo
-        // tenantId is automatically injected by tenantDb
         let customer = await tenantDb.customer.findFirst({
             where: {
-                name: customerName,
+                name: ticketData.customerName,
             }
         });
 
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {
-                    name: customerName,
-                    tenantId: session.user.tenantId, // Satisfy TS, enforced by extension
+                    name: ticketData.customerName,
+                    tenantId: tenantId, // Satisfy TS, enforced by extension
                 }
             });
         }
 
         await tenantDb.ticket.create({
             data: {
-                title,
-                description,
+                title: ticketData.title,
+                description: ticketData.description,
                 customerId: customer.id,
                 status: 'OPEN',
-                tenantId: session.user.tenantId, // Satisfy TS, enforced by extension
+                tenantId: tenantId, // Satisfy TS, enforced by extension
+                deviceType: ticketData.deviceType,
+                deviceModel: ticketData.deviceModel,
+                serialNumber: ticketData.serialNumber,
+                accessories: ticketData.accessories,
+                checkInNotes: ticketData.checkInNotes,
             }
         });
 
     } catch (error) {
         console.error('Failed to create ticket:', error);
-        return { message: 'Database Error: Failed to create ticket.' };
+        throw new Error('Database Error: Failed to create ticket.');
+    }
+}
+
+/**
+ * Create multiple new tickets for a single customer (Server Action for batch creation)
+ *
+ * @description Creates multiple tickets for authenticated users. It expects an array of
+ * ticket data, validates each entry with Zod, and then processes them in a Prisma transaction.
+ * Automatically creates or finds a customer by name within the user's tenant.
+ * Redirects to tickets list on success.
+ *
+ * @param {any} prevState - Previous form state (from useFormState, unused)
+ * @param {FormData} formData - Form data containing customerName and an array of ticket details
+ *
+ * @returns {Promise<{ message: string } | void>} Error object or void (redirects on success)
+ *
+ * @security
+ * - Requires authenticated session with tenantId
+ * - Automatic tenant isolation for customer lookup
+ * - Created tickets inherit user's tenantId
+ * - Uses Zod for robust input validation
+ * - Uses Prisma transactions for atomicity (all or nothing)
+ */
+export async function createBatchTickets(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'Unauthorized' };
+    }
+
+    const customerName = formData.get('customerName') as string;
+    const rawTickets = formData.get('tickets') as string; // Expecting a JSON string of tickets
+
+    if (!customerName || !rawTickets) {
+        return { message: 'Customer name and ticket data are required.' };
+    }
+
+    let ticketsData;
+    try {
+        ticketsData = JSON.parse(rawTickets);
+        // Validate the entire array of tickets using Zod
+        // CreateBatchTicketsSchema is an array of CreateTicketSchema
+        CreateBatchTicketsSchema.parse(ticketsData);
+    } catch (e) {
+        if (e instanceof z.ZodError) {
+            return { message: `Validation Error: ${e.errors.map(err => err.message).join(', ')}` };
+        }
+        return { message: 'Invalid ticket data format.' };
+    }
+
+    try {
+        const tenantId = session.user.tenantId;
+        const tenantDb = getTenantPrisma(tenantId);
+
+        let customer = await tenantDb.customer.findFirst({
+            where: { name: customerName },
+        });
+
+        if (!customer) {
+            customer = await tenantDb.customer.create({
+                data: {
+                    name: customerName,
+                    tenantId: tenantId,
+                },
+            });
+        }
+
+        const createTicketOperations = ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
+            tenantDb.ticket.create({
+                data: {
+                    title: ticket.title,
+                    description: ticket.description,
+                    customerId: customer!.id, // customer is guaranteed to exist here
+                    status: 'OPEN',
+                    tenantId: tenantId,
+                    deviceType: ticket.deviceType,
+                    deviceModel: ticket.deviceModel,
+                    serialNumber: ticket.serialNumber,
+                    accessories: ticket.accessories,
+                    checkInNotes: ticket.checkInNotes,
+                },
+            })
+        );
+
+        await prisma.$transaction(createTicketOperations);
+
+    } catch (error) {
+        console.error('Failed to create batch tickets:', error);
+        return { message: 'Database Error: Failed to create multiple tickets.' };
     }
 
     redirect('/dashboard/tickets');
 }
 
+// The old createTicket function needs to be removed as it's being replaced.
 // ==================== USER ACTIONS ====================
 
 /**
@@ -1020,5 +1106,321 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
     } catch (error) {
         console.error('Failed to delete note:', error);
         return { message: 'Error de base de datos: No se pudo eliminar la nota.' };
+    }
+}
+
+// ==================== PARTS (INVENTORY) ACTIONS ====================
+
+/**
+ * Create a new part (Server Action)
+ *
+ * @description Creates a new part for the inventory.
+ *
+ * @security
+ * - Requires authenticated session
+ * - Automatic tenant isolation
+ */
+export async function createPart(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'No autorizado' };
+    }
+
+    const name = formData.get('name') as string;
+    const sku = formData.get('sku') as string;
+    const quantity = parseInt(formData.get('quantity') as string);
+    const cost = parseFloat(formData.get('cost') as string);
+    const price = parseFloat(formData.get('price') as string);
+
+    if (!name || isNaN(quantity) || isNaN(cost) || isNaN(price)) {
+        return { message: 'Todos los campos requeridos deben ser válidos' };
+    }
+
+    if (quantity < 0 || cost < 0 || price < 0) {
+        return { message: 'Los valores numéricos no pueden ser negativos' };
+    }
+
+    try {
+        await prisma.part.create({
+            data: {
+                name,
+                sku: sku || null,
+                quantity,
+                cost,
+                price,
+                tenantId: session.user.tenantId,
+            }
+        });
+
+    } catch (error) {
+        console.error('Failed to create part:', error);
+        return { message: 'Error de base de datos: No se pudo crear el repuesto.' };
+    }
+
+    redirect('/dashboard/parts');
+}
+
+/**
+ * Update an existing part (Server Action)
+ *
+ * @description Updates part details.
+ *
+ * @security
+ * - Requires authenticated session
+ * - Enforces tenant isolation
+ * - Super admin can update any part
+ */
+export async function updatePart(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'No autorizado' };
+    }
+
+    const partId = formData.get('partId') as string;
+    const name = formData.get('name') as string;
+    const sku = formData.get('sku') as string;
+    const quantity = parseInt(formData.get('quantity') as string);
+    const cost = parseFloat(formData.get('cost') as string);
+    const price = parseFloat(formData.get('price') as string);
+
+    if (!partId || !name || isNaN(quantity) || isNaN(cost) || isNaN(price)) {
+        return { message: 'Todos los campos requeridos deben ser válidos' };
+    }
+
+    if (quantity < 0 || cost < 0 || price < 0) {
+        return { message: 'Los valores numéricos no pueden ser negativos' };
+    }
+
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+
+    try {
+        // Verify part exists and belongs to same tenant (unless super admin)
+        const existingPart = await prisma.part.findUnique({
+            where: { id: partId }
+        });
+
+        if (!existingPart) {
+            return { message: 'Repuesto no encontrado' };
+        }
+
+        if (!isSuperAdmin && existingPart.tenantId !== session.user.tenantId) {
+            return { message: 'No autorizado para editar este repuesto' };
+        }
+
+        await prisma.part.update({
+            where: { id: partId },
+            data: {
+                name,
+                sku: sku || null,
+                quantity,
+                cost,
+                price,
+            },
+        });
+
+    } catch (error) {
+        console.error('Failed to update part:', error);
+        return { message: 'Error de base de datos: No se pudo actualizar el repuesto.' };
+    }
+
+    redirect('/dashboard/parts');
+}
+
+/**
+ * Delete a part (Server Action)
+ *
+ * @description Deletes a part from inventory. Only ADMIN users can delete parts.
+ * Cannot delete parts that are in use.
+ *
+ * @security
+ * - Requires ADMIN role
+ * - Enforces tenant isolation
+ * - Prevents deletion of parts with usage records
+ */
+export async function deletePart(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'No autorizado' };
+    }
+
+    if (session.user.role !== 'ADMIN') {
+        return { message: 'Solo los administradores pueden eliminar repuestos' };
+    }
+
+    const partId = formData.get('partId') as string;
+
+    if (!partId) {
+        return { message: 'ID de repuesto requerido' };
+    }
+
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+
+    try {
+        // Verify part exists and belongs to same tenant (unless super admin)
+        const existingPart = await prisma.part.findUnique({
+            where: { id: partId },
+            include: {
+                usages: {
+                    select: { id: true }
+                }
+            }
+        });
+
+        if (!existingPart) {
+            return { message: 'Repuesto no encontrado' };
+        }
+
+        if (!isSuperAdmin && existingPart.tenantId !== session.user.tenantId) {
+            return { message: 'No autorizado para eliminar este repuesto' };
+        }
+
+        // Check if part has usage records
+        if (existingPart.usages.length > 0) {
+            return { message: `No se puede eliminar: el repuesto tiene ${existingPart.usages.length} registro(s) de uso` };
+        }
+
+        await prisma.part.delete({
+            where: { id: partId },
+        });
+
+    } catch (error) {
+        console.error('Failed to delete part:', error);
+        return { message: 'Error de base de datos: No se pudo eliminar el repuesto.' };
+    }
+
+    redirect('/dashboard/parts');
+}
+
+/**
+ * Add a part to a ticket (Server Action)
+ *
+ * @description Records the usage of a part in a ticket repair.
+ *
+ * @security
+ * - Requires authenticated session
+ * - Enforces tenant isolation for both ticket and part
+ * - Updates part quantity
+ */
+export async function addPartToTicket(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'No autorizado' };
+    }
+
+    const ticketId = formData.get('ticketId') as string;
+    const partId = formData.get('partId') as string;
+    const quantity = parseInt(formData.get('quantity') as string);
+
+    if (!ticketId || !partId || !quantity || isNaN(quantity) || quantity <= 0) {
+        return { message: 'Datos inválidos' };
+    }
+
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+
+    try {
+        // Verify ticket and part belong to same tenant
+        const [ticket, part] = await Promise.all([
+            prisma.ticket.findUnique({ where: { id: ticketId } }),
+            prisma.part.findUnique({ where: { id: partId } }),
+        ]);
+
+        if (!ticket || !part) {
+            return { message: 'Ticket o repuesto no encontrado' };
+        }
+
+        if (!isSuperAdmin) {
+            if (ticket.tenantId !== session.user.tenantId || part.tenantId !== session.user.tenantId) {
+                return { message: 'No autorizado' };
+            }
+        }
+
+        // Check if there's enough stock
+        if (part.quantity < quantity) {
+            return { message: `Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}` };
+        }
+
+        // Create usage record and update part quantity
+        await prisma.$transaction([
+            prisma.partUsage.create({
+                data: {
+                    ticketId,
+                    partId,
+                    quantity,
+                }
+            }),
+            prisma.part.update({
+                where: { id: partId },
+                data: {
+                    quantity: part.quantity - quantity,
+                }
+            }),
+        ]);
+
+        return { success: true, message: 'Repuesto agregado al ticket' };
+
+    } catch (error) {
+        console.error('Failed to add part to ticket:', error);
+        return { message: 'Error de base de datos: No se pudo agregar el repuesto.' };
+    }
+}
+
+/**
+ * Remove a part from a ticket (Server Action)
+ *
+ * @description Removes a part usage record and restores the quantity.
+ *
+ * @security
+ * - Requires authenticated session or ADMIN role
+ * - Enforces tenant isolation
+ */
+export async function removePartFromTicket(prevState: any, formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { message: 'No autorizado' };
+    }
+
+    const usageId = formData.get('usageId') as string;
+
+    if (!usageId) {
+        return { message: 'ID de uso requerido' };
+    }
+
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+
+    try {
+        const usage = await prisma.partUsage.findUnique({
+            where: { id: usageId },
+            include: {
+                ticket: { select: { tenantId: true } },
+                part: true,
+            }
+        });
+
+        if (!usage) {
+            return { message: 'Registro de uso no encontrado' };
+        }
+
+        if (!isSuperAdmin && usage.ticket.tenantId !== session.user.tenantId) {
+            return { message: 'No autorizado' };
+        }
+
+        // Delete usage record and restore part quantity
+        await prisma.$transaction([
+            prisma.partUsage.delete({
+                where: { id: usageId }
+            }),
+            prisma.part.update({
+                where: { id: usage.partId },
+                data: {
+                    quantity: usage.part.quantity + usage.quantity,
+                }
+            }),
+        ]);
+
+        return { success: true, message: 'Repuesto removido del ticket' };
+
+    } catch (error) {
+        console.error('Failed to remove part from ticket:', error);
+        return { message: 'Error de base de datos: No se pudo remover el repuesto.' };
     }
 }
