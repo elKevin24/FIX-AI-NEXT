@@ -49,6 +49,14 @@ export default async function TicketDetailPage({ params }: Props) {
                     createdAt: 'desc',
                 },
             },
+            partsUsed: {
+                include: {
+                    part: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            },
         },
     });
 
@@ -80,10 +88,24 @@ export default async function TicketDetailPage({ params }: Props) {
         },
     });
 
+    // Get available parts from the same tenant
+    const availableParts = await prisma.part.findMany({
+        where: {
+            tenantId: ticket.tenantId,
+            quantity: {
+                gt: 0, // Only parts with stock
+            },
+        },
+        orderBy: {
+            name: 'asc',
+        },
+    });
+
     return (
         <TicketDetailView
             ticket={ticket}
             availableUsers={availableUsers}
+            availableParts={availableParts}
             isSuperAdmin={isSuperAdmin}
             isAdmin={isAdmin}
             currentUserId={session.user.id}

@@ -2,15 +2,36 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    padding-bottom: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .header h1 {
     font-size: 2rem;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.5rem 0;
 }
 
 .header p {
     color: #666;
+    margin: 0;
+}
+
+.superAdminBadge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .statsGrid {
@@ -25,43 +46,237 @@
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: 1px solid #eaeaea;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cardIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
 }
 
 .card h3 {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: #666;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.5rem 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .statValue {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: bold;
     color: #000;
+    margin: 0.25rem 0;
+    line-height: 1;
 }
 
 .statLabel {
-    font-size: 0.85rem;
-    color: #666;
-    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    margin: 0;
 }
 
+/* Charts Grid */
+.chartsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chartCard {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+}
+
+.chartTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.urgentBadge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Full Width Card */
+.fullWidthCard {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+}
+
+/* Recent Tickets Table */
+.recentTicketsTable {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table thead {
+    background-color: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table td {
+    padding: 0.75rem;
+    color: #1f2937;
+}
+
+.ticketLink {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.ticketLink:hover {
+    text-decoration: underline;
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.statusBadge.open {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.statusBadge.in_progress {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.statusBadge.waiting_for_parts {
+    background-color: #ede9fe;
+    color: #5b21b6;
+}
+
+.statusBadge.resolved {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.statusBadge.closed {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chartsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     .header p {
         color: #aaa;
     }
 
-    .card {
+    .card,
+    .chartCard,
+    .fullWidthCard {
         background: #1a1a1a;
         border-color: #333;
     }
 
-    .card h3 {
-        color: #aaa;
+    .card h3,
+    .chartTitle {
+        color: #e5e7eb;
     }
 
     .statValue {
         color: #fff;
+    }
+
+    .table thead {
+        background-color: #1f2937;
+    }
+
+    .table th {
+        color: #e5e7eb;
+    }
+
+    .table tbody tr {
+        border-bottom-color: #374151;
+    }
+
+    .table tbody tr:hover {
+        background-color: #1f2937;
+    }
+
+    .table td {
+        color: #d1d5db;
     }
 }

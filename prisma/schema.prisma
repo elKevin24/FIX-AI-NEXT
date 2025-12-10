@@ -23,6 +23,7 @@ enum TicketStatus {
   WAITING_FOR_PARTS
   RESOLVED
   CLOSED
+  CANCELLED
 }
 
 model Tenant {
@@ -85,6 +86,14 @@ model Ticket {
   description String
   status      TicketStatus @default(OPEN)
   priority    String? // Low, Medium, High
+
+  // Device Details (v2)
+  deviceType    String?  @default("PC")
+  deviceModel   String?
+  serialNumber  String?
+  accessories   String? // JSON or text
+  checkInNotes  String? // Physical condition
+  cancellationReason String? // Only if status is CANCELLED
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
