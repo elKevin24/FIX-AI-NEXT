@@ -29,7 +29,7 @@ enum TicketStatus {
 model Tenant {
   id        String   @id @default(uuid())
   name      String
-  slug      String   @unique // For subdomain/url routing: tenant1.example.com
+  slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -45,7 +45,7 @@ model Tenant {
 model User {
   id       String   @id @default(uuid())
   email    String   @unique
-  password String // Hashed
+  password String
   name     String?
   role     UserRole @default(TECHNICIAN)
 
@@ -85,15 +85,13 @@ model Ticket {
   title              String
   description        String
   status             TicketStatus @default(OPEN)
-  priority           String? // Low, Medium, High
-
-  // Device Details (v2)
-  deviceType         String? @default("PC")
+  priority           String?
+  deviceType         String?      @default("PC")
   deviceModel        String?
   serialNumber       String?
-  accessories        String? // JSON or text
-  checkInNotes       String? // Physical condition
-  cancellationReason String? // Only if status is CANCELLED
+  accessories        String?
+  checkInNotes       String?
+  cancellationReason String?
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
@@ -150,7 +148,7 @@ model PartUsage {
 model AuditLog {
   id      String  @id @default(uuid())
   action  String
-  details String? // JSON string or text
+  details String?
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
@@ -165,8 +163,8 @@ model AuditLog {
 
 model TicketNote {
   id         String  @id @default(uuid())
-  content    String // Note content (can be multiline)
-  isInternal Boolean @default(true) // Internal notes vs customer-visible
+  content    String
+  isInternal Boolean @default(true)
 
   ticketId String
   ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
