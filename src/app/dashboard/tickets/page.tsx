@@ -131,7 +131,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {tickets.map((ticket) => (
+                        {tickets.map((ticket: typeof tickets[number]) => (
                             <tr key={ticket.id}>
                                 <td>{ticket.id.slice(0, 8)}</td>
                                 <td>{ticket.title}</td>
