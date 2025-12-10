@@ -286,6 +286,48 @@ Agregado al `tsconfig.json`:
 
 ---
 
+### 10. Warnings de Peer Dependencies con React 19
+
+**Problema:**
+```
+npm warn Conflicting peer dependency: react@18.3.1
+npm warn peer react@"^15.3.0 || 16 || 17 || 18" from react-copy-to-clipboard@5.1.0
+npm warn peer react@"^15.3.0 || 16 || 17 || 18" from react-debounce-input@3.3.0
+npm warn peer react@"^16.8.4 || ^17.0.0 || ^18.0.0" from react-inspector@6.0.2
+```
+
+**Ubicación:**
+- Subdependencias de `swagger-ui-react@5.30.3`
+
+**Causa:**
+El proyecto usa React 19.2.1, pero `swagger-ui-react` y sus dependencias internas (`react-copy-to-clipboard`, `react-debounce-input`, `react-inspector`) solo declaran soporte oficial hasta React 18.
+
+**Impacto:**
+- ⚠️ Warnings durante `npm install` y deploy
+- ✅ **No afecta la funcionalidad** - React 19 es compatible hacia atrás
+- ✅ El build se completa exitosamente
+
+**Solución:**
+Agregado campo `overrides` en `package.json` para forzar el uso de React 19 en todas las dependencias:
+
+```json
+{
+  "overrides": {
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  }
+}
+```
+
+**Resultado:**
+- ✅ Suprime los warnings de peer dependencies
+- ✅ Fuerza el uso consistente de React 19 en todo el árbol de dependencias
+- ✅ No rompe la funcionalidad de `swagger-ui-react`
+
+**Nota:** Estos warnings son comunes cuando se usa una versión reciente de React. La mayoría de las bibliotecas funcionan correctamente con React 19 aunque no declaren soporte oficial todavía.
+
+---
+
 ## 📊 Commits Realizados
 
 1. **746733b** - `fix: resolve TypeScript build errors`
@@ -306,6 +348,13 @@ Agregado al `tsconfig.json`:
 4. **5e7d12a** - `fix: remove inline comments from Prisma schema for strict formatting`
    - Remoción de comentarios inline
    - Formato final del schema
+
+5. **1116b02** - `docs: add comprehensive documentation of resolved build issues`
+   - Documentación completa de problemas y soluciones
+
+6. **[pending]** - `fix: suppress React peer dependency warnings in npm`
+   - Agregado overrides en package.json
+   - Fuerza uso de React 19 en subdependencias
 
 ---
 
@@ -360,4 +409,4 @@ Se utilizó el patrón `typeof array[number]` para inferir tipos de elementos de
 ---
 
 **Documento generado el:** 2025-12-10
-**Última actualización:** Commit 5e7d12a
+**Última actualización:** 2025-12-10 - Agregado fix para warnings de React peer dependencies
