@@ -1,5 +1,4 @@
 import { prisma } from "./prisma";
-import { Prisma } from "@prisma/client";
 
 /**
  * Returns a Prisma client extension that enforces tenant isolation.
@@ -11,15 +10,15 @@ export function getTenantPrisma(tenantId: string) {
     return prisma.$extends({
         query: {
             $allModels: {
-                async findMany({ args, query }) {
+                async findMany({ args, query }: any) {
                     args.where = { ...args.where, tenantId };
                     return query(args);
                 },
-                async findFirst({ args, query }) {
+                async findFirst({ args, query }: any) {
                     args.where = { ...args.where, tenantId };
                     return query(args);
                 },
-                async findUnique({ args, query, model }) {
+                async findUnique({ args, query, model }: any) {
                     // findUnique cannot easily be patched to include tenantId if it's not in the unique key.
                     // We convert it to findFirst to enforce tenant isolation.
                     // This works because we want to find a record that matches the unique criteria AND the tenantId.
@@ -29,11 +28,11 @@ export function getTenantPrisma(tenantId: string) {
                         ...rest,
                     });
                 },
-                async create({ args, query }) {
+                async create({ args, query }: any) {
                     (args.data as any).tenantId = tenantId;
                     return query(args);
                 },
-                async createMany({ args, query }) {
+                async createMany({ args, query }: any) {
                     if (Array.isArray(args.data)) {
                         args.data = args.data.map((item: any) => ({ ...item, tenantId }));
                     } else {
@@ -41,7 +40,7 @@ export function getTenantPrisma(tenantId: string) {
                     }
                     return query(args);
                 },
-                async update({ args, query, model }) {
+                async update({ args, query, model }: any) {
                     // Similar to findUnique, update takes a unique 'where'. 
                     // We can't easily inject tenantId into 'where' for update if it's not part of the unique constraint.
                     // We use updateMany to enforce the check, ensuring we only update 1 record.
@@ -62,10 +61,9 @@ export function getTenantPrisma(tenantId: string) {
                     if (!record) {
                         // If not found in this tenant, we throw or return null depending on expected behavior.
                         // Prisma update throws RecordNotFound if not found.
-                        throw new Prisma.PrismaClientKnownRequestError(
-                            'Record to update not found.',
-                            { code: 'P2025', clientVersion: Prisma.prismaVersion.client }
-                        );
+                        const error = new Error('Record to update not found.');
+                        (error as any).code = 'P2025';
+                        throw error;
                     }
 
                     // Now we can safely update by ID (which we know belongs to tenant)
@@ -73,7 +71,7 @@ export function getTenantPrisma(tenantId: string) {
                     // No, we should still be careful.
                     return query(args);
                 },
-                async delete({ args, query, model }) {
+                async delete({ args, query, model }: any) {
                     const { where, ...rest } = args;
                     const record = await (prisma as any)[model].findFirst({
                         where: { ...where, tenantId },
@@ -81,10 +79,9 @@ export function getTenantPrisma(tenantId: string) {
                     });
 
                     if (!record) {
-                        throw new Prisma.PrismaClientKnownRequestError(
-                            'Record to delete not found.',
-                            { code: 'P2025', clientVersion: Prisma.prismaVersion.client }
-                        );
+                        const error = new Error('Record to delete not found.');
+                        (error as any).code = 'P2025';
+                        throw error;
                     }
 
                     return query(args);

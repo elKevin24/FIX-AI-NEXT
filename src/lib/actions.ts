@@ -7,7 +7,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
-import { CreateTicketSchema } from './schemas'; // Import new Zod schema
+import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas'; // Import new Zod schemas
 
 /**
  * Get ticket by ID for public status check
