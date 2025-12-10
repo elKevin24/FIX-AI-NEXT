@@ -81,18 +81,18 @@ model Customer {
 }
 
 model Ticket {
-  id          String       @id @default(uuid())
-  title       String
-  description String
-  status      TicketStatus @default(OPEN)
-  priority    String? // Low, Medium, High
+  id                 String       @id @default(uuid())
+  title              String
+  description        String
+  status             TicketStatus @default(OPEN)
+  priority           String? // Low, Medium, High
 
   // Device Details (v2)
-  deviceType    String?  @default("PC")
-  deviceModel   String?
-  serialNumber  String?
-  accessories   String? // JSON or text
-  checkInNotes  String? // Physical condition
+  deviceType         String? @default("PC")
+  deviceModel        String?
+  serialNumber       String?
+  accessories        String? // JSON or text
+  checkInNotes       String? // Physical condition
   cancellationReason String? // Only if status is CANCELLED
 
   tenantId String
