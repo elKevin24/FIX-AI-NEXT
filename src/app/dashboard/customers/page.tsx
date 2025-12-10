@@ -64,7 +64,7 @@ export default async function CustomersPage() {
         </Card>
       ) : (
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--spacing-4)' }}>
-          {customers.map((customer) => (
+          {customers.map((customer: typeof customers[number]) => (
             <Card key={customer.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">

@@ -72,14 +72,14 @@ export async function GET(request: NextRequest) {
         };
 
         const results = [
-            ...tickets.map((ticket) => ({
+            ...tickets.map((ticket: typeof tickets[number]) => ({
                 type: 'ticket' as const,
                 id: ticket.id,
                 title: ticket.title,
                 subtitle: `Cliente: ${ticket.customer.name}`,
                 status: statusLabels[ticket.status] || ticket.status,
             })),
-            ...customers.map((customer) => ({
+            ...customers.map((customer: typeof customers[number]) => ({
                 type: 'customer' as const,
                 id: customer.id,
                 title: customer.name,

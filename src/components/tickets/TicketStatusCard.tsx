@@ -1,11 +1,29 @@
 'use client';
 
 import Link from 'next/link';
-import { Ticket, Tenant, User } from '@prisma/client';
 
-interface TicketWithTenant extends Ticket {
-    tenant: Tenant;
-    assignedTo?: User | null;
+interface TicketWithTenant {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    priority?: string | null;
+    deviceType?: string | null;
+    deviceModel?: string | null;
+    serialNumber?: string | null;
+    accessories?: string | null;
+    checkInNotes?: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    tenant: {
+        id: string;
+        name: string;
+    };
+    assignedTo?: {
+        id: string;
+        name: string | null;
+        email: string;
+    } | null;
 }
 
 const formatDate = (date: Date | string) => {

@@ -111,7 +111,7 @@ export default async function SearchPage({ searchParams }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {tickets.map((ticket) => (
+                                {tickets.map((ticket: typeof tickets[number]) => (
                                     <tr key={ticket.id}>
                                         <td>{ticket.id.slice(0, 8)}</td>
                                         <td>{ticket.title}</td>
@@ -151,7 +151,7 @@ export default async function SearchPage({ searchParams }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {customers.map((customer) => (
+                                {customers.map((customer: typeof customers[number]) => (
                                     <tr key={customer.id}>
                                         <td>{customer.name}</td>
                                         <td>{customer.email || '-'}</td>
