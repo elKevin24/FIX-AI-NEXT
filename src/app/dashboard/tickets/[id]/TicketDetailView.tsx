@@ -6,6 +6,23 @@ import styles from '../tickets.module.css';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import PartsSection from './PartsSection';
+
+interface Part {
+    id: string;
+    name: string;
+    sku: string | null;
+    quantity: number;
+    cost: any;
+    price: any;
+}
+
+interface PartUsage {
+    id: string;
+    quantity: number;
+    createdAt: Date;
+    part: Part;
+}
 
 interface TicketNote {
     id: string;
@@ -43,6 +60,7 @@ interface Ticket {
         name: string;
     };
     notes: TicketNote[];
+    partsUsed: PartUsage[];
 }
 
 interface User {
@@ -55,6 +73,7 @@ interface User {
 interface Props {
     ticket: Ticket;
     availableUsers: User[];
+    availableParts: Part[];
     isSuperAdmin: boolean;
     isAdmin: boolean;
     currentUserId: string;
@@ -75,7 +94,7 @@ const PRIORITY_OPTIONS = [
     { value: 'High', label: 'Alta' },
 ];
 
-export default function TicketDetailView({ ticket, availableUsers, isSuperAdmin, isAdmin, currentUserId }: Props) {
+export default function TicketDetailView({ ticket, availableUsers, availableParts, isSuperAdmin, isAdmin, currentUserId }: Props) {
     const router = useRouter();
     const [updateState, updateAction, isUpdating] = useActionState(updateTicket, null);
     const [deleteState, deleteAction, isDeleting] = useActionState(deleteTicket, null);
@@ -328,6 +347,46 @@ export default function TicketDetailView({ ticket, availableUsers, isSuperAdmin,
                         </div>
                     </div>
 
+                    {/* PDF Documents */}
+                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
+                        <h3 style={{ marginBottom: '1rem' }}>Documentos</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <a
+                                href={`/api/tickets/${ticket.id}/pdf/work-order`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.createBtn}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    textAlign: 'center',
+                                    textDecoration: 'none',
+                                    fontSize: '0.9rem',
+                                    display: 'block'
+                                }}
+                            >
+                                📄 Orden de Ingreso
+                            </a>
+                            {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && (
+                                <a
+                                    href={`/api/tickets/${ticket.id}/pdf/delivery-receipt`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.createBtn}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        textAlign: 'center',
+                                        textDecoration: 'none',
+                                        fontSize: '0.9rem',
+                                        display: 'block',
+                                        backgroundColor: '#10b981'
+                                    }}
+                                >
+                                    ✓ Comprobante de Entrega
+                                </a>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Delete Zone - Only for admins */}
                     {isAdmin && (
                         <div className={styles.tableContainer} style={{ padding: '1.5rem', borderColor: '#fee2e2' }}>
@@ -379,6 +438,13 @@ export default function TicketDetailView({ ticket, availableUsers, isSuperAdmin,
                     )}
                 </div>
             </div>
+
+            {/* Parts Section */}
+            <PartsSection
+                ticketId={ticket.id}
+                partsUsed={ticket.partsUsed}
+                availableParts={availableParts}
+            />
 
             {/* Notes Section */}
             <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '1.5rem' }}>

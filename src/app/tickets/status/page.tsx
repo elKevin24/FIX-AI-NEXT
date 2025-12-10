@@ -65,27 +65,22 @@ export default function TicketSearchPage() {
             padding: 'var(--spacing-4)',
             position: 'relative' // Necesario para el posicionamiento absoluto del botón de Home
         }}>
-            {/* Botón de Home flotante */}
-            <div style={{
-                position: 'absolute', // Posicionamiento flotante
-                top: 'var(--spacing-4)',
-                left: 'var(--spacing-4)',
-                zIndex: 10 // Asegura que esté encima de otros elementos
-            }}>
-                <Link
-                    href="/"
-                    className="btn btn-glass btn-sm"
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
-                    <span>Inicio</span>
-                </Link>
-            </div>
-
             <div style={{ width: '100%', maxWidth: ticket ? '900px' : '600px', transition: 'max-width 0.3s ease-out' }}>
-                {/* Main Card (Search Form & Results) */}
-                <Card
+                <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'flex-start' }}>
+                    {/* Botón de Home */}
+                    <Link
+                        href="/"
+                        className="btn btn-glass btn-sm"
+                        style={{ flexShrink: 0, marginTop: '0' }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        <span>Inicio</span>
+                    </Link>
+
+                    {/* Main Card (Search Form & Results) */}
+                    <Card
                     style={{ background: 'white', border: 'none', display: ticket ? 'flex' : 'block' }} // Flex si hay ticket para columnas
                     onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
                         e.currentTarget.style.transform = 'translateY(-4px)';
@@ -304,6 +299,7 @@ export default function TicketSearchPage() {
                         </div>
                     </CardBody>
                 </Card>
+                </div>
 
                 {/* Ticket Details Card (conditionally rendered below form) */}
                 {ticket && (
