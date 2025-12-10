@@ -8,381 +8,148 @@ interface TicketWithTenant extends Ticket {
     assignedTo?: User | null;
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-});
-
 const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return dateTimeFormatter.format(d);
-};
-
-const getRelativeTime = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor(diff / (1000 * 60));
-
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return 'Just now';
+    return new Date(date).toLocaleDateString('es-ES', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
 };
 
 export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant }) {
-    const getStatusBadge = (status: string) => {
-        const statusMap: Record<string, { label: string, icon: string }> = {
-            'OPEN': { label: 'Open', icon: '🔵' },
-            'IN_PROGRESS': { label: 'In Progress', icon: '⚡' },
-            'RESOLVED': { label: 'Resolved', icon: '✓' },
-            'CLOSED': { label: 'Closed', icon: '✓' },
-        };
-        return statusMap[status] || { label: status, icon: '•' };
+    
+    // DEBUG: Ver qué llega realmente
+    // console.log("Ticket Data en Card:", ticket);
+
+    if (!ticket) {
+        return <div style={{ padding: '16px', color: '#ef4444', backgroundColor: '#fee2e2', borderRadius: '8px' }}>Error: No ticket data received</div>;
+    }
+
+    // Status Colors (CSS Variables simulated in JS - LIGHT THEME)
+    const getStatusStyle = (status: string) => {
+        const baseStyle = { padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
+        switch(status) {
+            case 'OPEN': return { ...baseStyle, color: '#2563eb', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }; // Blue
+            case 'IN_PROGRESS': return { ...baseStyle, color: '#d97706', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)' }; // Amber
+            case 'WAITING_FOR_PARTS': return { ...baseStyle, color: '#9333ea', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)' }; // Purple
+            case 'RESOLVED': return { ...baseStyle, color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' }; // Green
+            case 'CLOSED': return { ...baseStyle, color: '#4b5563', background: 'rgba(107, 114, 128, 0.1)', border: '1px solid rgba(107, 114, 128, 0.2)' }; // Gray
+            case 'CANCELLED': return { ...baseStyle, color: '#dc2626', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)' }; // Red
+            default: return { ...baseStyle, color: '#4b5563', background: 'rgba(107, 114, 128, 0.1)' };
+        }
     };
 
-    const getPriorityBadge = (priority: string) => {
-        const priorityMap: Record<string, { icon: string }> = {
-            'LOW': { icon: '↓' },
-            'MEDIUM': { icon: '→' },
-            'HIGH': { icon: '↑' },
-            'URGENT': { icon: '⚠' },
-        };
-        return priorityMap[priority] || { icon: '•' };
+    const displayStatus = ticket.status ? ticket.status.replace(/_/g, ' ') : 'UNKNOWN';
+    const displayId = ticket.id ? ticket.id.split('-')[0] : '???';
+    const tenantName = ticket.tenant?.name || 'Unknown Workshop';
+    
+    // Styles (LIGHT THEME)
+    const styles = {
+        container: { maxWidth: '800px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif' },
+        card: { background: '#ffffff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }, // Light background, subtle shadow
+        header: { padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '16px' },
+        titleGroup: { },
+        titleRow: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' },
+        title: { fontSize: '20px', fontWeight: '700', color: '#1a202c', margin: 0, lineHeight: 1.2 }, // Dark text
+        metaRow: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#718096', fontFamily: 'monospace' }, // Gray text
+        grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', borderBottom: '1px solid #e2e8f0' },
+        cell: { padding: '16px 24px', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' },
+        cellLabel: { fontSize: '10px', textTransform: 'uppercase' as const, color: '#718096', fontWeight: '600', marginBottom: '4px', letterSpacing: '0.05em' }, // Gray label
+        cellValue: { fontSize: '14px', color: '#1a202c', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }, // Dark text
+        body: { padding: '24px' },
+        sectionTitle: { fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: '#718096', fontWeight: '700', marginBottom: '12px' }, // Gray title
+        description: { fontSize: '14px', color: '#4a5568', lineHeight: '1.6', whiteSpace: 'pre-wrap' as const, margin: 0 }, // Darker gray
+        extraSection: { marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' },
+        extraBox: { background: '#f7fafc', padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#4a5568' }, // Light background for extra info
+        footer: { background: '#f7fafc', padding: '12px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#718096' }, // Light footer
+        link: { color: '#4299e1', textDecoration: 'none', transition: 'color 0.2s' } // Blue link
     };
-
-    const statusInfo = getStatusBadge(ticket.status);
-    const priorityInfo = getPriorityBadge(ticket.priority || 'MEDIUM');
 
     return (
-        <>
-            {/* Sección de Encabezado con Degradado */}
-            <div style={{
-                background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-secondary-600))',
-                padding: 'var(--spacing-8)',
-                color: 'white',
-                position: 'relative',
-                overflow: 'hidden'
-            }}>
-                {/* Círculos Decorativos */}
-                <div style={{
-                    position: 'absolute',
-                    top: '-50px',
-                    right: '-50px',
-                    width: '200px',
-                    height: '200px',
-                    borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    filter: 'blur(40px)'
-                }} />
-
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--spacing-3)',
-                        marginBottom: 'var(--spacing-4)'
-                    }}>
-                        <div style={{
-                            width: '60px',
-                            height: '60px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: 'var(--radius-xl)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backdropFilter: 'blur(10px)'
-                        }}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
+        <div style={styles.container}>
+            <div style={styles.card}>
+                
+                {/* Header */}
+                <div style={styles.header}>
+                    <div style={styles.titleGroup}>
+                        <div style={styles.titleRow}>
+                            <h1 style={styles.title}>{ticket.title || 'Sin Título'}</h1>
+                            <span style={getStatusStyle(ticket.status || 'OPEN')}>
+                                {displayStatus}
+                            </span>
                         </div>
-                        <div>
-                            <p style={{
-                                fontSize: 'var(--font-size-sm)',
-                                opacity: 0.9,
-                                marginBottom: 'var(--spacing-1)'
-                            }}>
-                                {ticket.tenant.name}
-                            </p>
-                            <h1 style={{
-                                fontSize: 'var(--font-size-3xl)',
-                                fontWeight: '700',
-                                margin: 0,
-                                lineHeight: 1.2
-                            }}>
-                                {ticket.title}
-                            </h1>
+                        <div style={styles.metaRow}>
+                            <span>ID: <span style={{ color: '#718096' }}>{displayId}</span></span>
+                            <span>•</span>
+                            <span>{tenantName}</span>
                         </div>
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        gap: 'var(--spacing-3)',
-                        flexWrap: 'wrap',
-                        alignItems: 'center'
-                    }}>
-                        <div style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            padding: 'var(--spacing-2) var(--spacing-4)',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: 'var(--font-size-sm)',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--spacing-2)'
-                        }}>
-                            <span>{statusInfo.icon}</span>
-                            <span>{statusInfo.label}</span>
-                        </div>
-                        <div style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            padding: 'var(--spacing-2) var(--spacing-4)',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: 'var(--font-size-sm)',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--spacing-2)'
-                        }}>
-                            <span>{priorityInfo.icon}</span>
-                            <span>{ticket.priority}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Sección de Contenido */}
-            <div style={{ padding: 'var(--spacing-8)' }}>
-                {/* ID del Ticket */}
-                <div style={{
-                    background: 'var(--color-surface)',
-                    padding: 'var(--spacing-4)',
-                    borderRadius: 'var(--radius-lg)',
-                    marginBottom: 'var(--spacing-6)',
-                    border: '1px solid var(--color-border)'
-                }}>
-                    <p style={{
-                        fontSize: 'var(--font-size-xs)',
-                        color: 'var(--color-text-tertiary)',
-                        marginBottom: 'var(--spacing-1)',
-                        textTransform: 'uppercase',
-                        fontWeight: '600',
-                        letterSpacing: '0.05em'
-                    }}>
-                        ID del Ticket
-                    </p>
-                    <p style={{
-                        fontFamily: 'monospace',
-                        fontSize: 'var(--font-size-base)',
-                        color: 'var(--color-primary-600)',
-                        fontWeight: '600',
-                        margin: 0,
-                        wordBreak: 'break-all'
-                    }}>
-                        {ticket.id}
-                    </p>
-                </div>
-
-                {/* Descripción */}
-                <div style={{ marginBottom: 'var(--spacing-6)' }}>
-                    <h3 style={{
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-tertiary)',
-                        marginBottom: 'var(--spacing-3)',
-                        textTransform: 'uppercase',
-                        fontWeight: '600',
-                        letterSpacing: '0.05em',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--spacing-2)'
-                    }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Descripción
-                    </h3>
-                    <p style={{
-                        fontSize: 'var(--font-size-base)',
-                        color: 'var(--color-text-secondary)',
-                        lineHeight: '1.7',
-                        margin: 0,
-                        whiteSpace: 'pre-wrap'
-                    }}>
-                        {ticket.description}
-                    </p>
-                </div>
-
-                {/* Cuadrícula de Información */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: 'var(--spacing-4)',
-                    marginBottom: 'var(--spacing-6)'
-                }}>
-                    {/* Asignado a */}
-                    {ticket.assignedTo && (
-                        <div style={{
-                            padding: 'var(--spacing-4)',
-                            background: 'var(--color-surface)',
-                            borderRadius: 'var(--radius-lg)',
-                            border: '1px solid var(--color-border)'
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 'var(--spacing-2)',
-                                marginBottom: 'var(--spacing-2)'
-                            }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2">
-                                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <p style={{
-                                    fontSize: 'var(--font-size-xs)',
-                                    color: 'var(--color-text-tertiary)',
-                                    margin: 0,
-                                    textTransform: 'uppercase',
-                                    fontWeight: '600',
-                                    letterSpacing: '0.05em'
-                                }}>
-                                    Asignado a
-                                </p>
-                            </div>
-                            <p style={{
-                                fontSize: 'var(--font-size-base)',
-                                color: 'var(--color-text-primary)',
-                                fontWeight: '600',
-                                margin: 0
-                            }}>
-                                {ticket.assignedTo.name || ticket.assignedTo.email}
-                            </p>
+                    {/* Priority Badge */}
+                    {ticket.priority && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '500', color: '#718096', background: '#f7fafc', padding: '4px 10px', borderRadius: '99px', border: '1px solid #e2e8f0' }}>
+                            <span style={{ color: ticket.priority === 'HIGH' ? '#ef4444' : '#3b82f6', fontSize: '8px' }}>●</span>
+                            {ticket.priority} PRIORITY
                         </div>
                     )}
+                </div>
 
-                    {/* Creado */}
-                    <div style={{
-                        padding: 'var(--spacing-4)',
-                        background: 'var(--color-surface)',
-                        borderRadius: 'var(--radius-lg)',
-                        border: '1px solid var(--color-border)'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--spacing-2)',
-                            marginBottom: 'var(--spacing-2)'
-                        }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M12 6v6l4 2" />
-                            </svg>
-                            <p style={{
-                                fontSize: 'var(--font-size-xs)',
-                                color: 'var(--color-text-tertiary)',
-                                margin: 0,
-                                textTransform: 'uppercase',
-                                fontWeight: '600',
-                                letterSpacing: '0.05em'
-                            }}>
-                                Creado
-                            </p>
-                        </div>
-                        <p style={{
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-text-primary)',
-                            fontWeight: '600',
-                            margin: 0,
-                            marginBottom: 'var(--spacing-1)'
-                        }}>
-                            {formatDate(ticket.createdAt)}
-                        </p>
-                        <p style={{
-                            fontSize: 'var(--font-size-xs)',
-                            color: 'var(--color-text-tertiary)',
-                            margin: 0
-                        }}>
-                            {getRelativeTime(ticket.createdAt)}
-                        </p>
+                {/* Grid */}
+                <div style={styles.grid}>
+                    <div style={styles.cell}>
+                        <span style={styles.cellLabel}>Creado</span>
+                        <span style={styles.cellValue}>{ticket.createdAt ? formatDate(ticket.createdAt) : '-'}</span>
                     </div>
-
-                    {/* Última Actualización */}
-                    <div style={{
-                        padding: 'var(--spacing-4)',
-                        background: 'var(--color-surface)',
-                        borderRadius: 'var(--radius-lg)',
-                        border: '1px solid var(--color-border)'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--spacing-2)',
-                            marginBottom: 'var(--spacing-2)'
-                        }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth="2">
-                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <p style={{
-                                fontSize: 'var(--font-size-xs)',
-                                color: 'var(--color-text-tertiary)',
-                                margin: 0,
-                                textTransform: 'uppercase',
-                                fontWeight: '600',
-                                letterSpacing: '0.05em'
-                            }}>
-                                Última Actualización
-                            </p>
-                        </div>
-                        <p style={{
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-text-primary)',
-                            fontWeight: '600',
-                            margin: 0,
-                            marginBottom: 'var(--spacing-1)'
-                        }}>
-                            {formatDate(ticket.updatedAt)}
-                        </p>
-                        <p style={{
-                            fontSize: 'var(--font-size-xs)',
-                            color: 'var(--color-text-tertiary)',
-                            margin: 0
-                        }}>
-                            {getRelativeTime(ticket.updatedAt)}
-                        </p>
+                    <div style={styles.cell}>
+                        <span style={styles.cellLabel}>Actualizado</span>
+                        <span style={styles.cellValue}>{ticket.updatedAt ? formatDate(ticket.updatedAt) : '-'}</span>
+                    </div>
+                    <div style={styles.cell}>
+                        <span style={styles.cellLabel}>Asignado a</span>
+                        <span style={styles.cellValue}>{ticket.assignedTo?.name || 'Sin asignar'}</span>
+                    </div>
+                    <div style={{ ...styles.cell, borderRight: 'none' }}>
+                        <span style={styles.cellLabel}>Modelo</span>
+                        <span style={styles.cellValue}>{(ticket as any).deviceModel || 'N/A'}</span>
                     </div>
                 </div>
 
-                {/* Ayuda de Estado */}
-                <div style={{
-                    background: 'var(--color-info-50)',
-                    border: '1px solid var(--color-info-200)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--spacing-4)',
-                    display: 'flex',
-                    gap: 'var(--spacing-3)',
-                    alignItems: 'flex-start'
-                }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-info-600)" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}>
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 16v-4m0-4h.01" />
-                    </svg>
-                    <div>
-                        <p style={{
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-info-700)',
-                            margin: 0,
-                            lineHeight: '1.5'
-                        }}>
-                            <strong>¿Necesitas ayuda?</strong><br />
-                            Si tienes preguntas sobre tu ticket, por favor contacta a nuestro equipo de soporte con tu ID de ticket.
-                        </p>
-                    </div>
+                {/* Body */}
+                <div style={styles.body}>
+                    <h3 style={styles.sectionTitle}>Detalle del Problema</h3>
+                    <p style={styles.description}>
+                        {ticket.description || 'Sin descripción disponible.'}
+                    </p>
+
+                    {/* V2 Extras */}
+                    {((ticket as any).accessories || (ticket as any).checkInNotes) && (
+                        <div style={styles.extraSection}>
+                            {(ticket as any).accessories && (
+                                <div>
+                                    <h4 style={styles.sectionTitle}>Accesorios</h4>
+                                    <div style={styles.extraBox}>
+                                        {(ticket as any).accessories}
+                                    </div>
+                                </div>
+                            )}
+                            {(ticket as any).checkInNotes && (
+                                <div>
+                                    <h4 style={styles.sectionTitle}>Estado Físico</h4>
+                                    <div style={styles.extraBox}>
+                                        {(ticket as any).checkInNotes}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div style={styles.footer}>
+                    <span>FIX-AI TRACKER v2.0</span>
+                    <Link href="/login" style={styles.link}>
+                        Acceso Personal
+                    </Link>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
