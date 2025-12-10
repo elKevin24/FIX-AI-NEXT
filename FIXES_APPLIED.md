@@ -352,7 +352,7 @@ Agregado campo `overrides` en `package.json` para forzar el uso de React 19 en t
 5. **1116b02** - `docs: add comprehensive documentation of resolved build issues`
    - Documentación completa de problemas y soluciones
 
-6. **[pending]** - `fix: suppress React peer dependency warnings in npm`
+6. **e9e25aa** - `fix: suppress React peer dependency warnings in npm`
    - Agregado overrides en package.json
    - Fuerza uso de React 19 en subdependencias
 
