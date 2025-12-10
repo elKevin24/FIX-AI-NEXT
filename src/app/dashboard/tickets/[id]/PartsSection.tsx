@@ -47,9 +47,12 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
     // Refresh on success
     useEffect(() => {
         if (addState?.success) {
-            setShowAddForm(false);
-            setSelectedPartId('');
-            setQuantity(1);
+            // Defer state updates to avoid cascading renders
+            queueMicrotask(() => {
+                setShowAddForm(false);
+                setSelectedPartId('');
+                setQuantity(1);
+            });
             router.refresh();
         }
     }, [addState, router]);
