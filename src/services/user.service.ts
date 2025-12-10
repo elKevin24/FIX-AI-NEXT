@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getTenantId } from "@/lib/auth-helpers";
-import { User, UserRole } from "@prisma/client";
+
+export type UserRole = 'ADMIN' | 'TECHNICIAN' | 'RECEPTIONIST';
 
 export async function getUsers() {
     const tenantId = await getTenantId();
