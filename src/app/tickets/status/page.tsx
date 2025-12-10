@@ -38,12 +38,6 @@ export default function TicketSearchPage() {
         }
     };
 
-    const handleReset = () => {
-        setTicket(null);
-        setTicketId('');
-        setError('');
-    };
-
     // Quick access example IDs
     const exampleIds = [
         { short: '90287b37', label: 'Reparación Laptop' },
@@ -59,36 +53,51 @@ export default function TicketSearchPage() {
         <div style={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%)',
-            display: 'flex',
-            alignItems: 'center', // Alineado siempre al centro
-            justifyContent: 'center',
-            padding: 'var(--spacing-4)',
-            position: 'relative' // Necesario para el posicionamiento absoluto del botón de Home
+            position: 'relative',
+            paddingTop: 'var(--spacing-8)',
+            paddingBottom: 'var(--spacing-4)',
+            paddingLeft: 'var(--spacing-4)',
+            paddingRight: 'var(--spacing-4)',
         }}>
-            <div style={{ width: '100%', maxWidth: ticket ? '900px' : '600px', transition: 'max-width 0.3s ease-out' }}>
-                <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'flex-start' }}>
-                    {/* Botón de Home */}
-                    <Link
-                        href="/"
-                        className="btn btn-glass btn-sm"
-                        style={{ flexShrink: 0, marginTop: '0' }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                        <span>Inicio</span>
-                    </Link>
+            {/* Botón de Home - Posicionado absolutamente */}
+            <Link
+                href="/"
+                className="btn btn-glass btn-sm"
+                style={{
+                    position: 'absolute',
+                    top: 'var(--spacing-8)',
+                    left: 'var(--spacing-8)',
+                    zIndex: 10
+                }}
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                <span>Inicio</span>
+            </Link>
 
+            {/* Contenedor central de la card */}
+            <div style={{
+                width: '100%',
+                maxWidth: ticket ? '900px' : '600px',
+                transition: 'max-width 0.3s ease-out',
+                margin: '0 auto'
+            }}>
                     {/* Main Card (Search Form & Results) */}
                     <Card
-                    style={{ background: 'white', border: 'none', display: ticket ? 'flex' : 'block' }} // Flex si hay ticket para columnas
+                    style={{
+                        background: 'white',
+                        border: 'none',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                        transition: 'all 0.2s ease'
+                    }}
                     onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
                     }}
                     onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
                     }}
                 >
                     {/* Header with icon */}
@@ -97,49 +106,51 @@ export default function TicketSearchPage() {
                         paddingTop: 'var(--spacing-8)',
                         paddingBottom: 'var(--spacing-6)'
                     }}>
-                        {/* Icon - Circular & Glowing */}
+                        {/* Icon - Minimal & Clean */}
                         <div style={{
-                            width: '72px',
-                            height: '72px',
-                            margin: '0 auto var(--spacing-6)',
+                            width: '48px',
+                            height: '48px',
+                            margin: '0 auto var(--spacing-4)',
                             background: 'linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600))',
-                            borderRadius: '50%', // Circular
+                            borderRadius: '12px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 10px 25px -5px var(--color-primary-200)' // Colored shadow
+                            boxShadow: '0 2px 8px -2px var(--color-primary-300)'
                         }}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" />
                                 <path d="m12 12 4 10 1.7-4.3L22 16Z" />
                             </svg>
                         </div>
 
-                        <CardHeader style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 'var(--spacing-3)' }}>
-                            <h1 style={{ 
-                                fontSize: 'var(--font-size-2xl)', 
-                                fontWeight: '800', 
+                        <CardHeader style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 'var(--spacing-2)' }}>
+                            <h1 style={{
+                                fontSize: 'var(--font-size-2xl)',
+                                fontWeight: '700',
                                 color: 'var(--color-gray-900)',
-                                letterSpacing: '-0.03em'
+                                letterSpacing: '-0.02em',
+                                lineHeight: '1.2'
                             }}>
                                 Consulta tu Ticket
                             </h1>
                         </CardHeader>
                         <p style={{
-                            fontSize: 'var(--font-size-base)',
+                            fontSize: 'var(--font-size-sm)',
                             color: 'var(--color-gray-600)',
-                            maxWidth: '420px',
+                            maxWidth: '340px',
                             margin: '0 auto',
-                            lineHeight: '1.6'
+                            lineHeight: '1.5',
+                            fontWeight: '400'
                         }}>
-                            Ingresa el ID de tu servicio para ver el estado en tiempo real.
+                            Ingresa el ID de tu servicio para ver el estado
                         </p>
                     </div>
 
-                    <CardBody style={{ padding: '0 var(--spacing-2)' }}>
+                    <CardBody style={{ padding: '0 var(--spacing-8) var(--spacing-8)' }}>
                         {/* Search Form */}
-                        <form onSubmit={handleSubmit} style={{ marginBottom: ticket ? 'var(--spacing-6)' : 'var(--spacing-8)' }}> {/* Ajuste de margin */}
-                            <div style={{ marginBottom: 'var(--spacing-6)' }}>
+                        <form onSubmit={handleSubmit} style={{ marginBottom: 'var(--spacing-6)' }}>
+                            <div style={{ marginBottom: 'var(--spacing-5)' }}>
                                 <Input
                                     label="ID del Ticket"
                                     type="text"
@@ -148,20 +159,21 @@ export default function TicketSearchPage() {
                                         setTicketId(e.target.value);
                                         setError('');
                                     }}
-                                    placeholder="Ej: 90287b37"
+                                    placeholder="90287b37"
                                     required
-                                    style={{ 
-                                        fontSize: 'var(--font-size-lg)', 
-                                        padding: 'var(--spacing-4)',
-                                        letterSpacing: '0.05em',
+                                    style={{
+                                        fontSize: 'var(--font-size-base)',
+                                        padding: 'var(--spacing-3)',
+                                        letterSpacing: '0.02em',
                                         fontFamily: 'var(--font-family-mono)',
-                                        borderColor: error ? 'var(--color-error-500)' : undefined
+                                        borderColor: error ? 'var(--color-error-500)' : 'var(--color-gray-300)',
+                                        height: '48px'
                                     }}
                                 />
                                 {error && (
-                                    <p style={{ 
-                                        color: 'var(--color-error-600)', 
-                                        fontSize: 'var(--font-size-sm)', 
+                                    <p style={{
+                                        color: 'var(--color-error-600)',
+                                        fontSize: 'var(--font-size-sm)',
                                         marginTop: 'var(--spacing-2)',
                                         fontWeight: '500'
                                     }}>
@@ -176,11 +188,11 @@ export default function TicketSearchPage() {
                                 fullWidth
                                 disabled={loading}
                                 style={{
-                                    height: '54px',
+                                    height: '48px',
                                     fontSize: 'var(--font-size-base)',
                                     fontWeight: '600',
-                                    borderRadius: 'var(--radius-full)', // Pill button
-                                    boxShadow: '0 4px 12px var(--color-primary-200)'
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                                 }}
                             >
                                 {loading ? (
@@ -188,7 +200,7 @@ export default function TicketSearchPage() {
                                 ) : (
                                     <>
                                         <span>Consultar Estado</span>
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: '8px' }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '8px' }}>
                                             <path d="M5 12h14m-7-7l7 7-7 7" />
                                         </svg>
                                     </>
@@ -196,26 +208,27 @@ export default function TicketSearchPage() {
                             </Button>
                         </form>
 
+                        {/* TODO: Eliminar ejemplos */}
                         {/* Quick Access Examples - Chips Style */}
                         <div style={{
-                            borderTop: '1px solid var(--color-gray-100)',
-                            paddingTop: 'var(--spacing-6)',
-                            marginBottom: ticket ? 'var(--spacing-6)' : 'var(--spacing-8)' // Ajuste de margin
+                            borderTop: '1px solid var(--color-gray-200)',
+                            paddingTop: 'var(--spacing-5)',
+                            marginBottom: 'var(--spacing-5)'
                         }}>
                             <p style={{
                                 fontSize: 'var(--font-size-xs)',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.05em',
+                                letterSpacing: '0.08em',
                                 color: 'var(--color-gray-500)',
-                                marginBottom: 'var(--spacing-4)',
+                                marginBottom: 'var(--spacing-3)',
                                 fontWeight: '600',
                                 textAlign: 'center'
                             }}>
-                                Probar con ejemplos
+                                Ejemplos
                             </p>
                             <div style={{
                                 display: 'flex',
-                                gap: 'var(--spacing-3)',
+                                gap: 'var(--spacing-2)',
                                 justifyContent: 'center',
                                 flexWrap: 'wrap'
                             }}>
@@ -228,34 +241,36 @@ export default function TicketSearchPage() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 'var(--spacing-2)',
-                                            padding: 'var(--spacing-2) var(--spacing-4)',
-                                            background: 'white',
+                                            padding: 'var(--spacing-2) var(--spacing-3)',
+                                            background: 'var(--color-gray-50)',
                                             border: '1px solid var(--color-gray-200)',
-                                            borderRadius: '9999px',
+                                            borderRadius: '8px',
                                             cursor: 'pointer',
-                                            transition: 'all 0.2s ease',
+                                            transition: 'all 0.15s ease',
                                             fontSize: 'var(--font-size-sm)',
-                                            color: 'var(--color-gray-700)'
+                                            color: 'var(--color-gray-700)',
+                                            fontWeight: '500'
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = 'var(--color-primary-400)';
+                                            e.currentTarget.style.borderColor = 'var(--color-primary-300)';
                                             e.currentTarget.style.color = 'var(--color-primary-700)';
                                             e.currentTarget.style.background = 'var(--color-primary-50)';
                                         }}
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.borderColor = 'var(--color-gray-200)';
                                             e.currentTarget.style.color = 'var(--color-gray-700)';
-                                            e.currentTarget.style.background = 'white';
+                                            e.currentTarget.style.background = 'var(--color-gray-50)';
                                         }}
                                     >
                                         <span>{example.label}</span>
                                         <span style={{
                                             fontFamily: 'monospace',
-                                            background: 'var(--color-gray-100)',
-                                            padding: '2px 6px',
-                                            borderRadius: '4px',
-                                            fontSize: '0.8em',
-                                            color: 'var(--color-gray-600)'
+                                            background: 'white',
+                                            padding: '2px 8px',
+                                            borderRadius: '6px',
+                                            fontSize: '0.85em',
+                                            color: 'var(--color-gray-600)',
+                                            border: '1px solid var(--color-gray-200)'
                                         }}>{example.short}</span>
                                     </button>
                                 ))}
@@ -265,46 +280,46 @@ export default function TicketSearchPage() {
                         {/* Help section - Subtle */}
                         <div style={{
                             padding: 'var(--spacing-4)',
-                            background: 'var(--color-gray-50)',
-                            borderRadius: 'var(--radius-lg)',
+                            background: 'var(--color-info-50)',
+                            borderRadius: '10px',
                             display: 'flex',
                             gap: 'var(--spacing-3)',
-                            alignItems: 'center'
+                            alignItems: 'flex-start',
+                            border: '1px solid var(--color-info-100)'
                         }}>
                             <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                background: 'white',
+                                width: '20px',
+                                height: '20px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 color: 'var(--color-info-600)',
-                                boxShadow: 'var(--shadow-sm)',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                marginTop: '2px'
                             }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M12 16v-4m0-4h.01" />
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 16v-4m0-4h.01" />
                                 </svg>
                             </div>
                             <p style={{
                                 fontSize: 'var(--font-size-sm)',
-                                color: 'var(--color-gray-600)',
+                                color: 'var(--color-gray-700)',
                                 margin: 0,
-                                lineHeight: '1.4'
+                                lineHeight: '1.5'
                             }}>
-                                <span style={{ fontWeight: '600', color: 'var(--color-gray-800)' }}>¿Ayuda?</span> Tu ID está en el recibo de ingreso o en el correo de confirmación.
+                                Tu ID está en el recibo de ingreso o en el correo de confirmación.
                             </p>
                         </div>
                     </CardBody>
                 </Card>
-                </div>
 
                 {/* Ticket Details Card (conditionally rendered below form) */}
                 {ticket && (
-                    <div style={{ marginTop: 'var(--spacing-8)', padding: 'var(--spacing-4)' }}>
-                        <TicketStatusCard ticket={ticket} onBack={handleReset} />
+                    <div style={{
+                        marginTop: 'var(--spacing-6)'
+                    }}>
+                        <TicketStatusCard ticket={ticket} />
                     </div>
                 )}
             </div>
