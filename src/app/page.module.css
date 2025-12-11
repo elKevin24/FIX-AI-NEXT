@@ -27,10 +27,12 @@
 }
 
 .gradient {
-    background: linear-gradient(90deg, #ffd89b 0%, #19547b 100%);
+    background: linear-gradient(-90deg, #ffd89b, #b19cd9, #19547b, #ffd89b);
+    background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: animateGradient 10s ease infinite;
 }
 
 .subtitle {
@@ -62,6 +64,7 @@
 .primaryBtn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
 }
 
 .secondaryBtn {
@@ -80,6 +83,7 @@
 .secondaryBtn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+    text-decoration: none;
 }
 
 .features {
@@ -154,4 +158,10 @@
     .featureCard p {
         color: #cbd5e0;
     }
+}
+
+@keyframes animateGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
