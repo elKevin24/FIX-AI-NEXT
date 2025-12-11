@@ -34,23 +34,19 @@ const formatDate = (date: Date | string) => {
 
 export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant }) {
     
-    // DEBUG: Ver qué llega realmente
-    // console.log("Ticket Data en Card:", ticket);
-
     if (!ticket) {
         return <div style={{ padding: '16px', color: '#ef4444', backgroundColor: '#fee2e2', borderRadius: '8px' }}>Error: No ticket data received</div>;
     }
 
-    // Status Colors (CSS Variables simulated in JS - LIGHT THEME)
     const getStatusStyle = (status: string) => {
         const baseStyle = { padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
         switch(status) {
-            case 'OPEN': return { ...baseStyle, color: '#2563eb', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }; // Blue
-            case 'IN_PROGRESS': return { ...baseStyle, color: '#d97706', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)' }; // Amber
-            case 'WAITING_FOR_PARTS': return { ...baseStyle, color: '#9333ea', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)' }; // Purple
-            case 'RESOLVED': return { ...baseStyle, color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' }; // Green
-            case 'CLOSED': return { ...baseStyle, color: '#4b5563', background: 'rgba(107, 114, 128, 0.1)', border: '1px solid rgba(107, 114, 128, 0.2)' }; // Gray
-            case 'CANCELLED': return { ...baseStyle, color: '#dc2626', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)' }; // Red
+            case 'OPEN': return { ...baseStyle, color: '#2563eb', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' };
+            case 'IN_PROGRESS': return { ...baseStyle, color: '#d97706', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)' };
+            case 'WAITING_FOR_PARTS': return { ...baseStyle, color: '#9333ea', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)' };
+            case 'RESOLVED': return { ...baseStyle, color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' };
+            case 'CLOSED': return { ...baseStyle, color: '#4b5563', background: 'rgba(107, 114, 128, 0.1)', border: '1px solid rgba(107, 114, 128, 0.2)' };
+            case 'CANCELLED': return { ...baseStyle, color: '#dc2626', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)' };
             default: return { ...baseStyle, color: '#4b5563', background: 'rgba(107, 114, 128, 0.1)' };
         }
     };
@@ -59,34 +55,33 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
     const displayId = ticket.id ? ticket.id.split('-')[0] : '???';
     const tenantName = ticket.tenant?.name || 'Unknown Workshop';
     
-    // Styles (LIGHT THEME)
+    // Styles are now more for theming than layout
     const styles = {
         container: { maxWidth: '800px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif' },
-        card: { background: '#ffffff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }, // Light background, subtle shadow
-        header: { padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '16px' },
+        card: { background: '#ffffff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' },
+        header: { padding: '20px 24px', borderBottom: '1px solid #e2e8f0', gap: '16px' },
         titleGroup: { },
         titleRow: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' },
-        title: { fontSize: '20px', fontWeight: '700', color: '#1a202c', margin: 0, lineHeight: 1.2 }, // Dark text
-        metaRow: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#718096', fontFamily: 'monospace' }, // Gray text
-        grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', borderBottom: '1px solid #e2e8f0' },
-        cell: { padding: '16px 24px', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' },
-        cellLabel: { fontSize: '10px', textTransform: 'uppercase' as const, color: '#718096', fontWeight: '600', marginBottom: '4px', letterSpacing: '0.05em' }, // Gray label
-        cellValue: { fontSize: '14px', color: '#1a202c', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }, // Dark text
+        title: { fontSize: '20px', fontWeight: '700', color: '#1a202c', margin: 0, lineHeight: 1.2 },
+        metaRow: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#718096', fontFamily: 'monospace' },
+        grid: { borderBottom: '1px solid #e2e8f0' },
+        cell: { padding: '16px 24px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' },
+        cellLabel: { fontSize: '10px', textTransform: 'uppercase' as const, color: '#718096', fontWeight: '600', marginBottom: '4px', letterSpacing: '0.05em' },
+        cellValue: { fontSize: '14px', color: '#1a202c', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const },
         body: { padding: '24px' },
-        sectionTitle: { fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: '#718096', fontWeight: '700', marginBottom: '12px' }, // Gray title
-        description: { fontSize: '14px', color: '#4a5568', lineHeight: '1.6', whiteSpace: 'pre-wrap' as const, margin: 0 }, // Darker gray
-        extraSection: { marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' },
-        extraBox: { background: '#f7fafc', padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#4a5568' }, // Light background for extra info
-        footer: { background: '#f7fafc', padding: '12px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#718096' }, // Light footer
-        link: { color: '#4299e1', textDecoration: 'none', transition: 'color 0.2s' } // Blue link
+        sectionTitle: { fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: '#718096', fontWeight: '700', marginBottom: '12px' },
+        description: { fontSize: '14px', color: '#4a5568', lineHeight: '1.6', whiteSpace: 'pre-wrap' as const, margin: 0 },
+        extraSection: { marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e2e8f0', gap: '24px' },
+        extraBox: { background: '#f7fafc', padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#4a5568' },
+        footer: { background: '#f7fafc', padding: '12px 24px', borderTop: '1px solid #e2e8f0', fontSize: '10px', color: '#718096' },
+        link: { color: '#4299e1', textDecoration: 'none', transition: 'color 0.2s' }
     };
 
     return (
         <div style={styles.container}>
             <div style={styles.card}>
                 
-                {/* Header */}
-                <div style={styles.header}>
+                <div style={styles.header} className="card-header">
                     <div style={styles.titleGroup}>
                         <div style={styles.titleRow}>
                             <h1 style={styles.title}>{ticket.title || 'Sin Título'}</h1>
@@ -101,7 +96,6 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                         </div>
                     </div>
 
-                    {/* Priority Badge */}
                     {ticket.priority && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '500', color: '#718096', background: '#f7fafc', padding: '4px 10px', borderRadius: '99px', border: '1px solid #e2e8f0' }}>
                             <span style={{ color: ticket.priority === 'HIGH' ? '#ef4444' : '#3b82f6', fontSize: '8px' }}>●</span>
@@ -110,36 +104,33 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                     )}
                 </div>
 
-                {/* Grid */}
-                <div style={styles.grid}>
-                    <div style={styles.cell}>
+                <div style={styles.grid} className="details-grid">
+                    <div style={styles.cell} className="grid-cell">
                         <span style={styles.cellLabel}>Creado</span>
                         <span style={styles.cellValue}>{ticket.createdAt ? formatDate(ticket.createdAt) : '-'}</span>
                     </div>
-                    <div style={styles.cell}>
+                    <div style={styles.cell} className="grid-cell">
                         <span style={styles.cellLabel}>Actualizado</span>
                         <span style={styles.cellValue}>{ticket.updatedAt ? formatDate(ticket.updatedAt) : '-'}</span>
                     </div>
-                    <div style={styles.cell}>
+                    <div style={styles.cell} className="grid-cell">
                         <span style={styles.cellLabel}>Asignado a</span>
                         <span style={styles.cellValue}>{ticket.assignedTo?.name || 'Sin asignar'}</span>
                     </div>
-                    <div style={{ ...styles.cell, borderRight: 'none' }}>
+                    <div style={styles.cell} className="grid-cell">
                         <span style={styles.cellLabel}>Modelo</span>
                         <span style={styles.cellValue}>{(ticket as any).deviceModel || 'N/A'}</span>
                     </div>
                 </div>
 
-                {/* Body */}
                 <div style={styles.body}>
                     <h3 style={styles.sectionTitle}>Detalle del Problema</h3>
                     <p style={styles.description}>
                         {ticket.description || 'Sin descripción disponible.'}
                     </p>
 
-                    {/* V2 Extras */}
                     {((ticket as any).accessories || (ticket as any).checkInNotes) && (
-                        <div style={styles.extraSection}>
+                        <div style={styles.extraSection} className="extra-section">
                             {(ticket as any).accessories && (
                                 <div>
                                     <h4 style={styles.sectionTitle}>Accesorios</h4>
@@ -160,14 +151,72 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                     )}
                 </div>
 
-                {/* Footer */}
-                <div style={styles.footer}>
+                <div style={styles.footer} className="card-footer">
                     <span>FIX-AI TRACKER v2.0</span>
                     <Link href="/login" style={styles.link}>
                         Acceso Personal
                     </Link>
                 </div>
             </div>
+
+            <style jsx>{`
+                .card-header {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .details-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .grid-cell {
+                    border-bottom: 1px solid #e2e8f0;
+                    border-right: 1px solid #e2e8f0;
+                }
+                .details-grid .grid-cell:nth-child(2n) {
+                    border-right: none;
+                }
+                 .details-grid .grid-cell:last-child,
+                 .details-grid .grid-cell:nth-last-child(2):nth-child(odd) {
+                    border-bottom: none;
+                }
+                .extra-section {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                }
+                .card-footer {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                @media (min-width: 768px) {
+                    .card-header {
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    .details-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                    .grid-cell {
+                        border-bottom: none;
+                        border-right: 1px solid #e2e8f0;
+                    }
+                    .details-grid .grid-cell:last-child {
+                        border-right: none;
+                    }
+                    .extra-section {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                    .card-footer {
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

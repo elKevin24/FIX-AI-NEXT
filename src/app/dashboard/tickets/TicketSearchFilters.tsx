@@ -93,7 +93,7 @@ export default function TicketSearchFilters() {
                     />
                 </div>
                 <Button
-                    variant="primary"
+                    variant="danger"
                     onClick={handleSearch}
                     disabled={isPending}
                 >
