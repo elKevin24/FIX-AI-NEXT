@@ -21,108 +21,6 @@
 
 ---
 
-## 🎯 Sistema de Puntuación y Priorización
-
-**Objetivo:** Identificar qué features son alcanzables a corto plazo vs. visiones a largo plazo.
-
-### Metodología de Scoring
-
-Cada feature/módulo se califica en 3 dimensiones (escala 1-5):
-
-| Dimensión | Descripción | Peso |
-|-----------|-------------|------|
-| **Complejidad Técnica** | Dificultad de implementación (1=simple, 5=muy complejo) | 35% |
-| **Esfuerzo de Desarrollo** | Tiempo estimado (1=1-3 días, 5=1+ mes) | 35% |
-| **Impacto en Negocio** | Valor para usuarios (1=nice-to-have, 5=crítico) | 30% |
-
-**Fórmula:**
-```
-Score Final = (Complejidad × 0.35) + (Esfuerzo × 0.35) + ((6 - Impacto) × 0.30)
-```
-*Nota: El impacto se invierte (6 - Impacto) para que menor score = mayor prioridad*
-
-### Clasificación de Prioridades
-
-| Rango | Categoría | Horizonte | Descripción |
-|-------|-----------|-----------|-------------|
-| **1.0 - 2.0** | 🟢 **INMEDIATO** | Q1 2026 (Ene-Mar) | Alcanzable en 1-4 semanas. Implementar YA. |
-| **2.1 - 3.0** | 🟡 **CORTO PLAZO** | Q2 2026 (Abr-Jun) | Realizable en 1-2 meses. Siguiente sprint. |
-| **3.1 - 4.0** | 🟠 **MEDIANO PLAZO** | H2 2026 (Jul-Dic) | Requiere planificación. 3-6 meses. |
-| **4.1 - 5.0** | 🔴 **LARGO PLAZO** | 2027+ | Visión futura. Requiere recursos significativos. |
-
-### 📊 Tabla de Scoring por Feature
-
-| Feature | Complejidad | Esfuerzo | Impacto | **Score** | Categoría | Horizonte |
-|---------|-------------|----------|---------|-----------|-----------|-----------|
-| **Feature 1: Gestión Core** | 3 | 4 | 5 | **2.4** | 🟡 Corto | ✅ COMPLETADO |
-| **Feature 2: Operaciones Esenciales** | 2 | 3 | 5 | **1.8** | 🟢 Inmediato | ⏳ 80% completado |
-| **Feature 2.5: Plantillas Servicio** | 2 | 2 | 4 | **1.6** | 🟢 Inmediato | 📋 Próximo objetivo |
-| **Workflow v2.0: Multi-Dispositivo** | 3 | 3 | 5 | **2.4** | 🟡 Corto | ✅ Implementado |
-| **Feature 3.1: Descuentos/Cupones** | 2 | 2 | 3 | **2.1** | 🟡 Corto | Q2 2026 |
-| **Feature 3: Facturación Completa** | 4 | 4 | 4 | **3.4** | 🟠 Mediano | H2 2026 |
-| **Feature 3.2: Reportes Avanzados** | 3 | 3 | 3 | **3.0** | 🟡 Corto | Q2 2026 |
-| **Feature 3.3: Portal con Aprobaciones** | 3 | 3 | 4 | **2.7** | 🟡 Corto | Q2 2026 |
-| **Feature 4: IA Diagnóstico** | 5 | 5 | 3 | **4.4** | 🔴 Largo | 2027+ |
-| **Feature 4: Dictado por Voz** | 3 | 2 | 2 | **3.1** | 🟠 Mediano | H2 2026 |
-
-### 🎯 Roadmap Priorizado (Próximos 12 Meses)
-
-#### Q1 2026 (Ene-Mar) - 🟢 INMEDIATO
-1. **Feature 2.5: Plantillas de Servicio** (Score: 1.6)
-   - ROI altísimo: reduce 50% tiempo de creación
-   - Técnicamente alcanzable en 2-3 semanas
-   - MÁXIMA PRIORIDAD
-
-2. **Feature 2: Completar Operaciones Esenciales** (Score: 1.8)
-   - Notificaciones WhatsApp/Email
-   - Finalizar integración PDF
-   - Crítico para operación diaria
-
-#### Q2 2026 (Abr-Jun) - 🟡 CORTO PLAZO
-3. **Feature 3.1: Sistema de Descuentos/Cupones** (Score: 2.1)
-   - Permite campañas de marketing
-   - Implementación relativamente simple
-   - Alto impacto en ventas
-
-4. **Feature 3.3: Portal con Aprobaciones Digitales** (Score: 2.7)
-   - Mejora experiencia del cliente
-   - Reduce fricción en ventas
-   - Moderadamente complejo
-
-5. **Feature 3.2: Reportes y Analytics** (Score: 3.0)
-   - Necesario para toma de decisiones
-   - Puede ser iterativo (empezar simple)
-
-#### H2 2026 (Jul-Dic) - 🟠 MEDIANO PLAZO
-6. **Feature 3: Facturación Completa** (Score: 3.4)
-   - Requiere integración con SAT/AFIP
-   - Complejidad legal y técnica
-   - Esencial para escalar
-
-7. **Feature 4: Dictado por Voz** (Score: 3.1)
-   - Mejora productividad técnicos
-   - Requiere integración Whisper API
-   - Nice-to-have, no crítico
-
-#### 2027+ - 🔴 LARGO PLAZO (Visión)
-8. **Feature 4: IA para Diagnóstico** (Score: 4.4)
-   - Requiere ML pipeline completo
-   - Necesita dataset extenso
-   - Diferenciador competitivo a largo plazo
-   - NO priorizar hasta tener product-market fit sólido
-
-### 💡 Recomendaciones Estratégicas
-
-**Para los Próximos 3 Meses (Q1 2026):**
-- ✅ **HACER**: Feature 2.5 (Plantillas), completar Feature 2
-- ❌ **NO HACER**: IA, facturación completa, features experimentales
-- 🤔 **EVALUAR**: Descuentos/cupones si hay tiempo extra
-
-**Regla de Oro:**
-> "Cualquier feature con Score > 3.5 debe justificarse con datos de usuarios reales solicitándolo, no con suposiciones."
-
----
-
 ## 🎯 Índice de Contenidos
 
 1. [Feature 1: Gestión Core (MVP)](#feature-1-gestión-core-de-taller-mvp---completado) ✅
@@ -240,26 +138,15 @@ Score Final = (Complejidad × 0.35) + (Esfuerzo × 0.35) + ((6 - Impacto) × 0.3
 - Inconsistencias en nomenclatura
 - Dificultad para mantener precios estandarizados
 - No hay checklists de procedimientos
-- Cada taller tiene servicios diferentes sin forma de configurarlos
 
 **Solución:**
-Sistema de plantillas **100% configurable por el usuario**:
-- **Interfaz administrativa** para crear/editar plantillas
-- **No requiere código**: Todo se gestiona desde el dashboard
-- **Auto-relleno inteligente** en creación de tickets
-- **Personalizable por tenant**: Cada taller define sus propios servicios
-- **11 plantillas predefinidas** como punto de partida (opcionales)
-- **Gestión visual**: Crear, editar, activar/desactivar plantillas desde UI
+Sistema de plantillas que auto-rellena:
+- Título y descripción detallada
+- Prioridad y tiempo estimado
+- Repuestos comúnmente usados
+- Precio base de mano de obra
 
-### 📦 Plantillas Predefinidas (11 Total - Como Ejemplos Iniciales)
-
-**IMPORTANTE:** Estas plantillas son solo un **punto de partida**. Los administradores podrán:
-- ✅ **Crear nuevas plantillas** desde cero
-- ✅ **Editar** las plantillas existentes
-- ✅ **Eliminar** plantillas que no usen
-- ✅ **Activar/Desactivar** plantillas temporalmente
-- ✅ **Clonar** plantillas para crear variaciones
-- ✅ **Importar/Exportar** plantillas entre tenants (futuro)
+### 📦 Plantillas Predefinidas (11 Total)
 
 #### 🔧 MAINTENANCE - Mantenimientos (3)
 
@@ -360,120 +247,23 @@ Sistema de plantillas **100% configurable por el usuario**:
 
 - [ ] CRUD de ServiceTemplates
 - [ ] `createTicketFromTemplate()` action
-- [ ] **Validaciones y permisos RBAC granulares**
-  - Implementar permisos específicos por acción:
-    - `VIEW_TEMPLATES`: Ver plantillas existentes
-    - `CREATE_TEMPLATES`: Crear nuevas plantillas
-    - `EDIT_TEMPLATES`: Editar nombre, descripción, checklist
-    - `EDIT_TEMPLATE_PRICES`: Editar costos y precios (restringido)
-    - `DELETE_TEMPLATES`: Eliminar plantillas
-    - `MANAGE_TEMPLATE_PARTS`: Gestionar repuestos default
-  - Matriz de permisos por rol:
-    | Permiso | ADMIN | TECHNICIAN | RECEPTIONIST |
-    |---------|-------|------------|--------------|
-    | VIEW_TEMPLATES | ✅ | ✅ | ✅ |
-    | CREATE_TEMPLATES | ✅ | ⚠️ Solo si lo habilita admin | ❌ |
-    | EDIT_TEMPLATES | ✅ | ⚠️ Solo descripción/checklist | ❌ |
-    | EDIT_TEMPLATE_PRICES | ✅ | ❌ | ❌ |
-    | DELETE_TEMPLATES | ✅ | ❌ | ❌ |
-    | MANAGE_TEMPLATE_PARTS | ✅ | ✅ | ❌ |
-  - Validación en Server Actions: comprobar permisos antes de cada operación
-  - UI condicional: ocultar campos de precio si usuario no tiene `EDIT_TEMPLATE_PRICES`
-- [ ] Audit Log para cambios (especialmente cambios de precio)
+- [ ] Validaciones y permisos RBAC
+- [ ] Audit Log para cambios
 
-#### FASE 4: Frontend Admin - **PANTALLA DE GESTIÓN** (2-3 días)
+#### FASE 4: Frontend Admin (2-3 días)
 
-**Objetivo:** Interfaz completa para que administradores gestionen plantillas sin código.
+- [ ] Página `/dashboard/settings/service-templates`
+- [ ] Formularios crear/editar plantillas
+- [ ] Vista previa de plantillas
+- [ ] Gestión de repuestos default
 
-- [ ] **Página de Listado**: `/dashboard/settings/service-templates`
-  - Tabla con todas las plantillas del tenant
-  - Columnas: Nombre, Categoría, Costo, Duración, Estado (Activa/Inactiva), Acciones
-  - Filtros por categoría (MAINTENANCE, REPAIR, UPGRADE, etc.)
-  - Búsqueda por nombre
-  - Botón "Nueva Plantilla" prominente
-  - Acciones por fila: Editar, Activar/Desactivar, Duplicar, Eliminar
+#### FASE 5: Frontend Tickets (3-4 días)
 
-- [ ] **Formulario de Creación**: `/dashboard/settings/service-templates/create`
-  - Campo: Nombre de la plantilla (ej: "Mantenimiento Básico PC")
-  - Campo: Categoría (dropdown con 6 opciones)
-  - Campo: Título default para tickets (placeholder dinámico)
-  - Campo: Descripción/Checklist (editor de texto multilínea)
-  - Campo: Prioridad default (Low, Medium, High, URGENT)
-  - **Campo: Costo de mano de obra ($)** ⚠️ Solo visible si usuario tiene `EDIT_TEMPLATE_PRICES`
-  - Campo: Duración estimada (minutos)
-  - Campo: Color para UI (color picker)
-  - Campo: Icono (selector de emojis o iconos)
-  - **Sección: Repuestos default** ⚠️ Solo editable si usuario tiene `MANAGE_TEMPLATE_PARTS`
-  - Toggle: Activa/Inactiva
-  - Vista previa en tiempo real
-  - **Indicador de permisos**: Badge mostrando qué puede editar el usuario actual
-  - Botones: Guardar, Guardar y Crear Otra, Cancelar
-
-- [ ] **Formulario de Edición**: `/dashboard/settings/service-templates/[id]/edit`
-  - Mismos campos que creación
-  - Botón adicional: "Duplicar esta plantilla"
-  - Advertencia si hay tickets usando esta plantilla
-  - Historial de cambios (si hay versionado)
-
-- [ ] **Vista Previa de Plantilla**
-  - Modal o sección que muestra:
-    - Cómo se vería el ticket generado
-    - Lista de repuestos que se agregarían
-    - Costo estimado total (mano de obra + repuestos)
-    - Checklist renderizado
-
-- [ ] **Gestión de Repuestos Default**
-  - Multi-select inteligente del inventario
-  - Cantidad por repuesto
-  - Checkbox: "Obligatorio" vs "Opcional"
-  - Vista previa de costo total
-
-- [ ] **Acciones Masivas**
-  - Checkbox para seleccionar múltiples plantillas
-  - Activar/Desactivar en masa
-  - Eliminar múltiples (con confirmación)
-  - Cambiar categoría en masa
-
-#### FASE 5: Frontend Tickets - **USO DE PLANTILLAS** (3-4 días)
-
-**Objetivo:** Integración fluida de plantillas en el flujo de creación de tickets.
-
-- [ ] **Actualizar TicketWizard**
-  - **Paso 0 (Nuevo)**: "Seleccionar Plantilla o Crear Manual"
-  - Opción 1: Grid de cards con plantillas activas
-  - Opción 2: Link "Crear sin plantilla" (flujo actual)
-
-- [ ] **Grid Visual de Plantillas**
-  - Agrupadas por categoría con pestañas/tabs
-  - Cards con: Icono, Nombre, Precio, Duración
-  - Color de fondo según categoría
-  - Badge si tiene repuestos incluidos
-  - Tooltip con descripción completa al hover
-  - Search bar para filtrar plantillas
-  - Ordenamiento: Alfabético, Más usadas, Recientes
-
-- [ ] **Auto-relleno de Campos**
-  - Al seleccionar plantilla:
-    - Título se rellena con defaultTitle
-    - Descripción se rellena con checklist
-    - Prioridad pre-seleccionada
-    - Dispositivo tipo sugerido (si aplica)
-  - Indicador visual: "Basado en: [Nombre Plantilla]" con badge
-  - Botón "Limpiar plantilla" para deshacer
-
-- [ ] **Modo Híbrido: Plantilla + Personalización**
-  - Usuario puede editar TODOS los campos después de seleccionar
-  - Campos marcados en azul claro = "Vienen de plantilla"
-  - Al editar, se mantiene referencia a plantilla original
-  - Repuestos sugeridos son editables (agregar/quitar)
-
-- [ ] **Creación Rápida desde Listado**
-  - Botón flotante en `/dashboard/tickets`: "➕ Desde Plantilla"
-  - Modal quick-create:
-    - Select de plantilla (dropdown)
-    - Select de cliente (autocomplete)
-    - Botón "Crear" → Genera ticket en 2 clics
-  - Opción para "Ver detalles" antes de confirmar
+- [ ] Actualizar `TicketWizard` con Paso 0: Seleccionar Plantilla
+- [ ] Grid visual de plantillas por categoría
+- [ ] Auto-relleno de campos
+- [ ] Modo híbrido: plantilla + personalización
+- [ ] Botón "Crear desde plantilla" en listado
 
 #### FASE 6: Analytics (2 días)
 
@@ -484,37 +274,10 @@ Sistema de plantillas **100% configurable por el usuario**:
 
 #### FASE 7: Mejoras Avanzadas (Opcional) (3-5 días)
 
-- [ ] **Plantillas Personalizadas por Cliente**
-  - Cliente frecuente siempre pide el mismo servicio
-  - Botón "Guardar como plantilla personal"
-  - Visible solo para ese cliente
-
-- [ ] **Versionado de Plantillas**
-  - Historial de cambios en plantillas
-  - Tickets antiguos mantienen versión original
-  - Opción "Ver cambios" en edición
-
-- [ ] **Checklist Interactivo**
-  - Convertir descripción en checkboxes
-  - Técnico marca tareas completadas en ticket
-  - Progreso visual: "5/8 tareas completadas"
-  - Notificación cuando se completan todas
-
-- [ ] **Precios Dinámicos**
-  - Precio varía según modelo de equipo
-  - Ej: "Pantalla iPhone 13: $250, iPhone 15: $350"
-  - Tabla de precios por variante
-
-- [ ] **Importar/Exportar Plantillas**
-  - Exportar plantillas a JSON
-  - Compartir entre tenants
-  - Biblioteca pública de plantillas
-  - "Marketplace" de plantillas comunitarias
-
-- [ ] **Análisis de Uso**
-  - Dashboard: "Esta plantilla se usa 20 veces/mes"
-  - Sugerencias: "Considera crear plantilla para..."
-  - Detección de patrones: "80% de tickets son mantenimientos"
+- [ ] Plantillas personalizadas por cliente
+- [ ] Versionado de plantillas
+- [ ] Checklist interactivo
+- [ ] Precios dinámicos
 
 ### 🎯 Criterios de Éxito
 
@@ -656,60 +419,6 @@ AuditLog → Registra quién, cuándo, por qué
 
 ### Etapa 1: Facturación y Finanzas
 
-- [ ] **Sistema de Descuentos y Cupones** 🎫
-  - **Tipos de Descuento:**
-    - Porcentaje (10%, 15%, 20% off)
-    - Monto fijo ($50, $100 off)
-    - Descuento en mano de obra únicamente
-    - Descuento en repuestos únicamente
-    - 2x1 o promociones especiales
-
-  - **Modelo de Datos (Coupon):**
-    ```prisma
-    - code (SUMMER2024, CLIENTE10)
-    - type (PERCENTAGE, FIXED_AMOUNT, FREE_LABOR)
-    - value (10, 50.00)
-    - minPurchase (monto mínimo para aplicar)
-    - maxDiscount (descuento máximo si es porcentaje)
-    - validFrom / validUntil (fechas de vigencia)
-    - usageLimit (número máximo de usos)
-    - usageCount (contador de usos)
-    - isActive (activar/desactivar)
-    - appliesTo (ALL, SERVICES_ONLY, PARTS_ONLY, SPECIFIC_TEMPLATES)
-    - tenantId
-    ```
-
-  - **Funcionalidades:**
-    - CRUD completo de cupones (solo ADMIN)
-    - Aplicar cupón en creación/edición de ticket
-    - Validación automática:
-      - Verificar si está activo
-      - Verificar fechas de vigencia
-      - Verificar límite de usos
-      - Verificar monto mínimo
-    - Campo `appliedCouponId` en Ticket
-    - Mostrar descuento desglosado en PDFs
-    - Dashboard de cupones: cuáles se usan más, ROI
-
-  - **UI/UX:**
-    - Campo "Código de cupón" en TicketWizard (paso de confirmación)
-    - Validación en tiempo real con feedback visual
-    - Mensaje: "Cupón SUMMER2024 aplicado: -$50"
-    - Botón "Remover cupón" si se aplicó
-    - Lista de cupones activos visible para admins
-    - Analytics: "Este cupón generó 15 ventas adicionales"
-
-  - **Casos de Uso:**
-    - Cliente frecuente: cupón 10% descuento permanente
-    - Campaña de temporada: "VERANO2024" 15% off
-    - Compensación por retraso: cupón único de $100 off
-    - Referidos: "REFIERE20" 20% descuento
-
-  - **Permisos RBAC:**
-    - ADMIN: Crear, editar, eliminar cupones
-    - TECHNICIAN: Solo aplicar cupones existentes
-    - RECEPTIONIST: Aplicar cupones existentes
-
 - [ ] **Módulo de Caja**
   - Registro de cobros
   - Métodos de pago (efectivo, tarjeta, transferencia)
@@ -718,7 +427,7 @@ AuditLog → Registra quién, cuándo, por qué
 
 - [ ] **Facturación**
   - Generación de facturas/recibos
-  - Desglose de repuestos + mano de obra + descuentos aplicados
+  - Desglose de repuestos + mano de obra
   - Integración con SAT (México) / AFIP (Argentina)
   - Envío automático por email
 
@@ -726,7 +435,6 @@ AuditLog → Registra quién, cuándo, por qué
   - Ingresos por período
   - Gastos en repuestos
   - Ganancias netas
-  - **Impacto de descuentos/cupones en ingresos**
   - Proyecciones
 
 ### Etapa 2: Métricas y Reportes
