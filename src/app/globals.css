@@ -176,34 +176,11 @@
 }
 
 /* ========================================
-   DARK MODE SUPPORT (WCAG Adjusted)
+   DARK MODE SUPPORT - DISABLED
+   Forced Light Theme as per user request
    ======================================== */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Backgrounds */
-    --color-bg-primary: #14181f;
-    --color-bg-secondary: #1d212b;
-    --color-surface: #212631;
-    --color-surface-hover: #29303d;
-    --color-surface-active: #313949;
-
-    /* Text */
-    --color-text-primary: #f9fafb;
-    --color-text-secondary: #c4c9d4;
-    --color-text-tertiary: #9da3af;
-    --color-text-link: #759ef0;
-
-    /* Borders */
-    --color-border-light: #333c4d;
-    --color-border-medium: #47536b;
-    --color-border-strong: #677999; /* Adjusted #679 to valid hex #677999 assuming shorthand */
-
-    /* Primary */
-    --color-primary-500: #4d80e6;
-    --color-primary-600: #3670e2;
-  }
-}
+/* @media (prefers-color-scheme: dark) block removed */
 
 /* ========================================
    BASE STYLES
