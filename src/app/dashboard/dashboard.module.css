@@ -27,6 +27,14 @@
     gap: 0.5rem;
 }
 
+.logoIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: #2563eb; /* Blue 600 */
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
 .logo h2 {
     color: inherit;
     font-size: inherit;

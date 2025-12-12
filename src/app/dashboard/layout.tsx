@@ -12,6 +12,7 @@ export default function DashboardLayout({
         <div className={styles.container}>
             <aside className={styles.sidebar}>
                 <div className={styles.logo}>
+                    <div className={styles.logoIcon} />
                     <h2>FIX-AI</h2>
                 </div>
                 <nav className={styles.nav}>
