@@ -6,7 +6,10 @@ import { z } from 'zod';
 import { createBatchTickets } from '@/lib/actions'; // Importaremos la acción, aunque la llamada final suele ser en el form
 
 // Tipo inferido del schema de Zod para un ticket individual
-export type TicketDraft = z.infer<typeof CreateTicketSchema>;
+// Extendemos el tipo para incluir campos locales de UI como password
+export type TicketDraft = z.infer<typeof CreateTicketSchema> & {
+    password?: string;
+};
 
 // Estado inicial de un ticket vacío
 const INITIAL_TICKET: TicketDraft = {
@@ -18,6 +21,7 @@ const INITIAL_TICKET: TicketDraft = {
     serialNumber: '',
     accessories: '',
     checkInNotes: '',
+    password: '',
 };
 
 type CustomerData = {
@@ -92,7 +96,21 @@ export function useTicketWizard() {
     const prepareFormData = () => {
         const formData = new FormData();
         formData.append('customerName', customer?.name || '');
-        formData.append('tickets', JSON.stringify(tickets));
+        
+        // Procesar tickets para incluir el password en la descripción si existe
+        const processedTickets = tickets.map(t => {
+            const { password, ...rest } = t;
+            let finalDescription = rest.description;
+            if (password && password.trim()) {
+                finalDescription += `\n\n[Seguridad] Patrón/Contraseña: ${password}`;
+            }
+            return {
+                ...rest,
+                description: finalDescription
+            };
+        });
+
+        formData.append('tickets', JSON.stringify(processedTickets));
         return formData;
     };
 

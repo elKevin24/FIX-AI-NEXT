@@ -3,7 +3,8 @@
 import { useTicketWizard, TicketDraft } from '@/hooks/useTicketWizard';
 import { createBatchTickets } from '@/lib/actions';
 import { useActionState } from 'react';
-import styles from '../tickets.module.css'; // Usaremos los estilos existentes por ahora
+import { Input, Select, Textarea, Button, Card, CardHeader, CardTitle, CardBody, Alert } from '@/components/ui';
+import CustomerSearch from '@/components/tickets/CustomerSearch';
 
 export default function TicketWizard() {
     const {
@@ -25,71 +26,69 @@ export default function TicketWizard() {
 
     // Wrapper para el submit que inyecta los datos del wizard en el FormData
     const handleSubmit = (payload: FormData) => {
-        // Obtenemos los datos preparados por el hook
         const wizardData = prepareFormData();
-        
-        // Copiamos los datos al payload que recibe el Server Action
-        // (Aunque useActionState maneja el form, necesitamos inyectar nuestro JSON manual)
         payload.set('customerName', wizardData.get('customerName') as string);
         payload.set('tickets', wizardData.get('tickets') as string);
-        
         formAction(payload);
     };
 
     return (
-        <div className="max-w-4xl mx-auto bg-slate-900 p-6 rounded-lg shadow-xl text-white">
+        <div className="max-w-4xl mx-auto">
             
-            {/* --- STEPPER (INDICADOR DE PASOS) --- */}
-            <div className="flex items-center justify-between mb-8 border-b border-slate-700 pb-4">
+            {/* --- STEPPER --- */}
+            <div className="flex items-center justify-between mb-8 px-4">
                 <StepIndicator step={1} current={currentStep} label="Cliente" />
-                <div className="flex-1 h-1 bg-slate-700 mx-4" />
+                <div className="flex-1 h-px bg-slate-200 mx-4" />
                 <StepIndicator step={2} current={currentStep} label="Dispositivos" />
-                <div className="flex-1 h-1 bg-slate-700 mx-4" />
+                <div className="flex-1 h-px bg-slate-200 mx-4" />
                 <StepIndicator step={3} current={currentStep} label="Confirmar" />
             </div>
 
-            {/* --- MENSAJES DE ERROR --- */}
+            {/* --- ERROR MESSAGE --- */}
             {(error || state?.message) && (
-                <div className="bg-red-900/50 border border-red-500 text-red-200 p-3 rounded mb-6">
-                    ⚠️ {error || state?.message}
-                </div>
+                <Alert variant="error" className="mb-6">
+                    {error || state?.message}
+                </Alert>
             )}
 
             <form action={handleSubmit}>
                 
-                {/* --- PASO 1: CLIENTE --- */}
+                {/* --- STEP 1: CUSTOMER --- */}
                 {currentStep === 1 && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <h2 className="text-xl font-bold text-blue-400">¿Quién es el cliente?</h2>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm text-slate-400">Nombre Completo</label>
-                            <input
-                                type="text"
-                                className="p-3 rounded bg-slate-800 border border-slate-600 focus:border-blue-500 outline-none text-white"
-                                placeholder="Ej: Juan Pérez"
-                                value={customer?.name || ''}
-                                onChange={(e) => selectCustomer({ name: e.target.value })}
-                                autoFocus
+                    <Card className="animate-in fade-in slide-in-from-right-4 duration-300">
+                        <CardHeader>
+                            <CardTitle>¿Quién es el cliente?</CardTitle>
+                        </CardHeader>
+                        <CardBody className="space-y-4">
+                            <CustomerSearch 
+                                onSelect={(c) => selectCustomer({ name: c.name, email: 'email' in c ? c.email || undefined : undefined, phone: 'phone' in c ? c.phone || undefined : undefined })}
+                                selectedCustomer={customer}
                             />
-                            <p className="text-xs text-slate-500">
-                                Si el cliente no existe, se creará automáticamente.
-                            </p>
-                        </div>
-                    </div>
+                            {customer?.name && (
+                                <div className="mt-4 p-4 bg-slate-50 rounded-md border border-slate-100">
+                                    <p className="text-sm font-medium text-slate-700">Cliente Seleccionado:</p>
+                                    <p className="text-lg font-bold text-slate-900">{customer.name}</p>
+                                    {customer.email && <p className="text-sm text-slate-500">{customer.email}</p>}
+                                    {customer.phone && <p className="text-sm text-slate-500">{customer.phone}</p>}
+                                </div>
+                            )}
+                        </CardBody>
+                    </Card>
                 )}
 
-                {/* --- PASO 2: DISPOSITIVOS --- */}
+                {/* --- STEP 2: DEVICES --- */}
                 {currentStep === 2 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-blue-400">Equipos a Ingresar</h2>
-                            <button 
+                        <div className="flex justify-between items-center px-1">
+                            <h2 className="text-xl font-bold text-slate-800">Equipos a Ingresar</h2>
+                            <Button 
                                 type="button" 
+                                size="sm" 
                                 onClick={addTicket}
-                                className="text-sm bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors"
+                                variant="outline"
                             >
                                 + Agregar Otro Equipo
-                            </button>
+                            </Button>
                         </div>
 
                         {tickets.map((ticket, index) => (
@@ -105,72 +104,74 @@ export default function TicketWizard() {
                     </div>
                 )}
 
-                {/* --- PASO 3: RESUMEN --- */}
+                {/* --- STEP 3: SUMMARY --- */}
                 {currentStep === 3 && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <h2 className="text-xl font-bold text-green-400">Resumen del Ingreso</h2>
-                        
-                        <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                            <p className="text-slate-400 text-sm">Cliente</p>
-                            <p className="text-lg font-medium">{customer?.name}</p>
-                        </div>
+                    <Card className="animate-in fade-in slide-in-from-right-4 duration-300">
+                        <CardHeader>
+                            <CardTitle className="text-green-700">Resumen del Ingreso</CardTitle>
+                        </CardHeader>
+                        <CardBody className="space-y-6">
+                            <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                                <p className="text-slate-500 text-xs uppercase font-semibold mb-1">Cliente</p>
+                                <p className="text-lg font-bold text-slate-900">{customer?.name}</p>
+                            </div>
 
-                        <div className="space-y-3">
-                            <p className="text-slate-400 text-sm">Dispositivos ({tickets.length})</p>
-                            {tickets.map((t, i) => (
-                                <div key={i} className="bg-slate-800 p-3 rounded border border-slate-700 flex justify-between items-center">
-                                    <div>
-                                        <p className="font-bold text-white">{t.title || 'Sin Título'}</p>
-                                        <p className="text-sm text-slate-400">{t.deviceType} - {t.deviceModel}</p>
+                            <div className="space-y-3">
+                                <p className="text-slate-500 text-xs uppercase font-semibold">Dispositivos ({tickets.length})</p>
+                                {tickets.map((t, i) => (
+                                    <div key={i} className="bg-white p-4 rounded-md border border-slate-200 shadow-sm flex flex-col gap-2">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-bold text-slate-900">{t.title || 'Sin Título'}</p>
+                                                <p className="text-sm text-slate-600">{t.deviceType} - {t.deviceModel || 'Sin modelo'}</p>
+                                            </div>
+                                            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-medium border border-slate-200">
+                                                {t.deviceType}
+                                            </span>
+                                        </div>
+                                        {t.password && (
+                                            <div className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded flex items-center gap-2">
+                                                🔒 Clave: {t.password}
+                                            </div>
+                                        )}
+                                        <p className="text-sm text-slate-500 italic">"{t.description}"</p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
-                                            {t.accessories ? 'Con Accesorios' : 'Solo Equipo'}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
+                        </CardBody>
+                    </Card>
                 )}
 
-                {/* --- BOTONES DE NAVEGACIÓN --- */}
-                <div className="flex justify-between mt-8 pt-4 border-t border-slate-700">
+                {/* --- NAVIGATION --- */}
+                <div className="flex justify-between mt-8 pt-4">
                     {currentStep > 1 ? (
-                        <button
+                        <Button
                             type="button"
+                            variant="outline"
                             onClick={prevStep}
-                            className="px-6 py-2 rounded border border-slate-600 hover:bg-slate-800 text-slate-300 transition-colors"
                         >
                             Atrás
-                        </button>
+                        </Button>
                     ) : (
-                        <div /> /* Spacer */
+                        <div /> 
                     )}
 
                     {currentStep < 3 ? (
-                        <button
+                        <Button
                             type="button"
+                            variant="primary"
                             onClick={nextStep}
-                            className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
                         >
                             Siguiente
-                        </button>
+                        </Button>
                     ) : (
-                        <button
+                        <Button
                             type="submit"
+                            variant="success"
                             disabled={isPending}
-                            className="px-8 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                            {isPending ? (
-                                <>
-                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
-                                    Procesando...
-                                </>
-                            ) : (
-                                'Confirmar Ingreso'
-                            )}
-                        </button>
+                            {isPending ? 'Procesando...' : 'Confirmar Ingreso'}
+                        </Button>
                     )}
                 </div>
 
@@ -179,17 +180,17 @@ export default function TicketWizard() {
     );
 }
 
-// --- SUB-COMPONENTES DE UI ---
+// --- SUB-COMPONENTES ---
 
 function StepIndicator({ step, current, label }: { step: number, current: number, label: string }) {
     const isActive = step === current;
     const isCompleted = step < current;
     
     return (
-        <div className={`flex items-center gap-2 ${isActive ? 'text-blue-400' : isCompleted ? 'text-green-400' : 'text-slate-500'}`}>
+        <div className={`flex items-center gap-2 ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-slate-400'}`}>
             <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center font-bold border-2
-                ${isActive ? 'border-blue-400 bg-blue-900/20' : isCompleted ? 'border-green-400 bg-green-900/20' : 'border-slate-600 bg-slate-800'}
+                w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 transition-colors
+                ${isActive ? 'border-blue-600 bg-blue-50 text-blue-600' : isCompleted ? 'border-green-600 bg-green-50 text-green-600' : 'border-slate-300 bg-white text-slate-400'}
             `}>
                 {isCompleted ? '✓' : step}
             </div>
@@ -211,108 +212,117 @@ function DeviceCard({
     onRemove: () => void,
     showRemove: boolean
 }) {
+    const deviceTypeOptions = [
+        { value: 'PC', label: 'PC / Torre' },
+        { value: 'Laptop', label: 'Laptop' },
+        { value: 'Smartphone', label: 'Celular' },
+        { value: 'Console', label: 'Consola' },
+        { value: 'Tablet', label: 'Tablet' },
+        { value: 'Printer', label: 'Impresora' },
+        { value: 'Other', label: 'Otro' },
+    ];
+
     return (
-        <div className="bg-slate-800 p-4 rounded border border-slate-700 relative group">
-            <div className="absolute -top-3 -left-3 bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
-                #{index + 1}
+        <Card className="relative group border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="absolute -top-3 -left-3 bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-md z-10 border-2 border-white">
+                {index + 1}
             </div>
             
             {showRemove && (
                 <button 
                     type="button"
                     onClick={onRemove}
-                    className="absolute top-2 right-2 text-slate-500 hover:text-red-400 p-1"
+                    className="absolute top-2 right-2 text-slate-400 hover:text-red-500 p-2 transition-colors"
                     title="Eliminar dispositivo"
                 >
                     ✕
                 </button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                {/* Título (Resumen del problema) */}
-                <div className="md:col-span-2">
-                    <label className="block text-xs text-slate-400 mb-1">Título / Problema Principal *</label>
-                    <input 
-                        type="text" 
-                        value={ticket.title}
-                        onChange={e => onUpdate(index, 'title', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 focus:border-blue-500 outline-none"
-                        placeholder="Ej: No enciende / Pantalla rota"
-                    />
-                </div>
+            <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    {/* Fila 1: Título y Tipo */}
+                    <div className="md:col-span-2">
+                        <Input 
+                            label="Título / Problema Principal *" 
+                            value={ticket.title}
+                            onChange={e => onUpdate(index, 'title', e.target.value)}
+                            placeholder="Ej: No enciende / Pantalla rota"
+                            required
+                        />
+                    </div>
 
-                {/* Tipo y Modelo */}
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1">Tipo</label>
-                    <select 
-                        value={ticket.deviceType || 'PC'}
-                        onChange={e => onUpdate(index, 'deviceType', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 outline-none"
-                    >
-                        <option value="PC">PC / Torre</option>
-                        <option value="Laptop">Laptop</option>
-                        <option value="Smartphone">Celular</option>
-                        <option value="Console">Consola</option>
-                        <option value="Tablet">Tablet</option>
-                        <option value="Printer">Impresora</option>
-                        <option value="Other">Otro</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1">Modelo / Marca</label>
-                    <input 
-                        type="text" 
-                        value={ticket.deviceModel || ''}
-                        onChange={e => onUpdate(index, 'deviceModel', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 outline-none"
-                        placeholder="Ej: Dell Inspiron 15"
-                    />
-                </div>
+                    {/* Fila 2: Tipo y Modelo */}
+                    <div>
+                        <Select 
+                            label="Tipo de Dispositivo"
+                            value={ticket.deviceType || 'PC'}
+                            onChange={e => onUpdate(index, 'deviceType', e.target.value)}
+                            options={deviceTypeOptions}
+                        />
+                    </div>
+                    <div>
+                        <Input 
+                            label="Marca / Modelo"
+                            value={ticket.deviceModel || ''}
+                            onChange={e => onUpdate(index, 'deviceModel', e.target.value)}
+                            placeholder="Ej: Samsung Galaxy S21"
+                        />
+                    </div>
 
-                {/* Serial y Accesorios */}
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1">N° Serie (Opcional)</label>
-                    <input 
-                        type="text" 
-                        value={ticket.serialNumber || ''}
-                        onChange={e => onUpdate(index, 'serialNumber', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 outline-none"
-                        placeholder="SN-123456"
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1">Accesorios (Checklist)</label>
-                    <input 
-                        type="text" 
-                        value={ticket.accessories || ''}
-                        onChange={e => onUpdate(index, 'accessories', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 outline-none"
-                        placeholder="Cargador, Funda, Mouse..."
-                    />
-                </div>
+                    {/* Fila 3: Seguridad y Serial */}
+                    <div>
+                        <Input 
+                            label="Contraseña / Patrón"
+                            value={ticket.password || ''}
+                            onChange={e => onUpdate(index, 'password', e.target.value)}
+                            placeholder="Ej: 1234 o 'Z'"
+                            helper="Vital para pruebas"
+                            className="border-red-200 focus:border-red-400 bg-red-50/30" // Destacar campo seguridad
+                        />
+                    </div>
+                    <div>
+                        <Input 
+                            label="N° Serie (Opcional)"
+                            value={ticket.serialNumber || ''}
+                            onChange={e => onUpdate(index, 'serialNumber', e.target.value)}
+                            placeholder="SN-123456"
+                        />
+                    </div>
 
-                {/* Descripción y Notas Físicas */}
-                <div className="md:col-span-2">
-                    <label className="block text-xs text-slate-400 mb-1">Descripción Detallada *</label>
-                    <textarea 
-                        value={ticket.description}
-                        onChange={e => onUpdate(index, 'description', e.target.value)}
-                        rows={2}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 focus:border-blue-500 outline-none"
-                        placeholder="Detalles adicionales sobre la falla..."
-                    />
+                    {/* Fila 4: Accesorios */}
+                    <div className="md:col-span-2">
+                        <Input 
+                            label="Accesorios (Checklist)"
+                            value={ticket.accessories || ''}
+                            onChange={e => onUpdate(index, 'accessories', e.target.value)}
+                            placeholder="Cargador, Funda, Mouse..."
+                        />
+                    </div>
+
+                    {/* Fila 5: Descripción */}
+                    <div className="md:col-span-2">
+                        <Textarea 
+                            label="Descripción Detallada *"
+                            value={ticket.description}
+                            onChange={e => onUpdate(index, 'description', e.target.value)}
+                            rows={3}
+                            placeholder="Detalles adicionales sobre la falla, comportamiento, etc."
+                            required
+                        />
+                    </div>
+
+                    {/* Fila 6: Estado Físico */}
+                    <div className="md:col-span-2">
+                        <Input 
+                            label="Estado Físico (Rayones/Golpes)"
+                            value={ticket.checkInNotes || ''}
+                            onChange={e => onUpdate(index, 'checkInNotes', e.target.value)}
+                            placeholder="Ej: Golpe en esquina superior derecha"
+                        />
+                    </div>
                 </div>
-                <div className="md:col-span-2">
-                    <label className="block text-xs text-slate-400 mb-1">Estado Físico (Rayones/Golpes)</label>
-                    <input 
-                        type="text" 
-                        value={ticket.checkInNotes || ''}
-                        onChange={e => onUpdate(index, 'checkInNotes', e.target.value)}
-                        className="w-full p-2 rounded bg-slate-900 border border-slate-600 outline-none"
-                        placeholder="Ej: Golpe en esquina superior derecha"
-                    />
-                </div>
-            </div>
-        </div>
+            </CardBody>
+        </Card>
     );
 }
