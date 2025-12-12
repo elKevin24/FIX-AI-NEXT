@@ -42,12 +42,14 @@
   --color-success-500: hsl(145, 70%, 40%); /* Darkened */
   --color-success-600: hsl(145, 80%, 30%);
   --color-success-700: hsl(145, 85%, 20%);
+  --color-success-800: hsl(145, 90%, 15%);
 
   /* Warning (Yellow/Amber) - Difficult to use with white text, usually use black text on yellow bg */
   --color-warning-50: hsl(40, 100%, 97%);
   --color-warning-100: hsl(40, 90%, 92%);
   --color-warning-500: hsl(35, 90%, 45%); /* Darkened to Amber */
   --color-warning-600: hsl(30, 95%, 35%);
+  --color-warning-800: hsl(30, 100%, 20%);
 
   /* Error (Red) */
   --color-error-50: hsl(0, 100%, 97%);
@@ -55,6 +57,7 @@
   --color-error-500: hsl(355, 80%, 50%);
   --color-error-600: hsl(355, 85%, 40%);
   --color-error-700: hsl(355, 90%, 30%);
+  --color-error-800: hsl(355, 95%, 20%);
 
   /* Info (Blue/Cyan) */
   --color-info-50: hsl(205, 100%, 97%);
@@ -263,6 +266,7 @@ a {
 
 a:hover {
   text-decoration: none;
+  color: var(--color-primary-800);
 }
 
 /*Focus Styles for Accessibility */
