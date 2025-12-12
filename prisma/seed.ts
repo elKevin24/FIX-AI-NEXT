@@ -186,6 +186,7 @@ async function main() {
     console.log('🌱 [SEED] Creating tickets...');
     const ticket1 = await prisma.ticket.create({
         data: {
+            id: '47d8cd53-0000-0000-0000-000000000000', // Fixed ID for Demo TV
             title: 'Reparación de TV Samsung 55"',
             description: 'TV no enciende, luz indicadora parpadea. Cliente reporta que dejó de funcionar después de un apagón.',
             status: TicketStatus.IN_PROGRESS,
@@ -210,6 +211,7 @@ async function main() {
 
     const ticket3 = await prisma.ticket.create({
         data: {
+            id: '5f8320f6-0000-0000-0000-000000000000', // Fixed ID for Demo Laptop
             title: 'Laptop HP - No carga batería',
             description: 'La laptop solo funciona conectada a la corriente, batería no carga.',
             status: TicketStatus.OPEN,
