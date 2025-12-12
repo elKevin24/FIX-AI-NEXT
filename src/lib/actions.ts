@@ -37,7 +37,9 @@ import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas'; // Imp
  * - Exposes tenant name and basic ticket info
  * - Safe for customer self-service status checks
  */
-export async function getTicketById(id: string) {
+export async function getTicketById(rawId: string) {
+    const id = rawId.trim().toLowerCase();
+
     // Try to find by exact ID first (full UUID)
     let ticket = await prisma.ticket.findUnique({
         where: { id },
@@ -75,7 +77,9 @@ export async function getTicketById(id: string) {
  * @description Wrapper around getTicketById that catches errors and returns null
  * instead of triggering a 404 page redirect.
  */
-export async function searchTicket(id: string) {
+export async function searchTicket(rawId: string) {
+    const id = rawId.trim().toLowerCase();
+    
     try {
         // Try to find by exact ID first (full UUID)
         let ticket = await prisma.ticket.findUnique({
