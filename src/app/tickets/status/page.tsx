@@ -61,48 +61,45 @@ export default function TicketSearchPage() {
                     <div style={{
                         width: '1.5rem',
                         height: '1.5rem',
-                        background: '#3b82f6',
+                        background: '#2563eb', // Blue 600
                         borderRadius: '0.5rem',
                         border: 'none',
                         boxShadow: 'none',
                         outline: 'none',
                         overflow: 'hidden'
-                    }}></div> {/* Azul */}
+                    }}></div>
                     FIX-AI
                 </div>
-                <Link href="/" style={{ color: '#4a5568', textDecoration: 'none', fontSize: '0.875rem', outline: 'none' }}>Inicio</Link> {/* Texto gris */}
+                <Link href="/" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', outline: 'none' }}>Inicio</Link> {/* Slate 600 */}
             </nav>
 
             {/* Buscador Compacto */}
             <div style={{
                 width: '100%',
                 maxWidth: '26.25rem',
-                marginBottom: ticket ? '0.75rem' : '0', // Espacio si hay resultados
                 transition: 'all 0.3s ease'
             }}>
                 <div style={{
                     textAlign: 'center',
-                    marginBottom: ticket ? '0.5rem' : '1rem',
+                    marginBottom: '1rem',
                     transition: 'all 0.3s ease'
                 }}>
                     <h1 style={{
-                        fontSize: ticket ? '1.125rem' : '1.5rem',
+                        fontSize: '1.5rem',
                         fontWeight: '700',
                         color: '#1a202c',
-                        marginBottom: ticket ? '0' : '0.5rem',
+                        marginBottom: '0.5rem',
                         transition: 'all 0.3s ease'
                     }}>Estado de Reparación</h1>
-                    {!ticket && (
-                        <p style={{ fontSize: '0.875rem', color: '#4a5568' }}>Consulta el progreso de tu equipo</p>
-                    )}
+                    <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '1rem' }}>Consulta el progreso de tu equipo</p>
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        background: '#ffffff', // Fondo blanco para el input
-                        border: `1px solid ${error ? '#ef4444' : '#cbd5e0'}`, // Borde gris claro
+                        background: '#ffffff',
+                        border: `1px solid ${error ? '#ef4444' : '#94a3b8'}`, // Slate 400 para mejor contraste
                         borderRadius: '1rem',
                         boxShadow: '0 0.25rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.1)',
                         overflow: 'hidden',
@@ -121,7 +118,7 @@ export default function TicketSearchPage() {
                                 background: 'transparent',
                                 border: 'none',
                                 padding: '0.625rem 1rem',
-                                color: '#1a202c', // Texto oscuro en input
+                                color: '#1a202c',
                                 outline: 'none',
                                 fontSize: '0.875rem',
                                 fontFamily: 'monospace'
@@ -132,7 +129,7 @@ export default function TicketSearchPage() {
                             disabled={loading}
                             className="search-button"
                             style={{
-                                background: loading ? '#a0aec0' : '#3b82f6',
+                                background: loading ? '#94a3b8' : '#2563eb', // Blue 600
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '0.75rem',
@@ -160,7 +157,7 @@ export default function TicketSearchPage() {
                         </button>
                     </div>
                     {error && (
-                        <p style={{ position: 'absolute', top: '100%', left: '0.25rem', marginTop: '0.5rem', color: '#ef4444', fontSize: '0.75rem' }}>
+                        <p style={{ position: 'absolute', top: '100%', left: '0.25rem', marginTop: '0.5rem', color: '#dc2626', fontSize: '0.75rem', fontWeight: '500' }}>
                             {error}
                         </p>
                     )}
@@ -169,8 +166,8 @@ export default function TicketSearchPage() {
                 {/* Ejemplos (Solo si no hay ticket visible para no ensuciar) */}
                 {!ticket && (
                     <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                        <button onClick={() => setTicketId('5f8320f6')} className="demo-button" style={{ background: '#ffffff', border: '1px solid #cbd5e0', color: '#4a5568', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Demo Laptop</button>
-                        <button onClick={() => setTicketId('47d8cd53')} className="demo-button" style={{ background: '#ffffff', border: '1px solid #cbd5e0', color: '#4a5568', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Demo TV</button>
+                        <button onClick={() => setTicketId('5f8320f6')} className="demo-button" style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#64748b', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Demo Laptop</button>
+                        <button onClick={() => setTicketId('47d8cd53')} className="demo-button" style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#64748b', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Demo TV</button>
                     </div>
                 )}
             </div>
@@ -180,9 +177,9 @@ export default function TicketSearchPage() {
                 <div style={{
                     width: '100%',
                     maxWidth: '50rem',
-                    animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+                    animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    marginTop: '2rem'
                 }}>
-                    {/* Nota: La TicketStatusCard tiene su propio modo oscuro. Aquí se mezcla. */}
                     <TicketStatusCard ticket={ticket} />
                 </div>
             )}
@@ -212,7 +209,7 @@ export default function TicketSearchPage() {
                 /* Animación de hover para el botón Buscar */
                 .search-button:not(:disabled):hover {
                     transform: scale(1.05) !important;
-                    box-shadow: 0 0.5rem 1rem rgba(59, 130, 246, 0.3) !important;
+                    box-shadow: 0 0.5rem 1rem rgba(37, 99, 235, 0.3) !important; /* Blue 600 shadow */
                 }
 
                 .search-button:not(:disabled):active {
@@ -221,17 +218,18 @@ export default function TicketSearchPage() {
 
                 /* Animación para contenedor de búsqueda */
                 .search-container:focus-within {
-                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
                     transform: translateY(-2px);
+                    border-color: #2563eb !important; /* Blue 600 border on focus */
                 }
 
                 /* Animación para botones de demo */
                 .demo-button:hover {
-                    background: #f7fafc !important;
-                    border-color: #3b82f6 !important;
-                    color: #3b82f6 !important;
+                    background: #f8fafc !important;
+                    border-color: #2563eb !important;
+                    color: #2563eb !important;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+                    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
                 }
 
                 .demo-button:active {
@@ -269,7 +267,6 @@ export default function TicketSearchPage() {
                 input:active {
                     outline: none !important;
                     box-shadow: none !important;
-                    border-color: #cbd5e0 !important;
                 }
 
                 div:focus,

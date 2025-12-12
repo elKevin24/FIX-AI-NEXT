@@ -118,6 +118,18 @@ export default async function DashboardPage() {
                         email: true,
                     },
                 },
+                createdBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+                updatedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
             },
             orderBy: {
                 createdAt: 'desc',
@@ -265,6 +277,8 @@ export default async function DashboardPage() {
                                     <th>Cliente</th>
                                     <th>Estado</th>
                                     <th>Asignado a</th>
+                                    <th>Creado por</th>
+                                    <th>Modificado por</th>
                                     <th>Fecha</th>
                                 </tr>
                             </thead>
@@ -284,6 +298,16 @@ export default async function DashboardPage() {
                                             </span>
                                         </td>
                                         <td>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</td>
+                                        <td>
+                                            <span className={styles.auditInfo}>
+                                                {ticket.createdBy?.name || ticket.createdBy?.email || '-'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={styles.auditInfo}>
+                                                {ticket.updatedBy?.name || ticket.updatedBy?.email || '-'}
+                                            </span>
+                                        </td>
                                         <td>{new Date(ticket.createdAt).toLocaleDateString('es-ES')}</td>
                                     </tr>
                                 ))}

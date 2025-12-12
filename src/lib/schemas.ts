@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ServiceCategory } from '@prisma/client';
 
 // Esquema para la creación de un solo ticket (parte del flujo multi-dispositivo)
 export const CreateTicketSchema = z.object({
@@ -36,4 +37,34 @@ export const UpdateTicketSchema = z.object({
   accessories: z.string().optional().nullable(),
   checkInNotes: z.string().max(500, 'Las notas de ingreso son demasiado largas.').optional().nullable(),
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
+});
+
+// ============================================================================
+// SERVICE TEMPLATE SCHEMAS
+// ============================================================================
+
+export const ServiceTemplateSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo'),
+  category: z.nativeEnum(ServiceCategory, {
+    errorMap: () => ({ message: 'Categoría inválida' }),
+  }),
+  defaultTitle: z.string().min(1, 'El título default es requerido').max(255, 'El título es demasiado largo'),
+  defaultDescription: z.string().min(1, 'La descripción es requerida'),
+  defaultPriority: z.enum(['Low', 'Medium', 'High', 'URGENT'], {
+    errorMap: () => ({ message: 'Prioridad inválida' }),
+  }),
+  estimatedDuration: z.number().int().positive('La duración debe ser positiva').optional(),
+  laborCost: z.number().nonnegative('El costo debe ser positivo o cero').optional(),
+  isActive: z.boolean().optional().default(true),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Color hexadecimal inválido').optional(),
+  icon: z.string().max(10, 'Icono demasiado largo').optional(),
+});
+
+export const CreateServiceTemplateSchema = ServiceTemplateSchema;
+
+export const UpdateServiceTemplateSchema = ServiceTemplateSchema.partial().required({
+  name: true,
+  category: true,
+  defaultTitle: true,
+  defaultDescription: true,
 });
