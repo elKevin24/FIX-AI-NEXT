@@ -19,6 +19,27 @@
     color: #0f172a; /* Force dark text for labels */
 }
 
+/* Force dark text for all global typography elements in dashboard */
+.container :global(h1),
+.container :global(h2),
+.container :global(h3),
+.container :global(h4),
+.container :global(h5),
+.container :global(h6) {
+    color: #0f172a;
+}
+
+.container :global(p) {
+    color: #334155; /* Slate 700 */
+}
+
+.container :global(a) {
+    color: #2563eb; /* Blue 600 - Standard Light Mode Link Color */
+}
+.container :global(a:hover) {
+    color: #1e40af; /* Blue 800 */
+}
+
 .container :global(.form-input:focus),
 .container :global(.form-textarea:focus),
 .container :global(.form-select:focus) {
