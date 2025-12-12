@@ -67,6 +67,20 @@ Resumen ejecutivo del proyecto.
 - Estado actual
 - Métricas clave
 
+### [FOUNDATION_PRIORITIES.md](./FOUNDATION_PRIORITIES.md) ⭐ **NUEVO**
+
+**Prioridades para fortalecer las bases del proyecto.**
+
+**Contenido:**
+
+- Sistema de scoring (Importancia + Urgencia + Facilidad + ROI)
+- 20 áreas evaluadas con priorización
+- Plan de acción semanal
+- Quick Wins (tareas de <4 horas)
+- Métricas de éxito
+
+**Última Actualización:** 11 de Diciembre, 2025
+
 ---
 
 ## 🔄 Historial y Cambios
