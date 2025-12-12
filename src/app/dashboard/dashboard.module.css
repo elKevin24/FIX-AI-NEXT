@@ -15,6 +15,10 @@
     border-color: #cbd5e1; /* Slate 300 */
 }
 
+.container :global(.form-label) {
+    color: #0f172a; /* Force dark text for labels */
+}
+
 .container :global(.form-input:focus),
 .container :global(.form-textarea:focus),
 .container :global(.form-select:focus) {
