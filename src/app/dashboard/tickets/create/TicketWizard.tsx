@@ -28,6 +28,9 @@ export default function TicketWizard() {
     const handleSubmit = (payload: FormData) => {
         const wizardData = prepareFormData();
         payload.set('customerName', wizardData.get('customerName') as string);
+        if (wizardData.has('customerId')) {
+            payload.set('customerId', wizardData.get('customerId') as string);
+        }
         payload.set('tickets', wizardData.get('tickets') as string);
         formAction(payload);
     };
@@ -61,7 +64,12 @@ export default function TicketWizard() {
                         </CardHeader>
                         <CardBody className="space-y-4">
                             <CustomerSearch 
-                                onSelect={(c) => selectCustomer({ name: c.name, email: 'email' in c ? c.email || undefined : undefined, phone: 'phone' in c ? c.phone || undefined : undefined })}
+                                onSelect={(c) => selectCustomer({ 
+                                    id: 'id' in c ? c.id : undefined,
+                                    name: c.name, 
+                                    email: 'email' in c ? c.email || undefined : undefined, 
+                                    phone: 'phone' in c ? c.phone || undefined : undefined 
+                                })}
                                 selectedCustomer={customer}
                             />
                             {customer?.name && (
