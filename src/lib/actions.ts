@@ -302,6 +302,7 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
     }
 
     const customerName = formData.get('customerName') as string;
+    const customerId = formData.get('customerId') as string;
     const rawTickets = formData.get('tickets') as string; // Expecting a JSON string of tickets
 
     if (!customerName || !rawTickets) {
@@ -325,10 +326,23 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
         const tenantId = session.user.tenantId;
         const tenantDb = getTenantPrisma(tenantId);
 
-        let customer = await tenantDb.customer.findFirst({
-            where: { name: customerName },
-        });
+        let customer = null;
 
+        // Try to find by ID first (precise match)
+        if (customerId) {
+            customer = await tenantDb.customer.findUnique({
+                where: { id: customerId },
+            });
+        }
+
+        // Fallback to name lookup (loose match)
+        if (!customer) {
+            customer = await tenantDb.customer.findFirst({
+                where: { name: customerName },
+            });
+        }
+
+        // Create if not found
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {

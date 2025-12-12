@@ -25,6 +25,7 @@ const INITIAL_TICKET: TicketDraft = {
 };
 
 type CustomerData = {
+    id?: string;
     name: string;
     email?: string;
     phone?: string;
@@ -96,6 +97,9 @@ export function useTicketWizard() {
     const prepareFormData = () => {
         const formData = new FormData();
         formData.append('customerName', customer?.name || '');
+        if (customer?.id) {
+            formData.append('customerId', customer.id);
+        }
         
         // Procesar tickets para incluir el password en la descripción si existe
         const processedTickets = tickets.map(t => {
