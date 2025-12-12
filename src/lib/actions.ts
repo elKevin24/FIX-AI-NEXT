@@ -238,11 +238,16 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
             }
         });
 
+        // Get current user session to track who creates the ticket
+        const session = await auth();
+
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {
                     name: ticketData.customerName,
                     tenantId: tenantId, // Satisfy TS, enforced by extension
+                    createdById: session?.user?.id,
+                    updatedById: session?.user?.id,
                 }
             });
         }
@@ -259,6 +264,8 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
                 serialNumber: ticketData.serialNumber,
                 accessories: ticketData.accessories,
                 checkInNotes: ticketData.checkInNotes,
+                createdById: session?.user?.id,
+                updatedById: session?.user?.id,
             }
         });
 
@@ -327,11 +334,13 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                 data: {
                     name: customerName,
                     tenantId: tenantId,
+                    createdById: session.user.id,
+                    updatedById: session.user.id,
                 },
             });
         }
 
-        const createTicketOperations = ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
+        const createTicketOperations = ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) =>
             tenantDb.ticket.create({
                 data: {
                     title: ticket.title,
@@ -344,6 +353,8 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                     serialNumber: ticket.serialNumber,
                     accessories: ticket.accessories,
                     checkInNotes: ticket.checkInNotes,
+                    createdById: session.user.id,
+                    updatedById: session.user.id,
                 },
             })
         );
@@ -620,6 +631,8 @@ export async function createCustomer(prevState: any, formData: FormData) {
                 phone: phone || null,
                 address: address || null,
                 tenantId: session.user.tenantId,
+                createdById: session.user.id,
+                updatedById: session.user.id,
             }
         });
 
@@ -688,6 +701,7 @@ export async function updateCustomer(prevState: any, formData: FormData) {
                 email: email || null,
                 phone: phone || null,
                 address: address || null,
+                updatedById: session.user.id,
             },
         });
 
@@ -831,6 +845,7 @@ export async function updateTicket(prevState: any, formData: FormData) {
             accessories: accessories || null,
             checkInNotes: checkInNotes || null,
             cancellationReason: status === 'CANCELLED' ? cancellationReason : null,
+            updatedById: session.user.id,
         };
 
         const operations = [];
@@ -938,7 +953,10 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
         // Update status
         operations.push(prisma.ticket.update({
             where: { id: ticketId },
-            data: { status: status as any },
+            data: {
+                status: status as any,
+                updatedById: session.user.id,
+            },
         }));
 
         await prisma.$transaction(operations);
@@ -1197,6 +1215,8 @@ export async function createPart(prevState: any, formData: FormData) {
                 cost,
                 price,
                 tenantId: session.user.tenantId,
+                createdById: session.user.id,
+                updatedById: session.user.id,
             }
         });
 
@@ -1263,6 +1283,7 @@ export async function updatePart(prevState: any, formData: FormData) {
                 quantity,
                 cost,
                 price,
+                updatedById: session.user.id,
             },
         });
 
