@@ -4,8 +4,8 @@ import TicketSearchClient from './TicketSearchClient';
 export default async function TicketStatusPage() {
     // Fetch demo tickets for the 'electrofix' tenant (created by seed)
     // or just the latest 2 tickets if that fails.
-    
-    let demoTickets = [];
+
+    let demoTickets: { id: string; title: string; deviceType: string | null }[] = [];
 
     try {
         const tenant = await prisma.tenant.findUnique({
