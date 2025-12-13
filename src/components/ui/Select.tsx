@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
+import styles from './Form.module.css';
 
 export interface SelectOption {
   value: string;
@@ -27,35 +28,52 @@ export function Select({
 }: SelectProps) {
   const generatedId = useId();
   const selectId = id || generatedId;
+  const helperId = `${selectId}-helper`;
+  const errorId = `${selectId}-error`;
+  const hasError = !!error;
+
+  const selectClasses = [
+    styles.select,
+    hasError ? styles.errorInput : '',
+    className
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className="form-group">
+    <div className={styles.group}>
       {label && (
-        <label htmlFor={selectId} className="form-label">
+        <label htmlFor={selectId} className={styles.label}>
           {label}
         </label>
       )}
-      <select
-        id={selectId}
-        className={`form-select ${className}`}
-        {...props}
-      >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <span className="form-helper form-error">{error}</span>
+      <div className={styles.selectWrapper}>
+        <select
+          id={selectId}
+          className={selectClasses}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? errorId : helper ? helperId : undefined}
+          {...props}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      {hasError && (
+        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+          {error}
+        </span>
       )}
-      {!error && helper && (
-        <span className="form-helper">{helper}</span>
+      {!hasError && helper && (
+        <span id={helperId} className={styles.helper}>
+          {helper}
+        </span>
       )}
     </div>
   );
