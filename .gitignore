@@ -46,3 +46,4 @@ dev.log
 
 .gemini/
 gha-creds-*.json
+/generated/
