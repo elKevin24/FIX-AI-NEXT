@@ -5,6 +5,7 @@ import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
 import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
+import GlobalSearch from '@/components/GlobalSearch';
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -191,6 +192,10 @@ export default async function DashboardPage() {
                     <span className={styles.superAdminBadge}>👑 Super Admin</span>
                 )}
             </header>
+
+            <div className={styles.searchBar}>
+                <GlobalSearch />
+            </div>
 
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
