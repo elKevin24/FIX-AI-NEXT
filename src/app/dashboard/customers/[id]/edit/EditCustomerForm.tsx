@@ -12,6 +12,8 @@ interface Customer {
     email: string | null;
     phone: string | null;
     address: string | null;
+    dpi: string | null;
+    nit: string | null;
     tenantId: string;
     tenant: {
         name: string;
@@ -88,6 +90,31 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                             placeholder="+52 555 123 4567"
                             className="p-2 border rounded text-black"
                         />
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex flex-col gap-2 flex-1">
+                            <label htmlFor="dpi">DPI (ID)</label>
+                            <input
+                                id="dpi"
+                                name="dpi"
+                                type="text"
+                                defaultValue={customer.dpi || ''}
+                                placeholder="1234 56789 0101"
+                                className="p-2 border rounded text-black"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 flex-1">
+                            <label htmlFor="nit">NIT (Tax ID)</label>
+                            <input
+                                id="nit"
+                                name="nit"
+                                type="text"
+                                defaultValue={customer.nit || ''}
+                                placeholder="123456-7"
+                                className="p-2 border rounded text-black"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-2">

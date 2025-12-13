@@ -21,6 +21,8 @@ export default async function CustomersPage() {
       email: true,
       phone: true,
       address: true,
+      dpi: true,
+      nit: true,
       createdAt: true,
       _count: {
         select: {
@@ -90,6 +92,16 @@ export default async function CustomersPage() {
                 {customer.address && (
                   <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
                     <strong>Address:</strong> {customer.address}
+                  </div>
+                )}
+                {customer.dpi && (
+                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
+                    <strong>DPI:</strong> {customer.dpi}
+                  </div>
+                )}
+                {customer.nit && (
+                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
+                    <strong>NIT:</strong> {customer.nit}
                   </div>
                 )}
                 <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', marginTop: 'var(--spacing-2)' }}>
