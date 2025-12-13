@@ -4,14 +4,8 @@ import { defineConfig } from '@prisma/cli';
 export default defineConfig({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL!,
-      // Add other datasource options here if needed, like 'schemas'
+      url: process.env.DATABASE_URL!, // Ensure DATABASE_URL is available in environment
     },
   },
-  // Add specific Migrate configuration for Prisma 7
-  migrate: {
-    connection: {
-      url: process.env.DATABASE_URL!, // URL used by Prisma Migrate
-    },
-  },
+  // We can add the migrate connection here if needed, but datasources.db.url should be enough for deploy
 });

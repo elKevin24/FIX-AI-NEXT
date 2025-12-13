@@ -1,15 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
+
+
+
 
 enum UserRole {
   ADMIN
@@ -62,17 +61,17 @@ model User {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  assignedTickets      Ticket[]
-  auditLogs            AuditLog[]
-  ticketNotes          TicketNote[]
-  createdTickets       Ticket[]          @relation("TicketCreatedBy")
-  updatedTickets       Ticket[]          @relation("TicketUpdatedBy")
-  createdCustomers     Customer[]        @relation("CustomerCreatedBy")
-  updatedCustomers     Customer[]        @relation("CustomerUpdatedBy")
-  createdParts         Part[]            @relation("PartCreatedBy")
-  updatedParts         Part[]            @relation("PartUpdatedBy")
-  createdTemplates     ServiceTemplate[] @relation("TemplateCreatedBy")
-  updatedTemplates     ServiceTemplate[] @relation("TemplateUpdatedBy")
+  assignedTickets  Ticket[]
+  auditLogs        AuditLog[]
+  ticketNotes      TicketNote[]
+  createdTickets   Ticket[]          @relation("TicketCreatedBy")
+  updatedTickets   Ticket[]          @relation("TicketUpdatedBy")
+  createdCustomers Customer[]        @relation("CustomerCreatedBy")
+  updatedCustomers Customer[]        @relation("CustomerUpdatedBy")
+  createdParts     Part[]            @relation("PartCreatedBy")
+  updatedParts     Part[]            @relation("PartUpdatedBy")
+  createdTemplates ServiceTemplate[] @relation("TemplateCreatedBy")
+  updatedTemplates ServiceTemplate[] @relation("TemplateUpdatedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -225,17 +224,17 @@ model TicketNote {
 }
 
 model ServiceTemplate {
-  id                  String          @id @default(uuid())
-  name                String
-  category            ServiceCategory
-  defaultTitle        String
-  defaultDescription  String          @db.Text
-  defaultPriority     String          @default("Medium")
-  estimatedDuration   Int?            // en minutos
-  laborCost           Decimal?        @db.Decimal(10, 2)
-  isActive            Boolean         @default(true)
-  color               String?         @default("#3B82F6") // Color para UI
-  icon                String?         @default("🔧") // Emoji o nombre de icono
+  id                 String          @id @default(uuid())
+  name               String
+  category           ServiceCategory
+  defaultTitle       String
+  defaultDescription String          @db.Text
+  defaultPriority    String          @default("Medium")
+  estimatedDuration  Int? // en minutos
+  laborCost          Decimal?        @db.Decimal(10, 2)
+  isActive           Boolean         @default(true)
+  color              String?         @default("#3B82F6") // Color para UI
+  icon               String?         @default("🔧") // Emoji o nombre de icono
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -260,8 +259,8 @@ model ServiceTemplate {
 }
 
 model TemplateDefaultPart {
-  id       String @id @default(uuid())
-  quantity Int    @default(1)
+  id       String  @id @default(uuid())
+  quantity Int     @default(1)
   required Boolean @default(false) // Si es obligatorio o sugerido
 
   templateId String
