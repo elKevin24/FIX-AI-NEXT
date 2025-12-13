@@ -25,8 +25,9 @@ fi
 echo "✅ Docker está activo"
 
 echo "🐘 Iniciando PostgreSQL con docker compose..."
-docker compose up -d 2>/dev/null || {
-    echo "⚠️  docker compose falló. Verifica docker-compose.yml"
+docker compose up -d || true # Ignorar errores (warnings) y continuar
+docker compose ps -q db > /dev/null || {
+    echo "❌ El contenedor de la base de datos no está corriendo. Verifica Docker Compose."
     exit 1
 }
 

@@ -13,6 +13,8 @@ export default function CreateCustomerForm() {
     email: '',
     phone: '',
     address: '',
+    dpi: '',
+    nit: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -88,6 +90,29 @@ export default function CreateCustomerForm() {
         placeholder="+1 (555) 123-4567"
         helper="Optional"
       />
+
+      <div className="flex gap-4">
+        <Input
+          label="DPI (ID)"
+          name="dpi"
+          type="text"
+          value={formData.dpi}
+          onChange={handleChange}
+          placeholder="1234 56789 0101"
+          helper="Optional"
+          style={{ flex: 1 }}
+        />
+        <Input
+          label="NIT (Tax ID)"
+          name="nit"
+          type="text"
+          value={formData.nit}
+          onChange={handleChange}
+          placeholder="123456-7"
+          helper="Optional"
+          style={{ flex: 1 }}
+        />
+      </div>
 
       <Textarea
         label="Address"

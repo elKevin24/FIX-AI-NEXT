@@ -1,0 +1,11 @@
+Package                 Current         Wanted   Latest  Location                       Depended by
+@prisma/client           5.22.0         5.22.0    7.1.0  node_modules/@prisma/client    FIX-AI-NEXT
+@types/node             22.19.1        22.19.2   25.0.1  node_modules/@types/node       FIX-AI-NEXT
+bcryptjs                  2.4.3          2.4.3    3.0.3  node_modules/bcryptjs          FIX-AI-NEXT
+eslint                   9.39.1         9.39.2   9.39.2  node_modules/eslint            FIX-AI-NEXT
+next-auth         5.0.0-beta.30  5.0.0-beta.30  4.24.13  node_modules/next-auth         FIX-AI-NEXT
+pnpm                    10.24.0        10.25.0  10.25.0  node_modules/pnpm              FIX-AI-NEXT
+prisma                   5.22.0         5.22.0    7.1.0  node_modules/prisma            FIX-AI-NEXT
+swagger-ui-react         5.30.3         5.31.0   5.31.0  node_modules/swagger-ui-react  FIX-AI-NEXT
+vercel                   49.2.0         49.2.0   50.0.1  node_modules/vercel            FIX-AI-NEXT
+zod                     3.25.76        3.25.76   4.1.13  node_modules/zod               FIX-AI-NEXT
