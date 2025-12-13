@@ -16,10 +16,10 @@
     "db:seed": "npx prisma db seed",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
-    "neon:migrate": "npx dotenv-cli -e .env.neon -- npx prisma migrate deploy",
-    "neon:seed": "npx dotenv-cli -e .env.neon -- npx prisma db seed",
-    "neon:superadmin": "dotenv -e .env.neon -- npx tsx scripts/seed-superadmin.ts",
-    "neon:studio": "dotenv -e .env.neon -- npx prisma studio"
+    "neon:migrate": "npx prisma migrate deploy",
+    "neon:seed": "npx prisma db seed",
+    "neon:superadmin": "npx tsx scripts/seed-superadmin.ts",
+    "neon:studio": "npx prisma studio"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
