@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
+import styles from './Form.module.css';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
@@ -18,24 +19,39 @@ export function Textarea({
 }: TextareaProps) {
   const generatedId = useId();
   const textareaId = id || generatedId;
+  const helperId = `${textareaId}-helper`;
+  const errorId = `${textareaId}-error`;
+  const hasError = !!error;
+
+  const textareaClasses = [
+    styles.textarea,
+    hasError ? styles.errorInput : '',
+    className
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className="form-group">
+    <div className={styles.group}>
       {label && (
-        <label htmlFor={textareaId} className="form-label">
+        <label htmlFor={textareaId} className={styles.label}>
           {label}
         </label>
       )}
       <textarea
         id={textareaId}
-        className={`form-textarea ${className}`}
+        className={textareaClasses}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? errorId : helper ? helperId : undefined}
         {...props}
       />
-      {error && (
-        <span className="form-helper form-error">{error}</span>
+      {hasError && (
+        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+          {error}
+        </span>
       )}
-      {!error && helper && (
-        <span className="form-helper">{helper}</span>
+      {!hasError && helper && (
+        <span id={helperId} className={styles.helper}>
+          {helper}
+        </span>
       )}
     </div>
   );

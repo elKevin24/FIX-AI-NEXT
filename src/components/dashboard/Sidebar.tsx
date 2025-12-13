@@ -46,7 +46,7 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
         <>
             {/* Mobile Toggle Button */}
             <button 
-                className={styles.mobileToggle}
+                className={`${styles.mobileToggle} ${isOpen ? styles.toggleOpen : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle Menu"
             >
