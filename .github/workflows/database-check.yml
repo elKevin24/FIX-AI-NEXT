@@ -30,9 +30,13 @@ jobs:
 
       - name: Validate Prisma schema
         run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/db
 
       - name: Check Prisma format
         run: npx prisma format --check
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/db
 
   migration-check:
     name: Check Migrations
@@ -73,3 +77,5 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
