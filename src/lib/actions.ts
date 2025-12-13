@@ -79,7 +79,7 @@ export async function getTicketById(rawId: string) {
  */
 export async function searchTicket(rawId: string) {
     const id = rawId.trim().toLowerCase();
-    
+
     try {
         // Try to find by exact ID first (full UUID)
         let ticket = await prisma.ticket.findUnique({
@@ -309,6 +309,8 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
     const customerId = formData.get('customerId') as string;
     const customerEmail = formData.get('customerEmail') as string;
     const customerPhone = formData.get('customerPhone') as string;
+    const customerDpi = formData.get('customerDpi') as string;
+    const customerNit = formData.get('customerNit') as string;
     const rawTickets = formData.get('tickets') as string; // Expecting a JSON string of tickets
 
     if (!customerName || !rawTickets) {
@@ -355,6 +357,8 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                     name: customerName,
                     email: customerEmail || null,
                     phone: customerPhone || null,
+                    dpi: customerDpi || null,
+                    nit: customerNit || null,
                     tenantId: tenantId,
                     createdById: session.user.id,
                     updatedById: session.user.id,
@@ -632,6 +636,8 @@ export async function createCustomer(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
+    const dpi = formData.get('dpi') as string;
+    const nit = formData.get('nit') as string;
 
     if (!name) {
         return { message: 'El nombre es requerido' };
@@ -652,6 +658,8 @@ export async function createCustomer(prevState: any, formData: FormData) {
                 email: email || null,
                 phone: phone || null,
                 address: address || null,
+                dpi: dpi || null,
+                nit: nit || null,
                 tenantId: session.user.tenantId,
                 createdById: session.user.id,
                 updatedById: session.user.id,
@@ -687,6 +695,8 @@ export async function updateCustomer(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
+    const dpi = formData.get('dpi') as string;
+    const nit = formData.get('nit') as string;
 
     if (!customerId || !name) {
         return { message: 'El nombre es requerido' };
@@ -723,6 +733,8 @@ export async function updateCustomer(prevState: any, formData: FormData) {
                 email: email || null,
                 phone: phone || null,
                 address: address || null,
+                dpi: dpi || null,
+                nit: nit || null,
                 updatedById: session.user.id,
             },
         });
@@ -824,7 +836,7 @@ export async function updateTicket(prevState: any, formData: FormData) {
     const status = formData.get('status') as string;
     const priority = formData.get('priority') as string;
     const assignedToId = formData.get('assignedToId') as string;
-    
+
     // New V2 Fields
     const deviceType = formData.get('deviceType') as string;
     const deviceModel = formData.get('deviceModel') as string;
@@ -874,18 +886,18 @@ export async function updateTicket(prevState: any, formData: FormData) {
 
         // Logic for CANCELLATION: Restore stock
         if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-             if (existingTicket.partsUsed.length > 0) {
+            if (existingTicket.partsUsed.length > 0) {
                 // Prepare restoration operations
                 for (const usage of existingTicket.partsUsed) {
-                     operations.push(prisma.part.update({
-                         where: { id: usage.partId },
-                         data: { quantity: { increment: usage.quantity } }
-                     }));
-                     operations.push(prisma.partUsage.delete({
-                         where: { id: usage.id }
-                     }));
+                    operations.push(prisma.part.update({
+                        where: { id: usage.partId },
+                        data: { quantity: { increment: usage.quantity } }
+                    }));
+                    operations.push(prisma.partUsage.delete({
+                        where: { id: usage.id }
+                    }));
                 }
-             }
+            }
         }
 
         // Add the main ticket update operation
@@ -959,17 +971,17 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
 
         // RESTORE STOCK LOGIC
         if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-             if (existingTicket.partsUsed.length > 0) {
+            if (existingTicket.partsUsed.length > 0) {
                 for (const usage of existingTicket.partsUsed) {
-                     operations.push(prisma.part.update({
-                         where: { id: usage.partId },
-                         data: { quantity: { increment: usage.quantity } }
-                     }));
-                     operations.push(prisma.partUsage.delete({
-                         where: { id: usage.id }
-                     }));
+                    operations.push(prisma.part.update({
+                        where: { id: usage.partId },
+                        data: { quantity: { increment: usage.quantity } }
+                    }));
+                    operations.push(prisma.partUsage.delete({
+                        where: { id: usage.id }
+                    }));
                 }
-             }
+            }
         }
 
         // Update status
