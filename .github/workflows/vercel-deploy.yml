@@ -28,6 +28,14 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Install project dependencies
+        run: npm install # Assumes package-lock.json is present
+
+      - name: Run Prisma Migrations
+        run: npm run neon:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }} # Must be configured in GitHub Secrets
+        
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ github.event_name == 'push' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
         env:
