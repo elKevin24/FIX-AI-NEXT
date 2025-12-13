@@ -1,29 +1,42 @@
+/* Mobile First Strategy: Default styles are for mobile/touch devices */
+
 .sidebar {
+    /* Mobile Layout: Fixed drawer */
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px; /* Wider on mobile for comfortable touch area */
     background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
-    height: 100vh;
-    transition: transform 0.3s ease-in-out;
+    padding: 1.5rem; /* More breathing room */
+    transform: translateX(-100%); /* Hidden by default */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+}
+
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .logo {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     font-weight: 800;
-    font-size: 1.25rem;
+    font-size: 1.5rem; /* Larger text for mobile */
     color: #0f172a;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .logoIcon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem; /* Larger icon */
+    height: 2rem;
     background-color: #2563eb;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     flex-shrink: 0;
 }
 
@@ -36,112 +49,155 @@
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem; /* More spacing between links */
     flex: 1;
 }
 
 .navLink {
-    padding: 0.625rem 1rem;
+    /* Touch Target Optimization: Min 44px height */
+    padding: 0.875rem 1rem; 
     border-radius: 0.75rem;
     color: #475569;
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 1rem; /* 16px is better for reading on mobile */
     font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
+    transition: background-color 0.2s, color 0.2s;
+    /* Prevent text selection during touch */
+    user-select: none; 
+    -webkit-tap-highlight-color: transparent;
+}
+
+.navLink:active {
+    background-color: #f1f5f9;
+    transform: scale(0.98);
 }
 
 .navLink:hover {
+    /* Hover is mostly for desktop, but active state handles touch feedback */
     background-color: #f1f5f9;
     color: #2563eb;
-    transform: translateX(2px);
 }
 
 .userProfile {
     margin-top: auto;
-    padding-top: 1rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #e2e8f0;
 }
 
 .logoutBtn {
+    /* Touch Target Optimization */
     width: 100%;
-    padding: 0.625rem;
+    padding: 0.875rem; /* Larger touch target */
     background-color: transparent;
     border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
     cursor: pointer;
     color: #dc2626;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Prevent text selection */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.logoutBtn:hover {
+.logoutBtn:active {
     background-color: #fef2f2;
-    border-color: #dc2626;
+    transform: scale(0.98);
 }
 
 /* Mobile Toggle Button */
 .mobileToggle {
-    display: none; /* Hidden on desktop */
     position: fixed;
-    top: 1rem;
-    left: 1rem;
+    top: 0.75rem;
+    left: 0.75rem;
     z-index: 60;
-    padding: 0.5rem;
+    padding: 0.75rem; /* Generous touch target (48px+) */
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     color: #0f172a;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobileToggle:active {
+    transform: scale(0.95);
+    background-color: #f8fafc;
 }
 
 .overlay {
-    display: none;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(15, 23, 42, 0.4); /* Slate-900 with opacity */
+    backdrop-filter: blur(2px);
     z-index: 40;
     opacity: 0;
+    pointer-events: none; /* Pass through clicks when hidden */
     transition: opacity 0.3s ease;
 }
 
-/* Mobile Styles */
-@media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 280px;
-        transform: translateX(-100%);
-        box-shadow: 4px 0 24px rgba(0,0,0,0.1);
-    }
+.overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
 
-    .sidebar.open {
-        transform: translateX(0);
+/* Desktop Adaptation (Tablet Landscape and up) */
+@media (min-width: 1024px) {
+    .sidebar {
+        /* Reset positioning for desktop flow */
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 240px; /* Standard desktop width */
+        transform: none !important; /* Always visible */
+        box-shadow: none;
+        padding: 1.25rem;
     }
 
     .mobileToggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: none; /* Hide toggle on desktop */
     }
 
-    .overlay.open {
-        display: block;
-        opacity: 1;
+    .overlay {
+        display: none; /* Never show overlay on desktop */
     }
-}
 
-/* Desktop Styles */
-@media (min-width: 769px) {
-    .sidebar {
-        width: 240px;
-        position: sticky;
-        top: 0;
-        transform: none !important; /* Always visible */
+    .nav {
+        gap: 0.25rem; /* Tighter spacing */
+    }
+
+    .navLink {
+        padding: 0.625rem 1rem; /* Compact padding */
+        font-size: 0.875rem; /* Smaller font */
+    }
+
+    .navLink:hover {
+        transform: translateX(2px); /* Desktop-only hover effect */
+    }
+
+    .logo {
+        margin-bottom: 2rem;
+        font-size: 1.25rem;
+    }
+
+    .logoIcon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .logoutBtn {
+        padding: 0.625rem;
+        font-size: 0.875rem;
     }
 }
