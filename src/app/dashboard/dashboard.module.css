@@ -1,7 +1,8 @@
 .container {
     display: flex;
     min-height: 100vh;
-    background-color: #ffffff;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); /* Cloudy gradient */
+    background-attachment: fixed; /* Parallax-like feel */
     color: #0f172a;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     flex-direction: column; /* Mobile First: Column layout */
@@ -55,10 +56,12 @@
 /* Main Content Area */
 .mainContent {
     flex: 1;
-    padding: 1.5rem 1rem; /* Smaller padding on mobile */
+    padding: 1rem 1rem 1.5rem 1rem; /* Standard padding */
     overflow-y: auto;
     animation: fadeIn 0.5s ease-out;
-    margin-top: 3.5rem; /* Space for the mobile hamburger button */
+    margin-top: 0; /* Remove margin so it sits at the top */
+    /* Ensure content respects the button area if needed, or let it flow */
+    padding-top: 4rem; /* Initial padding to clear the button area visually */
 }
 
 .searchBar {
@@ -71,13 +74,14 @@
 }
 
 /* Desktop Styles */
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
     .container {
-        flex-direction: row; /* Row layout on desktop */
+        flex-direction: row; /* Row layout on desktop/tablet */
     }
 
     .mainContent {
         padding: 1.5rem 2rem;
         margin-top: 0; /* Reset margin on desktop */
+        padding-top: 1.5rem; /* Reset padding on desktop */
     }
 }

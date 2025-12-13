@@ -45,6 +45,48 @@ Una aplicación escalable de gestión de talleres electrónicos construida con *
 | **Zod** | 3.23.8 | Validación de schemas |
 | **CSS Modules** | - | Estilos con scope local |
 
+## 🎨 Estilos y CSS
+
+**IMPORTANTE:** Este proyecto **NO utiliza Tailwind CSS**. Todos los estilos están implementados con:
+
+- **CSS Modules** - Para componentes con estilos con scope local (`.module.css`)
+- **CSS Global** - Variables CSS y clases globales en `src/app/globals.css`
+- **Custom CSS Properties** - Variables CSS para theming consistente
+
+### Estructura de Estilos
+
+```
+src/
+├── app/
+│   ├── globals.css              # Estilos globales y CSS variables
+│   └── dashboard/
+│       └── tickets/
+│           └── create/
+│               └── SimpleTicketForm.module.css  # CSS Module
+└── components/
+    └── ui/
+        └── *.module.css         # CSS Modules por componente
+```
+
+### Ejemplo de Uso
+
+```tsx
+// ❌ NO USAR: Tailwind classes
+<div className="max-w-7xl mx-auto p-4">
+
+// ✅ USAR: CSS Modules
+import styles from './Component.module.css';
+<div className={styles.container}>
+```
+
+### CSS Variables Disponibles
+
+El proyecto usa CSS custom properties definidas en `globals.css`:
+- `--color-text-primary`, `--color-text-secondary`, `--color-text-tertiary`
+- `--color-border-light`, `--color-border-medium`
+- `--color-success-bg`, `--color-success-border`, `--color-success-text`
+- `--color-error`, `--color-error-bg`
+
 ## 📋 Requisitos Previos
 
 - **Node.js** 18+

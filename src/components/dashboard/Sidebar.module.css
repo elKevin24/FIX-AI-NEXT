@@ -16,11 +16,11 @@
     
     display: flex;
     flex-direction: column;
-    padding: 1.5rem; /* More breathing room */
+    padding: 0.5rem 1rem; /* Aligned with toggle button (top: 0.5rem, left: 1rem) */
     transform: translateX(-100%); /* Hidden by default */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* Soft depth shadow */
 }
 
 .sidebar.open {
@@ -28,17 +28,19 @@
 }
 
 .logo {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
+    margin-top: 0.25rem; /* Fine-tune alignment */
     font-weight: 800;
     font-size: 1.5rem; /* Larger text for mobile */
     color: #0f172a;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    height: 3.5rem; /* Align height area */
 }
 
 .logoIcon {
-    width: 2.5rem; /* Larger icon */
+    width: 2.5rem; /* Larger icon matches toggle */
     height: 2.5rem;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border-radius: 0.75rem;
@@ -150,17 +152,20 @@
 .mobileToggle {
     position: fixed;
     top: 1rem;
-    left: 1rem;
+    left: 0.75rem;
     z-index: 60;
-    padding: 0.75rem; /* Generous touch target (48px+) */
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 1rem;
+    padding: 0.75rem;
+    
+    /* Liquid Glass Button */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    
+    border-radius: 0.75rem;
     color: #0f172a;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,7 +175,19 @@
 
 .mobileToggle:active {
     transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.85); /* More opaque glass on active */
+    border-color: rgba(255, 255, 255, 0.8); /* Darken border slightly */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1); /* Slightly more pronounced shadow */
+}
+
+/* State when sidebar is open: Merge with Logo Icon */
+.toggleOpen {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: white; /* Contrast against blue logo icon */
+    opacity: 0.9;
+    /* Optional: If we want to hide it completely and just show logo, opacity: 0 */
 }
 
 .overlay {
@@ -190,26 +207,27 @@
 }
 
 /* Desktop Adaptation (Tablet Landscape and up) */
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
     .sidebar {
         /* Reset positioning for desktop flow */
         position: sticky;
         top: 0;
         height: 100vh;
-        width: 240px; /* Standard desktop width */
+        width: 240px; /* Standard width */
         transform: none !important; /* Always visible */
         box-shadow: none;
-        padding: 1.25rem;
+        padding: 1.5rem 1.25rem; /* Balanced padding */
         
-        /* Reset Glass Effect to Solid for Desktop */
+        /* Reset Glass Effect to Solid for Desktop - Professional Look */
         background-color: #ffffff;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         border-right: 1px solid #e2e8f0;
+        z-index: 10; /* Lower than mobile drawer but above content */
     }
 
     .mobileToggle {
-        display: none; /* Hide toggle on desktop */
+        display: none !important; /* Force hide toggle on desktop */
     }
 
     .overlay {

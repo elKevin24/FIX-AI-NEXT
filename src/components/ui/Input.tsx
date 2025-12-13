@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
+import styles from './Form.module.css';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -18,25 +19,39 @@ export function Input({
 }: InputProps) {
   const generatedId = useId();
   const inputId = id || generatedId;
+  const helperId = `${inputId}-helper`;
+  const errorId = `${inputId}-error`;
   const hasError = !!error;
 
+  const inputClasses = [
+    styles.input,
+    hasError ? styles.errorInput : '',
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className="form-group">
+    <div className={styles.group}>
       {label && (
-        <label htmlFor={inputId} className="form-label">
+        <label htmlFor={inputId} className={styles.label}>
           {label}
         </label>
       )}
       <input
         id={inputId}
-        className={`form-input ${className}`}
+        className={inputClasses}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? errorId : helper ? helperId : undefined}
         {...props}
       />
-      {error && (
-        <span className="form-helper form-error">{error}</span>
+      {hasError && (
+        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+          {error}
+        </span>
       )}
-      {!error && helper && (
-        <span className="form-helper">{helper}</span>
+      {!hasError && helper && (
+        <span id={helperId} className={styles.helper}>
+          {helper}
+        </span>
       )}
     </div>
   );
