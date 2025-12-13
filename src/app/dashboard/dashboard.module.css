@@ -71,7 +71,7 @@
 }
 
 /* Desktop Styles */
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
     .container {
         flex-direction: row; /* Row layout on desktop */
     }
