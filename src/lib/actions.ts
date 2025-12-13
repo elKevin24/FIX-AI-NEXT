@@ -307,6 +307,8 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
 
     const customerName = formData.get('customerName') as string;
     const customerId = formData.get('customerId') as string;
+    const customerEmail = formData.get('customerEmail') as string;
+    const customerPhone = formData.get('customerPhone') as string;
     const rawTickets = formData.get('tickets') as string; // Expecting a JSON string of tickets
 
     if (!customerName || !rawTickets) {
@@ -351,6 +353,8 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
             customer = await tenantDb.customer.create({
                 data: {
                     name: customerName,
+                    email: customerEmail || null,
+                    phone: customerPhone || null,
                     tenantId: tenantId,
                     createdById: session.user.id,
                     updatedById: session.user.id,

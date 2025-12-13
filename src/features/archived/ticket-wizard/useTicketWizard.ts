@@ -64,6 +64,21 @@ export function useTicketWizard() {
 
     const prevStep = () => setCurrentStep(prev => Math.max(1, prev - 1));
 
+    const goToStep = (step: number) => {
+        setError(null);
+        // Validaciones básicas si saltamos hacia adelante (aunque usualmente es para volver atrás)
+        if (step > currentStep) {
+            // Reutilizar lógica de nextStep sería ideal, pero por ahora solo permitimos ir a pasos
+            // que "ya pasamos" o el inmediato siguiente si es válido.
+            // Simplificación: Solo permitir ir hacia atrás o al siguiente inmediato.
+            if (step === currentStep + 1) {
+                nextStep();
+                return;
+            }
+        }
+        setCurrentStep(step);
+    };
+
     // --- ACCIONES DE CLIENTE ---
     const selectCustomer = (data: CustomerData) => {
         setCustomer(data);
@@ -78,6 +93,13 @@ export function useTicketWizard() {
             ...prev, 
             { ...INITIAL_TICKET, customerName: customer?.name || '' }
         ]);
+    };
+
+    const duplicateTicket = (index: number) => {
+        setTickets(prev => {
+            const ticketToClone = prev[index];
+            return [...prev, { ...ticketToClone }];
+        });
     };
 
     const removeTicket = (index: number) => {
@@ -129,8 +151,10 @@ export function useTicketWizard() {
         // Actions
         nextStep,
         prevStep,
+        goToStep,
         selectCustomer,
         addTicket,
+        duplicateTicket,
         removeTicket,
         updateTicket,
         prepareFormData,

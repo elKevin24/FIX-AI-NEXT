@@ -1,0 +1,387 @@
+/* TicketWizard.module.css */
+
+.container {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 1rem 1rem 5rem 1rem; /* Adjust padding for better mobile spacing and footer */
+}
+
+/* Stepper */
+.stepperContainer {
+    display: flex;
+    align-items: flex-start; /* Align text at top if long */
+    justify-content: center;
+    gap: 1rem; /* Adjust gap for smaller screens */
+    margin-bottom: 2rem;
+    background-color: var(--color-background-card, #ffffff);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    border: var(--border-light);
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+}
+
+.stepConnector {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-top: 1.25rem; /* Align with step number center */
+}
+
+.stepConnectorLine {
+    height: 1px;
+    background-color: var(--color-border-medium);
+    width: 100%;
+}
+
+.stepIndicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.stepNumber {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid;
+    transition: all 0.3s ease;
+}
+
+.stepLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.stepSubLabel {
+    font-size: 0.625rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.125rem;
+}
+
+/* Step Indicator Variants */
+.stepNumber.active {
+    border-color: var(--color-primary-600);
+    background-color: var(--color-primary-600);
+    color: var(--color-white);
+    box-shadow: var(--shadow-md);
+}
+
+.stepLabel.active {
+    color: var(--color-primary-600);
+}
+
+.stepNumber.completed {
+    border-color: var(--color-success-600);
+    background-color: var(--color-success-600);
+    color: var(--color-white);
+    box-shadow: var(--shadow-md);
+}
+
+.stepLabel.completed {
+    color: var(--color-success-600);
+}
+
+.stepNumber.pending {
+    border-color: var(--color-border-medium);
+    background-color: var(--color-white);
+    color: var(--color-text-tertiary);
+}
+
+.stepLabel.pending {
+    color: var(--color-text-tertiary);
+}
+
+
+/* Step Content */
+.stepContent {
+    animation: fadeInSlideRight 0.3s ease-out;
+    margin-bottom: 2rem;
+}
+
+@keyframes fadeInSlideRight {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Step 1 Customer Section */
+.customerHeader {
+    background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+}
+
+.customerIconCircle {
+    width: 3rem;
+    height: 3rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.customerInfoCard {
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--color-success-50), var(--color-emerald-50));
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-success-200);
+    box-shadow: var(--shadow-sm);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.customerNewForm {
+    padding: 1rem;
+    background-color: var(--color-blue-50);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-blue-200);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.hintBox {
+    background-color: var(--color-blue-50);
+    border: 1px solid var(--color-blue-200);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.hintIcon {
+    font-size: 1.25rem;
+    color: var(--color-blue-500);
+}
+
+.hintText {
+    font-size: 0.875rem;
+    color: var(--color-blue-900);
+}
+
+/* Step 2 Devices Section */
+.devicesHeader {
+    background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+}
+
+.deviceCountBadge {
+    width: 2rem;
+    height: 2rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.addDeviceButton {
+    background-color: var(--color-white);
+    color: var(--color-purple-600);
+    border-color: var(--color-purple-200);
+    transition: all 0.2s ease;
+}
+
+.addDeviceButton:hover {
+    background-color: var(--color-purple-50);
+}
+
+.deviceCard {
+    position: relative;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-medium);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.deviceCard:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.deviceIcon {
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, var(--color-blue-500), var(--color-blue-600));
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+}
+
+.deviceNumberBadge {
+    position: absolute;
+    top: -0.75rem;
+    right: -0.75rem;
+    background-color: var(--color-text-primary);
+    color: var(--color-white);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+}
+
+.removeDeviceButton {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.removeDeviceButton:hover {
+    color: var(--color-danger-500);
+}
+
+.securityInput {
+    background-color: var(--color-red-50);
+    border-color: var(--color-red-200);
+}
+
+/* Step 3 Summary Section */
+.summaryHeader {
+    background: linear-gradient(135deg, var(--color-success-500), var(--color-emerald-600));
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+}
+
+.summaryClientCard {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-medium);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summaryDeviceCard {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border-medium);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.summaryHintBox {
+    background-color: var(--color-blue-50);
+    border: 1px solid var(--color-blue-200);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Navigation Buttons */
+.navigationFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border-light);
+    margin-top: 2rem;
+}
+
+.submitButton {
+    background: linear-gradient(135deg, var(--color-success-600), var(--color-emerald-600));
+    color: var(--color-white);
+    box-shadow: var(--shadow-lg);
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+}
+
+/* Utility / Responsive Classes for Grid & Flex */
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flexStartCenter {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.flexRow {
+    display: flex;
+    align-items: center;
+}
+
+.gap1 { gap: 0.25rem; }
+.gap2 { gap: 0.5rem; }
+.gap3 { gap: 0.75rem; }
+.gap4 { gap: 1rem; }
+.gap6 { gap: 1.5rem; }
+.gap8 { gap: 2rem; }
+
+.grid { display: grid; }
+.gridCols1 { grid-template-columns: 1fr; }
+
+.colSpan2 { grid-column: span 2 / span 2; }
+
+@media (min-width: 768px) {
+    .stepperContainer {
+        gap: 1.5rem;
+    }
+    
+    .customerGridMd2Cols {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .customerGridLg4Cols {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .mdColSpan2 {
+        grid-column: span 2 / span 2;
+    }
+
+    .mdColSpan5 { grid-column: span 5 / span 5; }
+    .mdColSpan3 { grid-column: span 3 / span 3; }
+    .mdColSpan4 { grid-column: span 4 / span 4; }
+
+    .gridCols3Md { grid-template-columns: repeat(3, 1fr); }
+}
+
