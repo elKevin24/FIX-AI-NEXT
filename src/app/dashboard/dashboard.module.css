@@ -56,12 +56,10 @@
 /* Main Content Area */
 .mainContent {
     flex: 1;
-    padding: 1rem 1rem 1.5rem 1rem; /* Standard padding */
+    padding: 2rem 1rem 1rem 1rem; /* Increased top padding for mobile */
     overflow-y: auto;
     animation: fadeIn 0.5s ease-out;
     margin-top: 0; /* Remove margin so it sits at the top */
-    /* Ensure content respects the button area if needed, or let it flow */
-    padding-top: 4rem; /* Initial padding to clear the button area visually */
 }
 
 .searchBar {
