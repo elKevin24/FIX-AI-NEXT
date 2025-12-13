@@ -26,6 +26,8 @@ export default async function EditCustomerPage({ params }: Props) {
             email: true,
             phone: true,
             address: true,
+            dpi: true,
+            nit: true,
             tenantId: true,
             tenant: {
                 select: {
