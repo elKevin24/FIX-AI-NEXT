@@ -118,7 +118,7 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
                                 onClick={handleCreateNew}
                                 className="p-3 bg-blue-50 hover:bg-blue-100 cursor-pointer text-blue-700 text-sm font-medium text-center sticky bottom-0"
                             >
-                                + Crear "{query}" como nuevo
+                                + Crear &ldquo;{query}&rdquo; como nuevo
                             </li>
                         </ul>
                     ) : (
@@ -130,7 +130,7 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
                                 onClick={handleCreateNew}
                                 className="w-full"
                             >
-                                Usar "{query}"
+                                Usar &ldquo;{query}&rdquo;
                             </Button>
                         </div>
                     )}
