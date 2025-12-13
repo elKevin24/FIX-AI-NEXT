@@ -6,6 +6,8 @@ import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
 import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
 import GlobalSearch from '@/components/GlobalSearch';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -199,46 +201,38 @@ export default async function DashboardPage() {
 
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
-                <div className={styles.card}>
-                    <div className={styles.cardIcon} style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
-                        📊
-                    </div>
-                    <div>
-                        <h3>Tickets Activos</h3>
-                        <p className={styles.statValue}>{activeTickets}</p>
-                        <p className={styles.statLabel}>Abiertos + En Progreso</p>
-                    </div>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.cardIcon} style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
-                        ⏳
-                    </div>
-                    <div>
-                        <h3>Esperando Repuestos</h3>
-                        <p className={styles.statValue}>{pendingParts}</p>
-                        <p className={styles.statLabel}>Inventario pendiente</p>
-                    </div>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.cardIcon} style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
-                        ✓
-                    </div>
-                    <div>
-                        <h3>Completados Hoy</h3>
-                        <p className={styles.statValue}>{completedToday}</p>
-                        <p className={styles.statLabel}>Tickets resueltos</p>
-                    </div>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.cardIcon} style={{ backgroundColor: '#e0e7ff', color: '#3730a3' }}>
-                        👥
-                    </div>
-                    <div>
-                        <h3>Total Clientes</h3>
-                        <p className={styles.statValue}>{totalCustomers}</p>
-                        <p className={styles.statLabel}>En base de datos</p>
-                    </div>
-                </div>
+                <StatCard 
+                    title="Tickets Activos"
+                    value={activeTickets}
+                    label="Abiertos + En Progreso"
+                    icon="📊"
+                    iconBgColor="#dbeafe"
+                    iconColor="#1e40af"
+                />
+                <StatCard 
+                    title="Esperando Repuestos"
+                    value={pendingParts}
+                    label="Inventario pendiente"
+                    icon="⏳"
+                    iconBgColor="#fef3c7"
+                    iconColor="#92400e"
+                />
+                <StatCard 
+                    title="Completados Hoy"
+                    value={completedToday}
+                    label="Tickets resueltos"
+                    icon="✓"
+                    iconBgColor="#d1fae5"
+                    iconColor="#065f46"
+                />
+                <StatCard 
+                    title="Total Clientes"
+                    value={totalCustomers}
+                    label="En base de datos"
+                    icon="👥"
+                    iconBgColor="#e0e7ff"
+                    iconColor="#3730a3"
+                />
             </div>
 
             {/* Charts and Widgets Grid */}
@@ -298,9 +292,7 @@ export default async function DashboardPage() {
                                         <td>{ticket.title}</td>
                                         <td>{ticket.customer.name}</td>
                                         <td>
-                                            <span className={`${styles.statusBadge} ${styles[ticket.status.toLowerCase()]}`}>
-                                                {ticket.status}
-                                            </span>
+                                            <TicketStatusBadge status={ticket.status} />
                                         </td>
                                         <td>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</td>
                                         <td>
