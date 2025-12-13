@@ -7,8 +7,13 @@
     left: 0;
     bottom: 0;
     width: 280px; /* Wider on mobile for comfortable touch area */
-    background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
+    
+    /* Liquid Glass Effect for Mobile */
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    
     display: flex;
     flex-direction: column;
     padding: 1.5rem; /* More breathing room */
@@ -33,30 +38,32 @@
 }
 
 .logoIcon {
-    width: 2rem; /* Larger icon */
-    height: 2rem;
-    background-color: #2563eb;
-    border-radius: 0.625rem;
+    width: 2.5rem; /* Larger icon */
+    height: 2.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 0.75rem;
     flex-shrink: 0;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 }
 
 .logo h2 {
     color: inherit;
     font-size: inherit;
     margin: 0;
+    letter-spacing: -0.025em;
 }
 
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; /* More spacing between links */
+    gap: 0.75rem; /* More spacing between links */
     flex: 1;
 }
 
 .navLink {
     /* Touch Target Optimization: Min 44px height */
     padding: 0.875rem 1rem; 
-    border-radius: 0.75rem;
+    border-radius: 1rem; /* Softer corners */
     color: #475569;
     text-decoration: none;
     font-size: 1rem; /* 16px is better for reading on mobile */
@@ -64,27 +71,33 @@
     display: flex;
     align-items: center;
     gap: 0.75rem; /* Space between icon and text */
-    transition: background-color 0.2s, color 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
     /* Prevent text selection during touch */
     user-select: none; 
     -webkit-tap-highlight-color: transparent;
 }
 
 .navLink:active {
-    background-color: #f1f5f9;
+    background-color: rgba(255, 255, 255, 0.4);
     transform: scale(0.98);
 }
 
 .navLink:hover {
     /* Hover is mostly for desktop, but active state handles touch feedback */
-    background-color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
     color: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
 /* Active State */
 .navLink.active {
-    background-color: #eff6ff; /* Blue 50 */
+    background: rgba(239, 246, 255, 0.6); /* Blue 50 with opacity */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     color: #2563eb; /* Blue 600 */
+    box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.15);
 }
 
 .navIcon {
@@ -97,15 +110,16 @@
 .userProfile {
     margin-top: auto;
     padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .logoutBtn {
     /* Touch Target Optimization */
     width: 100%;
     padding: 0.875rem; /* Larger touch target */
-    background-color: transparent;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 0.75rem;
     cursor: pointer;
     color: #dc2626;
@@ -122,23 +136,31 @@
 }
 
 .logoutBtn:active {
-    background-color: #fef2f2;
+    background-color: rgba(254, 242, 242, 0.8);
     transform: scale(0.98);
+}
+
+.logoutBtn:hover {
+    background-color: rgba(254, 242, 242, 0.6);
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 12px -2px rgba(239, 68, 68, 0.1);
 }
 
 /* Mobile Toggle Button */
 .mobileToggle {
     position: fixed;
-    top: 0.75rem;
-    left: 0.75rem;
+    top: 1rem;
+    left: 1rem;
     z-index: 60;
     padding: 0.75rem; /* Generous touch target (48px+) */
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
     color: #0f172a;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -148,14 +170,14 @@
 
 .mobileToggle:active {
     transform: scale(0.95);
-    background-color: #f8fafc;
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.4); /* Slate-900 with opacity */
-    backdrop-filter: blur(2px);
+    background-color: rgba(15, 23, 42, 0.2); /* Slate-900 lighter opacity */
+    backdrop-filter: blur(4px);
     z-index: 40;
     opacity: 0;
     pointer-events: none; /* Pass through clicks when hidden */
@@ -178,6 +200,12 @@
         transform: none !important; /* Always visible */
         box-shadow: none;
         padding: 1.25rem;
+        
+        /* Reset Glass Effect to Solid for Desktop */
+        background-color: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-right: 1px solid #e2e8f0;
     }
 
     .mobileToggle {
@@ -189,30 +217,30 @@
     }
 
     .nav {
-        gap: 0.25rem; /* Tighter spacing */
+        gap: 0.5rem; /* Tighter spacing */
     }
 
     .navLink {
-        padding: 0.625rem 1rem; /* Compact padding */
-        font-size: 0.875rem; /* Smaller font */
+        padding: 0.75rem 1rem; /* Compact padding */
+        font-size: 0.9rem; /* Smaller font */
     }
 
     .navLink:hover {
-        transform: translateX(2px); /* Desktop-only hover effect */
+        transform: translateX(4px); /* Desktop-only hover effect */
     }
 
     .logo {
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
         font-size: 1.25rem;
     }
 
     .logoIcon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2rem;
+        height: 2rem;
     }
 
     .logoutBtn {
-        padding: 0.625rem;
+        padding: 0.75rem;
         font-size: 0.875rem;
     }
 }
