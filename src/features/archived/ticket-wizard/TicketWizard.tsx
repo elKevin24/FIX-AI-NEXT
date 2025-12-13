@@ -1,6 +1,6 @@
 'use client';
 
-import { useTicketWizard, TicketDraft } from '@/hooks/useTicketWizard';
+import { useTicketWizard, TicketDraft } from './useTicketWizard';
 import { createBatchTickets } from '@/lib/actions';
 import { useActionState, useState } from 'react';
 import { Input, Select, Textarea, Button, Card, CardHeader, CardTitle, CardBody, Alert } from '@/components/ui';
@@ -86,7 +86,7 @@ export default function TicketWizard() {
             )}
 
             <form action={handleSubmit} onKeyDown={handleKeyDown}>
-                
+
                 {/* --- STEP 1: CUSTOMER --- */}
                 {currentStep === 1 && (
                     <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -208,19 +208,19 @@ export default function TicketWizard() {
                         </div>
 
                         {tickets.map((ticket, index) => (
-                            <DeviceCard 
-                                key={index} 
-                                index={index} 
-                                ticket={ticket} 
-                                onUpdate={updateTicket} 
+                            <DeviceCard
+                                key={index}
+                                index={index}
+                                ticket={ticket}
+                                onUpdate={updateTicket}
                                 onRemove={() => removeTicket(index)}
                                 onDuplicate={() => duplicateTicket(index)}
                                 showRemove={tickets.length > 1}
                             />
                         ))}
-                        
+
                         <div className="flex justify-center pt-2">
-                             <Button
+                            <Button
                                 type="button"
                                 variant="outline"
                                 onClick={addTicket}
@@ -251,11 +251,11 @@ export default function TicketWizard() {
 
                         {/* Información del Cliente */}
                         <Card className="border-slate-200 shadow-sm relative overflow-hidden">
-                             <div className="absolute top-0 right-0 p-2">
-                                <Button 
-                                    type="button" 
-                                    variant="ghost" 
-                                    size="sm" 
+                            <div className="absolute top-0 right-0 p-2">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => goToStep(1)}
                                     className="text-blue-600 hover:bg-blue-50 text-xs"
                                 >
@@ -291,10 +291,10 @@ export default function TicketWizard() {
                                     </span>
                                     Dispositivo{tickets.length > 1 ? 's' : ''} a Ingresar
                                 </h3>
-                                <Button 
-                                    type="button" 
-                                    variant="ghost" 
-                                    size="sm" 
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => goToStep(2)}
                                     className="text-purple-600 hover:bg-purple-50 text-xs flex items-center gap-1"
                                 >
@@ -456,7 +456,7 @@ function StepIndicator({ step, current, label, onClick }: { step: number, curren
     const isClickable = isCompleted || step === current;
 
     return (
-        <div 
+        <div
             className={`flex flex-col items-center gap-2 ${isClickable ? 'cursor-pointer' : ''}`}
             onClick={isClickable ? onClick : undefined}
         >
@@ -528,7 +528,7 @@ function DeviceCard({
 
     const handleFieldChange = (field: keyof TicketDraft, value: any) => {
         onUpdate(index, field, value);
-        validateField(field, value);
+        validateField(field as string, value);
     };
 
     const currentIcon = DEVICE_ICONS[ticket.deviceType || 'PC'] || '🔧';
@@ -548,13 +548,13 @@ function DeviceCard({
 
             {/* Botones de acción */}
             <div className="absolute top-3 right-3 flex gap-2">
-                 <button
+                <button
                     type="button"
                     onClick={onDuplicate}
                     className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-all duration-200"
                     title="Duplicar dispositivo"
                 >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                 </button>
