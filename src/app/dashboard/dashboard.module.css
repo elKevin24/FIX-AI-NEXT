@@ -56,7 +56,7 @@
 /* Main Content Area */
 .mainContent {
     flex: 1;
-    padding: 2rem 1rem 1rem 1rem; /* Increased top padding for mobile */
+    padding: 2rem 1rem 1rem 1rem; /* Reverted to previous padding for mobile */
     overflow-y: auto;
     animation: fadeIn 0.5s ease-out;
     margin-top: 0; /* Remove margin so it sits at the top */

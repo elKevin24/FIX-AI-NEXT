@@ -12,6 +12,8 @@ interface Customer {
     name: string;
     email?: string;
     phone?: string;
+    dpi?: string;
+    nit?: string;
 }
 
 interface Device {
@@ -58,6 +60,12 @@ export default function SimpleTicketForm() {
         if (customer.phone) {
             formData.set('customerPhone', customer.phone);
         }
+        if (customer.dpi) {
+            formData.set('customerDpi', customer.dpi);
+        }
+        if (customer.nit) {
+            formData.set('customerNit', customer.nit);
+        }
         formData.set('tickets', JSON.stringify(devices));
         formAction(formData);
     };
@@ -94,15 +102,9 @@ export default function SimpleTicketForm() {
             <div className={styles.content}>
                 {/* Header Section */}
                 <div className={styles.header}>
-                    <div className={styles.headerIcon}>
-                        <span>✨</span>
-                    </div>
                     <h1 className={styles.title}>
                         Nuevo Ticket
                     </h1>
-                    <p className={styles.subtitle}>
-                        Sistema de Ingreso "Liquid Glass"
-                    </p>
                 </div>
 
                 {state?.message && (
@@ -124,13 +126,14 @@ export default function SimpleTicketForm() {
 
                         <div className={styles.customerGrid}>
                             <div style={{ gridColumn: '1 / -1' }}>
-                                <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Buscar o Crear Cliente</label>
                                 <CustomerSearch
                                     onSelect={(c) => setCustomer({
                                         id: 'id' in c ? c.id : undefined,
                                         name: c.name,
                                         email: 'email' in c ? c.email || undefined : undefined,
-                                        phone: 'phone' in c ? c.phone || undefined : undefined
+                                        phone: 'phone' in c ? c.phone || undefined : undefined,
+                                        dpi: 'dpi' in c ? c.dpi || undefined : undefined,
+                                        nit: 'nit' in c ? c.nit || undefined : undefined
                                     })}
                                     selectedCustomer={customer}
                                 />
@@ -152,6 +155,20 @@ export default function SimpleTicketForm() {
                                         value={customer.phone || ''}
                                         onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
                                     />
+                                    <Input
+                                        label="🆔 DPI (opcional)"
+                                        type="text"
+                                        placeholder="1234 56789 0101"
+                                        value={customer.dpi || ''}
+                                        onChange={(e) => setCustomer({ ...customer, dpi: e.target.value })}
+                                    />
+                                    <Input
+                                        label="📄 NIT (opcional)"
+                                        type="text"
+                                        placeholder="123456-7"
+                                        value={customer.nit || ''}
+                                        onChange={(e) => setCustomer({ ...customer, nit: e.target.value })}
+                                    />
                                 </>
                             )}
 
@@ -161,10 +178,15 @@ export default function SimpleTicketForm() {
                                         <span>✓</span>
                                     </div>
                                     <div>
-                                        <p style={{ fontWeight: '700', fontSize: '1.1rem', margin: 0, color: '#065f46' }}>{customer.name}</p>
-                                        <p style={{ fontSize: '0.9rem', margin: 0, color: '#047857' }}>
-                                            {customer.email || customer.phone || 'Cliente Seleccionado'}
-                                        </p>
+                                        <p className={styles.customerName}>{customer.name}</p>
+                                        {(customer.email || customer.phone || customer.nit) && (
+                                            <div className={styles.customerDetail}>
+                                                {customer.email && <span className="block">{customer.email}</span>}
+                                                {customer.phone && <span className="block">{customer.phone}</span>}
+                                                {customer.dpi && <span className="block">DPI: {customer.dpi}</span>}
+                                                {customer.nit && <span className="block">NIT: {customer.nit}</span>}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

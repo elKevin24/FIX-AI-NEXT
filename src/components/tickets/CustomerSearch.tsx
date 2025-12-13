@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
+import styles from './CustomerSearch.module.css';
+
 interface Customer {
     id: string;
     name: string;
     email: string | null;
     phone: string | null;
+    dpi: string | null;
+    nit: string | null;
 }
 
 interface CustomerSearchProps {
@@ -79,8 +83,17 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
         setIsOpen(false);
     };
 
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+    };
+
     return (
-        <div className="relative" ref={wrapperRef}>
+        <div className={styles.container} ref={wrapperRef}>
             <Input
                 label="Buscar Cliente"
                 placeholder="Nombre, Teléfono o Email..."
@@ -88,49 +101,62 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
                 onChange={(e) => {
                     setQuery(e.target.value);
                     setIsOpen(true);
-                    // Also emit current text as "new customer" potential
-                    // This allows typing a new name and just hitting next
-                    onSelect({ name: e.target.value }); 
                 }}
                 autoComplete="off"
             />
             
             {isOpen && query.length >= 2 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                <div className={styles.dropdown}>
                     {loading ? (
-                        <div className="p-3 text-sm text-slate-500 text-center">Buscando...</div>
+                        <div className={styles.loading}>
+                            <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>🔍</span>
+                            Buscando...
+                        </div>
                     ) : results.length > 0 ? (
-                        <ul>
+                        <ul className={styles.list}>
                             {results.map((customer) => (
                                 <li 
                                     key={customer.id}
                                     onClick={() => handleSelect(customer)}
-                                    className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0"
+                                    className={styles.listItem}
                                 >
-                                    <div className="font-medium text-slate-900">{customer.name}</div>
-                                    <div className="text-xs text-slate-500">
-                                        {customer.phone && <span>📞 {customer.phone} </span>}
-                                        {customer.email && <span>✉️ {customer.email}</span>}
+                                    <div className={styles.avatar}>
+                                        {getInitials(customer.name)}
+                                    </div>
+                                    <div className={styles.itemContent}>
+                                        <div className={styles.itemName}>{customer.name}</div>
+                                        <div className={styles.itemDetail}>
+                                            {customer.phone && (
+                                                <span title="Teléfono">📱 {customer.phone}</span>
+                                            )}
+                                            {customer.email && (
+                                                <span title="Email" style={{ marginLeft: customer.phone ? '0.75rem' : 0 }}>
+                                                    ✉️ {customer.email}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </li>
                             ))}
                             <li 
                                 onClick={handleCreateNew}
-                                className="p-3 bg-blue-50 hover:bg-blue-100 cursor-pointer text-blue-700 text-sm font-medium text-center sticky bottom-0"
+                                className={styles.createItem}
                             >
-                                + Crear &ldquo;{query}&rdquo; como nuevo
+                                <span style={{ marginRight: '0.5rem' }}>✨</span>
+                                Crear &ldquo;{query}&rdquo; como nuevo
                             </li>
                         </ul>
                     ) : (
-                        <div className="p-3 text-center">
-                            <p className="text-sm text-slate-500 mb-2">No encontrado</p>
+                        <div className={styles.notFound}>
+                            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤔</div>
+                            <p className={styles.notFoundText}>No encontramos a &ldquo;{query}&rdquo;</p>
                             <Button 
                                 variant="outline" 
                                 size="sm" 
                                 onClick={handleCreateNew}
-                                className="w-full"
+                                className={styles.useButton}
                             >
-                                Usar &ldquo;{query}&rdquo;
+                                Crear Nuevo Cliente
                             </Button>
                         </div>
                     )}
