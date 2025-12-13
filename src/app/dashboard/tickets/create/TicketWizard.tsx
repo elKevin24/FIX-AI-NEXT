@@ -142,7 +142,7 @@ export default function TicketWizard() {
                                                 🔒 Clave: {t.password}
                                             </div>
                                         )}
-                                        <p className="text-sm text-slate-500 italic">"{t.description}"</p>
+                                        <p className="text-sm text-slate-500 italic">&ldquo;{t.description}&rdquo;</p>
                                     </div>
                                 ))}
                             </div>
