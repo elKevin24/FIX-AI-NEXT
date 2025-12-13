@@ -1,0 +1,147 @@
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    height: 100vh;
+    transition: transform 0.3s ease-in-out;
+    z-index: 50;
+}
+
+.logo {
+    margin-bottom: 2rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logoIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: #2563eb;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.logo h2 {
+    color: inherit;
+    font-size: inherit;
+    margin: 0;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.navLink {
+    padding: 0.625rem 1rem;
+    border-radius: 0.75rem;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+}
+
+.navLink:hover {
+    background-color: #f1f5f9;
+    color: #2563eb;
+    transform: translateX(2px);
+}
+
+.userProfile {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.logoutBtn {
+    width: 100%;
+    padding: 0.625rem;
+    background-color: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+    background-color: #fef2f2;
+    border-color: #dc2626;
+}
+
+/* Mobile Toggle Button */
+.mobileToggle {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    padding: 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #0f172a;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        transform: translateX(-100%);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobileToggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .overlay.open {
+        display: block;
+        opacity: 1;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    .sidebar {
+        width: 240px;
+        position: sticky;
+        top: 0;
+        transform: none !important; /* Always visible */
+    }
+}
