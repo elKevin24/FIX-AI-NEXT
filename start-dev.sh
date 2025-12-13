@@ -1,38 +1,22 @@
 #!/bin/bash
 
-# Script para iniciar Docker + Next.js dev server
+# Script para iniciar Next.js dev server con Neon Database
 
 set -e
 
-echo "🐳 Iniciando Docker daemon..."
-if ! command -v systemctl &> /dev/null; then
-    echo "⚠️  systemctl no disponible. Intenta iniciar Docker manualmente:"
-    echo "   sudo dockerd &"
-    exit 1
-fi
+echo "🔗 Conectando a Neon Database..."
 
-# Verificar si Docker está corriendo
-if ! docker ps &> /dev/null; then
-    echo "🔄 Docker no está corriendo. Iniciando..."
-    systemctl start docker 2>/dev/null || {
-        echo "⚠️  No se pudo iniciar Docker con systemctl"
-        echo "   Intenta: sudo systemctl start docker"
+# Verificar que existe la variable DATABASE_URL
+if [ -z "$DATABASE_URL" ]; then
+    if [ ! -f .env ]; then
+        echo "❌ No se encontró el archivo .env"
+        echo "   Crea un archivo .env con DATABASE_URL"
         exit 1
-    }
-    sleep 2
+    fi
+    echo "✅ Usando configuración de .env"
+else
+    echo "✅ DATABASE_URL configurado"
 fi
-
-echo "✅ Docker está activo"
-
-echo "🐘 Iniciando PostgreSQL con docker compose..."
-docker compose up -d || true # Ignorar errores (warnings) y continuar
-docker compose ps -q db > /dev/null || {
-    echo "❌ El contenedor de la base de datos no está corriendo. Verifica Docker Compose."
-    exit 1
-}
-
-echo "⏳ Esperando a PostgreSQL (5 segundos)..."
-sleep 5
 
 echo "📦 Ejecutando migraciones de Prisma (si aplica)..."
 npx prisma migrate deploy --skip-generate 2>/dev/null || {
