@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -45,7 +46,7 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
     return (
         <>
             {/* Mobile Toggle Button */}
-            <button 
+            <button
                 className={`${styles.mobileToggle} ${isOpen ? styles.toggleOpen : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle Menu"
@@ -58,7 +59,7 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
             </button>
 
             {/* Overlay */}
-            <div 
+            <div
                 className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
                 onClick={() => setIsOpen(false)}
             />
@@ -92,6 +93,9 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
                     </Link>
                 </nav>
                 <div className={styles.userProfile}>
+                    <div className={styles.themeSwitcherWrapper}>
+                        <ThemeSwitcher />
+                    </div>
                     {logoutButton}
                 </div>
             </aside>
