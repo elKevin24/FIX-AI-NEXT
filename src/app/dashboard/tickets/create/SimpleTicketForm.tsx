@@ -21,7 +21,6 @@ interface Device {
     description: string;
     deviceType: string;
     deviceModel?: string;
-    password?: string;
     serialNumber?: string;
     accessories?: string;
     checkInNotes?: string;
@@ -195,18 +194,20 @@ export default function SimpleTicketForm() {
 
                     {/* --- Devices Section Header --- */}
                     <div className={styles.devicesHeader}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <h2 className={styles.cardTitle} style={{ fontSize: '1.5rem' }}>Dispositivos</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                            <h2 className={styles.cardTitle} style={{ fontSize: '1.125rem', fontWeight: '600' }}>Dispositivos</h2>
                             <span className={styles.deviceCount}>
                                 {devices.length}
                             </span>
                         </div>
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="secondary"
+                            size="sm"
                             onClick={addDevice}
+                            style={{ borderRadius: '999px' }}
                         >
-                            + Agregar Otro Equipo
+                            + Agregar otro Dispositivo
                         </Button>
                     </div>
 
@@ -268,14 +269,8 @@ export default function SimpleTicketForm() {
                                         />
                                     </div>
 
-                                    {/* Row 3: Security & Extras */}
+                                    {/* Row 3: Extras */}
                                     <div className={styles.extrasGrid}>
-                                        <Input
-                                            label="🔒 Contraseña / Patrón"
-                                            value={device.password || ''}
-                                            onChange={(e) => updateDevice(index, 'password', e.target.value)}
-                                            placeholder="Vital para pruebas"
-                                        />
                                         <Input
                                             label="🏷️ N° Serie / IMEI"
                                             value={device.serialNumber || ''}
