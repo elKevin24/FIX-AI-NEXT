@@ -1,46 +1,110 @@
-/* Card.module.css */
+/* ========================================
+   CARD COMPONENT - Liquid Glass Minimalista
+   ======================================== */
+
 .card {
-  background-color: #ffffff;
-  border-radius: 1rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-border-light);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
-.header {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  border-bottom: 1px solid #f1f5f9;
-  background-color: #fff;
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--color-border-medium) 50%,
+      transparent 100%);
+  opacity: 0.5;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-.title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.2;
-  margin: 0;
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-.description {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0;
+.card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-200);
 }
 
-.body {
-  padding: 1.5rem;
-  flex: 1;
+.card:active {
+  transform: translateY(-2px) scale(1.005);
+  transition: all 0.1s;
 }
 
-.footer {
-  padding: 1rem 1.5rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #f1f5f9;
+/* Card Header */
+.cardHeader {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.cardDescription {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.5;
+}
+
+/* Card Body */
+.cardBody {
+  color: var(--color-text-primary);
+}
+
+/* Card Footer */
+.cardFooter {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Card Variants */
+.cardCompact {
+  padding: 1rem;
+}
+
+.cardCompact .cardHeader {
+  margin-bottom: 0.75rem;
+}
+
+.cardFlat {
+  box-shadow: none;
+  border: 1px solid var(--color-border-medium);
+}
+
+.cardFlat:hover {
+  box-shadow: var(--shadow-sm);
 }

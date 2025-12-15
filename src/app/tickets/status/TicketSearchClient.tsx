@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { searchTicket } from '@/lib/actions';
 import TicketStatusCard from '@/components/tickets/TicketStatusCard';
+import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 
 interface DemoTicket {
     id: string;
@@ -42,163 +43,166 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
 
     return (
         <>
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: '#ffffff',
-            zIndex: -1
-        }}></div>
-        <div style={{
-            minHeight: '100dvh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: ticket ? '0.75rem' : '1.25rem',
-            fontFamily: 'system-ui, sans-serif',
-            overflowY: 'auto'
-        }}>
-            
-            {/* Navbar Simple */}
-            <nav style={{ width: '100%', maxWidth: '50rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: ticket ? '0.5rem' : '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1a202c', fontWeight: 'bold' }}> {/* Texto oscuro */}
-                    <div style={{
-                        width: '1.5rem',
-                        height: '1.5rem',
-                        background: '#2563eb', // Blue 600
-                        borderRadius: '0.5rem',
-                        border: 'none',
-                        boxShadow: 'none',
-                        outline: 'none',
-                        overflow: 'hidden'
-                    }}></div>
-                    FIX-AI
-                </div>
-                <Link href="/" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', outline: 'none' }}>Inicio</Link> {/* Slate 600 */}
-            </nav>
-
-            {/* Buscador Compacto */}
             <div style={{
-                width: '100%',
-                maxWidth: '26.25rem',
-                transition: 'all 0.3s ease'
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'var(--color-bg-primary)',
+                zIndex: -1
+            }}></div>
+            <div style={{
+                minHeight: '100dvh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: ticket ? '0.75rem' : '1.25rem',
+                fontFamily: 'system-ui, sans-serif',
+                overflowY: 'auto'
             }}>
-                <div style={{
-                    textAlign: 'center',
-                    marginBottom: '1rem',
-                    transition: 'all 0.3s ease'
-                }}>
-                    <h1 style={{
-                        fontSize: '1.5rem',
-                        fontWeight: '700',
-                        color: '#1a202c',
-                        marginBottom: '0.5rem',
-                        transition: 'all 0.3s ease'
-                    }}>Estado de Reparación</h1>
-                    <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '1rem' }}>Consulta el progreso de tu equipo</p>
-                </div>
 
-                <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: '#ffffff',
-                        border: `1px solid ${error ? '#ef4444' : '#94a3b8'}`, // Slate 400 para mejor contraste
-                        borderRadius: '1rem',
-                        boxShadow: '0 0.25rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.1)',
-                        overflow: 'hidden',
-                        isolation: 'isolate',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                    className="search-container"
-                    >
-                        <input
-                            type="text"
-                            value={ticketId}
-                            onChange={(e) => { setTicketId(e.target.value); setError(''); }}
-                            placeholder="Ingresa tu ID de Ticket (ej: 90287b37)"
-                            style={{
-                                flex: 1,
-                                background: 'transparent',
-                                border: 'none',
-                                padding: '0.625rem 1rem',
-                                color: '#1a202c',
-                                outline: 'none',
-                                fontSize: '0.875rem',
-                                fontFamily: 'monospace'
-                            }}
-                        />
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="search-button"
-                            style={{
-                                background: loading ? '#94a3b8' : '#2563eb', // Blue 600
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                padding: '0.625rem 1.25rem',
-                                margin: '0.25rem',
-                                fontSize: '0.875rem',
-                                fontWeight: '600',
-                                cursor: loading ? 'wait' : 'pointer',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                outline: 'none',
-                                boxShadow: 'none',
-                                overflow: 'hidden',
-                                WebkitAppearance: 'none',
-                                MozAppearance: 'none',
-                                appearance: 'none',
-                                transform: loading ? 'scale(0.95)' : 'scale(1)'
-                            }}
-                        >
-                            <span style={{
-                                display: 'inline-block',
-                                animation: loading ? 'pulse 1.5s ease-in-out infinite' : 'none'
-                            }}>
-                                {loading ? '...' : 'Buscar'}
-                            </span>
-                        </button>
+                {/* Navbar Simple */}
+                <nav style={{ width: '100%', maxWidth: '50rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: ticket ? '0.5rem' : '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-primary)', fontWeight: 'bold' }}>
+                        <div style={{
+                            width: '1.5rem',
+                            height: '1.5rem',
+                            background: 'var(--color-primary-600)',
+                            borderRadius: '0.5rem',
+                            border: 'none',
+                            boxShadow: 'none',
+                            outline: 'none',
+                            overflow: 'hidden'
+                        }}></div>
+                        FIX-AI
                     </div>
-                    {error && (
-                        <p style={{ position: 'absolute', top: '100%', left: '0.25rem', marginTop: '0.5rem', color: '#dc2626', fontSize: '0.75rem', fontWeight: '500' }}>
-                            {error}
-                        </p>
-                    )}
-                </form>
-
-                {/* Ejemplos Dinámicos */}
-                {!ticket && demoTickets.length > 0 && (
-                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        {demoTickets.map((demo) => (
-                            <button 
-                                key={demo.id}
-                                onClick={() => setTicketId(demo.id.slice(0, 8))} 
-                                className="demo-button" 
-                                style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#64748b', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
-                            >
-                                Demo {demo.deviceType || 'Equipo'}
-                            </button>
-                        ))}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <ThemeSwitcher />
+                        <Link href="/" style={{ color: 'var(--color-text-secondary)', textDecoration: 'none', fontSize: '0.875rem', outline: 'none' }}>Inicio</Link>
                     </div>
-                )}
-            </div>
+                </nav>
 
-            {/* Resultado (Card) */}
-            {ticket && (
+                {/* Buscador Compacto */}
                 <div style={{
                     width: '100%',
-                    maxWidth: '50rem',
-                    animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                    marginTop: '2rem'
+                    maxWidth: '26.25rem',
+                    transition: 'all 0.3s ease'
                 }}>
-                    <TicketStatusCard ticket={ticket} />
-                </div>
-            )}
+                    <div style={{
+                        textAlign: 'center',
+                        marginBottom: '1rem',
+                        transition: 'all 0.3s ease'
+                    }}>
+                        <h1 style={{
+                            fontSize: '1.5rem',
+                            fontWeight: '700',
+                            color: 'var(--color-text-primary)',
+                            marginBottom: '0.5rem',
+                            transition: 'all 0.3s ease'
+                        }}>Estado de Reparación</h1>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Consulta el progreso de tu equipo</p>
+                    </div>
 
-            <style jsx global>{`
+                    <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            background: 'var(--color-surface)',
+                            border: `1px solid ${error ? 'var(--color-error-600)' : 'var(--color-border-medium)'}`,
+                            borderRadius: '1rem',
+                            boxShadow: 'var(--shadow-sm)',
+                            overflow: 'hidden',
+                            isolation: 'isolate',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                            className="search-container"
+                        >
+                            <input
+                                type="text"
+                                value={ticketId}
+                                onChange={(e) => { setTicketId(e.target.value); setError(''); }}
+                                placeholder="Ingresa tu ID de Ticket (ej: 90287b37)"
+                                style={{
+                                    flex: 1,
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: '0.625rem 1rem',
+                                    color: 'var(--color-text-primary)',
+                                    outline: 'none',
+                                    fontSize: '0.875rem',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="search-button"
+                                style={{
+                                    background: loading ? 'var(--color-gray-400)' : 'var(--color-primary-600)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    padding: '0.625rem 1.25rem',
+                                    margin: '0.25rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    cursor: loading ? 'wait' : 'pointer',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    outline: 'none',
+                                    boxShadow: 'none',
+                                    overflow: 'hidden',
+                                    WebkitAppearance: 'none',
+                                    MozAppearance: 'none',
+                                    appearance: 'none',
+                                    transform: loading ? 'scale(0.95)' : 'scale(1)'
+                                }}
+                            >
+                                <span style={{
+                                    display: 'inline-block',
+                                    animation: loading ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                                }}>
+                                    {loading ? '...' : 'Buscar'}
+                                </span>
+                            </button>
+                        </div>
+                        {error && (
+                            <p style={{ position: 'absolute', top: '100%', left: '0.25rem', marginTop: '0.5rem', color: 'var(--color-error-600)', fontSize: '0.75rem', fontWeight: '500' }}>
+                                {error}
+                            </p>
+                        )}
+                    </form>
+
+                    {/* Ejemplos Dinámicos */}
+                    {!ticket && demoTickets.length > 0 && (
+                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            {demoTickets.map((demo) => (
+                                <button
+                                    key={demo.id}
+                                    onClick={() => setTicketId(demo.id.slice(0, 8))}
+                                    className="demo-button"
+                                    style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-tertiary)', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                >
+                                    Demo {demo.deviceType || 'Equipo'}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Resultado (Card) */}
+                {ticket && (
+                    <div style={{
+                        width: '100%',
+                        maxWidth: '50rem',
+                        animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                        marginTop: '2rem'
+                    }}>
+                        <TicketStatusCard ticket={ticket} />
+                    </div>
+                )}
+
+                <style jsx global>{`
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
@@ -223,7 +227,6 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                 /* Animación de hover para el botón Buscar */
                 .search-button:not(:disabled):hover {
                     transform: scale(1.05) !important;
-                    box-shadow: 0 0.5rem 1rem rgba(37, 99, 235, 0.3) !important; /* Blue 600 shadow */
                 }
 
                 .search-button:not(:disabled):active {
@@ -232,18 +235,18 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
 
                 /* Animación para contenedor de búsqueda */
                 .search-container:focus-within {
-                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+                    box-shadow: var(--shadow-md) !important;
                     transform: translateY(-2px);
-                    border-color: #2563eb !important; /* Blue 600 border on focus */
+                    border-color: var(--color-primary-600) !important;
                 }
 
                 /* Animación para botones de demo */
                 .demo-button:hover {
-                    background: #f8fafc !important;
-                    border-color: #2563eb !important;
-                    color: #2563eb !important;
+                    background: var(--color-surface-hover) !important;
+                    border-color: var(--color-primary-600) !important;
+                    color: var(--color-primary-600) !important;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
+                }
                 }
 
                 .demo-button:active {
@@ -289,7 +292,7 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                     box-shadow: none !important;
                 }
             `}</style>
-        </div>
+            </div>
         </>
     );
 }
