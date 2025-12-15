@@ -2,7 +2,7 @@
 
 .container {
     min-height: 100vh;
-    padding: 1rem 0.75rem 3rem;
+    padding: 0 0.75rem 3rem;
     position: relative;
     overflow-x: hidden;
 }
@@ -63,7 +63,7 @@
 /* Header */
 .header {
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     padding: 0;
 }
 
@@ -103,6 +103,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-top: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
@@ -175,8 +176,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
-    margin-bottom: 0.5rem;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .deviceCount {
@@ -288,7 +290,7 @@
 /* Tablet & Desktop */
 @media (min-width: 768px) {
     .container {
-        padding: 1.5rem 1rem 4rem;
+        padding: 0 1rem 4rem;
     }
 
     .content {
