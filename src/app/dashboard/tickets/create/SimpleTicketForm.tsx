@@ -219,7 +219,6 @@ export default function SimpleTicketForm() {
                                         <div className={styles.deviceNumber}>
                                             #{index + 1}
                                         </div>
-                                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Detalles del Equipo</span>
                                     </div>
                                     {devices.length > 1 && (
                                         <button
