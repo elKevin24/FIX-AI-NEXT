@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/Input';
 import styles from './GlobalSearch.module.css';
 
 interface SearchResult {
@@ -60,7 +59,7 @@ export default function GlobalSearch() {
         if (result.type === 'ticket') {
             router.push(`/dashboard/tickets/${result.id}`);
         } else {
-            router.push(`/dashboard/customers/${result.id}/edit`); // Assuming edit page for customer
+            router.push(`/dashboard/customers/${result.id}/edit`);
         }
     };
 
@@ -73,9 +72,24 @@ export default function GlobalSearch() {
 
     return (
         <div ref={wrapperRef} className={styles.container}>
-            <div className="relative">
-                <Input
+            <div className={styles.searchWrapper}>
+                <svg
+                    className={styles.searchIcon}
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input
                     type="text"
+                    className={styles.searchInput}
                     placeholder="Buscar tickets, clientes..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -85,37 +99,39 @@ export default function GlobalSearch() {
                 />
                 {isLoading && (
                     <div className={styles.loading}>
-                        Buscando...
+                        <div className={styles.loadingSpinner}></div>
                     </div>
                 )}
             </div>
 
             {isOpen && results.length > 0 && (
                 <div className={styles.dropdown}>
-                    {results.map((result) => (
-                        <div
-                            key={`${result.type}-${result.id}`}
-                            onClick={() => handleResultClick(result)}
-                            className={styles.resultItem}
-                        >
-                            <span className={result.type === 'ticket' ? styles.ticketBadge : styles.customerBadge}>
-                                {result.type === 'ticket' ? 'Ticket' : 'Cliente'}
-                            </span>
-                            <div className={styles.resultContent}>
-                                <div className={styles.resultTitle}>
-                                    {result.title}
-                                </div>
-                                <div className={styles.resultSubtitle}>
-                                    {result.subtitle}
-                                </div>
-                            </div>
-                            {result.status && (
-                                <span className={styles.statusTag}>
-                                    {result.status}
+                    <div className={styles.resultsContainer}>
+                        {results.map((result) => (
+                            <div
+                                key={`${result.type}-${result.id}`}
+                                onClick={() => handleResultClick(result)}
+                                className={styles.resultItem}
+                            >
+                                <span className={result.type === 'ticket' ? styles.ticketBadge : styles.customerBadge}>
+                                    {result.type === 'ticket' ? 'Ticket' : 'Cliente'}
                                 </span>
-                            )}
-                        </div>
-                    ))}
+                                <div className={styles.resultContent}>
+                                    <div className={styles.resultTitle}>
+                                        {result.title}
+                                    </div>
+                                    <div className={styles.resultSubtitle}>
+                                        {result.subtitle}
+                                    </div>
+                                </div>
+                                {result.status && (
+                                    <span className={styles.statusTag}>
+                                        {result.status}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                     <div
                         onClick={() => {
                             setIsOpen(false);

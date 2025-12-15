@@ -1,85 +1,61 @@
+/* ========================================
+   DASHBOARD - Ultra Minimalista Liquid Glass
+   Colores Cloudy & Glassmorphism
+   ======================================== */
+
 .container {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); /* Cloudy gradient */
-    background-attachment: fixed; /* Parallax-like feel */
-    color: #0f172a;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    flex-direction: column; /* Mobile First: Column layout */
+    background: var(--color-bg-primary);
+    position: relative;
+    overflow: hidden;
+    flex-direction: column;
 }
 
-/* Force Light Theme for Inputs within Dashboard */
-.container :global(.form-input),
-.container :global(.form-textarea),
-.container :global(.form-select) {
-    background-color: #ffffff;
-    color: #0f172a;
-    border-color: #cbd5e1;
+/* Cloudy Background Effects */
+.container::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 20% 30%, var(--color-primary-100) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--color-secondary-100) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--color-success-50) 0%, transparent 70%);
+    filter: blur(100px);
+    opacity: 0.3;
+    pointer-events: none;
 }
 
-.container :global(.form-label) {
-    color: #0f172a;
-}
-
-.container :global(h1),
-.container :global(h2),
-.container :global(h3),
-.container :global(h4),
-.container :global(h5),
-.container :global(h6) {
-    color: #0f172a;
-}
-
-.container :global(p) {
-    color: #334155;
-}
-
-.container :global(a) {
-    color: #2563eb;
-}
-.container :global(a:hover) {
-    color: #1e40af;
-}
-
-.container :global(.form-input:focus),
-.container :global(.form-textarea:focus),
-.container :global(.form-select:focus) {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.container :global(.form-input::placeholder),
-.container :global(.form-textarea::placeholder) {
-    color: #94a3b8;
-}
-
-/* Main Content Area */
+/* Main Content Area - Liquid Glass */
 .mainContent {
     flex: 1;
-    padding: 2rem 1rem 1rem 1rem;
+    padding: 1rem;
+    position: relative;
+    z-index: 1;
     overflow-y: auto;
-    animation: fadeIn 0.5s ease-out;
-    margin-top: 0; /* Remove margin so it sits at the top */
-}
-
-.searchBar {
-    margin-bottom: 2rem;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Desktop Styles */
 @media (min-width: 768px) {
     .container {
-        flex-direction: row; /* Row layout on desktop/tablet */
+        flex-direction: row;
     }
 
     .mainContent {
-        padding: 1.5rem 2rem;
-        margin-top: 0; /* Reset margin on desktop */
-        padding-top: 1.5rem; /* Reset padding on desktop */
+        padding: 2rem;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
