@@ -45,23 +45,26 @@
 
 .dropdown {
     position: absolute;
-    bottom: calc(100% + var(--spacing-1));
-    left: 0;
+    top: calc(100% + var(--spacing-1));
+    /* Cambiado de bottom a top - abre hacia abajo */
     right: 0;
+    /* Alineado a la derecha */
     min-width: 200px;
     background: var(--color-surface);
     border: 1px solid var(--color-border-medium);
     border-radius: var(--radius-base);
     box-shadow: var(--shadow-xl);
     overflow: visible;
-    z-index: 99999;
-    animation: slideUp var(--transition-fast);
+    z-index: var(--z-tooltip);
+    /* 1070 - highest in design system */
+    animation: slideDown var(--transition-fast);
 }
 
-@keyframes slideUp {
+@keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(-8px);
+        /* Desliza desde arriba hacia abajo */
     }
 
     to {

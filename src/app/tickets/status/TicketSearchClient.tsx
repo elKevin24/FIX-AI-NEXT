@@ -63,7 +63,16 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
             }}>
 
                 {/* Navbar Simple */}
-                <nav style={{ width: '100%', maxWidth: '50rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: ticket ? '0.5rem' : '1rem' }}>
+                <nav style={{
+                    width: '100%',
+                    maxWidth: '50rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: ticket ? '0.5rem' : '1rem',
+                    overflow: 'visible',
+                    position: 'relative'
+                }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-primary)', fontWeight: 'bold' }}>
                         <div style={{
                             width: '1.5rem',

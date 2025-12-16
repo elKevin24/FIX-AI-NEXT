@@ -1,9 +1,10 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Card, CardHeader, CardTitle, CardBody, Badge, Button } from '@/components/ui';
+import { Card, CardHeader, CardBody, Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
+import styles from './users.module.css';
 
 export default async function UsersPage() {
   const session = await auth();
@@ -14,7 +15,7 @@ export default async function UsersPage() {
 
   // Only ADMIN can view the user list
   if (session.user.role !== 'ADMIN') {
-      redirect('/dashboard');
+    redirect('/dashboard');
   }
 
   const db = getTenantPrisma(session.user.tenantId);
@@ -47,16 +48,29 @@ export default async function UsersPage() {
     }
   };
 
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'ADMIN':
+        return 'Administrador';
+      case 'TECHNICIAN':
+        return 'Técnico';
+      case 'RECEPTIONIST':
+        return 'Recepcionista';
+      default:
+        return role;
+    }
+  };
+
   return (
-    <div style={{ padding: 'var(--spacing-6)' }}>
-      <div className="flex justify-between items-center" style={{ marginBottom: 'var(--spacing-6)' }}>
-        <div>
-          <h1 style={{ marginBottom: 'var(--spacing-2)' }}>Users</h1>
-          <p className="text-secondary">Manage workshop users and their roles</p>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1>Usuarios</h1>
+          <p>Administra los usuarios y sus roles</p>
         </div>
         {isAdmin && (
           <Link href="/dashboard/users/create">
-            <Button variant="primary">+ Add User</Button>
+            <Button variant="primary">+ Nuevo Usuario</Button>
           </Link>
         )}
       </div>
@@ -64,45 +78,41 @@ export default async function UsersPage() {
       {users.length === 0 ? (
         <Card>
           <CardBody>
-            <div className="text-center" style={{ padding: 'var(--spacing-8)' }}>
-              <p className="text-secondary" style={{ marginBottom: 'var(--spacing-4)' }}>
-                No users found
-              </p>
+            <div className={styles.emptyState}>
+              <p>No hay usuarios registrados</p>
               {isAdmin && (
                 <Link href="/dashboard/users/create">
-                  <Button variant="primary">Add Your First User</Button>
+                  <Button variant="primary">Agregar Primer Usuario</Button>
                 </Link>
               )}
             </div>
           </CardBody>
         </Card>
       ) : (
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--spacing-4)' }}>
-          {users.map((user: typeof users[number]) => (
-            <Card key={user.id}>
+        <div className={styles.usersGrid}>
+          {users.map((user) => (
+            <Card key={user.id} className={styles.userCard}>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{user.name || 'Unnamed User'}</CardTitle>
-                    <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
-                      {user.email}
-                    </p>
+                <div className={styles.cardHeader}>
+                  <div className={styles.userInfo}>
+                    <h3 className={styles.userName}>{user.name || 'Sin nombre'}</h3>
+                    <p className={styles.userEmail}>{user.email}</p>
                   </div>
                   <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {user.role}
+                    {getRoleLabel(user.role)}
                   </Badge>
                 </div>
               </CardHeader>
               <CardBody>
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
-                  Created: {new Date(user.createdAt).toLocaleDateString()}
+                <div className={styles.userMeta}>
+                  Creado: {new Date(user.createdAt).toLocaleDateString('es-ES')}
                 </div>
               </CardBody>
               {isAdmin && user.id !== session.user.id && (
-                <div className="flex gap-2" style={{ padding: 'var(--spacing-4)', paddingTop: '0' }}>
-                  <Link href={`/dashboard/users/${user.id}/edit`} style={{ flex: 1 }}>
-                    <Button variant="secondary" size="sm" style={{ width: '100%' }}>
-                      Edit
+                <div className={styles.cardActions}>
+                  <Link href={`/dashboard/users/${user.id}/edit`}>
+                    <Button variant="secondary" size="sm">
+                      Editar
                     </Button>
                   </Link>
                   <DeleteUserButton userId={user.id} userName={user.name || user.email} />

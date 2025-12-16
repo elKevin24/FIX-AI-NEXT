@@ -32,6 +32,34 @@ enum ServiceCategory {
   CONSULTATION
 }
 
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TechnicianStatus {
+  AVAILABLE
+  UNAVAILABLE
+  ON_VACATION
+  ON_LEAVE
+  IN_TRAINING
+  SICK_LEAVE
+}
+
+enum Specialization {
+  LAPTOPS
+  DESKTOPS
+  PRINTERS
+  NETWORKING
+  MOBILE_DEVICES
+  SERVERS
+  PERIPHERALS
+  SOFTWARE
+  GENERAL
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
@@ -59,17 +87,26 @@ model User {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
+  // Configuración del técnico
+  status               TechnicianStatus @default(AVAILABLE)
+  maxConcurrentTickets Int              @default(5) // Límite de tickets simultáneos
+  statusReason         String? // Razón de unavailable/leave
+  availableFrom        DateTime? // Fecha de regreso si está ausente
+  availableUntil       DateTime? // Fecha fin de ausencia
+
   assignedTickets  Ticket[]
   auditLogs        AuditLog[]
   ticketNotes      TicketNote[]
-  createdTickets   Ticket[]          @relation("TicketCreatedBy")
-  updatedTickets   Ticket[]          @relation("TicketUpdatedBy")
-  createdCustomers Customer[]        @relation("CustomerCreatedBy")
-  updatedCustomers Customer[]        @relation("CustomerUpdatedBy")
-  createdParts     Part[]            @relation("PartCreatedBy")
-  updatedParts     Part[]            @relation("PartUpdatedBy")
-  createdTemplates ServiceTemplate[] @relation("TemplateCreatedBy")
-  updatedTemplates ServiceTemplate[] @relation("TemplateUpdatedBy")
+  createdTickets   Ticket[]                   @relation("TicketCreatedBy")
+  updatedTickets   Ticket[]                   @relation("TicketUpdatedBy")
+  createdCustomers Customer[]                 @relation("CustomerCreatedBy")
+  updatedCustomers Customer[]                 @relation("CustomerUpdatedBy")
+  createdParts     Part[]                     @relation("PartCreatedBy")
+  updatedParts     Part[]                     @relation("PartUpdatedBy")
+  createdTemplates ServiceTemplate[]          @relation("TemplateCreatedBy")
+  updatedTemplates ServiceTemplate[]          @relation("TemplateUpdatedBy")
+  specializations  TechnicianSpecialization[]
+  unavailabilities TechnicianUnavailability[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,12 +142,12 @@ model Customer {
 }
 
 model Ticket {
-  id                 String       @id @default(uuid())
+  id                 String         @id @default(uuid())
   title              String
   description        String
-  status             TicketStatus @default(OPEN)
-  priority           String?
-  deviceType         String?      @default("PC")
+  status             TicketStatus   @default(OPEN)
+  priority           TicketPriority @default(MEDIUM)
+  deviceType         String?        @default("PC")
   deviceModel        String?
   serialNumber       String?
   accessories        String?
@@ -140,6 +177,8 @@ model Ticket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([status, priority]) // Para queries del pool
+  @@index([assignedToId, status]) // Para workload por técnico
   @@index([serviceTemplateId])
   @@index([createdById])
   @@index([updatedById])
@@ -272,4 +311,41 @@ model TemplateDefaultPart {
   @@index([templateId])
   @@index([partId])
   @@map("template_default_parts")
+}
+
+// Especialidades del técnico
+model TechnicianSpecialization {
+  id String @id @default(uuid())
+
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization Specialization
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, specialization])
+  @@index([userId])
+  @@map("technician_specializations")
+}
+
+// Períodos de indisponibilidad del técnico
+model TechnicianUnavailability {
+  id     String           @id @default(uuid())
+  reason TechnicianStatus @default(UNAVAILABLE)
+  notes  String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([startDate, endDate])
+  @@map("technician_unavailabilities")
 }

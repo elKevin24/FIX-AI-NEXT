@@ -19,3 +19,5 @@ export type { SelectProps, SelectOption } from './Select';
 
 export { Alert } from './Alert';
 export type { AlertProps } from './Alert';
+
+export { default as SearchInputGroup } from './SearchInputGroup';

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { TicketPriority, TicketStatus } from '@prisma/client';
 import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
@@ -34,21 +35,21 @@ export default async function DashboardPage() {
         prisma.ticket.count({
             where: {
                 tenantId,
-                status: { in: ['OPEN', 'IN_PROGRESS'] },
+                status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] },
             },
         }),
         // Tickets waiting for parts
         prisma.ticket.count({
             where: {
                 tenantId,
-                status: 'WAITING_FOR_PARTS',
+                status: TicketStatus.WAITING_FOR_PARTS,
             },
         }),
         // Completed today
         prisma.ticket.count({
             where: {
                 tenantId,
-                status: 'RESOLVED',
+                status: TicketStatus.RESOLVED,
                 updatedAt: {
                     gte: new Date(new Date().setHours(0, 0, 0, 0)),
                 },
@@ -70,8 +71,8 @@ export default async function DashboardPage() {
         prisma.ticket.findMany({
             where: {
                 tenantId,
-                priority: { in: ['HIGH', 'URGENT'] },
-                status: { notIn: ['RESOLVED', 'CLOSED'] },
+                priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
+                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
             },
             include: {
                 customer: {
@@ -150,16 +151,16 @@ export default async function DashboardPage() {
     // Calculate technician metrics
     const technicianMetrics = technicianStats.map((tech: typeof technicianStats[number]) => {
         const completed = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
-            t.status === 'RESOLVED' || t.status === 'CLOSED'
+            t.status === TicketStatus.RESOLVED || t.status === TicketStatus.CLOSED
         ).length;
 
         const inProgress = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
-            t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS'
+            t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
         ).length;
 
         // Calculate average days to complete
         const completedTickets = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
-            t.status === 'RESOLVED' || t.status === 'CLOSED'
+            t.status === TicketStatus.RESOLVED || t.status === TicketStatus.CLOSED
         );
 
         let avgDays = 0;
