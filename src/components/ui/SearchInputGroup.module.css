@@ -1,0 +1,78 @@
+/* ========================================
+   SEARCH INPUT GROUP - Design Pattern
+   Patrón establecido desde /tickets/status
+   ======================================== */
+
+.searchGroup {
+    display: flex;
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.searchGroup:focus-within {
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.searchGroup.error {
+    border-color: var(--color-error-600);
+}
+
+.searchGroup.error:focus-within {
+    box-shadow: 0 0 0 3px var(--color-error-100);
+}
+
+.searchInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.625rem 1rem;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.searchInput::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.searchButton {
+    background: var(--color-primary-600);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    margin: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    white-space: nowrap;
+}
+
+.searchButton:hover:not(:disabled) {
+    background: var(--color-primary-700);
+}
+
+.searchButton:disabled {
+    background: var(--color-gray-400);
+    cursor: wait;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 640px) {
+    .searchGroup {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchButton {
+        margin: 0.5rem;
+        border-radius: var(--radius-base);
+    }
+}
