@@ -106,13 +106,13 @@
   --color-text-link: var(--color-primary-600);
   /* Ratio > 4.5:1 */
 
-  /* Border Colors - UI Boundaries (3:1 required) */
-  --color-border-light: var(--color-gray-300);
-  /* Subtle dividers */
-  --color-border-medium: var(--color-gray-400);
-  /* Inputs, Cards */
-  --color-border-strong: var(--color-gray-600);
-  /* Active states */
+  /* Border Colors - UI Boundaries (Sutiles y minimalistas) */
+  --color-border-light: var(--color-gray-200);
+  /* Dividers muy sutiles */
+  --color-border-medium: var(--color-gray-300);
+  /* Inputs, Cards - Más suave */
+  --color-border-strong: var(--color-gray-400);
+  /* Active states - Moderado */
 
   /* ========== TYPOGRAPHY ========== */
   --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -236,10 +236,10 @@
   --color-text-inverse: hsl(210, 30%, 10%);
   --color-text-link: hsl(220, 85%, 70%);
 
-  /* Borders - Lighter for visibility on dark */
-  --color-border-light: hsl(210, 15%, 25%);
-  --color-border-medium: hsl(210, 15%, 30%);
-  --color-border-strong: hsl(210, 15%, 40%);
+  /* Borders - Sutiles pero visibles en dark */
+  --color-border-light: hsl(210, 15%, 20%);
+  --color-border-medium: hsl(210, 15%, 25%);
+  --color-border-strong: hsl(210, 15%, 35%);
 
   /* Primary - Brighter blue for dark backgrounds */
   --color-primary-50: hsl(220, 75%, 15%);
@@ -323,10 +323,10 @@
   --color-text-inverse: hsl(220, 14%, 11%);
   --color-text-link: hsl(212, 92%, 68%);
 
-  /* Borders - Subtle but visible */
-  --color-border-light: hsl(215, 12%, 28%);
-  --color-border-medium: hsl(215, 12%, 32%);
-  --color-border-strong: hsl(215, 14%, 40%);
+  /* Borders - Sutiles pero visibles */
+  --color-border-light: hsl(215, 12%, 22%);
+  --color-border-medium: hsl(215, 12%, 28%);
+  --color-border-strong: hsl(215, 14%, 36%);
 
   /* Primary - Bright Blue (GitHub style) */
   --color-primary-50: hsl(212, 85%, 15%);
@@ -480,11 +480,13 @@ p {
 a {
   color: var(--color-text-link);
   text-decoration: none;
+  /* Sin subrayado por defecto */
   font-weight: var(--font-weight-medium);
 }
 
 a:hover {
   text-decoration: none;
+  /* Sin subrayado en hover */
   color: var(--color-primary-800);
 }
 
@@ -1108,4 +1110,48 @@ a:hover {
 
 .rounded-full {
   border-radius: var(--radius-full);
+}
+
+/* ========================================
+   ACCESSIBILITY: SCREEN READER ONLY
+   ======================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========================================
+   ACCESSIBILITY: REDUCED MOTION
+   WCAG 2.1 Level AA - Success Criterion 2.3.3
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable all blob animations */
+  .blob,
+  [class*="blob"] {
+    animation: none !important;
+  }
+
+  /* Keep focus styles visible but instant */
+  :focus-visible {
+    transition: none !important;
+  }
 }

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bash start-dev.sh",
+    "dev": "next dev",
     "dev:next": "next dev",
     "build": "next build",
     "start": "next start",

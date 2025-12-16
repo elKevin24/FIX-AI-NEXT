@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { Card, CardHeader, CardTitle, CardBody, Badge, Button } from '@/components/ui';
 import Link from 'next/link';
-import DeleteCustomerButton from './DeleteCustomerButton'; // Assuming this is needed for the Card UI
+import DeleteCustomerButton from './DeleteCustomerButton';
+import styles from './customers.module.css';
 
 export default async function CustomersPage() {
   const session = await auth();
@@ -29,7 +30,6 @@ export default async function CustomersPage() {
           tickets: true,
         },
       },
-      // tenant: true, // Only if isSuperAdmin logic needs to display tenant name, otherwise removed for brevity
     },
     orderBy: {
       createdAt: 'desc',
@@ -37,45 +37,40 @@ export default async function CustomersPage() {
   });
 
   const isAdmin = session.user.role === 'ADMIN';
-  // const isSuperAdmin = session.user.email === 'adminkev@example.com'; // Removed as it's not directly used in the Card UI for display, but could be used for conditional DeleteCustomerButton
 
   return (
-    <div style={{ padding: 'var(--spacing-6)' }}>
-      <div className="flex justify-between items-center" style={{ marginBottom: 'var(--spacing-6)' }}>
-        <div>
-          <h1 style={{ marginBottom: 'var(--spacing-2)' }}>Customers</h1>
-          <p className="text-secondary">Manage your workshop customers</p>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1>Clientes</h1>
+          <p>Administra los clientes del taller</p>
         </div>
         <Link href="/dashboard/customers/create">
-          <Button variant="primary">+ Add Customer</Button>
+          <Button variant="primary">+ Nuevo Cliente</Button>
         </Link>
       </div>
 
       {customers.length === 0 ? (
         <Card>
           <CardBody>
-            <div className="text-center" style={{ padding: 'var(--spacing-8)' }}>
-              <p className="text-secondary" style={{ marginBottom: 'var(--spacing-4)' }}>
-                No customers found
-              </p>
+            <div className={styles.emptyState}>
+              <p>No hay clientes registrados</p>
               <Link href="/dashboard/customers/create">
-                <Button variant="primary">Add Your First Customer</Button>
+                <Button variant="primary">Agregar Primer Cliente</Button>
               </Link>
             </div>
           </CardBody>
         </Card>
       ) : (
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--spacing-4)' }}>
-          {customers.map((customer: typeof customers[number]) => (
-            <Card key={customer.id}>
+        <div className={styles.customersGrid}>
+          {customers.map((customer) => (
+            <Card key={customer.id} className={styles.customerCard}>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div style={{ flex: 1 }}>
-                    <CardTitle>{customer.name}</CardTitle>
+                <div className={styles.cardHeader}>
+                  <div className={styles.customerInfo}>
+                    <h3 className={styles.customerName}>{customer.name}</h3>
                     {customer.email && (
-                      <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
-                        {customer.email}
-                      </p>
+                      <p className={styles.customerEmail}>{customer.email}</p>
                     )}
                   </div>
                   <Badge variant={customer._count.tickets > 0 ? 'primary' : 'gray'}>
@@ -85,33 +80,37 @@ export default async function CustomersPage() {
               </CardHeader>
               <CardBody>
                 {customer.phone && (
-                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
-                    <strong>Phone:</strong> {customer.phone}
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Teléfono:</span>
+                    <span className={styles.infoValue}>{customer.phone}</span>
                   </div>
                 )}
                 {customer.address && (
-                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
-                    <strong>Address:</strong> {customer.address}
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Dirección:</span>
+                    <span className={styles.infoValue}>{customer.address}</span>
                   </div>
                 )}
                 {customer.dpi && (
-                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
-                    <strong>DPI:</strong> {customer.dpi}
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>DPI:</span>
+                    <span className={styles.infoValue}>{customer.dpi}</span>
                   </div>
                 )}
                 {customer.nit && (
-                  <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-2)' }}>
-                    <strong>NIT:</strong> {customer.nit}
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>NIT:</span>
+                    <span className={styles.infoValue}>{customer.nit}</span>
                   </div>
                 )}
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', marginTop: 'var(--spacing-2)' }}>
-                  Customer since: {new Date(customer.createdAt).toLocaleDateString()}
+                <div className={styles.customerSince}>
+                  Cliente desde: {new Date(customer.createdAt).toLocaleDateString('es-ES')}
                 </div>
               </CardBody>
-              <div className="flex gap-2" style={{ padding: 'var(--spacing-4)', paddingTop: '0' }}>
-                <Link href={`/dashboard/customers/${customer.id}/edit`} style={{ flex: 1 }}>
-                  <Button variant="secondary" size="sm" style={{ width: '100%' }}>
-                    Edit
+              <div className={styles.cardActions}>
+                <Link href={`/dashboard/customers/${customer.id}/edit`}>
+                  <Button variant="secondary" size="sm">
+                    Editar
                   </Button>
                 </Link>
                 {isAdmin && customer._count.tickets === 0 && (

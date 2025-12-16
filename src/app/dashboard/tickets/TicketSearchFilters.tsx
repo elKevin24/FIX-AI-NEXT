@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition, useEffect } from 'react';
-import { Input, Select, Button } from '@/components/ui';
+import { Select, Button, SearchInputGroup } from '@/components/ui';
 import styles from './searchFilters.module.css';
 
 export default function TicketSearchFilters() {
@@ -80,25 +80,15 @@ export default function TicketSearchFilters() {
         <div className={styles.filtersContainer}>
             <div className={styles.searchRow}>
                 <div className={styles.searchInput}>
-                    <Input
-                        type="text"
-                        placeholder="Buscar por ID, título o cliente..."
+                    <SearchInputGroup
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                handleSearch();
-                            }
-                        }}
+                        onChange={setSearch}
+                        onSearch={handleSearch}
+                        placeholder="Buscar por ID, título o cliente..."
+                        buttonText="Buscar"
+                        isLoading={isPending}
                     />
                 </div>
-                <Button
-                    variant="primary"
-                    onClick={handleSearch}
-                    disabled={isPending}
-                >
-                    {isPending ? 'Buscando...' : 'Buscar'}
-                </Button>
                 {(search || status || priority || assignedTo) && (
                     <Button
                         variant="ghost"
@@ -128,16 +118,17 @@ export default function TicketSearchFilters() {
                     />
                 </div>
                 <div className={styles.filterGroup}>
-                    <Input
-                        label="Asignado a (email)"
-                        type="text"
-                        placeholder="email@example.com"
+                    <Select
+                        label="Asignado a"
                         value={assignedTo}
-                        onChange={(e) => setAssignedTo(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAssignedTo(e.target.value)}
+                        options={[
+                            { value: '', label: 'Todos' },
+                            // Aquí podrías cargar usuarios dinámicamente
+                        ]}
                     />
                 </div>
             </div>
         </div>
     );
 }
-
