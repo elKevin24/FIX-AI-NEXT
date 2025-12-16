@@ -1,0 +1,238 @@
+/* ========================================
+   PARTS PAGE - Ultra-Polished Glass UI
+   ======================================== */
+
+.container {
+    padding: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ========== HEADER ========== */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1rem;
+}
+
+.headerContent h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 0.375rem 0;
+    letter-spacing: -0.025em;
+}
+
+.lowStockWarning {
+    color: var(--color-error-600);
+    font-weight: 600;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* ========== STATS GRID - GLASSMORPHISM ========== */
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    position: relative;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.statCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 16px 48px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.statCard.lowStock {
+    background: rgba(254, 226, 226, 0.7);
+    border-color: rgba(254, 202, 202, 0.8);
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.statCard.lowStock .statLabel {
+    color: var(--color-error-700);
+}
+
+.statCard.lowStock .statValue {
+    color: var(--color-error-600);
+}
+
+/* ========== TABLE - MINIMALISTA ========== */
+
+.tableContainer {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: transparent;
+}
+
+.table tbody tr {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    transition: background 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.table tbody tr.lowStockRow {
+    background: rgba(254, 242, 242, 0.5);
+}
+
+.table tbody td {
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+
+/* ========== BADGES ========== */
+
+.lowStockBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    background: rgba(254, 226, 226, 0.8);
+    color: var(--color-error-700);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.stockValue {
+    font-weight: 600;
+}
+
+.stockValue.low {
+    color: var(--color-error-600);
+}
+
+.marginPositive {
+    color: var(--color-success-600);
+}
+
+.marginNegative {
+    color: var(--color-error-600);
+}
+
+/* ========== DARK THEME ========== */
+
+[data-theme="dark"] .statCard,
+[data-theme="dark-colorblind"] .statCard {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .statCard.lowStock,
+[data-theme="dark-colorblind"] .statCard.lowStock {
+    background: rgba(127, 29, 29, 0.4);
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme="dark"] .tableContainer,
+[data-theme="dark-colorblind"] .tableContainer {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .table tbody tr,
+[data-theme="dark-colorblind"] .table tbody tr {
+    border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .table tbody tr:hover,
+[data-theme="dark-colorblind"] .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .table tbody tr.lowStockRow,
+[data-theme="dark-colorblind"] .table tbody tr.lowStockRow {
+    background: rgba(127, 29, 29, 0.2);
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .tableContainer {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}

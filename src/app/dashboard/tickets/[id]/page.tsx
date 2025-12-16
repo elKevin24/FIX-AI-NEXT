@@ -101,11 +101,18 @@ export default async function TicketDetailPage({ params }: Props) {
         },
     });
 
+    // Convert Decimal objects to numbers for client components
+    const serializedParts = availableParts.map(part => ({
+        ...part,
+        cost: part.cost ? Number(part.cost) : 0,
+        price: part.price ? Number(part.price) : 0,
+    }));
+
     return (
         <TicketDetailView
             ticket={ticket}
             availableUsers={availableUsers}
-            availableParts={availableParts}
+            availableParts={serializedParts}
             isSuperAdmin={isSuperAdmin}
             isAdmin={isAdmin}
             currentUserId={session.user.id}
