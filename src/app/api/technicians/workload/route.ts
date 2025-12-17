@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { UserRole, TicketStatus } from '@prisma/client';
+
+// Define types locally since they may not be exported yet
+enum UserRole {
+  ADMIN = 'ADMIN',
+  TECHNICIAN = 'TECHNICIAN',
+  RECEPTIONIST = 'RECEPTIONIST',
+}
+
+enum TicketStatus {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  CANCELLED = 'CANCELLED',
+}
 
 /**
  * @swagger
@@ -89,7 +104,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Calculate workload metrics for each technician
-    const techniciansWithMetrics = technicians.map((tech) => {
+    const techniciansWithMetrics = technicians.map((tech: any) => {
       const currentWorkload = tech._count.assignedTickets;
       const availableSlots = Math.max(
         0,
@@ -101,22 +116,22 @@ export async function GET(req: NextRequest) {
           : 0;
 
       const ticketsByStatus = {
-        OPEN: tech.assignedTickets.filter((t) => t.status === 'OPEN').length,
+        OPEN: tech.assignedTickets.filter((t: any) => t.status === 'OPEN').length,
         IN_PROGRESS: tech.assignedTickets.filter(
-          (t) => t.status === 'IN_PROGRESS'
+          (t: any) => t.status === 'IN_PROGRESS'
         ).length,
         WAITING_FOR_PARTS: tech.assignedTickets.filter(
-          (t) => t.status === 'WAITING_FOR_PARTS'
+          (t: any) => t.status === 'WAITING_FOR_PARTS'
         ).length,
       };
 
       const ticketsByPriority = {
-        URGENT: tech.assignedTickets.filter((t) => t.priority === 'URGENT')
+        URGENT: tech.assignedTickets.filter((t: any) => t.priority === 'URGENT')
           .length,
-        HIGH: tech.assignedTickets.filter((t) => t.priority === 'HIGH').length,
-        MEDIUM: tech.assignedTickets.filter((t) => t.priority === 'MEDIUM')
+        HIGH: tech.assignedTickets.filter((t: any) => t.priority === 'HIGH').length,
+        MEDIUM: tech.assignedTickets.filter((t: any) => t.priority === 'MEDIUM')
           .length,
-        LOW: tech.assignedTickets.filter((t) => t.priority === 'LOW').length,
+        LOW: tech.assignedTickets.filter((t: any) => t.priority === 'LOW').length,
       };
 
       return {
@@ -127,7 +142,7 @@ export async function GET(req: NextRequest) {
         statusReason: tech.statusReason,
         availableFrom: tech.availableFrom,
         availableUntil: tech.availableUntil,
-        specializations: tech.specializations.map((s) => s.specialization),
+        specializations: tech.specializations.map((s: any) => s.specialization),
         maxConcurrentTickets: tech.maxConcurrentTickets,
         currentWorkload,
         availableSlots,
@@ -143,25 +158,25 @@ export async function GET(req: NextRequest) {
     // Calculate overall statistics
     const totalTechnicians = techniciansWithMetrics.length;
     const availableTechnicians = techniciansWithMetrics.filter(
-      (t) => t.isAvailable
+      (t: any) => t.isAvailable
     ).length;
     const fullyBookedTechnicians = techniciansWithMetrics.filter(
-      (t) => t.isFull
+      (t: any) => t.isFull
     ).length;
     const unavailableTechnicians = techniciansWithMetrics.filter(
-      (t) => t.status !== 'AVAILABLE'
+      (t: any) => t.status !== 'AVAILABLE'
     ).length;
 
     const totalCapacity = techniciansWithMetrics.reduce(
-      (acc, t) => acc + t.maxConcurrentTickets,
+      (acc: number, t: any) => acc + t.maxConcurrentTickets,
       0
     );
     const totalAssigned = techniciansWithMetrics.reduce(
-      (acc, t) => acc + t.currentWorkload,
+      (acc: number, t: any) => acc + t.currentWorkload,
       0
     );
     const totalAvailableSlots = techniciansWithMetrics.reduce(
-      (acc, t) => acc + t.availableSlots,
+      (acc: number, t: any) => acc + t.availableSlots,
       0
     );
 

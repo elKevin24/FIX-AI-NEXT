@@ -90,7 +90,7 @@ export default async function UsersPage() {
         </Card>
       ) : (
         <div className={styles.usersGrid}>
-          {users.map((user) => (
+          {users.map((user: any) => (
             <Card key={user.id} className={styles.userCard}>
               <CardHeader>
                 <div className={styles.cardHeader}>

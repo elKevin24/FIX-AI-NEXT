@@ -63,7 +63,7 @@ export default async function CustomersPage() {
         </Card>
       ) : (
         <div className={styles.customersGrid}>
-          {customers.map((customer) => (
+          {customers.map((customer: any) => (
             <Card key={customer.id} className={styles.customerCard}>
               <CardHeader>
                 <div className={styles.cardHeader}>
