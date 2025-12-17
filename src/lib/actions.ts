@@ -227,7 +227,7 @@ export async function authenticate(
  * @todo Add input sanitization/validation with Zod
  * @todo Support customer email/phone lookup
  */
-export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema>, tenantId: string) {
+export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema>, customerName: string, tenantId: string) {
     if (!tenantId) {
         throw new Error('Tenant ID is required to create a ticket.');
     }
@@ -238,7 +238,7 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
         // Simple customer creation/lookup for demo
         let customer = await tenantDb.customer.findFirst({
             where: {
-                name: ticketData.customerName,
+                name: customerName,
             }
         });
 
@@ -248,7 +248,7 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {
-                    name: ticketData.customerName,
+                    name: customerName,
                     tenantId: tenantId, // Satisfy TS, enforced by extension
                     createdById: session?.user?.id,
                     updatedById: session?.user?.id,

@@ -102,7 +102,7 @@ export default async function TicketDetailPage({ params }: Props) {
     });
 
     // Convert Decimal objects to numbers for client components
-    const serializedParts = availableParts.map(part => ({
+    const serializedParts = availableParts.map((part: any) => ({
         ...part,
         cost: part.cost ? Number(part.cost) : 0,
         price: part.price ? Number(part.price) : 0,

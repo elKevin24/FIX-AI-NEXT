@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { ServiceCategory } from '@prisma/client';
+import { ServiceCategory, TicketPriority } from '@prisma/client';
 
 // ============================================================================
 // TYPES
@@ -21,6 +21,33 @@ export type ServiceTemplateFormData = {
   color?: string;
   icon?: string;
 };
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Convert template priority string to TicketPriority enum
+ * Template priorities use mixed case (Low, Medium, High, URGENT)
+ * Database enum uses uppercase (LOW, MEDIUM, HIGH, URGENT)
+ */
+function convertPriorityToEnum(priority: string): TicketPriority {
+  const upperPriority = priority.toUpperCase();
+
+  switch (upperPriority) {
+    case 'LOW':
+      return TicketPriority.LOW;
+    case 'MEDIUM':
+    case 'NORMAL':
+      return TicketPriority.MEDIUM;
+    case 'HIGH':
+      return TicketPriority.HIGH;
+    case 'URGENT':
+      return TicketPriority.URGENT;
+    default:
+      return TicketPriority.MEDIUM; // Default fallback
+  }
+}
 
 // ============================================================================
 // GET ALL TEMPLATES
@@ -357,7 +384,7 @@ export async function duplicateServiceTemplate(id: string) {
       createdById: session.user.id,
       updatedById: session.user.id,
       defaultParts: {
-        create: original.defaultParts.map((dp) => ({
+        create: original.defaultParts.map((dp: any) => ({
           partId: dp.partId,
           quantity: dp.quantity,
           required: dp.required,
@@ -420,7 +447,7 @@ export async function createTicketFromTemplate(
     data: {
       title: template.defaultTitle,
       description: template.defaultDescription,
-      priority: template.defaultPriority,
+      priority: convertPriorityToEnum(template.defaultPriority),
       deviceType: deviceType || 'PC',
       deviceModel: deviceModel || '',
       customerId,
@@ -436,7 +463,7 @@ export async function createTicketFromTemplate(
   // Agregar repuestos default si los hay
   if (template.defaultParts.length > 0) {
     await prisma.partUsage.createMany({
-      data: template.defaultParts.map((dp) => ({
+      data: template.defaultParts.map((dp: any) => ({
         ticketId: ticket.id,
         partId: dp.partId,
         quantity: dp.quantity,
