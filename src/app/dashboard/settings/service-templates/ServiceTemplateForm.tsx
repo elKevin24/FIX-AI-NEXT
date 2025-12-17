@@ -2,8 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ServiceCategory } from '@prisma/client';
 import { createServiceTemplate, updateServiceTemplate } from '@/lib/service-template-actions';
+
+// Define ServiceCategory locally since it may not be exported yet
+enum ServiceCategory {
+  MAINTENANCE = 'MAINTENANCE',
+  REPAIR = 'REPAIR',
+  UPGRADE = 'UPGRADE',
+  DIAGNOSTIC = 'DIAGNOSTIC',
+  INSTALLATION = 'INSTALLATION',
+  CONSULTATION = 'CONSULTATION',
+}
 
 type ServiceTemplateFormProps = {
   initialData?: {

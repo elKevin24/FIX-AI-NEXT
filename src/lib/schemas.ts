@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { ServiceCategory } from '@prisma/client';
+
+// Define ServiceCategory locally since it may not be exported yet
+enum ServiceCategory {
+  MAINTENANCE = 'MAINTENANCE',
+  REPAIR = 'REPAIR',
+  UPGRADE = 'UPGRADE',
+  DIAGNOSTIC = 'DIAGNOSTIC',
+  INSTALLATION = 'INSTALLATION',
+  CONSULTATION = 'CONSULTATION',
+}
 
 // Esquema para la creación de un solo ticket (parte del flujo multi-dispositivo)
 // NOTA: customerName se envía por separado en FormData, no dentro de cada ticket

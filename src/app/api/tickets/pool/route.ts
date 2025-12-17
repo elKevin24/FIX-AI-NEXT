@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { TicketPriority, TicketStatus } from '@prisma/client';
+
+// Define types locally since they may not be exported yet
+enum TicketPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+enum TicketStatus {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  CANCELLED = 'CANCELLED',
+}
 
 /**
  * @swagger
@@ -100,7 +116,7 @@ export async function GET(req: NextRequest) {
 
     // Calculate age in hours for each ticket
     const now = new Date();
-    const ticketsWithAge = tickets.map((ticket) => {
+    const ticketsWithAge = tickets.map((ticket: any) => {
       const ageInHours = Math.floor(
         (now.getTime() - ticket.createdAt.getTime()) / (1000 * 60 * 60)
       );
@@ -124,12 +140,12 @@ export async function GET(req: NextRequest) {
     });
 
     const stats = {
-      total: poolStats.reduce((acc, stat) => acc + stat._count, 0),
+      total: poolStats.reduce((acc: number, stat: any) => acc + stat._count, 0),
       byPriority: {
-        URGENT: poolStats.find((s) => s.priority === 'URGENT')?._count || 0,
-        HIGH: poolStats.find((s) => s.priority === 'HIGH')?._count || 0,
-        MEDIUM: poolStats.find((s) => s.priority === 'MEDIUM')?._count || 0,
-        LOW: poolStats.find((s) => s.priority === 'LOW')?._count || 0,
+        URGENT: poolStats.find((s: any) => s.priority === 'URGENT')?._count || 0,
+        HIGH: poolStats.find((s: any) => s.priority === 'HIGH')?._count || 0,
+        MEDIUM: poolStats.find((s: any) => s.priority === 'MEDIUM')?._count || 0,
+        LOW: poolStats.find((s: any) => s.priority === 'LOW')?._count || 0,
       },
     };
 
@@ -145,7 +161,7 @@ export async function GET(req: NextRequest) {
         canTakeMore,
         status: currentUser.status,
         specializations: currentUser.specializations.map(
-          (s) => s.specialization
+          (s: any) => s.specialization
         ),
       },
     });
