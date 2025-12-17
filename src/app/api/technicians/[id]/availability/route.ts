@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { TechnicianStatus } from '@prisma/client';
+
+// Define TechnicianStatus locally since it may not be exported yet
+type TechnicianStatus =
+  | 'AVAILABLE'
+  | 'UNAVAILABLE'
+  | 'ON_VACATION'
+  | 'ON_LEAVE'
+  | 'IN_TRAINING'
+  | 'SICK_LEAVE';
 
 /**
  * @swagger
