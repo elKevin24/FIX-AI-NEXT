@@ -3,23 +3,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-
-// Define types locally since they may not be exported yet
-enum ServiceCategory {
-  MAINTENANCE = 'MAINTENANCE',
-  REPAIR = 'REPAIR',
-  UPGRADE = 'UPGRADE',
-  DIAGNOSTIC = 'DIAGNOSTIC',
-  INSTALLATION = 'INSTALLATION',
-  CONSULTATION = 'CONSULTATION',
-}
-
-enum TicketPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
+import { ServiceCategory, TicketPriority } from '@prisma/client';
 
 // ============================================================================
 // TYPES
