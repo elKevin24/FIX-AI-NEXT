@@ -1,6 +1,7 @@
 'use client';
 
 import styles from './WorkloadSummary.module.css';
+import Link from 'next/link';
 
 interface WorkloadSummaryProps {
   summary: {
@@ -98,9 +99,9 @@ export function WorkloadSummary({ summary }: WorkloadSummaryProps) {
                 </span>
               )}
             </div>
-            <a href="/dashboard/tickets/pool" className={styles.alertButton}>
+            <Link href="/dashboard/tickets/pool" className={styles.alertButton}>
               View Pool
-            </a>
+            </Link>
           </div>
         </div>
       )}

@@ -51,9 +51,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Apply resolved theme to DOM
     useEffect(() => {
         const resolved = resolveTheme(theme);
-        setResolvedTheme(resolved);
+        if (resolved !== resolvedTheme) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setResolvedTheme(resolved);
+        }
         document.documentElement.setAttribute('data-theme', resolved);
-    }, [theme]);
+    }, [theme, resolvedTheme]);
 
     // Listen for system theme changes when theme is 'auto'
     useEffect(() => {

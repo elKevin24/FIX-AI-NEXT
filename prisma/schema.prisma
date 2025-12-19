@@ -154,6 +154,9 @@ model Ticket {
   checkInNotes       String?
   cancellationReason String?
 
+  estimatedCompletionDate DateTime? // Calculated based on services
+  dueDate                 DateTime? // Promised delivery date (SLA)
+
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
@@ -167,6 +170,7 @@ model Ticket {
   serviceTemplate   ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
 
   partsUsed PartUsage[]
+  services  TicketService[]
   notes     TicketNote[]
 
   createdById String?
@@ -240,6 +244,7 @@ model AuditLog {
 
   createdAt DateTime @default(now())
 
+  @@index([tenantId])
   @@map("audit_logs")
 }
 
@@ -278,6 +283,7 @@ model ServiceTemplate {
 
   defaultParts TemplateDefaultPart[]
   tickets      Ticket[]
+  usages       TicketService[]
 
   createdById String?
   createdBy   User?   @relation("TemplateCreatedBy", fields: [createdById], references: [id])
@@ -311,6 +317,26 @@ model TemplateDefaultPart {
   @@index([templateId])
   @@index([partId])
   @@map("template_default_parts")
+}
+
+model TicketService {
+  id String @id @default(uuid())
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   ServiceTemplate @relation(fields: [serviceId], references: [id])
+
+  // Snapshot of values at time of addition
+  name      String
+  laborCost Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([serviceId])
+  @@map("ticket_services")
 }
 
 // Especialidades del técnico

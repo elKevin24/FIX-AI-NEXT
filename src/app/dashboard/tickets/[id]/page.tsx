@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import TicketDetailView from './TicketDetailView';
+import { getTicketTimeline } from '@/lib/timeline';
+
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -57,6 +59,11 @@ export default async function TicketDetailPage({ params }: Props) {
                     createdAt: 'desc',
                 },
             },
+            services: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }, // @ts-ignore
         },
     });
 
@@ -101,6 +108,17 @@ export default async function TicketDetailPage({ params }: Props) {
         },
     });
 
+    // Get available services from the same tenant
+    const availableServices = await prisma.serviceTemplate.findMany({
+        where: {
+            tenantId: ticket.tenantId,
+            isActive: true,
+        },
+        orderBy: {
+            name: 'asc',
+        },
+    });
+
     // Convert Decimal objects to numbers for client components
     const serializedParts = availableParts.map((part: any) => ({
         ...part,
@@ -108,14 +126,34 @@ export default async function TicketDetailPage({ params }: Props) {
         price: part.price ? Number(part.price) : 0,
     }));
 
+    const serializedServices = availableServices.map(service => ({
+        id: service.id,
+        name: service.name,
+        laborCost: service.laborCost ? Number(service.laborCost) : 0,
+    }));
+
+    // @ts-ignore
+    const serializedTicketServices = (ticket as any).services?.map((s: any) => ({
+        ...s,
+        laborCost: s.laborCost ? Number(s.laborCost) : 0,
+    })) || [];
+
+    // Get combined timeline events (notes + audit logs)
+    const timelineEvents = await getTicketTimeline(ticket.id, ticket.tenantId);
+
     return (
         <TicketDetailView
-            ticket={ticket}
+            ticket={{
+                ...(ticket as any),
+                services: serializedTicketServices,
+            }}
             availableUsers={availableUsers}
             availableParts={serializedParts}
+            availableServices={serializedServices}
             isSuperAdmin={isSuperAdmin}
             isAdmin={isAdmin}
             currentUserId={session.user.id}
+            timelineEvents={timelineEvents}
         />
     );
 }
