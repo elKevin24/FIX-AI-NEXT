@@ -1,23 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
-
-// Define types locally since they may not be exported yet
-enum TicketPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
-
-enum TicketStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-  CANCELLED = 'CANCELLED',
-}
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { TicketPriority, TicketStatus } from '@prisma/client';
 
 /**
  * @swagger
@@ -51,8 +35,10 @@ export async function GET(req: NextRequest) {
     const priority = searchParams.get('priority') as TicketPriority | null;
     const limit = parseInt(searchParams.get('limit') || '50');
 
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
     // Get current technician's info if they're a technician
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await db.user.findUnique({
       where: { id: session.user.id },
       include: {
         specializations: true,
@@ -85,9 +71,8 @@ export async function GET(req: NextRequest) {
       currentUser.maxConcurrentTickets - currentUser._count.assignedTickets;
 
     // Get tickets from pool (unassigned OPEN tickets)
-    const tickets = await prisma.ticket.findMany({
+    const tickets = await db.ticket.findMany({
       where: {
-        tenantId: session.user.tenantId,
         status: TicketStatus.OPEN,
         assignedToId: null,
         ...(priority && { priority }),
@@ -129,10 +114,9 @@ export async function GET(req: NextRequest) {
     });
 
     // Get pool statistics
-    const poolStats = await prisma.ticket.groupBy({
+    const poolStats = await db.ticket.groupBy({
       by: ['priority'],
       where: {
-        tenantId: session.user.tenantId,
         status: TicketStatus.OPEN,
         assignedToId: null,
       },
