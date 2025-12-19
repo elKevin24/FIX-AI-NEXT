@@ -6,8 +6,8 @@ import { prisma } from "./prisma";
  * @param tenantId The ID of the tenant to scope queries to.
  * @returns A tenant-scoped Prisma client.
  */
-export function getTenantPrisma(tenantId: string) {
-    return prisma.$extends({
+export function getTenantPrisma(tenantId: string, userId?: string, clientArg: any = prisma) {
+    return clientArg.$extends({
         query: {
             $allModels: {
                 async findMany({ args, query }: any) {
@@ -19,57 +19,119 @@ export function getTenantPrisma(tenantId: string) {
                     return query(args);
                 },
                 async findUnique({ args, query, model }: any) {
-                    // findUnique cannot easily be patched to include tenantId if it's not in the unique key.
-                    // We convert it to findFirst to enforce tenant isolation.
-                    // This works because we want to find a record that matches the unique criteria AND the tenantId.
                     const { where, ...rest } = args;
                     return (prisma as any)[model].findFirst({
                         where: { ...where, tenantId },
                         ...rest,
                     });
                 },
-                async create({ args, query }: any) {
+                async create({ args, query, model }: any) {
                     (args.data as any).tenantId = tenantId;
-                    return query(args);
+                    if (userId) {
+                        (args.data as any).createdById = userId;
+                        (args.data as any).updatedById = userId;
+                    }
+                    
+                    const result = await query(args);
+
+                    // Automatic Audit Log
+                    if (userId && model !== 'AuditLog') {
+                        try {
+                            // Run properly detached to not block response
+                             (prisma as any).auditLog.create({
+                                data: {
+                                    action: `CREATE_${model.toUpperCase()}`,
+                                    details: JSON.stringify({ 
+                                        id: result.id, 
+                                        model,
+                                        data: args.data 
+                                    }),
+                                    userId,
+                                    tenantId
+                                }
+                            });
+                        } catch (e) {
+                            console.error('Failed to create audit log:', e);
+                        }
+                    }
+
+                    return result;
                 },
-                async createMany({ args, query }: any) {
+                async createMany({ args, query, model }: any) {
                     if (Array.isArray(args.data)) {
-                        args.data = args.data.map((item: any) => ({ ...item, tenantId }));
+                        args.data = args.data.map((item: any) => ({ 
+                            ...item, 
+                            tenantId,
+                            createdById: userId,
+                            updatedById: userId
+                        }));
                     } else {
                         (args.data as any).tenantId = tenantId;
+                        if (userId) {
+                            (args.data as any).createdById = userId;
+                            (args.data as any).updatedById = userId;
+                        }
                     }
-                    return query(args);
+                    
+                    const result = await query(args);
+
+                    // Audit Log for Batch Create
+                    if (userId && model !== 'AuditLog') {
+                         (prisma as any).auditLog.create({
+                            data: {
+                                action: `BATCH_CREATE_${model.toUpperCase()}`,
+                                details: JSON.stringify({ 
+                                    count: result.count, 
+                                    model 
+                                }),
+                                userId,
+                                tenantId
+                            }
+                        });
+                    }
+
+                    return result;
                 },
                 async update({ args, query, model }: any) {
-                    // Similar to findUnique, update takes a unique 'where'. 
-                    // We can't easily inject tenantId into 'where' for update if it's not part of the unique constraint.
-                    // We use updateMany to enforce the check, ensuring we only update 1 record.
                     const { where, ...rest } = args;
-                    // We use updateMany but we expect it to affect at most 1 record.
-                    // However, update returns the object, updateMany returns count.
-                    // So we might need to findFirst then update? 
-                    // Or just use updateMany and return the count?
-                    // Standard Prisma update returns the record.
-
-                    // Strategy: Find the record first ensuring tenantId, then update it.
-                    // This ensures we don't update something we don't own.
+                    
+                    // 1. Verify ownership and get previous state (for diffing if needed, or ensuring existence)
                     const record = await (prisma as any)[model].findFirst({
                         where: { ...where, tenantId },
-                        select: { id: true } // Assuming all models have 'id' or we need to know the PK
+                        select: { id: true } 
                     });
 
                     if (!record) {
-                        // If not found in this tenant, we throw or return null depending on expected behavior.
-                        // Prisma update throws RecordNotFound if not found.
                         const error = new Error('Record to update not found.');
                         (error as any).code = 'P2025';
                         throw error;
                     }
 
-                    // Now we can safely update by ID (which we know belongs to tenant)
-                    // Or just proceed with the original update since we verified ownership?
-                    // No, we should still be careful.
-                    return query(args);
+                    // 2. Add metadata
+                    if (userId && args.data) {
+                        args.data.updatedById = userId;
+                    }
+
+                    // 3. Perform Update
+                    const result = await query(args);
+
+                    // 4. Audit Log
+                    if (userId && model !== 'AuditLog') {
+                         (prisma as any).auditLog.create({
+                            data: {
+                                action: `UPDATE_${model.toUpperCase()}`,
+                                details: JSON.stringify({ 
+                                    id: result.id, 
+                                    model,
+                                    changes: args.data 
+                                }),
+                                userId,
+                                tenantId
+                            }
+                        });
+                    }
+
+                    return result;
                 },
                 async delete({ args, query, model }: any) {
                     const { where, ...rest } = args;
@@ -84,7 +146,23 @@ export function getTenantPrisma(tenantId: string) {
                         throw error;
                     }
 
-                    return query(args);
+                    const result = await query(args);
+
+                    if (userId && model !== 'AuditLog') {
+                         (prisma as any).auditLog.create({
+                            data: {
+                                action: `DELETE_${model.toUpperCase()}`,
+                                details: JSON.stringify({ 
+                                    id: record.id, 
+                                    model 
+                                }),
+                                userId,
+                                tenantId
+                            }
+                        });
+                    }
+
+                    return result;
                 },
             },
         },
