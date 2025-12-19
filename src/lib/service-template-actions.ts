@@ -1,9 +1,9 @@
 'use server';
 
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { ServiceCategory, TicketPriority } from '@prisma/client';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 
 // ============================================================================
 // TYPES
@@ -55,14 +55,13 @@ function convertPriorityToEnum(priority: string): TicketPriority {
 
 export async function getServiceTemplates() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
-  const templates = await prisma.serviceTemplate.findMany({
-    where: {
-      tenantId: session.user.tenantId,
-    },
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const templates = await tenantDb.serviceTemplate.findMany({
     include: {
       defaultParts: {
         include: {
@@ -90,13 +89,14 @@ export async function getServiceTemplates() {
 
 export async function getActiveServiceTemplates() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
-  const templates = await prisma.serviceTemplate.findMany({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const templates = await tenantDb.serviceTemplate.findMany({
     where: {
-      tenantId: session.user.tenantId,
       isActive: true,
     },
     include: {
@@ -121,14 +121,15 @@ export async function getActiveServiceTemplates() {
 
 export async function getServiceTemplate(id: string) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
-  const template = await prisma.serviceTemplate.findUnique({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const template = await tenantDb.serviceTemplate.findUnique({
     where: {
       id,
-      tenantId: session.user.tenantId,
     },
     include: {
       defaultParts: {
@@ -157,7 +158,7 @@ export async function getServiceTemplate(id: string) {
 
 export async function createServiceTemplate(data: ServiceTemplateFormData) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
@@ -166,7 +167,9 @@ export async function createServiceTemplate(data: ServiceTemplateFormData) {
     throw new Error('Permiso denegado. Solo administradores pueden crear plantillas.');
   }
 
-  const template = await prisma.serviceTemplate.create({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const template = await tenantDb.serviceTemplate.create({
     data: {
       ...data,
       laborCost: data.laborCost ? Number(data.laborCost) : null,
@@ -176,15 +179,7 @@ export async function createServiceTemplate(data: ServiceTemplateFormData) {
     },
   });
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: 'CREATE_SERVICE_TEMPLATE',
-      details: JSON.stringify({ templateId: template.id, name: template.name }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
+  // Audit log handled automatically
 
   revalidatePath('/dashboard/settings/service-templates');
   return template;
@@ -196,17 +191,8 @@ export async function createServiceTemplate(data: ServiceTemplateFormData) {
 
 export async function updateServiceTemplate(id: string, data: ServiceTemplateFormData) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
-  }
-
-  // Verificar que la plantilla pertenece al tenant
-  const existingTemplate = await prisma.serviceTemplate.findUnique({
-    where: { id },
-  });
-
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
-    throw new Error('Plantilla no encontrada');
   }
 
   // Solo ADMIN puede editar completamente
@@ -214,7 +200,17 @@ export async function updateServiceTemplate(id: string, data: ServiceTemplateFor
     throw new Error('Permiso denegado');
   }
 
-  const template = await prisma.serviceTemplate.update({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const existingTemplate = await tenantDb.serviceTemplate.findUnique({
+    where: { id },
+  });
+
+  if (!existingTemplate) {
+    throw new Error('Plantilla no encontrada');
+  }
+
+  const template = await tenantDb.serviceTemplate.update({
     where: { id },
     data: {
       ...data,
@@ -223,15 +219,7 @@ export async function updateServiceTemplate(id: string, data: ServiceTemplateFor
     },
   });
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: 'UPDATE_SERVICE_TEMPLATE',
-      details: JSON.stringify({ templateId: template.id, changes: data }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
+  // Audit log handled automatically
 
   revalidatePath('/dashboard/settings/service-templates');
   revalidatePath(`/dashboard/settings/service-templates/${id}`);
@@ -244,17 +232,8 @@ export async function updateServiceTemplate(id: string, data: ServiceTemplateFor
 
 export async function toggleTemplateActiveStatus(id: string, isActive: boolean) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
-  }
-
-  // Verificar que la plantilla pertenece al tenant
-  const existingTemplate = await prisma.serviceTemplate.findUnique({
-    where: { id },
-  });
-
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
-    throw new Error('Plantilla no encontrada');
   }
 
   // Solo ADMIN puede activar/desactivar
@@ -262,7 +241,17 @@ export async function toggleTemplateActiveStatus(id: string, isActive: boolean) 
     throw new Error('Permiso denegado');
   }
 
-  const template = await prisma.serviceTemplate.update({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const existingTemplate = await tenantDb.serviceTemplate.findUnique({
+    where: { id },
+  });
+
+  if (!existingTemplate) {
+    throw new Error('Plantilla no encontrada');
+  }
+
+  const template = await tenantDb.serviceTemplate.update({
     where: { id },
     data: {
       isActive,
@@ -270,15 +259,7 @@ export async function toggleTemplateActiveStatus(id: string, isActive: boolean) 
     },
   });
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: isActive ? 'ACTIVATE_SERVICE_TEMPLATE' : 'DEACTIVATE_SERVICE_TEMPLATE',
-      details: JSON.stringify({ templateId: template.id, name: template.name }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
+  // Audit log handled automatically
 
   revalidatePath('/dashboard/settings/service-templates');
   return template;
@@ -290,7 +271,7 @@ export async function toggleTemplateActiveStatus(id: string, isActive: boolean) 
 
 export async function deleteServiceTemplate(id: string) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
@@ -299,8 +280,9 @@ export async function deleteServiceTemplate(id: string) {
     throw new Error('Permiso denegado');
   }
 
-  // Verificar que la plantilla pertenece al tenant
-  const existingTemplate = await prisma.serviceTemplate.findUnique({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const existingTemplate = await tenantDb.serviceTemplate.findUnique({
     where: { id },
     include: {
       _count: {
@@ -311,7 +293,7 @@ export async function deleteServiceTemplate(id: string) {
     },
   });
 
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
+  if (!existingTemplate) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -322,19 +304,11 @@ export async function deleteServiceTemplate(id: string) {
     );
   }
 
-  await prisma.serviceTemplate.delete({
+  await tenantDb.serviceTemplate.delete({
     where: { id },
   });
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: 'DELETE_SERVICE_TEMPLATE',
-      details: JSON.stringify({ templateId: id, name: existingTemplate.name }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
+  // Audit log handled automatically
 
   revalidatePath('/dashboard/settings/service-templates');
   return { success: true };
@@ -346,7 +320,7 @@ export async function deleteServiceTemplate(id: string) {
 
 export async function duplicateServiceTemplate(id: string) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
@@ -355,20 +329,22 @@ export async function duplicateServiceTemplate(id: string) {
     throw new Error('Permiso denegado');
   }
 
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
   // Obtener plantilla original
-  const original = await prisma.serviceTemplate.findUnique({
+  const original = await tenantDb.serviceTemplate.findUnique({
     where: { id },
     include: {
       defaultParts: true,
     },
   });
 
-  if (!original || original.tenantId !== session.user.tenantId) {
+  if (!original) {
     throw new Error('Plantilla no encontrada');
   }
 
   // Crear copia
-  const duplicate = await prisma.serviceTemplate.create({
+  const duplicate = await tenantDb.serviceTemplate.create({
     data: {
       name: `${original.name} (Copia)`,
       category: original.category,
@@ -393,19 +369,7 @@ export async function duplicateServiceTemplate(id: string) {
     },
   });
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: 'DUPLICATE_SERVICE_TEMPLATE',
-      details: JSON.stringify({
-        originalId: id,
-        duplicateId: duplicate.id,
-        name: duplicate.name,
-      }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
+  // Audit log handled automatically
 
   revalidatePath('/dashboard/settings/service-templates');
   return duplicate;
@@ -415,26 +379,22 @@ export async function duplicateServiceTemplate(id: string) {
 // CREATE TICKET FROM TEMPLATE
 // ============================================================================
 
-export async function createTicketFromTemplate(
-  templateId: string,
-  customerId: string,
-  deviceType?: string,
-  deviceModel?: string
-) {
+export async function createTicketFromTemplate(templateId: string, deviceType: string, deviceModel: string, customerId: string) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
 
-  // Obtener plantilla
-  const template = await prisma.serviceTemplate.findUnique({
+  const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const template = await tenantDb.serviceTemplate.findUnique({
     where: { id: templateId },
     include: {
       defaultParts: true,
     },
   });
 
-  if (!template || template.tenantId !== session.user.tenantId) {
+  if (!template) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -443,11 +403,11 @@ export async function createTicketFromTemplate(
   }
 
   // Crear ticket usando la plantilla
-  const ticket = await prisma.ticket.create({
+  const ticket = await tenantDb.ticket.create({
     data: {
       title: template.defaultTitle,
       description: template.defaultDescription,
-      priority: convertPriorityToEnum(template.defaultPriority),
+      priority: (template.defaultPriority as any) || 'MEDIUM',
       deviceType: deviceType || 'PC',
       deviceModel: deviceModel || '',
       customerId,
@@ -462,7 +422,7 @@ export async function createTicketFromTemplate(
 
   // Agregar repuestos default si los hay
   if (template.defaultParts.length > 0) {
-    await prisma.partUsage.createMany({
+    await tenantDb.partUsage.createMany({
       data: template.defaultParts.map((dp: any) => ({
         ticketId: ticket.id,
         partId: dp.partId,
@@ -471,20 +431,8 @@ export async function createTicketFromTemplate(
     });
   }
 
-  // Audit log
-  await prisma.auditLog.create({
-    data: {
-      action: 'CREATE_TICKET_FROM_TEMPLATE',
-      details: JSON.stringify({
-        ticketId: ticket.id,
-        templateId,
-        templateName: template.name,
-      }),
-      userId: session.user.id,
-      tenantId: session.user.tenantId,
-    },
-  });
-
+  // Audit log handled automatically by getTenantPrisma extension
+  
   revalidatePath('/dashboard/tickets');
   return ticket;
 }

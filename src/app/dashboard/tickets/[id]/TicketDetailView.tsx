@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PartsSection from './PartsSection';
+import ServicesSection from './ServicesSection';
+import TimelineSection from './TimelineSection';
+import { TimelineEvent } from '@/lib/timeline';
 
 interface Part {
     id: string;
@@ -17,11 +20,25 @@ interface Part {
     price: any;
 }
 
+interface Service {
+    id: string;
+    name: string;
+    laborCost: any;
+}
+
 interface PartUsage {
     id: string;
     quantity: number;
     createdAt: Date;
     part: Part;
+}
+
+interface ServiceUsage {
+    id: string;
+    name: string;
+    laborCost: any;
+    createdAt: Date;
+    serviceId: string;
 }
 
 interface TicketNote {
@@ -61,6 +78,7 @@ interface Ticket {
     };
     notes: TicketNote[];
     partsUsed: PartUsage[];
+    services: ServiceUsage[];
 }
 
 interface User {
@@ -74,9 +92,11 @@ interface Props {
     ticket: Ticket;
     availableUsers: User[];
     availableParts: Part[];
+    availableServices: Service[];
     isSuperAdmin: boolean;
     isAdmin: boolean;
     currentUserId: string;
+    timelineEvents: TimelineEvent[];
 }
 
 const STATUS_OPTIONS = [
@@ -94,7 +114,7 @@ const PRIORITY_OPTIONS = [
     { value: 'High', label: 'Alta' },
 ];
 
-export default function TicketDetailView({ ticket, availableUsers, availableParts, isSuperAdmin, isAdmin, currentUserId }: Props) {
+export default function TicketDetailView({ ticket, availableUsers, availableParts, availableServices, isSuperAdmin, isAdmin, currentUserId, timelineEvents }: Props) {
     const router = useRouter();
     const [updateState, updateAction, isUpdating] = useActionState(updateTicket, null);
     const [deleteState, deleteAction, isDeleting] = useActionState(deleteTicket, null);
@@ -439,6 +459,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 </div>
             </div>
 
+            {/* Services Section */}
+            <ServicesSection
+                ticketId={ticket.id}
+                servicesUsed={ticket.services}
+                availableServices={availableServices}
+            />
+
             {/* Parts Section */}
             <PartsSection
                 ticketId={ticket.id}
@@ -446,9 +473,9 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 availableParts={availableParts}
             />
 
-            {/* Notes Section */}
+            {/* Notes Section & Timeline */}
             <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '1.5rem' }}>
-                <h3 style={{ marginBottom: '1.5rem' }}>Bitácora de Reparación ({ticket.notes.length} nota{ticket.notes.length !== 1 ? 's' : ''})</h3>
+                <h3 style={{ marginBottom: '1.5rem' }}>Bitácora de Reparación y Auditoría ({timelineEvents.length} eventos)</h3>
 
                 {/* Add Note Form */}
                 <form ref={formRef} action={noteAction} style={{ marginBottom: '2rem' }}>
@@ -485,37 +512,52 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                     </div>
                 </form>
 
-                {/* Notes List */}
+                {/* Unified Timeline List */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {ticket.notes.length === 0 ? (
+                    {timelineEvents.length === 0 ? (
                         <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>
-                            No hay notas todavía. Agrega la primera nota para comenzar la bitácora.
+                            No hay eventos registrados.
                         </p>
                     ) : (
-                        ticket.notes.map((note) => (
+                        timelineEvents.map((event) => (
                             <div
-                                key={note.id}
+                                key={event.id}
                                 style={{
                                     padding: '1rem',
-                                    backgroundColor: '#f9f9f9',
+                                    backgroundColor: event.type === 'NOTE' ? '#f9f9f9' : '#f0f9ff',
                                     borderRadius: '8px',
-                                    border: '1px solid #eee',
+                                    border: event.type === 'NOTE' ? '1px solid #eee' : '1px solid #bae6fd',
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ fontWeight: '600', color: '#333' }}>
-                                            {note.author.name || note.author.email}
+                                        <span style={{ 
+                                            fontWeight: '600', 
+                                            color: event.type === 'NOTE' ? '#333' : '#0369a1' 
+                                        }}>
+                                            {event.author.name || event.author.email || 'Sistema'}
                                         </span>
+                                        {event.type === 'LOG' && (
+                                            <span style={{
+                                                fontSize: '0.7rem',
+                                                backgroundColor: '#0ea5e9',
+                                                color: 'white',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                Sistema
+                                            </span>
+                                        )}
                                         <span style={{ fontSize: '0.8rem', color: '#999' }}>
-                                            {new Date(note.createdAt).toLocaleString('es-ES')}
+                                            {new Date(event.date).toLocaleString('es-ES')}
                                         </span>
                                     </div>
 
-                                    {/* Delete button - only for author or admin */}
-                                    {(note.author.id === currentUserId || isAdmin) && (
+                                    {/* Delete button - only for NOTE and author/admin */}
+                                    {event.type === 'NOTE' && (event.author.email === ticket.notes.find(n => n.id === event.id)?.author?.email || isAdmin) && (
                                         <form action={deleteNoteAction}>
-                                            <input type="hidden" name="noteId" value={note.id} />
+                                            <input type="hidden" name="noteId" value={event.id} />
                                             <button
                                                 type="submit"
                                                 disabled={isDeletingNote}
@@ -535,8 +577,12 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         </form>
                                     )}
                                 </div>
-                                <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5', color: '#444' }}>
-                                    {note.content}
+                                <p style={{ 
+                                    whiteSpace: 'pre-wrap', 
+                                    lineHeight: '1.5', 
+                                    color: event.type === 'NOTE' ? '#444' : '#0c4a6e'
+                                }}>
+                                    {event.content}
                                 </p>
                             </div>
                         ))
