@@ -115,7 +115,7 @@ export async function receivePurchaseOrder(orderId: string) {
          const db = getTenantPrisma(session.user.tenantId, session.user.id); // Base client
 
          // Use transaction for the entire reception process
-         await db.$transaction(async (tx) => {
+         await db.$transaction(async (tx: any) => {
              // 1. Get Order with Items
              // Note: tx in transaction doesn't need getTenantPrisma again if we use `tx` which is already the prisma client,
              // BUT we need tenant filtering key.

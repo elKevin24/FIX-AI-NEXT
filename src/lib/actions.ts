@@ -375,7 +375,7 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
         const currentCustomerId = customer.id;
 
         // Use interactive transaction for batch creation and audit logging
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(tenantId, session.user.id, tx);
 
             // Execute creations in parallel within the transaction
@@ -930,7 +930,7 @@ export async function updateTicket(prevState: any, formData: FormData) {
         }
 
         // Execute transaction
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(existingTicket.tenantId, session.user.id, tx);
 
             // Logic for CANCELLATION: Restore stock
@@ -1033,7 +1033,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
                  // Re-init tenantDb with ticket's tenant
                  const itemTenantDb = getTenantPrisma(adminTicket.tenantId, session.user.id);
                  
-                 await prisma.$transaction(async (tx) => {
+                 await prisma.$transaction(async (tx: any) => {
                      const txTenantDb = getTenantPrisma(adminTicket.tenantId, session.user.id, tx);
                      await handleStatusUpdate(txTenantDb, adminTicket.id, status, adminTicket, session.user.id);
                  });
@@ -1043,7 +1043,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
         }
 
         // Normal user flow
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
             await handleStatusUpdate(txTenantDb, ticketId, status, existingTicket, session.user.id);
         });
@@ -1508,7 +1508,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
 
             // Verify ticket belongs to tenant
@@ -1591,7 +1591,7 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
 
             const usage = await txTenantDb.partUsage.findUnique({
