@@ -1,22 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
-
-// Define types locally since they may not be exported yet
-enum UserRole {
-  ADMIN = 'ADMIN',
-  TECHNICIAN = 'TECHNICIAN',
-  RECEPTIONIST = 'RECEPTIONIST',
-}
-
-enum TicketStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-  CANCELLED = 'CANCELLED',
-}
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { UserRole, TicketStatus } from '@prisma/client';
 
 /**
  * @swagger
@@ -35,10 +20,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
     // Get all technicians in the tenant
-    const technicians = await prisma.user.findMany({
+    const technicians = await db.user.findMany({
       where: {
-        tenantId: session.user.tenantId,
         role: UserRole.TECHNICIAN,
       },
       select: {
@@ -184,17 +170,15 @@ export async function GET(req: NextRequest) {
       totalCapacity > 0 ? Math.round((totalAssigned / totalCapacity) * 100) : 0;
 
     // Get unassigned tickets count
-    const unassignedCount = await prisma.ticket.count({
+    const unassignedCount = await db.ticket.count({
       where: {
-        tenantId: session.user.tenantId,
         status: TicketStatus.OPEN,
         assignedToId: null,
       },
     });
 
-    const unassignedOldCount = await prisma.ticket.count({
+    const unassignedOldCount = await db.ticket.count({
       where: {
-        tenantId: session.user.tenantId,
         status: TicketStatus.OPEN,
         assignedToId: null,
         createdAt: {
