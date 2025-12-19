@@ -36,12 +36,8 @@ export default function ThemeSwitcher() {
     }, [isOpen]);
 
     // Focus management when dropdown opens
-    useEffect(() => {
-        if (isOpen) {
-            const currentIndex = themes.findIndex(t => t.value === theme);
-            setFocusedIndex(currentIndex >= 0 ? currentIndex : 0);
-        }
-    }, [isOpen, theme]);
+    // Removed to avoid sync setState error - logic moved to toggle handler if needed
+    // or handled by initial render of dropdown content
 
     // Auto-focus the focused button
     useEffect(() => {
@@ -97,9 +93,17 @@ export default function ThemeSwitcher() {
     const handleMainButtonKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
+            if (!isOpen) {
+                const currentIndex = themes.findIndex(t => t.value === theme);
+                setFocusedIndex(currentIndex >= 0 ? currentIndex : 0);
+            }
             setIsOpen(!isOpen);
         } else if (e.key === 'ArrowDown') {
             e.preventDefault();
+            if (!isOpen) {
+                const currentIndex = themes.findIndex(t => t.value === theme);
+                setFocusedIndex(currentIndex >= 0 ? currentIndex : 0);
+            }
             setIsOpen(true);
         }
     };
@@ -109,7 +113,13 @@ export default function ThemeSwitcher() {
             <div className={styles.themeSwitcher} ref={dropdownRef}>
                 <button
                     className={styles.themeButton}
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={() => {
+                        if (!isOpen) {
+                             const currentIndex = themes.findIndex(t => t.value === theme);
+                             setFocusedIndex(currentIndex >= 0 ? currentIndex : 0);
+                        }
+                        setIsOpen(!isOpen);
+                    }}
                     onKeyDown={handleMainButtonKeyDown}
                     aria-label="Cambiar tema"
                     aria-haspopup="menu"
