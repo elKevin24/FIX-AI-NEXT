@@ -377,7 +377,12 @@ export async function duplicateServiceTemplate(id: string) {
 // CREATE TICKET FROM TEMPLATE
 // ============================================================================
 
-export async function createTicketFromTemplate(templateId: string, deviceType: string, deviceModel: string, customerId: string) {
+export async function createTicketFromTemplate(
+  templateId: string,
+  deviceType: string,
+  deviceModel: string,
+  customerId: string
+) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
@@ -385,11 +390,15 @@ export async function createTicketFromTemplate(templateId: string, deviceType: s
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
-  // Obtener plantilla
+  // Obtener plantilla con partes requeridas
   const template = await db.serviceTemplate.findUnique({
     where: { id: templateId },
     include: {
-      defaultParts: true,
+      defaultParts: {
+        include: {
+          part: true,
+        },
+      },
     },
   });
 
@@ -401,35 +410,99 @@ export async function createTicketFromTemplate(templateId: string, deviceType: s
     throw new Error('Esta plantilla está inactiva');
   }
 
-  // Crear ticket usando la plantilla
-  const ticket = await db.ticket.create({
-    data: {
-      title: template.defaultTitle,
-      description: template.defaultDescription,
-      priority: (template.defaultPriority as any) || 'MEDIUM',
-      deviceType: deviceType || 'PC',
-      deviceModel: deviceModel || '',
-      customerId,
-      tenantId: session.user.tenantId,
-      serviceTemplateId: templateId,
-      // Asignar automáticamente si el usuario es técnico
-      assignedToId: session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
-      createdById: session.user.id,
-      updatedById: session.user.id,
-    },
+  // Validar que customer pertenece al tenant (CRITICAL: tenant isolation)
+  const customer = await db.customer.findUnique({
+    where: { id: customerId },
   });
 
-  // Agregar repuestos default si los hay
-  if (template.defaultParts.length > 0) {
-    await db.partUsage.createMany({
-      data: template.defaultParts.map((dp: { partId: string; quantity: number }) => ({
-        ticketId: ticket.id,
-        partId: dp.partId,
-        quantity: dp.quantity,
-      })),
-    });
+  if (!customer || customer.tenantId !== session.user.tenantId) {
+    throw new Error('Cliente no encontrado o no pertenece a tu organización');
   }
 
+  // ATOMIC TRANSACTION: Crear ticket y consumir stock automáticamente
+  const ticket = await db.$transaction(async (tx: any) => {
+    // 1. Crear el ticket
+    const newTicket = await tx.ticket.create({
+      data: {
+        title: template.defaultTitle,
+        description: template.defaultDescription,
+        priority: convertPriorityToEnum(template.defaultPriority),
+        deviceType: deviceType || 'PC',
+        deviceModel: deviceModel || '',
+        customerId,
+        tenantId: session.user.tenantId,
+        serviceTemplateId: templateId,
+        // Asignar automáticamente si el usuario es técnico
+        assignedToId:
+          session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
+        createdById: session.user.id,
+        updatedById: session.user.id,
+      },
+    });
+
+    // 2. Procesar partes REQUERIDAS con consumo atómico de stock
+    const requiredParts = template.defaultParts.filter((dp: any) => dp.required);
+
+    for (const defaultPart of requiredParts) {
+      // ATOMIC UPDATE: Solo decrementa si hay stock suficiente
+      const updateResult = await tx.part.updateMany({
+        where: {
+          id: defaultPart.partId,
+          quantity: { gte: defaultPart.quantity }, // Condición atómica
+        },
+        data: {
+          quantity: { decrement: defaultPart.quantity }, // Decremento atómico
+        },
+      });
+
+      // Si no se actualizó ninguna fila, no hay stock suficiente
+      if (updateResult.count === 0) {
+        throw new Error(
+          `Stock insuficiente para ${defaultPart.part.name}. ` +
+            `Disponible: ${defaultPart.part.quantity}, Requerido: ${defaultPart.quantity}`
+        );
+      }
+
+      // Registrar uso de parte
+      await tx.partUsage.create({
+        data: {
+          ticketId: newTicket.id,
+          partId: defaultPart.partId,
+          quantity: defaultPart.quantity,
+        },
+      });
+    }
+
+    // 3. Agregar partes OPCIONALES (no requieren stock, solo sugerencia)
+    const optionalParts = template.defaultParts.filter((dp: any) => !dp.required);
+
+    if (optionalParts.length > 0) {
+      // Las partes opcionales se agregan como referencia pero NO consumen stock
+      // El técnico decide después si las usa
+      for (const optionalPart of optionalParts) {
+        // Verificar si hay stock disponible para la sugerencia
+        const part = await tx.part.findUnique({
+          where: { id: optionalPart.partId },
+        });
+
+        if (part && part.quantity >= optionalPart.quantity) {
+          // Solo registrar como "sugerencia" en notas
+          await tx.ticketNote.create({
+            data: {
+              ticketId: newTicket.id,
+              authorId: session.user.id,
+              content: `💡 Parte sugerida por plantilla: ${part.name} (Cantidad: ${optionalPart.quantity})`,
+              isInternal: true,
+            },
+          });
+        }
+      }
+    }
+
+    return newTicket;
+  });
+
   revalidatePath('/dashboard/tickets');
+  revalidatePath(`/dashboard/tickets/${ticket.id}`);
   return ticket;
 }
