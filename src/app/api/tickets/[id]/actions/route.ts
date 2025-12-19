@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
-
-// Define TicketStatus locally since it may not be exported yet
-enum TicketStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-  CANCELLED = 'CANCELLED',
-}
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { TicketStatus } from '@prisma/client';
 
 /**
  * @swagger
@@ -69,11 +60,12 @@ export async function POST(
       );
     }
 
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
     // Verify ticket exists and belongs to tenant
-    const ticket = await prisma.ticket.findFirst({
+    const ticket = await db.ticket.findUnique({
       where: {
         id,
-        tenantId: session.user.tenantId,
       },
       include: {
         customer: true,
@@ -81,20 +73,18 @@ export async function POST(
       },
     });
 
-    if (!ticket) {
+    if (!ticket || ticket.tenantId !== session.user.tenantId) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
     let updatedTicket;
-    let auditAction = '';
-    let auditDetails = '';
 
     switch (action) {
       case 'take':
         // Technician takes an unassigned ticket
         // TRANSACTION: Prevents race condition in workload checking
         try {
-          updatedTicket = await prisma.$transaction(async (tx) => {
+          updatedTicket = await db.$transaction(async (tx: any) => {
             // Re-fetch technician with current workload INSIDE transaction
             const technician = await tx.user.findUnique({
               where: { id: session.user.id },
@@ -157,9 +147,6 @@ export async function POST(
 
             return updated;
           });
-
-          auditAction = 'TAKE_TICKET';
-          auditDetails = `${session.user.name} took ticket #${id.substring(0, 8)}`;
         } catch (error: any) {
           return NextResponse.json(
             { error: error.message || 'Failed to take ticket' },
@@ -179,9 +166,7 @@ export async function POST(
 
         // TRANSACTION: Prevents race condition in workload checking
         try {
-          let technicianName = '';
-
-          updatedTicket = await prisma.$transaction(async (tx) => {
+          updatedTicket = await db.$transaction(async (tx: any) => {
             // Verify target technician exists and belongs to tenant (inside transaction)
             const targetTechnician = await tx.user.findFirst({
               where: {
@@ -206,8 +191,6 @@ export async function POST(
             if (!targetTechnician) {
               throw new Error('Target technician not found');
             }
-
-            technicianName = targetTechnician.name || 'Unknown';
 
             // Check if target technician is available
             if (targetTechnician.status !== 'AVAILABLE') {
@@ -240,9 +223,6 @@ export async function POST(
 
             return updated;
           });
-
-          auditAction = 'ASSIGN_TICKET';
-          auditDetails = `${session.user.name} assigned ticket #${id.substring(0, 8)} to ${technicianName}`;
         } catch (error: any) {
           return NextResponse.json(
             { error: error.message || 'Failed to assign ticket' },
@@ -253,7 +233,7 @@ export async function POST(
 
       case 'start':
         // Start work on ticket
-        updatedTicket = await prisma.ticket.update({
+        updatedTicket = await db.ticket.update({
           where: { id },
           data: {
             status: TicketStatus.IN_PROGRESS,
@@ -264,9 +244,6 @@ export async function POST(
             assignedTo: true,
           },
         });
-
-        auditAction = 'START_TICKET';
-        auditDetails = `Started work on ticket #${id.substring(0, 8)}`;
         break;
 
       case 'wait_for_parts':
@@ -278,59 +255,60 @@ export async function POST(
           );
         }
 
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.WAITING_FOR_PARTS,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
-        });
+        // Use transaction to update ticket and add note atomically
+        updatedTicket = await db.$transaction(async (tx: any) => {
+             const t = await tx.ticket.update({
+                where: { id },
+                data: {
+                    status: TicketStatus.WAITING_FOR_PARTS,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                },
+             });
 
-        // Add note
-        await prisma.ticketNote.create({
-          data: {
-            ticketId: id,
-            content: note,
-            isInternal: true,
-            authorId: session.user.id,
-          },
-        });
+             await tx.ticketNote.create({
+                data: {
+                    ticketId: id,
+                    content: note,
+                    isInternal: true,
+                    authorId: session.user.id,
+                }
+             });
 
-        auditAction = 'WAIT_FOR_PARTS';
-        auditDetails = `Ticket #${id.substring(0, 8)} waiting for parts: ${note}`;
+             return t;
+        });
         break;
 
       case 'resume':
         // Resume work from waiting for parts
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.IN_PROGRESS,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
+        updatedTicket = await db.$transaction(async (tx: any) => {
+            const t = await tx.ticket.update({
+                where: { id },
+                data: {
+                    status: TicketStatus.IN_PROGRESS,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                },
+            });
+
+            if (note) {
+                await tx.ticketNote.create({
+                    data: {
+                    ticketId: id,
+                    content: note,
+                    isInternal: true,
+                    authorId: session.user.id,
+                    },
+                });
+            }
+            return t;
         });
-
-        if (note) {
-          await prisma.ticketNote.create({
-            data: {
-              ticketId: id,
-              content: note,
-              isInternal: true,
-              authorId: session.user.id,
-            },
-          });
-        }
-
-        auditAction = 'RESUME_TICKET';
-        auditDetails = `Resumed work on ticket #${id.substring(0, 8)}`;
         break;
 
       case 'resolve':
@@ -342,59 +320,58 @@ export async function POST(
           );
         }
 
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.RESOLVED,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
-        });
+        updatedTicket = await db.$transaction(async (tx: any) => {
+            const t = await tx.ticket.update({
+                where: { id },
+                data: {
+                    status: TicketStatus.RESOLVED,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                },
+            });
 
-        // Add closing note
-        await prisma.ticketNote.create({
-          data: {
-            ticketId: id,
-            content: note,
-            isInternal: true,
-            authorId: session.user.id,
-          },
+            await tx.ticketNote.create({
+                data: {
+                    ticketId: id,
+                    content: note,
+                    isInternal: true,
+                    authorId: session.user.id,
+                },
+            });
+            return t;
         });
-
-        auditAction = 'RESOLVE_TICKET';
-        auditDetails = `Resolved ticket #${id.substring(0, 8)}`;
         break;
 
       case 'deliver':
         // Mark ticket as delivered/closed
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.CLOSED,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
+        updatedTicket = await db.$transaction(async (tx: any) => {
+            const t = await tx.ticket.update({
+                where: { id },
+                data: {
+                    status: TicketStatus.CLOSED,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                },
+            });
+
+            if (note) {
+                await tx.ticketNote.create({
+                    data: {
+                    ticketId: id,
+                    content: note,
+                    isInternal: false,
+                    authorId: session.user.id,
+                    },
+                });
+            }
+            return t;
         });
-
-        if (note) {
-          await prisma.ticketNote.create({
-            data: {
-              ticketId: id,
-              content: note,
-              isInternal: false,
-              authorId: session.user.id,
-            },
-          });
-        }
-
-        auditAction = 'DELIVER_TICKET';
-        auditDetails = `Delivered ticket #${id.substring(0, 8)} to customer`;
         break;
 
       case 'cancel':
@@ -422,7 +399,7 @@ export async function POST(
         }
 
         // ATOMIC TRANSACTION: Restore parts and update ticket status together
-        updatedTicket = await prisma.$transaction(async (tx) => {
+        updatedTicket = await db.$transaction(async (tx: any) => {
           // Get all parts used in this ticket
           const partsUsed = await tx.partUsage.findMany({
             where: { ticketId: id },
@@ -456,39 +433,36 @@ export async function POST(
 
           return updated;
         });
-
-        auditAction = 'CANCEL_TICKET';
-        auditDetails = `Cancelled ticket #${id.substring(0, 8)}: ${cancellationReason}`;
         break;
 
       case 'reopen':
         // Reopen a closed/cancelled ticket
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.IN_PROGRESS,
-            cancellationReason: null,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
+        updatedTicket = await db.$transaction(async (tx: any) => {
+             const t = await tx.ticket.update({
+                where: { id },
+                data: {
+                    status: TicketStatus.IN_PROGRESS,
+                    cancellationReason: null,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                },
+             });
+
+             if (note) {
+                await tx.ticketNote.create({
+                    data: {
+                    ticketId: id,
+                    content: `Ticket reopened: ${note}`,
+                    isInternal: true,
+                    authorId: session.user.id,
+                    },
+                });
+            }
+            return t;
         });
-
-        if (note) {
-          await prisma.ticketNote.create({
-            data: {
-              ticketId: id,
-              content: `Ticket reopened: ${note}`,
-              isInternal: true,
-              authorId: session.user.id,
-            },
-          });
-        }
-
-        auditAction = 'REOPEN_TICKET';
-        auditDetails = `Reopened ticket #${id.substring(0, 8)}`;
         break;
 
       default:
@@ -498,15 +472,7 @@ export async function POST(
         );
     }
 
-    // Create audit log
-    await prisma.auditLog.create({
-      data: {
-        action: auditAction,
-        details: auditDetails,
-        userId: session.user.id,
-        tenantId: session.user.tenantId,
-      },
-    });
+    // Automatic audit logging handles the logs now as part of the transaction or direct calls on 'db'
 
     return NextResponse.json({
       success: true,

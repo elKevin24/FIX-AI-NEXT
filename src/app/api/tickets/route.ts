@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 
 export async function GET(request: Request) {
     const session = await auth();
@@ -10,10 +10,8 @@ export async function GET(request: Request) {
     }
 
     try {
-        const tickets = await prisma.ticket.findMany({
-            where: {
-                tenantId: session.user.tenantId,
-            },
+        const db = getTenantPrisma(session.user.tenantId, session.user.id);
+        const tickets = await db.ticket.findMany({
             include: {
                 customer: true,
                 assignedTo: true,
@@ -49,8 +47,10 @@ export async function POST(request: Request) {
             );
         }
 
+        const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
         // CRITICAL: Validate tenant isolation - ensure customer belongs to user's tenant
-        const customer = await prisma.customer.findFirst({
+        const customer = await db.customer.findFirst({
             where: {
                 id: customerId,
                 tenantId: session.user.tenantId,
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const ticket = await prisma.ticket.create({
+        const ticket = await db.ticket.create({
             data: {
                 title,
                 description,
@@ -76,16 +76,6 @@ export async function POST(request: Request) {
             },
             include: {
                 customer: true,
-            },
-        });
-
-        // Create audit log
-        await prisma.auditLog.create({
-            data: {
-                action: 'CREATE_TICKET',
-                details: JSON.stringify({ ticketId: ticket.id, title }),
-                userId: session.user.id,
-                tenantId: session.user.tenantId,
             },
         });
 
