@@ -92,65 +92,80 @@ export async function POST(
     switch (action) {
       case 'take':
         // Technician takes an unassigned ticket
-        const technician = await prisma.user.findUnique({
-          where: { id: session.user.id },
-          include: {
-            _count: {
-              select: {
-                assignedTickets: {
-                  where: {
-                    status: {
-                      in: ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS'],
+        // TRANSACTION: Prevents race condition in workload checking
+        try {
+          updatedTicket = await prisma.$transaction(async (tx) => {
+            // Re-fetch technician with current workload INSIDE transaction
+            const technician = await tx.user.findUnique({
+              where: { id: session.user.id },
+              include: {
+                _count: {
+                  select: {
+                    assignedTickets: {
+                      where: {
+                        status: {
+                          in: ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS'],
+                        },
+                      },
                     },
                   },
                 },
               },
-            },
-          },
-        });
+            });
 
-        if (!technician) {
-          return NextResponse.json(
-            { error: 'Technician not found' },
-            { status: 404 }
-          );
-        }
+            if (!technician) {
+              throw new Error('Technician not found');
+            }
 
-        // Check if technician is available
-        if (technician.status !== 'AVAILABLE') {
+            // Check if technician is available
+            if (technician.status !== 'AVAILABLE') {
+              throw new Error(`Technician is ${technician.status}`);
+            }
+
+            // Check workload limit (inside transaction for consistency)
+            if (
+              technician._count.assignedTickets >= technician.maxConcurrentTickets
+            ) {
+              throw new Error(
+                `Workload limit reached (${technician.maxConcurrentTickets} tickets)`
+              );
+            }
+
+            // Verify ticket is not already assigned
+            const currentTicket = await tx.ticket.findUnique({
+              where: { id },
+              select: { assignedToId: true, status: true },
+            });
+
+            if (currentTicket?.assignedToId) {
+              throw new Error('Ticket is already assigned to another technician');
+            }
+
+            // Update ticket assignment
+            const updated = await tx.ticket.update({
+              where: { id },
+              data: {
+                assignedToId: session.user.id,
+                status: TicketStatus.IN_PROGRESS,
+                updatedById: session.user.id,
+              },
+              include: {
+                customer: true,
+                assignedTo: true,
+              },
+            });
+
+            return updated;
+          });
+
+          auditAction = 'TAKE_TICKET';
+          auditDetails = `${session.user.name} took ticket #${id.substring(0, 8)}`;
+        } catch (error: any) {
           return NextResponse.json(
-            { error: `Technician is ${technician.status}` },
+            { error: error.message || 'Failed to take ticket' },
             { status: 400 }
           );
         }
-
-        // Check workload limit
-        if (
-          technician._count.assignedTickets >= technician.maxConcurrentTickets
-        ) {
-          return NextResponse.json(
-            {
-              error: `Workload limit reached (${technician.maxConcurrentTickets} tickets)`,
-            },
-            { status: 400 }
-          );
-        }
-
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            assignedToId: session.user.id,
-            status: TicketStatus.IN_PROGRESS,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
-        });
-
-        auditAction = 'TAKE_TICKET';
-        auditDetails = `${session.user.name} took ticket #${id.substring(0, 8)}`;
         break;
 
       case 'assign':
@@ -162,70 +177,78 @@ export async function POST(
           );
         }
 
-        // Verify target technician exists and belongs to tenant
-        const targetTechnician = await prisma.user.findFirst({
-          where: {
-            id: assignedToId,
-            tenantId: session.user.tenantId,
-          },
-          include: {
-            _count: {
-              select: {
-                assignedTickets: {
-                  where: {
-                    status: {
-                      in: ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS'],
+        // TRANSACTION: Prevents race condition in workload checking
+        try {
+          let technicianName = '';
+
+          updatedTicket = await prisma.$transaction(async (tx) => {
+            // Verify target technician exists and belongs to tenant (inside transaction)
+            const targetTechnician = await tx.user.findFirst({
+              where: {
+                id: assignedToId,
+                tenantId: session.user.tenantId,
+              },
+              include: {
+                _count: {
+                  select: {
+                    assignedTickets: {
+                      where: {
+                        status: {
+                          in: ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS'],
+                        },
+                      },
                     },
                   },
                 },
               },
-            },
-          },
-        });
+            });
 
-        if (!targetTechnician) {
-          return NextResponse.json(
-            { error: 'Target technician not found' },
-            { status: 404 }
-          );
-        }
+            if (!targetTechnician) {
+              throw new Error('Target technician not found');
+            }
 
-        // Check if target technician is available
-        if (targetTechnician.status !== 'AVAILABLE') {
+            technicianName = targetTechnician.name || 'Unknown';
+
+            // Check if target technician is available
+            if (targetTechnician.status !== 'AVAILABLE') {
+              throw new Error(`Technician is ${targetTechnician.status}`);
+            }
+
+            // Check workload limit (inside transaction for consistency)
+            if (
+              targetTechnician._count.assignedTickets >=
+              targetTechnician.maxConcurrentTickets
+            ) {
+              throw new Error(
+                `Technician workload limit reached (${targetTechnician.maxConcurrentTickets} tickets)`
+              );
+            }
+
+            // Update ticket assignment
+            const updated = await tx.ticket.update({
+              where: { id },
+              data: {
+                assignedToId,
+                status: TicketStatus.IN_PROGRESS,
+                updatedById: session.user.id,
+              },
+              include: {
+                customer: true,
+                assignedTo: true,
+              },
+            });
+
+            return updated;
+          });
+
+          auditAction = 'ASSIGN_TICKET';
+          auditDetails = `${session.user.name} assigned ticket #${id.substring(0, 8)} to ${technicianName}`;
+        } catch (error: any) {
           return NextResponse.json(
-            { error: `Technician is ${targetTechnician.status}` },
+            { error: error.message || 'Failed to assign ticket' },
             { status: 400 }
           );
         }
-
-        // Check workload limit
-        if (
-          targetTechnician._count.assignedTickets >=
-          targetTechnician.maxConcurrentTickets
-        ) {
-          return NextResponse.json(
-            {
-              error: `Technician workload limit reached (${targetTechnician.maxConcurrentTickets} tickets)`,
-            },
-            { status: 400 }
-          );
-        }
-
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            assignedToId,
-            status: TicketStatus.IN_PROGRESS,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
-        });
-
-        auditAction = 'ASSIGN_TICKET';
-        auditDetails = `${session.user.name} assigned ticket #${id.substring(0, 8)} to ${targetTechnician.name}`;
         break;
 
       case 'start':
@@ -375,7 +398,14 @@ export async function POST(
         break;
 
       case 'cancel':
-        // Cancel ticket
+        // Cancel ticket - requires ADMIN role
+        if (session.user.role !== 'ADMIN') {
+          return NextResponse.json(
+            { error: 'Only admins can cancel tickets' },
+            { status: 403 }
+          );
+        }
+
         if (!cancellationReason) {
           return NextResponse.json(
             { error: 'Cancellation reason is required' },
@@ -383,34 +413,48 @@ export async function POST(
           );
         }
 
-        // Restore parts to inventory
-        const partsUsed = await prisma.partUsage.findMany({
-          where: { ticketId: id },
-          include: { part: true },
-        });
-
-        for (const usage of partsUsed) {
-          await prisma.part.update({
-            where: { id: usage.partId },
-            data: {
-              quantity: {
-                increment: usage.quantity,
-              },
-            },
-          });
+        // Validate current status - cannot cancel already cancelled or closed tickets
+        if (ticket.status === TicketStatus.CANCELLED) {
+          return NextResponse.json(
+            { error: 'Ticket is already cancelled' },
+            { status: 400 }
+          );
         }
 
-        updatedTicket = await prisma.ticket.update({
-          where: { id },
-          data: {
-            status: TicketStatus.CANCELLED,
-            cancellationReason,
-            updatedById: session.user.id,
-          },
-          include: {
-            customer: true,
-            assignedTo: true,
-          },
+        // ATOMIC TRANSACTION: Restore parts and update ticket status together
+        updatedTicket = await prisma.$transaction(async (tx) => {
+          // Get all parts used in this ticket
+          const partsUsed = await tx.partUsage.findMany({
+            where: { ticketId: id },
+            select: { partId: true, quantity: true },
+          });
+
+          // Restore parts to inventory atomically
+          for (const usage of partsUsed) {
+            await tx.part.update({
+              where: { id: usage.partId },
+              data: {
+                quantity: { increment: usage.quantity },
+              },
+            });
+          }
+
+          // Update ticket status
+          const updated = await tx.ticket.update({
+            where: { id },
+            data: {
+              status: TicketStatus.CANCELLED,
+              cancellationReason,
+              assignedToId: null, // Free up technician slot
+              updatedById: session.user.id,
+            },
+            include: {
+              customer: true,
+              assignedTo: true,
+            },
+          });
+
+          return updated;
         });
 
         auditAction = 'CANCEL_TICKET';

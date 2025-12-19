@@ -1465,40 +1465,50 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
         await prisma.$transaction(async (tx) => {
             const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
 
-            // Verify ticket and part belong to same tenant
-            const [ticket, part] = await Promise.all([
-                txTenantDb.ticket.findUnique({ where: { id: ticketId } }),
-                txTenantDb.part.findUnique({ where: { id: partId } }),
-            ]);
-
-            if (!ticket || !part) {
-                throw new Error('Ticket o repuesto no encontrado');
+            // Verify ticket belongs to tenant
+            const ticket = await txTenantDb.ticket.findUnique({ where: { id: ticketId } });
+            if (!ticket) {
+                throw new Error('Ticket no encontrado');
             }
 
-            if (!isSuperAdmin) {
-                if (ticket.tenantId !== session.user.tenantId || part.tenantId !== session.user.tenantId) {
+            if (!isSuperAdmin && ticket.tenantId !== session.user.tenantId) {
+                throw new Error('No autorizado');
+            }
+
+            // ATOMIC UPDATE: Decrement stock only if sufficient quantity available
+            // This prevents race conditions by using a WHERE clause with quantity check
+            const updateResult = await tx.part.updateMany({
+                where: {
+                    id: partId,
+                    tenantId: session.user.tenantId,
+                    quantity: { gte: quantity }, // Only update if stock is sufficient
+                },
+                data: {
+                    quantity: { decrement: quantity }, // Atomic decrement
+                },
+            });
+
+            // If no rows were updated, either part doesn't exist or insufficient stock
+            if (updateResult.count === 0) {
+                const part = await txTenantDb.part.findUnique({ where: { id: partId } });
+
+                if (!part) {
+                    throw new Error('Repuesto no encontrado');
+                }
+
+                if (!isSuperAdmin && part.tenantId !== session.user.tenantId) {
                     throw new Error('No autorizado');
                 }
-            }
 
-            // Check if there's enough stock
-            if (part.quantity < quantity) {
                 throw new Error(`Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}`);
             }
 
-            // Create usage record and update part quantity
+            // Create usage record
             await txTenantDb.partUsage.create({
                 data: {
                     ticketId,
                     partId,
                     quantity,
-                }
-            });
-            
-            await txTenantDb.part.update({
-                where: { id: partId },
-                data: {
-                    quantity: part.quantity - quantity,
                 }
             });
         });
