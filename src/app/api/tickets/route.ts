@@ -41,14 +41,38 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { title, description, customerId, priority } = body;
 
+        // Validate required fields
+        if (!title || !description || !customerId) {
+            return NextResponse.json(
+                { error: 'Missing required fields: title, description, customerId' },
+                { status: 400 }
+            );
+        }
+
+        // CRITICAL: Validate tenant isolation - ensure customer belongs to user's tenant
+        const customer = await prisma.customer.findFirst({
+            where: {
+                id: customerId,
+                tenantId: session.user.tenantId,
+            },
+        });
+
+        if (!customer) {
+            return NextResponse.json(
+                { error: 'Customer not found or does not belong to your organization' },
+                { status: 404 }
+            );
+        }
+
         const ticket = await prisma.ticket.create({
             data: {
                 title,
                 description,
                 customerId,
-                priority,
+                priority: priority || 'MEDIUM',
                 tenantId: session.user.tenantId,
                 status: 'OPEN',
+                createdById: session.user.id,
             },
             include: {
                 customer: true,
