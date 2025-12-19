@@ -18,6 +18,9 @@ interface Part {
     quantity: number;
     cost: any;
     price: any;
+    category?: string | null;
+    location?: string | null;
+    minStock?: number;
 }
 
 interface Service {

@@ -7,7 +7,8 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
-import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas'; // Import new Zod schemas
+import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas';
+import { createNotification } from '@/lib/notifications';
 
 /**
  * Get ticket by ID for public status check
@@ -920,6 +921,14 @@ export async function updateTicket(prevState: any, formData: FormData) {
             updatedById: session.user.id,
         };
 
+        // Notification Logic: Check if assignedToId changed
+        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
+             // Create notification asynchronously (don't block update)
+             // But we need to make sure we don't fail silently? 
+             // Ideally this runs AFTER transaction commits, but we can fire and forget here or await.
+             // We can trigger it outside the transaction.
+        }
+
         // Execute transaction
         await prisma.$transaction(async (tx) => {
             const txTenantDb = getTenantPrisma(existingTicket.tenantId, session.user.id, tx);
@@ -943,12 +952,25 @@ export async function updateTicket(prevState: any, formData: FormData) {
                 }
             }
 
-            // Main ticket update
             await txTenantDb.ticket.update({
                 where: { id: ticketId },
                 data: updateData,
             });
         });
+
+        // Audit Log handled by middleware
+
+        // Execute Notification OUTSIDE transaction to not block
+        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
+            await createNotification({
+                userId: assignedToId,
+                tenantId: session.user.tenantId,
+                type: 'INFO',
+                title: 'Nuevo Ticket Asignado',
+                message: `Se te ha asignado el ticket #${existingTicket.id.slice(0,8)}: ${title}`,
+                link: `/dashboard/tickets/${ticketId}`
+            });
+        }
 
         // Audit Log handled by middleware
 
@@ -1025,6 +1047,18 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
             const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
             await handleStatusUpdate(txTenantDb, ticketId, status, existingTicket, session.user.id);
         });
+
+        // Notify Assigned User if different from updater
+        if (existingTicket.assignedToId && existingTicket.assignedToId !== session.user.id) {
+            await createNotification({
+                userId: existingTicket.assignedToId,
+                tenantId: session.user.tenantId,
+                type: 'INFO',
+                title: 'Estado del Ticket Actualizado',
+                message: `El ticket #${existingTicket.id.slice(0, 8)} cambió a estado ${status}`,
+                link: `/dashboard/tickets/${ticketId}`
+            });
+        }
 
         return { success: true, message: 'Estado actualizado' };
 
@@ -1175,6 +1209,18 @@ export async function addTicketNote(prevState: any, formData: FormData) {
             where: { id: ticketId },
             data: { updatedAt: new Date() }
         });
+
+        // Notify Assigned User if note author is different
+        if (ticket.assignedToId && ticket.assignedToId !== session.user.id) {
+            await createNotification({
+                userId: ticket.assignedToId,
+                tenantId: session.user.tenantId,
+                type: 'INFO',
+                title: 'Nueva Nota en Ticket',
+                message: `Nueva nota en ticket #${ticket.id.slice(0, 8)}: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+                link: `/dashboard/tickets/${ticketId}`
+            });
+        }
 
         return { success: true, message: 'Nota agregada correctamente' };
 
