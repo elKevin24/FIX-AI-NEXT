@@ -73,6 +73,7 @@ model Tenant {
   parts            Part[]
   auditLogs        AuditLog[]
   serviceTemplates ServiceTemplate[]
+  purchaseOrders   PurchaseOrder[]
 
   @@map("tenants")
 }
@@ -136,8 +137,11 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([dpi, tenantId], name: "unique_dpi_per_tenant")
+  @@unique([nit, tenantId], name: "unique_nit_per_tenant")
   @@index([createdById])
   @@index([updatedById])
+  @@index([tenantId])
   @@map("customers")
 }
 
@@ -196,12 +200,16 @@ model Part {
   quantity Int     @default(0)
   cost     Decimal @db.Decimal(10, 2)
   price    Decimal @db.Decimal(10, 2)
+  category String? // 'SCREEN', 'KEYBOARD', etc.
+  location String? // 'Estante A1'
+  minStock Int     @default(1) // Alerta cuando quantity <= minStock
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   usages               PartUsage[]
   templateDefaultParts TemplateDefaultPart[]
+  purchaseItems        PurchaseItem[]
 
   createdById String?
   createdBy   User?   @relation("PartCreatedBy", fields: [createdById], references: [id])
@@ -211,9 +219,54 @@ model Part {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([sku, tenantId], name: "unique_sku_per_tenant")
   @@index([createdById])
   @@index([updatedById])
+  @@index([tenantId])
   @@map("parts")
+}
+
+model PurchaseOrder {
+  id           String         @id @default(uuid())
+  supplier     String // 'Intelaf', 'Amazon', etc.
+  status       PurchaseStatus @default(PENDING) // PENDING, RECEIVED, CANCELLED
+  orderDate    DateTime       @default(now())
+  receivedDate DateTime?
+  totalCost    Decimal        @default(0) @db.Decimal(10, 2)
+
+  items PurchaseItem[]
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdById String?
+  updatedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("purchase_orders")
+}
+
+model PurchaseItem {
+  id       String  @id @default(uuid())
+  quantity Int
+  unitCost Decimal @db.Decimal(10, 2)
+
+  partId String
+  part   Part   @relation(fields: [partId], references: [id])
+
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  @@map("purchase_items")
+}
+
+enum PurchaseStatus {
+  PENDING
+  RECEIVED
+  CANCELLED
 }
 
 model PartUsage {
