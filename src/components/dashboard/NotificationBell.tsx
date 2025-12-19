@@ -20,21 +20,21 @@ export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const fetchNotifications = async () => {
-        try {
-            const data = await getMyNotifications();
-            // Ensure dates are parsed if they come as strings
-            const parsedData = data.map((n: any) => ({
-                ...n,
-                createdAt: new Date(n.createdAt)
-            }));
-            setNotifications(parsedData);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        }
-    };
-
     useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const data = await getMyNotifications();
+                // Ensure dates are parsed if they come as strings
+                const parsedData = data.map((n: any) => ({
+                    ...n,
+                    createdAt: new Date(n.createdAt)
+                }));
+                setNotifications(parsedData);
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        };
+
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 60000); // Poll every minute
         return () => clearInterval(interval);
