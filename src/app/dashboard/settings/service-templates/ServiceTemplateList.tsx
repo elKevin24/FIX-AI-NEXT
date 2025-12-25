@@ -5,6 +5,7 @@ import { ServiceCategory } from '@prisma/client';
 import { toggleTemplateActiveStatus, deleteServiceTemplate, duplicateServiceTemplate } from '@/lib/service-template-actions';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import styles from './service-templates.module.css';
 
 type Template = {
   id: string;
@@ -99,19 +100,19 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className={`${styles.glassCard} space-y-4`}>
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4">
           <input
             type="text"
             placeholder="Buscar plantilla..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as ServiceCategory | 'ALL')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">Todas las categorías</option>
             {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
@@ -126,11 +127,11 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       {/* Lista */}
       <div className="grid gap-4">
         {filteredTemplates.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500 text-lg">No se encontraron plantillas</p>
+          <div className={styles.emptyState}>
+            <p className="text-gray-500 text-base md:text-lg">No se encontraron plantillas</p>
             <Link
               href="/dashboard/settings/service-templates/create"
-              className="mt-4 inline-block text-blue-600 hover:text-blue-700"
+              className="mt-4 inline-block text-blue-600 hover:text-blue-700 text-sm md:text-base"
             >
               Crear primera plantilla
             </Link>
@@ -139,7 +140,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
           filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
+              className={styles.templateCard}
               style={{ borderLeft: `4px solid ${template.color || '#3B82F6'}` }}
             >
               <div className="flex items-start justify-between">
