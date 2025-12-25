@@ -131,209 +131,343 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">
           📦 Partes de la Plantilla
         </h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-gray-600">
           Define las partes que se usarán por defecto al crear tickets con esta plantilla.
         </p>
       </div>
 
+      {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
           {error}
         </div>
       )}
 
-      {/* Current Parts */}
+      {/* Current Parts - Mobile Cards / Desktop Table */}
       {defaultParts.length > 0 && (
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Parte
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  SKU
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Cantidad
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Tipo
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {defaultParts.map((dp) => (
-                <tr key={dp.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <span className="font-medium text-gray-900">{dp.part.name}</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {dp.part.sku || '-'}
-                  </td>
-                  <td className="px-4 py-3">
-                    {editingId === dp.id ? (
-                      <input
-                        type="number"
-                        min="1"
-                        value={editQuantity}
-                        onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                        className="w-20 px-2 py-1 border border-gray-300 rounded"
-                      />
-                    ) : (
-                      <span className="text-gray-900">{dp.quantity}</span>
+        <>
+          {/* Mobile: Cards */}
+          <div className="block md:hidden space-y-3">
+            {defaultParts.map((dp) => (
+              <div key={dp.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{dp.part.name}</div>
+                    {dp.part.sku && (
+                      <div className="text-xs text-gray-500">{dp.part.sku}</div>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {editingId === dp.id ? (
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={editRequired}
-                          onChange={(e) => setEditRequired(e.target.checked)}
-                          className="rounded border-gray-300"
-                        />
-                        <span className="text-sm">Requerido</span>
-                      </label>
-                    ) : (
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
+                      dp.required
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {dp.required ? 'Requerido' : 'Opcional'}
+                  </span>
+                </div>
+
+                {editingId === dp.id ? (
+                  <div className="space-y-2">
+                    <input
+                      type="number"
+                      min="1"
+                      value={editQuantity}
+                      onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                      placeholder="Cantidad"
+                    />
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editRequired}
+                        onChange={(e) => setEditRequired(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">Requerido</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleSaveEdit(dp.id)}
+                        disabled={loading}
+                        className="flex-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                      <span>Cantidad: {dp.quantity}</span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          dp.required
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-blue-100 text-blue-700'
+                        className={
+                          dp.part.quantity >= dp.quantity
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        Stock: {dp.part.quantity}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStartEdit(dp)}
+                        className="flex-1 px-3 py-1.5 text-sm text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleRemove(dp.id)}
+                        disabled={loading}
+                        className="flex-1 px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table */}
+          <div className="hidden md:block border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
+                    Parte
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
+                    Cantidad
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
+                    Tipo
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
+                    Stock
+                  </th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {defaultParts.map((dp) => (
+                  <tr key={dp.id} className="hover:bg-gray-50">
+                    <td className="px-3 py-2">
+                      <div className="font-medium text-gray-900">{dp.part.name}</div>
+                      {dp.part.sku && (
+                        <div className="text-xs text-gray-500">{dp.part.sku}</div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {editingId === dp.id ? (
+                        <input
+                          type="number"
+                          min="1"
+                          value={editQuantity}
+                          onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
+                        />
+                      ) : (
+                        <span className="text-sm">{dp.quantity}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {editingId === dp.id ? (
+                        <label className="flex items-center gap-1.5">
+                          <input
+                            type="checkbox"
+                            checked={editRequired}
+                            onChange={(e) => setEditRequired(e.target.checked)}
+                            className="rounded border-gray-300"
+                          />
+                          <span className="text-sm">Req.</span>
+                        </label>
+                      ) : (
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            dp.required
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
+                          {dp.required ? 'Req.' : 'Opc.'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={`text-sm ${
+                          dp.part.quantity >= dp.quantity
+                            ? 'text-green-600'
+                            : 'text-red-600'
                         }`}
                       >
-                        {dp.required ? '✓ Requerido' : 'Opcional'}
+                        {dp.part.quantity}
                       </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`text-sm ${
-                        dp.part.quantity >= dp.quantity
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {dp.part.quantity} disponibles
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {editingId === dp.id ? (
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => handleSaveEdit(dp.id)}
-                          disabled={loading}
-                          className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50"
-                        >
-                          Guardar
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="text-sm text-gray-600 hover:text-gray-700"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => handleStartEdit(dp)}
-                          className="text-sm text-blue-600 hover:text-blue-700"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleRemove(dp.id)}
-                          disabled={loading}
-                          className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {editingId === dp.id ? (
+                        <div className="flex gap-1.5 justify-end">
+                          <button
+                            onClick={() => handleSaveEdit(dp.id)}
+                            disabled={loading}
+                            className="text-sm px-2 py-1 text-green-600 hover:bg-green-50 rounded disabled:opacity-50"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="text-sm px-2 py-1 text-gray-600 hover:bg-gray-50 rounded"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-1.5 justify-end">
+                          <button
+                            onClick={() => handleStartEdit(dp)}
+                            className="text-sm px-2 py-1 text-blue-600 hover:bg-blue-50 rounded"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleRemove(dp.id)}
+                            disabled={loading}
+                            className="text-sm px-2 py-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
+      {/* Empty State */}
       {defaultParts.length === 0 && (
-        <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <p className="text-gray-500">
-            No hay partes agregadas. Agrega partes para que se usen automáticamente al crear
-            tickets.
+        <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <p className="text-sm text-gray-500">
+            No hay partes agregadas. Agrega partes para que se usen automáticamente al crear tickets.
           </p>
         </div>
       )}
 
       {/* Add Part Form */}
       {availableParts.length > 0 && (
-        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <h4 className="font-medium text-gray-900 mb-3">Agregar Parte</h4>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <select
-              value={selectedPartId}
-              onChange={(e) => setSelectedPartId(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">Seleccionar parte...</option>
-              {availableParts.map((part) => (
-                <option key={part.id} value={part.id}>
-                  {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              placeholder="Cantidad"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+          <h4 className="font-medium text-gray-900 text-sm mb-3">Agregar Parte</h4>
+          <div className="space-y-2">
+            {/* Mobile: Stacked */}
+            <div className="block md:hidden space-y-2">
+              <select
+                value={selectedPartId}
+                onChange={(e) => setSelectedPartId(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">Seleccionar parte...</option>
+                {availableParts.map((part) => (
+                  <option key={part.id} value={part.id}>
+                    {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
+                  </option>
+                ))}
+              </select>
               <input
-                type="checkbox"
-                checked={required}
-                onChange={(e) => setRequired(e.target.checked)}
-                className="rounded border-gray-300"
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                placeholder="Cantidad"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-sm">Requerido</span>
-            </label>
+              <label className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+                <input
+                  type="checkbox"
+                  checked={required}
+                  onChange={(e) => setRequired(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <span className="text-sm">Requerido</span>
+              </label>
+              <button
+                onClick={handleAddPart}
+                disabled={loading || !selectedPartId}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Agregando...' : 'Agregar'}
+              </button>
+            </div>
 
-            <button
-              onClick={handleAddPart}
-              disabled={loading || !selectedPartId}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Agregando...' : 'Agregar'}
-            </button>
+            {/* Desktop: Grid */}
+            <div className="hidden md:grid md:grid-cols-[2fr_auto_auto_auto] gap-2">
+              <select
+                value={selectedPartId}
+                onChange={(e) => setSelectedPartId(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">Seleccionar parte...</option>
+                {availableParts.map((part) => (
+                  <option key={part.id} value={part.id}>
+                    {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                placeholder="Cant."
+                className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <label className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg bg-white whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  checked={required}
+                  onChange={(e) => setRequired(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <span className="text-sm">Req.</span>
+              </label>
+              <button
+                onClick={handleAddPart}
+                disabled={loading || !selectedPartId}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap"
+              >
+                {loading ? 'Agregando...' : 'Agregar'}
+              </button>
+            </div>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            💡 Las partes <strong>requeridas</strong> consumirán stock automáticamente al crear
-            el ticket. Las <strong>opcionales</strong> solo aparecerán como sugerencia.
+            💡 Las partes <strong>requeridas</strong> consumen stock al crear el ticket. Las <strong>opcionales</strong> son sugerencias.
           </p>
         </div>
       )}
 
+      {/* Info Message */}
       {availableParts.length === 0 && defaultParts.length > 0 && (
-        <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
           ℹ️ Todas las partes disponibles ya están agregadas a esta plantilla.
         </div>
       )}
