@@ -506,3 +506,169 @@ export async function createTicketFromTemplate(
   revalidatePath(`/dashboard/tickets/${ticket.id}`);
   return ticket;
 }
+
+// ============================================================================
+// GET AVAILABLE PARTS
+// ============================================================================
+
+export async function getAvailableParts() {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const parts = await db.part.findMany({
+    orderBy: {
+      name: 'asc',
+    },
+  });
+
+  return parts;
+}
+
+// ============================================================================
+// MANAGE TEMPLATE DEFAULT PARTS
+// ============================================================================
+
+export async function addPartToTemplate(
+  templateId: string,
+  partId: string,
+  quantity: number,
+  required: boolean
+) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    throw new Error('Permiso denegado');
+  }
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  // Verificar que la plantilla pertenece al tenant
+  const template = await db.serviceTemplate.findUnique({
+    where: { id: templateId },
+  });
+
+  if (!template || template.tenantId !== session.user.tenantId) {
+    throw new Error('Plantilla no encontrada');
+  }
+
+  // Verificar que la parte pertenece al tenant
+  const part = await db.part.findUnique({
+    where: { id: partId },
+  });
+
+  if (!part || part.tenantId !== session.user.tenantId) {
+    throw new Error('Parte no encontrada');
+  }
+
+  // Verificar si ya existe
+  const existing = await db.templateDefaultPart.findFirst({
+    where: {
+      templateId,
+      partId,
+    },
+  });
+
+  if (existing) {
+    throw new Error('Esta parte ya está agregada a la plantilla');
+  }
+
+  const defaultPart = await db.templateDefaultPart.create({
+    data: {
+      templateId,
+      partId,
+      quantity,
+      required,
+    },
+    include: {
+      part: true,
+    },
+  });
+
+  revalidatePath('/dashboard/settings/service-templates');
+  revalidatePath(`/dashboard/settings/service-templates/${templateId}/edit`);
+  return defaultPart;
+}
+
+export async function updateTemplateDefaultPart(
+  id: string,
+  quantity: number,
+  required: boolean
+) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    throw new Error('Permiso denegado');
+  }
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  // Verificar que existe y pertenece al tenant
+  const defaultPart = await db.templateDefaultPart.findUnique({
+    where: { id },
+    include: {
+      template: true,
+    },
+  });
+
+  if (!defaultPart || defaultPart.template.tenantId !== session.user.tenantId) {
+    throw new Error('Parte de plantilla no encontrada');
+  }
+
+  const updated = await db.templateDefaultPart.update({
+    where: { id },
+    data: {
+      quantity,
+      required,
+    },
+    include: {
+      part: true,
+    },
+  });
+
+  revalidatePath('/dashboard/settings/service-templates');
+  revalidatePath(`/dashboard/settings/service-templates/${defaultPart.templateId}/edit`);
+  return updated;
+}
+
+export async function removePartFromTemplate(id: string) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    throw new Error('Permiso denegado');
+  }
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  // Verificar que existe y pertenece al tenant
+  const defaultPart = await db.templateDefaultPart.findUnique({
+    where: { id },
+    include: {
+      template: true,
+    },
+  });
+
+  if (!defaultPart || defaultPart.template.tenantId !== session.user.tenantId) {
+    throw new Error('Parte de plantilla no encontrada');
+  }
+
+  await db.templateDefaultPart.delete({
+    where: { id },
+  });
+
+  revalidatePath('/dashboard/settings/service-templates');
+  revalidatePath(`/dashboard/settings/service-templates/${defaultPart.templateId}/edit`);
+  return { success: true };
+}

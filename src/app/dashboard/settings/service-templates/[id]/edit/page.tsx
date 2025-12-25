@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getServiceTemplate } from '@/lib/service-template-actions';
 import { ServiceTemplateForm } from '../../ServiceTemplateForm';
+import { TemplatePartsManager } from '../../TemplatePartsManager';
 
 export const metadata = {
   title: 'Editar Plantilla de Servicio | Dashboard',
@@ -38,7 +39,7 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
   const template = await getServiceTemplate(id);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="mb-6">
         <Link
           href="/dashboard/settings/service-templates"
@@ -48,21 +49,29 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Editar Plantilla</h1>
-            <p className="text-gray-600">
-              {template._count.tickets > 0 && (
-                <span className="text-sm text-yellow-700 bg-yellow-50 px-3 py-1 rounded">
-                  ⚠️ Esta plantilla tiene {template._count.tickets} tickets asociados
-                </span>
-              )}
-            </p>
+      <div className="space-y-6">
+        {/* Template Form */}
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Editar Plantilla</h1>
+              <p className="text-gray-600">
+                {template._count.tickets > 0 && (
+                  <span className="text-sm text-yellow-700 bg-yellow-50 px-3 py-1 rounded">
+                    ⚠️ Esta plantilla tiene {template._count.tickets} tickets asociados
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
+
+          <ServiceTemplateForm initialData={template} />
         </div>
 
-        <ServiceTemplateForm initialData={template} />
+        {/* Parts Manager */}
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <TemplatePartsManager templateId={id} defaultParts={template.defaultParts} />
+        </div>
       </div>
     </div>
   );
