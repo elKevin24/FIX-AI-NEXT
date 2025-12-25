@@ -8,6 +8,7 @@ import {
   updateTemplateDefaultPart,
   removePartFromTemplate,
 } from '@/lib/service-template-actions';
+import styles from './service-templates.module.css';
 
 type Part = {
   id: string;
@@ -155,7 +156,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
           {/* Mobile: Cards */}
           <div className="block md:hidden space-y-3">
             {defaultParts.map((dp) => (
-              <div key={dp.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+              <div key={dp.id} className={styles.partsCard}>
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{dp.part.name}</div>
@@ -164,10 +165,8 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                     )}
                   </div>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
-                      dp.required
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-blue-100 text-blue-700'
+                    className={`${styles.glassBadge} ${
+                      dp.required ? styles.requiredBadge : styles.optionalBadge
                     }`}
                   >
                     {dp.required ? 'Requerido' : 'Opcional'}
@@ -245,7 +244,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block border border-gray-200 rounded-lg overflow-hidden">
+          <div className={`hidden md:block ${styles.glassTable}`}>
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -301,10 +300,8 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                         </label>
                       ) : (
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            dp.required
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-blue-100 text-blue-700'
+                          className={`${styles.glassBadge} ${
+                            dp.required ? styles.requiredBadge : styles.optionalBadge
                           }`}
                         >
                           {dp.required ? 'Req.' : 'Opc.'}
@@ -367,7 +364,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
 
       {/* Empty State */}
       {defaultParts.length === 0 && (
-        <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+        <div className={styles.emptyState}>
           <p className="text-sm text-gray-500">
             No hay partes agregadas. Agrega partes para que se usen automáticamente al crear tickets.
           </p>
@@ -376,7 +373,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
 
       {/* Add Part Form */}
       {availableParts.length > 0 && (
-        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+        <div className={styles.formSection}>
           <h4 className="font-medium text-gray-900 text-sm mb-3">Agregar Parte</h4>
           <div className="space-y-2">
             {/* Mobile: Stacked */}
@@ -467,7 +464,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
 
       {/* Info Message */}
       {availableParts.length === 0 && defaultParts.length > 0 && (
-        <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className={styles.infoAlert}>
           ℹ️ Todas las partes disponibles ya están agregadas a esta plantilla.
         </div>
       )}
