@@ -7,7 +7,8 @@
 
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import styles from './Ticket80mm.module.css';
 import {
     Ticket80mmData,
@@ -20,6 +21,8 @@ interface Ticket80mmProps {
     showParts?: boolean;
     showServices?: boolean;
     showCostSummary?: boolean;
+    showQR?: boolean;
+    baseUrl?: string; // URL base para el QR code (ej: 'https://tuapp.com')
 }
 
 /**
@@ -106,10 +109,42 @@ const calculateServicesCost = (ticket: Ticket80mmData): number => {
  * Componente principal Ticket80mm con forwardRef para poder acceder al DOM desde el wrapper
  */
 const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
-    ({ ticket, showParts = true, showServices = true, showCostSummary = true }, ref) => {
+    ({ ticket, showParts = true, showServices = true, showCostSummary = true, showQR = true, baseUrl }, ref) => {
+        const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+
         const partsCost = calculatePartsCost(ticket);
         const servicesCost = calculateServicesCost(ticket);
         const totalCost = partsCost + servicesCost;
+
+        // Generar QR Code
+        useEffect(() => {
+            if (!showQR) return;
+
+            const generateQR = async () => {
+                try {
+                    // Determinar URL base
+                    const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '');
+                    const ticketUrl = `${base}/tickets/status/${ticket.id}`;
+
+                    // Generar QR code como data URL
+                    const qrDataUrl = await QRCode.toDataURL(ticketUrl, {
+                        width: 120,
+                        margin: 1,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF',
+                        },
+                        errorCorrectionLevel: 'M',
+                    });
+
+                    setQrCodeDataUrl(qrDataUrl);
+                } catch (error) {
+                    console.error('Error generando QR code:', error);
+                }
+            };
+
+            generateQR();
+        }, [ticket.id, showQR, baseUrl]);
 
         return (
             <div ref={ref} className={styles.ticket80mm}>
@@ -323,6 +358,20 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                                 <span className={styles.dataValue}>{formatDate(ticket.estimatedCompletionDate)}</span>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* QR Code */}
+                {showQR && qrCodeDataUrl && (
+                    <div className={styles.qrSection}>
+                        <div className={styles.qrContainer}>
+                            <img
+                                src={qrCodeDataUrl}
+                                alt={`QR Code - Ticket ${ticket.id}`}
+                                className={styles.qrCode}
+                            />
+                        </div>
+                        <p className={styles.qrLabel}>Escanea para consultar estado</p>
                     </div>
                 )}
 
