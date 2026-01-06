@@ -79,7 +79,7 @@ export default async function Ticket80mmPage({ params }: Props) {
             name: ticket.assignedTo.name,
             email: ticket.assignedTo.email,
         } : null,
-        partsUsed: ticket.partsUsed.map((pu) => ({
+        partsUsed: ticket.partsUsed.map((pu: any) => ({
             id: pu.id,
             quantity: pu.quantity,
             part: {
@@ -91,7 +91,7 @@ export default async function Ticket80mmPage({ params }: Props) {
                 category: pu.part.category,
             },
         })),
-        services: ticket.services.map((s) => ({
+        services: ticket.services.map((s: any) => ({
             id: s.id,
             name: s.name,
             laborCost: s.laborCost.toString(),
