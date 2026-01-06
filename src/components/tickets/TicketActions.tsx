@@ -20,6 +20,8 @@ interface TicketActionsProps {
     showParts?: boolean;
     showServices?: boolean;
     showCostSummary?: boolean;
+    showQR?: boolean;
+    baseUrl?: string;
     onDownloadStart?: () => void;
     onDownloadComplete?: () => void;
     onError?: (error: Error) => void;
@@ -51,6 +53,8 @@ const TicketActions: React.FC<TicketActionsProps> = ({
     showParts = true,
     showServices = true,
     showCostSummary = true,
+    showQR = true,
+    baseUrl,
     onDownloadStart,
     onDownloadComplete,
     onError,
@@ -230,6 +234,8 @@ const TicketActions: React.FC<TicketActionsProps> = ({
                     showParts={showParts}
                     showServices={showServices}
                     showCostSummary={showCostSummary}
+                    showQR={showQR}
+                    baseUrl={baseUrl}
                 />
             </div>
 
