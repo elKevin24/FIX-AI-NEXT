@@ -5,7 +5,8 @@
  * @author Senior Fullstack Developer
  */
 
-import { notFound } from 'next/navigation';
+import { auth } from '@/auth';
+import { redirect, notFound } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
@@ -18,7 +19,14 @@ interface Props {
 
 export default async function Ticket80mmPage({ params }: Props) {
     const { id } = await params;
-    const prisma = await getTenantPrisma();
+    const session = await auth();
+
+    if (!session?.user?.id || !session?.user?.tenantId) {
+        redirect('/login');
+    }
+
+    const { tenantId, id: userId } = session.user;
+    const prisma = getTenantPrisma(tenantId, userId);
 
     // Obtener ticket con todas las relaciones necesarias
     const ticket = await prisma.ticket.findUnique({
