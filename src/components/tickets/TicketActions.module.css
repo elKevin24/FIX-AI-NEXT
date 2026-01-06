@@ -1,0 +1,158 @@
+/**
+ * CSS Module para TicketActions
+ * Estilos para los botones de acción y wrapper
+ */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+}
+
+.ticketWrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 302px;
+}
+
+.actionsBar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 302px;
+}
+
+.actionButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    min-width: 70px;
+}
+
+.actionButton:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #3b82f6;
+    color: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.shareButton {
+    border-color: #10b981;
+    color: #059669;
+}
+
+.shareButton:hover:not(:disabled) {
+    background: #ecfdf5;
+    border-color: #059669;
+    color: #047857;
+}
+
+.buttonIcon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.buttonText {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Processing Overlay */
+.processingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: 16px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.processingText {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 320px) {
+    .actionsBar {
+        max-width: 100%;
+    }
+
+    .actionButton {
+        flex: 1;
+        min-width: 60px;
+        padding: 8px 12px;
+    }
+
+    .buttonIcon {
+        font-size: 18px;
+    }
+
+    .buttonText {
+        font-size: 10px;
+    }
+}
+
+/* Print - Ocultar botones al imprimir */
+@media print {
+    .actionsBar {
+        display: none;
+    }
+
+    .processingOverlay {
+        display: none;
+    }
+}
