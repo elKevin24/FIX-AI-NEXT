@@ -132,6 +132,8 @@ export default MyTicketPage;
 | `showParts` | `boolean` | `true` | Mostrar sección de repuestos |
 | `showServices` | `boolean` | `true` | Mostrar sección de servicios |
 | `showCostSummary` | `boolean` | `true` | Mostrar resumen de costos |
+| `showQR` | `boolean` | `true` | Mostrar código QR para consulta de estado |
+| `baseUrl` | `string` | `window.location.origin` | URL base para generar el QR code |
 | `onDownloadStart` | `() => void` | - | Callback cuando inicia descarga |
 | `onDownloadComplete` | `() => void` | - | Callback cuando termina descarga |
 | `onError` | `(error: Error) => void` | - | Callback cuando hay error |
@@ -275,6 +277,25 @@ export default async function Ticket80mmPage({ params }: Props) {
   - Preservan colores de badges
   - Evitan saltos de página
 
+### 5. **Código QR para Consulta de Estado**
+- Genera automáticamente un código QR con la URL del ticket público
+- Apunta a `/tickets/status/{ID}` para consulta sin autenticación
+- Tamaño optimizado (100px en pantalla, 80px en impresión)
+- Error correction level: Medium (30% recovery)
+- Se puede ocultar con `showQR={false}`
+- URL personalizable con prop `baseUrl`
+
+**Ejemplo de uso:**
+```tsx
+<TicketActions
+    ticket={ticketData}
+    showQR={true}
+    baseUrl="https://tudominio.com"
+/>
+```
+
+El QR generado apuntará a: `https://tudominio.com/tickets/status/{ticket.id}`
+
 ---
 
 ## 🎯 Características del Diseño
@@ -370,10 +391,23 @@ import Ticket80mm from '@/components/tickets/Ticket80mm';
     showParts={false}           // Ocultar repuestos
     showServices={true}          // Mostrar servicios
     showCostSummary={false}      // Ocultar resumen de costos
+    showQR={false}               // Ocultar código QR
 />
 ```
 
-### 4. **Agregar feedback visual**
+### 4. **Personalizar URL del código QR**
+```tsx
+// Usar URL de producción para el QR
+<TicketActions
+    ticket={ticketData}
+    baseUrl="https://tudominio.com"
+/>
+
+// El QR apuntará a: https://tudominio.com/tickets/status/{ticket.id}
+// Útil en desarrollo para que el QR apunte a producción
+```
+
+### 5. **Agregar feedback visual**
 ```tsx
 const [downloading, setDownloading] = useState(false);
 

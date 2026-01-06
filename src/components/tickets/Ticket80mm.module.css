@@ -248,6 +248,38 @@
     font-size: 10px;
 }
 
+/* QR Code Section */
+.qrSection {
+    margin: 8px 0;
+    padding: 6px 0;
+    border-top: 1px solid #d1d5db;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.qrContainer {
+    background: #ffffff;
+    padding: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.qrCode {
+    display: block;
+    width: 100px;
+    height: 100px;
+}
+
+.qrLabel {
+    margin: 4px 0 0 0;
+    font-size: 7px;
+    color: #6b7280;
+    text-align: center;
+    font-weight: 600;
+}
+
 /* Footer */
 .footer {
     margin-top: 8px;
@@ -316,6 +348,15 @@
 
     .footer {
         font-size: 6pt;
+    }
+
+    .qrLabel {
+        font-size: 6pt;
+    }
+
+    .qrCode {
+        width: 80px;
+        height: 80px;
     }
 
     /* Forzar colores en impresión */

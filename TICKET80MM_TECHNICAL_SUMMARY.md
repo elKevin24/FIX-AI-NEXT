@@ -455,11 +455,13 @@ const Ticket80mm = forwardRef<HTMLDivElement, Props>(
 ```json
 {
     "html2canvas": "^1.4.1",   // 127 KB gzipped
-    "jspdf": "^2.5.2"          // 98 KB gzipped
+    "jspdf": "^2.5.2",         // 98 KB gzipped
+    "qrcode": "^1.5.x",        // 48 KB gzipped
+    "@types/qrcode": "^1.5.x"  // TypeScript definitions
 }
 ```
 
-**Total Bundle Impact**: ~225 KB (solo cuando se usan, gracias a dynamic imports)
+**Total Bundle Impact**: ~273 KB (solo cuando se usan, gracias a dynamic imports)
 
 ### Rutas Creadas
 
@@ -484,25 +486,13 @@ GET /dashboard/tickets/[id]/ticket80mm
 | **Descarga PDF** | ✅ 100% | `jsPDF` formato 80mm |
 | **Web Share API** | ✅ 100% | Solo en móviles, con fallback |
 | **Impresión Optimizada** | ✅ 100% | `@media print` completo |
+| **Código QR** | ✅ 100% | Apunta a `/tickets/status/{id}`, personalizable |
 | **Arquitectura Next.js** | ✅ 100% | Server/Client Components, CSS Modules |
 | **Pixel Perfect** | ✅ 100% | Diseño profesional y técnico |
 
 ---
 
 ## 🔮 Extensibilidad Futura
-
-### Fácil de Extender
-
-```typescript
-// Agregar QR Code
-import QRCode from 'qrcode';
-
-const qrCodeUrl = await QRCode.toDataURL(
-    `https://tuapp.com/tickets/status/${ticket.id}`
-);
-
-<img src={qrCodeUrl} alt="QR" />
-```
 
 ### Fácil de Personalizar
 
