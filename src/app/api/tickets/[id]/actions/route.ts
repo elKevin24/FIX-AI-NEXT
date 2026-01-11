@@ -7,6 +7,10 @@ import {
   TicketAction,
   AuthorizationError,
 } from '@/lib/auth-utils';
+import {
+  notifyTicketStatusChange,
+  notifyTechnicianAssigned,
+} from '@/lib/ticket-notifications';
 
 /**
  * @swagger
@@ -486,6 +490,65 @@ export async function POST(
     }
 
     // Automatic audit logging handles the logs now as part of the transaction or direct calls on 'db'
+
+    // ========================================================================
+    // NOTIFICATIONS: Send notifications to customer and technician
+    // ========================================================================
+    if (updatedTicket) {
+      try {
+        // Notify customer about status change
+        await notifyTicketStatusChange(
+          {
+            id: updatedTicket.id,
+            ticketNumber: updatedTicket.ticketNumber,
+            deviceType: updatedTicket.deviceType,
+            deviceModel: updatedTicket.deviceModel,
+            status: updatedTicket.status,
+            customer: {
+              id: updatedTicket.customer.id,
+              name: updatedTicket.customer.name,
+              email: updatedTicket.customer.email,
+            },
+            assignedTo: updatedTicket.assignedTo,
+            tenantId: updatedTicket.tenantId,
+          },
+          {
+            oldStatus: ticket.status,
+            newStatus: updatedTicket.status,
+            note,
+          }
+        );
+
+        // If ticket was assigned, notify the technician
+        if (
+          (action === 'assign' || action === 'take') &&
+          updatedTicket.assignedToId &&
+          updatedTicket.assignedTo
+        ) {
+          await notifyTechnicianAssigned(
+            updatedTicket.assignedToId,
+            updatedTicket.tenantId,
+            {
+              id: updatedTicket.id,
+              ticketNumber: updatedTicket.ticketNumber,
+              deviceType: updatedTicket.deviceType,
+              deviceModel: updatedTicket.deviceModel,
+              status: updatedTicket.status,
+              customer: {
+                id: updatedTicket.customer.id,
+                name: updatedTicket.customer.name,
+                email: updatedTicket.customer.email,
+              },
+              assignedTo: updatedTicket.assignedTo,
+              tenantId: updatedTicket.tenantId,
+            }
+          );
+        }
+      } catch (notificationError) {
+        // Log notification errors but don't fail the request
+        console.error('Failed to send notifications:', notificationError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

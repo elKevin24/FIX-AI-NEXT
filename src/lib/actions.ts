@@ -9,6 +9,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
 import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas';
 import { createNotification } from '@/lib/notifications';
+import { notifyLowStock } from './ticket-notifications';
 
 /**
  * Get ticket by ID for public status check
@@ -891,17 +892,23 @@ export async function updateTicket(prevState: any, formData: FormData) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
-        const existingTicket = await prisma.ticket.findUnique({
-            where: { id: ticketId },
-            include: { partsUsed: true } // Include parts to restore stock if cancelled
-        });
+        let existingTicket;
+        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+
+        if (isSuperAdmin) {
+            existingTicket = await prisma.ticket.findUnique({
+                where: { id: ticketId },
+                include: { partsUsed: true } // Include parts to restore stock if cancelled
+            });
+        } else {
+            existingTicket = await tenantDb.ticket.findUnique({
+                where: { id: ticketId },
+                include: { partsUsed: true }
+            });
+        }
 
         if (!existingTicket) {
             return { message: 'Ticket no encontrado' };
-        }
-
-        if (!isSuperAdmin && existingTicket.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para editar este ticket' };
         }
 
         // ... (Assignee validation logic remains same)
@@ -1394,7 +1401,7 @@ export async function updatePart(prevState: any, formData: FormData) {
             return { message: 'No autorizado para editar este repuesto' };
         }
 
-        await tenantDb.part.update({
+        const updatedPart = await tenantDb.part.update({
             where: { id: partId },
             data: {
                 name,
@@ -1405,6 +1412,19 @@ export async function updatePart(prevState: any, formData: FormData) {
                 updatedById: session.user.id,
             },
         });
+
+        // Check for low stock and notify admins
+        if (updatedPart.quantity <= updatedPart.minStock) {
+            const admins = await tenantDb.user.findMany({
+                where: {
+                    role: 'ADMIN',
+                },
+                select: { id: true }
+            });
+
+            const adminIds = admins.map((a: { id: string }) => a.id);
+            await notifyLowStock(updatedPart.tenantId, updatedPart, adminIds);
+        }
 
     } catch (error) {
         console.error('Failed to update part:', error);
@@ -1557,6 +1577,31 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
                     quantity,
                 }
             });
+
+            // Check for low stock and notify admins
+            const updatedPart = await tx.part.findUnique({
+                where: { id: partId },
+                select: { id: true, name: true, quantity: true, minStock: true, tenantId: true }
+            });
+
+            if (updatedPart && updatedPart.quantity <= updatedPart.minStock) {
+                // Get admin IDs for this tenant
+                const admins = await tx.user.findMany({
+                    where: {
+                        tenantId: updatedPart.tenantId,
+                        role: 'ADMIN',
+                    },
+                    select: { id: true }
+                });
+
+                const adminIds = admins.map((a: { id: string }) => a.id);
+                
+                // Trigger notification (asynchronously ideally, but since we are in a transaction
+                // we should probably do it after or use a background task. 
+                // For simplicity and to ensure it's logged if the TX succeeds, 
+                // we can call it here or right after TX.)
+                await notifyLowStock(updatedPart.tenantId, updatedPart, adminIds);
+            }
         });
 
         return { success: true, message: 'Repuesto agregado al ticket' };
