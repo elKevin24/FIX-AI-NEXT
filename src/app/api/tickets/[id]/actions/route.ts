@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { TicketStatus } from '@prisma/client';
+import {
+  requireTicketActionPermission,
+  TicketAction,
+  AuthorizationError,
+} from '@/lib/auth-utils';
 
 /**
  * @swagger
@@ -58,6 +63,21 @@ export async function POST(
         { error: 'Action is required' },
         { status: 400 }
       );
+    }
+
+    // ========================================================================
+    // RBAC: Validate user has permission to perform this action
+    // ========================================================================
+    try {
+      requireTicketActionPermission(session.user.role, action as TicketAction);
+    } catch (error) {
+      if (error instanceof AuthorizationError) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 403 }
+        );
+      }
+      throw error;
     }
 
     const db = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -375,14 +395,7 @@ export async function POST(
         break;
 
       case 'cancel':
-        // Cancel ticket - requires ADMIN role
-        if (session.user.role !== 'ADMIN') {
-          return NextResponse.json(
-            { error: 'Only admins can cancel tickets' },
-            { status: 403 }
-          );
-        }
-
+        // Cancel ticket (RBAC validated above)
         if (!cancellationReason) {
           return NextResponse.json(
             { error: 'Cancellation reason is required' },
