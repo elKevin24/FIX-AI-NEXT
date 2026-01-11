@@ -3,7 +3,6 @@ import { redirect, notFound } from 'next/navigation';
 import TicketDetailView from './TicketDetailView';
 import { getTicketTimeline } from '@/lib/timeline';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { prisma } from '@/lib/prisma'; // Keep for strictly super admin specific fallback if needed, but try to minimize
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -26,41 +25,21 @@ export default async function TicketDetailPage({ params }: Props) {
     const db = getTenantPrisma(tenantId, userId);
 
     try {
-        // 2. Fetch Ticket
-        // Note: findUnique in extension might not enforce filtering if ID is provided directly depending on implementation,
-        // but our implementation usually does. However, for findUnique, Prisma extension 'where' hooks often don't fire.
-        // So we explicitly check tenantId or use findFirst with tenantId filter if strictness is needed.
-        // But let's stick to standard findUnique and verify later if needed, or better:
-        // Use findUnique and let middleware/logic handle, but to be 100% safe against leaks:
-        
-        let ticket: any;
-        
-        if (isSuperAdmin) {
-             // Super Admin might view across tenants, so we use global prisma + check
-             // But here we might just want to see it contextually?
-             // If we are "logged in" as a user of a tenant, we should see that tenant's view.
-             // If Super Admin has no tenantId? They shouldn't be here really without selecting one.
-             // Assuming Super Admin "masquerades" or just uses their assigned tenant.
-             ticket = await prisma.ticket.findUnique({
-                where: { id },
-                include: makeTicketInclude(),
-             });
-        } else {
-             // Standard User
-             ticket = await db.ticket.findUnique({
-                 where: { id },
-                 include: makeTicketInclude(),
-             });
-        }
+        // 2. Fetch Ticket with STRICT Tenant Isolation
+        // CRITICAL SECURITY: Always use getTenantPrisma to enforce tenant filtering
+        // Using findFirst with explicit tenantId check eliminates race condition window
+
+        const ticket = await db.ticket.findFirst({
+            where: {
+                id,
+                tenantId, // CRITICAL: Explicit tenant filter
+            },
+            include: makeTicketInclude(),
+        });
 
         if (!ticket) {
+            // Either ticket doesn't exist or doesn't belong to this tenant
             notFound();
-        }
-
-        // Strict Tenant Check (Double Safety)
-        if (!isSuperAdmin && ticket.tenantId !== tenantId) {
-            // Ideally wouldn't find it, but if ID lookup bypassed filter:
-            redirect('/dashboard/tickets');
         }
 
         // 3. Fetch Available Resources (Technicians, Parts, Services)
