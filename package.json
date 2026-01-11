@@ -19,7 +19,9 @@
     "neon:migrate": "npx prisma migrate deploy",
     "neon:seed": "npx prisma db seed",
     "neon:superadmin": "npx tsx scripts/seed-superadmin.ts",
-    "neon:studio": "npx prisma studio"
+    "neon:studio": "npx prisma studio",
+    "test:notifications": "npx tsx scripts/test-notifications.ts",
+    "create:maintenance-templates": "npx tsx scripts/create-maintenance-templates.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
@@ -37,6 +39,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^3.5.1",
+    "resend": "^6.7.0",
     "swagger-ui-react": "^5.30.3",
     "zod": "^3.23.8"
   },
