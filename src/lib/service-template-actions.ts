@@ -4,6 +4,8 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { ServiceCategory, TicketPriority } from '@prisma/client';
+import { notifyLowStock } from './ticket-notifications';
+import { notifyTicketCreated } from '@/lib/ticket-notifications';
 
 // ============================================================================
 // TYPES
@@ -471,6 +473,25 @@ export async function createTicketFromTemplate(
           quantity: defaultPart.quantity,
         },
       });
+
+      // Check for low stock and notify admins
+      const updatedPart = await tx.part.findUnique({
+        where: { id: defaultPart.partId },
+        select: { id: true, name: true, quantity: true, minStock: true, tenantId: true }
+      });
+
+      if (updatedPart && updatedPart.quantity <= updatedPart.minStock) {
+        const admins = await tx.user.findMany({
+          where: {
+            tenantId: updatedPart.tenantId,
+            role: 'ADMIN',
+          },
+          select: { id: true }
+        });
+
+        const adminIds = admins.map((a: { id: string }) => a.id);
+        await notifyLowStock(updatedPart.tenantId, updatedPart, adminIds);
+      }
     }
 
     // 3. Agregar partes OPCIONALES (no requieren stock, solo sugerencia)
@@ -501,6 +522,38 @@ export async function createTicketFromTemplate(
 
     return newTicket;
   });
+
+  // Fetch the created ticket with customer data for notifications
+  const ticketWithCustomer = await db.ticket.findUnique({
+    where: { id: ticket.id },
+    include: {
+      customer: true,
+      assignedTo: true,
+    },
+  });
+
+  // Send notification to customer about ticket creation
+  if (ticketWithCustomer) {
+    try {
+      await notifyTicketCreated({
+        id: ticketWithCustomer.id,
+        ticketNumber: ticketWithCustomer.ticketNumber,
+        deviceType: ticketWithCustomer.deviceType,
+        deviceModel: ticketWithCustomer.deviceModel,
+        status: ticketWithCustomer.status,
+        customer: {
+          id: ticketWithCustomer.customer.id,
+          name: ticketWithCustomer.customer.name,
+          email: ticketWithCustomer.customer.email,
+        },
+        assignedTo: ticketWithCustomer.assignedTo,
+        tenantId: ticketWithCustomer.tenantId,
+      });
+    } catch (notificationError) {
+      // Log notification errors but don't fail the request
+      console.error('Failed to send ticket creation notification:', notificationError);
+    }
+  }
 
   revalidatePath('/dashboard/tickets');
   revalidatePath(`/dashboard/tickets/${ticket.id}`);
