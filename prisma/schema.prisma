@@ -75,6 +75,10 @@ model Tenant {
   serviceTemplates ServiceTemplate[]
   purchaseOrders   PurchaseOrder[]
   notifications    Notification[]
+  invoices         Invoice[]
+  payments         Payment[]
+  cashRegisters    CashRegister[]
+  cashTransactions CashTransaction[]
 
   @@map("tenants")
 }
@@ -96,20 +100,26 @@ model User {
   availableFrom        DateTime? // Fecha de regreso si está ausente
   availableUntil       DateTime? // Fecha fin de ausencia
 
-  assignedTickets  Ticket[]
-  auditLogs        AuditLog[]
-  ticketNotes      TicketNote[]
-  createdTickets   Ticket[]                   @relation("TicketCreatedBy")
-  updatedTickets   Ticket[]                   @relation("TicketUpdatedBy")
-  createdCustomers Customer[]                 @relation("CustomerCreatedBy")
-  updatedCustomers Customer[]                 @relation("CustomerUpdatedBy")
-  createdParts     Part[]                     @relation("PartCreatedBy")
-  updatedParts     Part[]                     @relation("PartUpdatedBy")
-  createdTemplates ServiceTemplate[]          @relation("TemplateCreatedBy")
-  updatedTemplates ServiceTemplate[]          @relation("TemplateUpdatedBy")
-  specializations  TechnicianSpecialization[]
-  unavailabilities TechnicianUnavailability[]
-  notifications    Notification[]
+  assignedTickets     Ticket[]
+  auditLogs           AuditLog[]
+  ticketNotes         TicketNote[]
+  createdTickets      Ticket[]                   @relation("TicketCreatedBy")
+  updatedTickets      Ticket[]                   @relation("TicketUpdatedBy")
+  createdCustomers    Customer[]                 @relation("CustomerCreatedBy")
+  updatedCustomers    Customer[]                 @relation("CustomerUpdatedBy")
+  createdParts        Part[]                     @relation("PartCreatedBy")
+  updatedParts        Part[]                     @relation("PartUpdatedBy")
+  createdTemplates    ServiceTemplate[]          @relation("TemplateCreatedBy")
+  updatedTemplates    ServiceTemplate[]          @relation("TemplateUpdatedBy")
+  specializations     TechnicianSpecialization[]
+  unavailabilities    TechnicianUnavailability[]
+  notifications       Notification[]
+  createdInvoices     Invoice[]                  @relation("InvoiceCreatedBy")
+  updatedInvoices     Invoice[]                  @relation("InvoiceUpdatedBy")
+  receivedPayments    Payment[]
+  openedCashRegisters CashRegister[]             @relation("CashRegisterOpenedBy")
+  closedCashRegisters CashRegister[]             @relation("CashRegisterClosedBy")
+  cashTransactions    CashTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,7 +139,8 @@ model Customer {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  tickets Ticket[]
+  tickets  Ticket[]
+  invoices Invoice[]
 
   createdById String?
   createdBy   User?   @relation("CustomerCreatedBy", fields: [createdById], references: [id])
@@ -178,6 +189,7 @@ model Ticket {
   partsUsed PartUsage[]
   services  TicketService[]
   notes     TicketNote[]
+  invoice   Invoice?
 
   createdById String?
   createdBy   User?   @relation("TicketCreatedBy", fields: [createdById], references: [id])
@@ -449,4 +461,193 @@ model Notification {
   @@index([userId])
   @@index([tenantId])
   @@map("notifications")
+}
+
+// ============================================================================
+// BILLING & FINANCE MODELS
+// ============================================================================
+
+enum PaymentMethod {
+  CASH // Efectivo
+  CARD // Tarjeta (débito/crédito)
+  TRANSFER // Transferencia bancaria
+  CHECK // Cheque
+  OTHER // Otro
+}
+
+enum InvoiceStatus {
+  DRAFT // Borrador
+  PENDING // Pendiente de pago
+  PAID // Pagada
+  CANCELLED // Cancelada
+  OVERDUE // Vencida
+}
+
+// Factura/Recibo generado para un ticket cerrado
+model Invoice {
+  id            String        @id @default(uuid())
+  invoiceNumber String // Numeración secuencial: INV-0001, INV-0002, etc.
+  status        InvoiceStatus @default(PENDING)
+
+  // Relación con ticket
+  ticketId String @unique
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  // Relación con cliente
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  // Desglose financiero
+  laborCost      Decimal @default(0) @db.Decimal(10, 2) // Mano de obra
+  partsCost      Decimal @default(0) @db.Decimal(10, 2) // Costo de repuestos
+  partsMarkup    Decimal @default(0) @db.Decimal(10, 2) // Ganancia en repuestos
+  subtotal       Decimal @default(0) @db.Decimal(10, 2) // Subtotal antes de impuestos
+  taxRate        Decimal @default(0) @db.Decimal(5, 2) // Tasa de IVA (ej: 12.00 para 12%)
+  taxAmount      Decimal @default(0) @db.Decimal(10, 2) // Monto de IVA
+  discountAmount Decimal @default(0) @db.Decimal(10, 2) // Descuento aplicado
+  total          Decimal @default(0) @db.Decimal(10, 2) // Total a pagar
+
+  // Información fiscal (Guatemala)
+  customerName    String
+  customerNIT     String? // NIT del cliente (factura fiscal)
+  customerDPI     String? // DPI del cliente
+  customerAddress String?
+
+  // Notas y términos
+  notes        String? @db.Text
+  paymentTerms String? // Ej: "Pago al retirar equipo"
+
+  // Fechas
+  issuedAt DateTime  @default(now()) // Fecha de emisión
+  dueAt    DateTime? // Fecha de vencimiento
+  paidAt   DateTime? // Fecha de pago
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Auditoría
+  createdById String
+  createdBy   User   @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  updatedById String
+  updatedBy   User   @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con pagos
+  payments Payment[]
+
+  @@unique([invoiceNumber, tenantId], name: "unique_invoice_number_per_tenant")
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([ticketId])
+  @@index([status])
+  @@index([issuedAt])
+  @@map("invoices")
+}
+
+// Registro de pagos recibidos
+model Payment {
+  id            String @id @default(uuid())
+  paymentNumber String // Numeración: PAY-0001, PAY-0002, etc.
+
+  // Relación con factura
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+
+  // Detalles del pago
+  amount         Decimal       @db.Decimal(10, 2) // Monto pagado
+  paymentMethod  PaymentMethod
+  transactionRef String? // Referencia de transacción (número de cheque, referencia bancaria)
+  notes          String?       @db.Text
+
+  // Fecha
+  paidAt DateTime @default(now())
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Auditoría
+  receivedById String
+  receivedBy   User   @relation(fields: [receivedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([paymentNumber, tenantId], name: "unique_payment_number_per_tenant")
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@index([paidAt])
+  @@map("payments")
+}
+
+// Caja registradora - Registro de apertura/cierre de caja
+model CashRegister {
+  id   String @id @default(uuid())
+  name String // Ej: "Caja Principal", "Caja Sucursal 1"
+
+  // Estado de la caja
+  isOpen   Boolean   @default(false)
+  openedAt DateTime?
+  closedAt DateTime?
+
+  // Montos
+  openingBalance  Decimal @default(0) @db.Decimal(10, 2) // Saldo inicial
+  closingBalance  Decimal @default(0) @db.Decimal(10, 2) // Saldo final
+  expectedBalance Decimal @default(0) @db.Decimal(10, 2) // Saldo esperado (calculado)
+  difference      Decimal @default(0) @db.Decimal(10, 2) // Diferencia (real - esperado)
+
+  // Notas del cierre
+  closingNotes String? @db.Text
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Usuario que abrió/cerró
+  openedById String?
+  openedBy   User?   @relation("CashRegisterOpenedBy", fields: [openedById], references: [id])
+  closedById String?
+  closedBy   User?   @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con transacciones de caja
+  transactions CashTransaction[]
+
+  @@index([tenantId])
+  @@index([isOpen])
+  @@index([openedAt])
+  @@map("cash_registers")
+}
+
+// Transacciones de caja (movimientos de efectivo)
+model CashTransaction {
+  id          String  @id @default(uuid())
+  type        String // 'INCOME' (ingreso), 'EXPENSE' (gasto), 'WITHDRAWAL' (retiro)
+  amount      Decimal @db.Decimal(10, 2)
+  description String
+  reference   String? // Referencia a factura, ticket, etc.
+
+  // Relación con caja
+  cashRegisterId String
+  cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Auditoría
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([cashRegisterId])
+  @@index([createdAt])
+  @@map("cash_transactions")
 }
