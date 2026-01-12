@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { ServiceCategory } from '@prisma/client';
 
+// ============================================================================
+// TICKET SCHEMAS
+// ============================================================================
+
 // Esquema para la creación de un solo ticket (parte del flujo multi-dispositivo)
 // NOTA: customerName se envía por separado en FormData, no dentro de cada ticket
 export const CreateTicketSchema = z.object({
@@ -37,6 +41,62 @@ export const UpdateTicketSchema = z.object({
   accessories: z.string().optional().nullable(),
   checkInNotes: z.string().max(500, 'Las notas de ingreso son demasiado largas.').optional().nullable(),
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
+});
+
+// ============================================================================
+// USER SCHEMAS
+// ============================================================================
+
+export const CreateUserSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  email: z.string().email('Formato de email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  role: z.enum(['ADMIN', 'TECHNICIAN', 'RECEPTIONIST'], {
+    errorMap: () => ({ message: 'Rol inválido' })
+  }),
+});
+
+export const UpdateUserSchema = z.object({
+  userId: z.string().uuid('ID de usuario inválido'),
+  name: z.string().min(1, 'El nombre es requerido'),
+  email: z.string().email('Formato de email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+  role: z.enum(['ADMIN', 'TECHNICIAN', 'RECEPTIONIST'], {
+    errorMap: () => ({ message: 'Rol inválido' })
+  }),
+});
+
+// ============================================================================
+// CUSTOMER SCHEMAS
+// ============================================================================
+
+export const CreateCustomerSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  email: z.string().email('Formato de email inválido').optional().or(z.literal('')),
+  phone: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  dpi: z.string().optional().nullable(),
+  nit: z.string().optional().nullable(),
+});
+
+export const UpdateCustomerSchema = CreateCustomerSchema.extend({
+  customerId: z.string().uuid('ID de cliente inválido'),
+});
+
+// ============================================================================
+// PART SCHEMAS
+// ============================================================================
+
+export const CreatePartSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  sku: z.string().optional().nullable(),
+  quantity: z.number({ invalid_type_error: 'Cantidad inválida' }).int('La cantidad debe ser un entero').nonnegative('La cantidad no puede ser negativa'),
+  cost: z.number({ invalid_type_error: 'Costo inválido' }).nonnegative('El costo no puede ser negativo'),
+  price: z.number({ invalid_type_error: 'Precio inválido' }).nonnegative('El precio no puede ser negativo'),
+});
+
+export const UpdatePartSchema = CreatePartSchema.extend({
+  partId: z.string().uuid('ID de repuesto inválido'),
 });
 
 // ============================================================================
