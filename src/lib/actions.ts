@@ -7,7 +7,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
-import { CreateTicketSchema, CreateBatchTicketsSchema } from './schemas';
+import { CreateTicketSchema, CreateBatchTicketsSchema, CreateUserSchema, UpdateUserSchema, CreateCustomerSchema, UpdateCustomerSchema, CreatePartSchema, UpdatePartSchema } from './schemas';
 import { createNotification } from '@/lib/notifications';
 import { notifyLowStock } from './ticket-notifications';
 
