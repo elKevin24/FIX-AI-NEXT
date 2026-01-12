@@ -89,12 +89,13 @@ export default function TicketWizard() {
     try {
       if (selectedTemplate) {
         // Create ticket from template (with atomic stock consumption)
-        const ticket = await createTicketFromTemplate(
-          selectedTemplate.id,
-          deviceType,
-          deviceModel,
-          customer.id!
-        );
+        const formData = new FormData();
+        formData.append('templateId', selectedTemplate.id);
+        if (deviceType) formData.append('deviceType', deviceType);
+        if (deviceModel) formData.append('deviceModel', deviceModel);
+        formData.append('customerId', customer.id!);
+
+        const ticket = await createTicketFromTemplate(formData);
 
         setSuccess(true);
         setTimeout(() => {

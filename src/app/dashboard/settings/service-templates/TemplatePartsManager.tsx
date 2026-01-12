@@ -70,7 +70,13 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
     setError('');
 
     try {
-      await addPartToTemplate(templateId, selectedPartId, quantity, required);
+      const data = new FormData();
+      data.append('templateId', templateId);
+      data.append('partId', selectedPartId);
+      data.append('quantity', quantity.toString());
+      data.append('required', String(required));
+
+      await addPartToTemplate(data);
       setSelectedPartId('');
       setQuantity(1);
       setRequired(false);
@@ -99,7 +105,12 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
     setError('');
 
     try {
-      await updateTemplateDefaultPart(id, editQuantity, editRequired);
+      const data = new FormData();
+      data.append('id', id);
+      data.append('quantity', editQuantity.toString());
+      data.append('required', String(editRequired));
+
+      await updateTemplateDefaultPart(data);
       setEditingId(null);
       router.refresh();
     } catch (err) {
