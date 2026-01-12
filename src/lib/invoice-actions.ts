@@ -326,7 +326,7 @@ export async function registerPayment(data: PaymentData) {
 
   // Calcular total pagado hasta ahora
   const totalPaid = invoice.payments.reduce(
-    (sum, p) => sum + Number(p.amount),
+    (sum: number, p: any) => sum + Number(p.amount),
     0
   );
 
@@ -479,39 +479,39 @@ export async function getFinancialStats(filters?: { from?: Date; to?: Date }) {
 
   // Calcular métricas
   const totalInvoiced = invoices.reduce(
-    (sum, inv) => sum + Number(inv.total),
+    (sum: number, inv: any) => sum + Number(inv.total),
     0
   );
 
-  const totalPaid = invoices.reduce((sum, inv) => {
-    const paid = inv.payments.reduce((s, p) => s + Number(p.amount), 0);
+  const totalPaid = invoices.reduce((sum: number, inv: any) => {
+    const paid = inv.payments.reduce((s: number, p: any) => s + Number(p.amount), 0);
     return sum + paid;
   }, 0);
 
   const totalPending = totalInvoiced - totalPaid;
 
   const totalLaborIncome = invoices.reduce(
-    (sum, inv) => sum + Number(inv.laborCost),
+    (sum: number, inv: any) => sum + Number(inv.laborCost),
     0
   );
 
   const totalPartsIncome = invoices.reduce(
-    (sum, inv) => sum + Number(inv.partsCost),
+    (sum: number, inv: any) => sum + Number(inv.partsCost),
     0
   );
 
   const totalPartsProfit = invoices.reduce(
-    (sum, inv) => sum + Number(inv.partsMarkup),
+    (sum: number, inv: any) => sum + Number(inv.partsMarkup),
     0
   );
 
   const invoicesByStatus = {
-    paid: invoices.filter((inv) => inv.status === InvoiceStatus.PAID).length,
-    pending: invoices.filter((inv) => inv.status === InvoiceStatus.PENDING)
+    paid: invoices.filter((inv: any) => inv.status === InvoiceStatus.PAID).length,
+    pending: invoices.filter((inv: any) => inv.status === InvoiceStatus.PENDING)
       .length,
-    overdue: invoices.filter((inv) => inv.status === InvoiceStatus.OVERDUE)
+    overdue: invoices.filter((inv: any) => inv.status === InvoiceStatus.OVERDUE)
       .length,
-    draft: invoices.filter((inv) => inv.status === InvoiceStatus.DRAFT).length,
+    draft: invoices.filter((inv: any) => inv.status === InvoiceStatus.DRAFT).length,
   };
 
   return {
