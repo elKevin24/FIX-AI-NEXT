@@ -128,3 +128,23 @@ export const UpdateServiceTemplateSchema = ServiceTemplateSchema.partial().requi
   defaultTitle: true,
   defaultDescription: true,
 });
+
+export const CreateTicketFromTemplateSchema = z.object({
+  templateId: z.string().uuid('ID de plantilla inválido'),
+  deviceType: z.string().max(50, 'El tipo de dispositivo es demasiado largo.').optional().nullable(),
+  deviceModel: z.string().max(255, 'El modelo del dispositivo es demasiado largo.').optional().nullable(),
+  customerId: z.string().uuid('ID de cliente inválido'),
+});
+
+export const AddPartToTemplateSchema = z.object({
+  templateId: z.string().uuid('ID de plantilla inválido'),
+  partId: z.string().uuid('ID de repuesto inválido'),
+  quantity: z.number().int('La cantidad debe ser un entero').positive('La cantidad debe ser positiva'),
+  required: z.boolean(),
+});
+
+export const UpdateTemplateDefaultPartSchema = z.object({
+  id: z.string().uuid('ID de parte por defecto inválido'),
+  quantity: z.number().int('La cantidad debe ser un entero').positive('La cantidad debe ser positiva'),
+  required: z.boolean(),
+});

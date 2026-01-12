@@ -1,0 +1,32 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90m/home/kev/Documentos/GitHub/FIX-AI-NEXT[39m
+
+[90mstderr[2m | src/lib/actions.test.ts[2m > [22m[2mactions.ts - Customer & Part Actions[2m > [22m[2mupdatePart[2m > [22m[2mshould successfully update a part and check for low stock
+[22m[39mFailed to create notification PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation:
+
+
+The table `public.notifications` does not exist in the current database.
+    at ei.handleRequestError [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39mnode_modules/[4m@prisma/client[24m/runtime/library.js:121:7268[90m)[39m
+    at ei.handleAndLogRequestError [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39mnode_modules/[4m@prisma/client[24m/runtime/library.js:121:6593[90m)[39m
+    at ei.request [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39mnode_modules/[4m@prisma/client[24m/runtime/library.js:121:6300[90m)[39m
+    at a [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39mnode_modules/[4m@prisma/client[24m/runtime/library.js:130:9551[90m)[39m
+    at createNotification [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/notifications.ts:40:9[90m)[39m
+    at async Promise.all (index 0)
+    at notifyAdmins [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/ticket-notifications.ts:175:3[90m)[39m
+    at notifyLowStock [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/ticket-notifications.ts:196:3[90m)[39m
+    at Module.updatePart [90m(/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/actions.ts:1406:13[90m)[39m
+    at [90m/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/actions.test.ts:160:7 {
+  code: [32m'P2021'[39m,
+  meta: { modelName: [32m'Notification'[39m, table: [32m'public.notifications'[39m },
+  clientVersion: [32m'6.19.1'[39m
+}
+
+ [32m✓[39m src/lib/actions.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1298[2mms[22m[39m
+       [33m[2m✓[22m[39m should successfully update a part and check for low stock [33m 1285[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 20:06:42
+[2m   Duration [22m 2.34s[2m (transform 155ms, setup 0ms, import 364ms, tests 1.30s, environment 474ms)[22m
+
