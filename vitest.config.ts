@@ -11,5 +11,13 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    server: {
+      deps: {
+        inline: ['next-auth'],
+      },
+    },
+    env: {
+      RESEND_API_KEY: 're_dummy_123',
+    },
   },
 })

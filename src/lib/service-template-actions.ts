@@ -6,6 +6,13 @@ import { revalidatePath } from 'next/cache';
 import { ServiceCategory, TicketPriority } from '@prisma/client';
 import { notifyLowStock } from './ticket-notifications';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
+import {
+  CreateServiceTemplateSchema,
+  UpdateServiceTemplateSchema,
+  CreateTicketFromTemplateSchema,
+  AddPartToTemplateSchema,
+  UpdateTemplateDefaultPartSchema
+} from './schemas';
 
 // ============================================================================
 // TYPES
@@ -163,7 +170,7 @@ export async function getServiceTemplate(id: string) {
 // CREATE TEMPLATE
 // ============================================================================
 
-export async function createServiceTemplate(data: ServiceTemplateFormData) {
+export async function createServiceTemplate(formData: FormData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
@@ -173,6 +180,24 @@ export async function createServiceTemplate(data: ServiceTemplateFormData) {
   if (session.user.role !== 'ADMIN') {
     throw new Error('Permiso denegado. Solo administradores pueden crear plantillas.');
   }
+
+  const formDataObj = Object.fromEntries(formData);
+
+  // Convert numerical fields from string to number for Zod validation
+  const dataToValidate = {
+    ...formDataObj,
+    estimatedDuration: formDataObj.estimatedDuration ? Number(formDataObj.estimatedDuration) : undefined,
+    laborCost: formDataObj.laborCost ? Number(formDataObj.laborCost) : undefined,
+    isActive: formDataObj.isActive === 'true', // Convert string 'true' to boolean true
+  };
+
+  const validatedFields = CreateServiceTemplateSchema.safeParse(dataToValidate);
+
+  if (!validatedFields.success) {
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+  }
+
+  const data = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -194,7 +219,7 @@ export async function createServiceTemplate(data: ServiceTemplateFormData) {
 // UPDATE TEMPLATE
 // ============================================================================
 
-export async function updateServiceTemplate(id: string, data: ServiceTemplateFormData) {
+export async function updateServiceTemplate(id: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
@@ -204,6 +229,22 @@ export async function updateServiceTemplate(id: string, data: ServiceTemplateFor
   if (session.user.role !== 'ADMIN') {
     throw new Error('Permiso denegado');
   }
+
+  const formDataObj = Object.fromEntries(formData);
+  const dataToValidate = {
+    ...formDataObj,
+    estimatedDuration: formDataObj.estimatedDuration ? Number(formDataObj.estimatedDuration) : undefined,
+    laborCost: formDataObj.laborCost ? Number(formDataObj.laborCost) : undefined,
+    isActive: formDataObj.isActive === 'true', // Convert string 'true' to boolean true
+  };
+
+  const validatedFields = UpdateServiceTemplateSchema.safeParse(dataToValidate);
+
+  if (!validatedFields.success) {
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+  }
+
+  const data = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -379,16 +420,20 @@ export async function duplicateServiceTemplate(id: string) {
 // CREATE TICKET FROM TEMPLATE
 // ============================================================================
 
-export async function createTicketFromTemplate(
-  templateId: string,
-  deviceType: string,
-  deviceModel: string,
-  customerId: string
-) {
+export async function createTicketFromTemplate(formData: FormData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+
+  const formDataObj = Object.fromEntries(formData);
+  const validatedFields = CreateTicketFromTemplateSchema.safeParse(formDataObj);
+
+  if (!validatedFields.success) {
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+  }
+
+  const { templateId, deviceType, deviceModel, customerId } = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -585,12 +630,7 @@ export async function getAvailableParts() {
 // MANAGE TEMPLATE DEFAULT PARTS
 // ============================================================================
 
-export async function addPartToTemplate(
-  templateId: string,
-  partId: string,
-  quantity: number,
-  required: boolean
-) {
+export async function addPartToTemplate(formData: FormData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
@@ -599,6 +639,21 @@ export async function addPartToTemplate(
   if (session.user.role !== 'ADMIN') {
     throw new Error('Permiso denegado');
   }
+
+  const formDataObj = Object.fromEntries(formData);
+  const dataToValidate = {
+    ...formDataObj,
+    quantity: Number(formDataObj.quantity),
+    required: formDataObj.required === 'true',
+  };
+
+  const validatedFields = AddPartToTemplateSchema.safeParse(dataToValidate);
+
+  if (!validatedFields.success) {
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+  }
+
+  const { templateId, partId, quantity, required } = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -649,11 +704,7 @@ export async function addPartToTemplate(
   return defaultPart;
 }
 
-export async function updateTemplateDefaultPart(
-  id: string,
-  quantity: number,
-  required: boolean
-) {
+export async function updateTemplateDefaultPart(formData: FormData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
@@ -662,6 +713,22 @@ export async function updateTemplateDefaultPart(
   if (session.user.role !== 'ADMIN') {
     throw new Error('Permiso denegado');
   }
+
+  const formDataObj = Object.fromEntries(formData);
+  const dataToValidate = {
+    ...formDataObj,
+    id: formDataObj.id, // Assuming 'id' is passed as a hidden field
+    quantity: Number(formDataObj.quantity),
+    required: formDataObj.required === 'true',
+  };
+
+  const validatedFields = UpdateTemplateDefaultPartSchema.safeParse(dataToValidate);
+
+  if (!validatedFields.success) {
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+  }
+
+  const { id, quantity, required } = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 

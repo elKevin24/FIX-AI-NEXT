@@ -435,25 +435,14 @@ export async function createUser(prevState: any, formData: FormData) {
         return { message: 'Solo los administradores pueden crear usuarios' };
     }
 
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const role = formData.get('role') as 'ADMIN' | 'TECHNICIAN' | 'RECEPTIONIST';
+    const formDataObj = Object.fromEntries(formData);
+    const validatedFields = CreateUserSchema.safeParse(formDataObj);
 
-    if (!name || !email || !password || !role) {
-        return { message: 'Todos los campos son requeridos' };
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return { message: 'El formato del email no es válido' };
-    }
-
-    // Validate password length
-    if (password.length < 6) {
-        return { message: 'La contraseña debe tener al menos 6 caracteres' };
-    }
+    const { name, email, password, role } = validatedFields.data;
 
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -530,16 +519,16 @@ export async function updateUser(prevState: any, formData: FormData) {
         return { message: 'Solo los administradores pueden editar usuarios' };
     }
 
-    const userId = formData.get('userId') as string;
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const role = formData.get('role') as 'ADMIN' | 'TECHNICIAN' | 'RECEPTIONIST';
+    const formDataObj = Object.fromEntries(formData);
+    const validatedFields = UpdateUserSchema.safeParse(formDataObj);
 
-    if (!userId || !name || !email || !role) {
-        return { message: 'Campos requeridos faltantes' };
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
+    const { userId, name, email, password, role } = validatedFields.data;
+
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -666,24 +655,14 @@ export async function createCustomer(prevState: any, formData: FormData) {
         return { message: 'No autorizado' };
     }
 
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const phone = formData.get('phone') as string;
-    const address = formData.get('address') as string;
-    const dpi = formData.get('dpi') as string;
-    const nit = formData.get('nit') as string;
+    const formDataObj = Object.fromEntries(formData);
+    const validatedFields = CreateCustomerSchema.safeParse(formDataObj);
 
-    if (!name) {
-        return { message: 'El nombre es requerido' };
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
-    // Validate email format if provided
-    if (email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return { message: 'El formato del email no es válido' };
-        }
-    }
+    const { name, email, phone, address, dpi, nit } = validatedFields.data;
 
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -726,26 +705,16 @@ export async function updateCustomer(prevState: any, formData: FormData) {
         return { message: 'No autorizado' };
     }
 
-    const customerId = formData.get('customerId') as string;
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const phone = formData.get('phone') as string;
-    const address = formData.get('address') as string;
-    const dpi = formData.get('dpi') as string;
-    const nit = formData.get('nit') as string;
+    const formDataObj = Object.fromEntries(formData);
+    const validatedFields = UpdateCustomerSchema.safeParse(formDataObj);
 
-    if (!customerId || !name) {
-        return { message: 'El nombre es requerido' };
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
-    // Validate email format if provided
-    if (email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return { message: 'El formato del email no es válido' };
-        }
-    }
+    const { customerId, name, email, phone, address, dpi, nit } = validatedFields.data;
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -812,6 +781,7 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
         return { message: 'ID de cliente requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -889,6 +859,7 @@ export async function updateTicket(prevState: any, formData: FormData) {
         return { message: 'Campos requeridos faltantes' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1009,6 +980,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
         return { message: 'Campos requeridos faltantes' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1128,6 +1100,7 @@ export async function deleteTicket(prevState: any, formData: FormData) {
         return { message: 'ID de ticket requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1184,6 +1157,7 @@ export async function addTicketNote(prevState: any, formData: FormData) {
         return { message: 'El contenido de la nota es requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1258,6 +1232,7 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
         return { message: 'ID de nota requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const isAdmin = session.user.role === 'ADMIN';
 
@@ -1314,19 +1289,21 @@ export async function createPart(prevState: any, formData: FormData) {
         return { message: 'No autorizado' };
     }
 
-    const name = formData.get('name') as string;
-    const sku = formData.get('sku') as string;
-    const quantity = parseInt(formData.get('quantity') as string);
-    const cost = parseFloat(formData.get('cost') as string);
-    const price = parseFloat(formData.get('price') as string);
+    const data = {
+        name: formData.get('name'),
+        sku: formData.get('sku'),
+        quantity: Number(formData.get('quantity')),
+        cost: Number(formData.get('cost')),
+        price: Number(formData.get('price')),
+    };
 
-    if (!name || isNaN(quantity) || isNaN(cost) || isNaN(price)) {
-        return { message: 'Todos los campos requeridos deben ser válidos' };
+    const validatedFields = CreatePartSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
-    if (quantity < 0 || cost < 0 || price < 0) {
-        return { message: 'Los valores numéricos no pueden ser negativos' };
-    }
+    const { name, sku, quantity, cost, price } = validatedFields.data;
 
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -1368,21 +1345,24 @@ export async function updatePart(prevState: any, formData: FormData) {
         return { message: 'No autorizado' };
     }
 
-    const partId = formData.get('partId') as string;
-    const name = formData.get('name') as string;
-    const sku = formData.get('sku') as string;
-    const quantity = parseInt(formData.get('quantity') as string);
-    const cost = parseFloat(formData.get('cost') as string);
-    const price = parseFloat(formData.get('price') as string);
+    const data = {
+        partId: formData.get('partId'),
+        name: formData.get('name'),
+        sku: formData.get('sku'),
+        quantity: Number(formData.get('quantity')),
+        cost: Number(formData.get('cost')),
+        price: Number(formData.get('price')),
+    };
 
-    if (!partId || !name || isNaN(quantity) || isNaN(cost) || isNaN(price)) {
-        return { message: 'Todos los campos requeridos deben ser válidos' };
+    const validatedFields = UpdatePartSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+        return { message: validatedFields.error.errors[0].message };
     }
 
-    if (quantity < 0 || cost < 0 || price < 0) {
-        return { message: 'Los valores numéricos no pueden ser negativos' };
-    }
+    const { partId, name, sku, quantity, cost, price } = validatedFields.data;
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1461,6 +1441,7 @@ export async function deletePart(prevState: any, formData: FormData) {
         return { message: 'ID de repuesto requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1525,6 +1506,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
         return { message: 'Datos inválidos' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
@@ -1633,6 +1615,7 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
         return { message: 'ID de uso requerido' };
     }
 
+    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {

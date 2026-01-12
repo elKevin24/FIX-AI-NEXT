@@ -72,10 +72,26 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
     setError('');
 
     try {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('category', formData.category);
+      data.append('defaultTitle', formData.defaultTitle);
+      data.append('defaultDescription', formData.defaultDescription);
+      data.append('defaultPriority', formData.defaultPriority);
+      if (formData.estimatedDuration !== null) {
+        data.append('estimatedDuration', formData.estimatedDuration.toString());
+      }
+      if (formData.laborCost !== null) {
+        data.append('laborCost', formData.laborCost.toString());
+      }
+      data.append('isActive', String(formData.isActive));
+      if (formData.color) data.append('color', formData.color);
+      if (formData.icon) data.append('icon', formData.icon);
+
       if (initialData?.id) {
-        await updateServiceTemplate(initialData.id, formData);
+        await updateServiceTemplate(initialData.id, data);
       } else {
-        await createServiceTemplate(formData);
+        await createServiceTemplate(data);
       }
       router.push('/dashboard/settings/service-templates');
       router.refresh();
