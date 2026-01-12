@@ -235,12 +235,12 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
   const openingBalance = Number(cashRegister.openingBalance);
 
   const totalIncome = cashRegister.transactions
-    .filter((t) => t.type === 'INCOME')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .filter((t: any) => t.type === 'INCOME')
+    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const totalExpenses = cashRegister.transactions
-    .filter((t) => t.type === 'EXPENSE' || t.type === 'WITHDRAWAL')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .filter((t: any) => t.type === 'EXPENSE' || t.type === 'WITHDRAWAL')
+    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const expectedBalance = openingBalance + totalIncome - totalExpenses;
   const difference = data.closingBalance - expectedBalance;
@@ -309,16 +309,16 @@ export async function getCashRegisterStats(cashRegisterId: string) {
   }
 
   const totalIncome = cashRegister.transactions
-    .filter((t) => t.type === 'INCOME')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .filter((t: any) => t.type === 'INCOME')
+    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const totalExpenses = cashRegister.transactions
-    .filter((t) => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .filter((t: any) => t.type === 'EXPENSE')
+    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const totalWithdrawals = cashRegister.transactions
-    .filter((t) => t.type === 'WITHDRAWAL')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .filter((t: any) => t.type === 'WITHDRAWAL')
+    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const currentBalance = cashRegister.isOpen
     ? Number(cashRegister.openingBalance) + totalIncome - totalExpenses - totalWithdrawals
