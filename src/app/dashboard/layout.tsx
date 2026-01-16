@@ -1,13 +1,14 @@
-import { signOut } from '@/auth';
+import { signOut, auth } from '@/auth';
 import styles from './dashboard.module.css';
 import Sidebar from '@/components/dashboard/Sidebar';
 // We don't import Sidebar.module.css here, the component handles it.
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await auth();
     // Logout button passed as a server component/slot to client component
     const logoutButton = (
         <form
@@ -48,7 +49,7 @@ export default function DashboardLayout({
 
     return (
         <div className={styles.container}>
-            <Sidebar logoutButton={logoutButton} />
+            <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
             <main className={styles.mainContent}>
                 {children}
             </main>

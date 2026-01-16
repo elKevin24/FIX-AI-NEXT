@@ -108,8 +108,11 @@ describe('service-template-actions', () => {
     });
 
     it('should successfully create a ticket and consume stock', async () => {
+      const templateId = '00000000-0000-0000-0000-000000000001';
+      const customerId = '00000000-0000-0000-0000-000000000002';
+
       const template = {
-        id: 'temp-1',
+        id: templateId,
         name: 'Template',
         defaultTitle: 'Title',
         defaultDescription: 'Desc',
@@ -122,7 +125,7 @@ describe('service-template-actions', () => {
         ],
       };
 
-      const customer = { id: 'cust-1', tenantId: 'tenant-1' };
+      const customer = { id: customerId, tenantId: 'tenant-1' };
       const newTicket = { id: 'tick-1', ticketNumber: 'T-100' };
 
       mockDb.serviceTemplate.findUnique.mockResolvedValue(template);
@@ -141,11 +144,17 @@ describe('service-template-actions', () => {
         deviceModel: 'Model X',
         status: 'OPEN',
         tenantId: 'tenant-1',
-        customer: { id: 'cust-1', name: 'Customer', email: 'cust@test.com' },
+        customer: { id: customerId, name: 'Customer', email: 'cust@test.com' },
         assignedTo: null
       })};
 
-      const result = await createTicketFromTemplate('temp-1', 'PC', 'Model X', 'cust-1');
+      const formData = new FormData();
+      formData.append('templateId', templateId);
+      formData.append('deviceType', 'PC');
+      formData.append('deviceModel', 'Model X');
+      formData.append('customerId', customerId);
+
+      const result = await createTicketFromTemplate(formData);
 
       expect(mockTx.ticket.create).toHaveBeenCalled();
       expect(mockTx.part.updateMany).toHaveBeenCalledWith({
@@ -158,8 +167,11 @@ describe('service-template-actions', () => {
     });
 
     it('should throw error if stock is insufficient', async () => {
+      const templateId = '00000000-0000-0000-0000-000000000001';
+      const customerId = '00000000-0000-0000-0000-000000000002';
+
       const template = {
-        id: 'temp-1',
+        id: templateId,
         isActive: true,
         defaultPriority: 'MEDIUM',
         tenantId: 'tenant-1',
@@ -169,10 +181,16 @@ describe('service-template-actions', () => {
       };
 
       mockDb.serviceTemplate.findUnique.mockResolvedValue(template);
-      mockDb.customer.findUnique.mockResolvedValue({ id: 'cust-1', tenantId: 'tenant-1' });
+      mockDb.customer.findUnique.mockResolvedValue({ id: customerId, tenantId: 'tenant-1' });
       mockTx.part.updateMany.mockResolvedValue({ count: 0 });
 
-      await expect(createTicketFromTemplate('temp-1', 'PC', 'X', 'cust-1')).rejects.toThrow(/Stock insuficiente/);
+      const formData = new FormData();
+      formData.append('templateId', templateId);
+      formData.append('deviceType', 'PC');
+      formData.append('deviceModel', 'X');
+      formData.append('customerId', customerId);
+
+      await expect(createTicketFromTemplate(formData)).rejects.toThrow(/Stock insuficiente/);
     });
   });
 });

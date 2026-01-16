@@ -16,6 +16,25 @@ vi.mock('next/link', () => {
   };
 });
 
+// Mock ThemeContext
+vi.mock('@/contexts/ThemeContext', () => ({
+  useTheme: () => ({
+    theme: 'light',
+    setTheme: vi.fn(),
+    resolvedTheme: 'light',
+  }),
+}));
+
+// Mock NotificationBell
+vi.mock('./NotificationBell', () => ({
+  default: () => <div data-testid="notification-bell">🔔</div>,
+}));
+
+// Mock ThemeSwitcher (to avoid its own internal complexity in this test)
+vi.mock('@/components/ui/ThemeSwitcher', () => ({
+  default: () => <div data-testid="theme-switcher">🎨</div>,
+}));
+
 describe('Sidebar Component', () => {
   const logoutButton = <button>Cerrar Sesión</button>;
 

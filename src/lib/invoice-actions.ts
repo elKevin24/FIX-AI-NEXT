@@ -5,6 +5,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { InvoiceStatus, PaymentMethod } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { registerInvoicePaymentInCash } from './cash-register-actions';
 
 // ============================================================================
 // TYPES
@@ -385,6 +386,17 @@ export async function registerPayment(data: PaymentData) {
         ticket: true,
       },
     });
+
+    // Si el pago es en efectivo, registrar en caja registradora
+    if (data.paymentMethod === PaymentMethod.CASH) {
+      try {
+        await registerInvoicePaymentInCash(data.invoiceId, data.amount);
+      } catch (error) {
+        console.error('Error al registrar pago en caja:', error);
+        // No lanzamos error para no revertir el pago de la factura, 
+        // pero idealmente deberíamos informar al usuario.
+      }
+    }
 
     return { payment, invoice: updatedInvoice };
   });

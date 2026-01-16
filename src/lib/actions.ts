@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
 import { CreateTicketSchema, CreateBatchTicketsSchema, CreateUserSchema, UpdateUserSchema, CreateCustomerSchema, UpdateCustomerSchema, CreatePartSchema, UpdatePartSchema } from './schemas';
 import { createNotification } from '@/lib/notifications';
-import { notifyLowStock } from './ticket-notifications';
+import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTechnicianAssigned } from './ticket-notifications';
 
 /**
  * Get ticket by ID for public status check
@@ -263,7 +263,7 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
             });
         }
 
-        await tenantDb.ticket.create({
+        const createdTicket = await tenantDb.ticket.create({
             data: {
                 title: ticketData.title,
                 description: ticketData.description,
@@ -277,8 +277,32 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
                 checkInNotes: ticketData.checkInNotes,
                 createdById: session?.user?.id,
                 updatedById: session?.user?.id,
+            },
+            include: {
+                customer: true,
+                assignedTo: true,
             }
         });
+
+        // Notify customer about ticket creation
+        try {
+            await notifyTicketCreated({
+                id: createdTicket.id,
+                ticketNumber: (createdTicket as any).ticketNumber || createdTicket.id.slice(0, 8),
+                deviceType: createdTicket.deviceType || 'PC',
+                deviceModel: createdTicket.deviceModel || '',
+                status: createdTicket.status,
+                customer: {
+                    id: createdTicket.customer.id,
+                    name: createdTicket.customer.name,
+                    email: createdTicket.customer.email,
+                },
+                assignedTo: createdTicket.assignedTo,
+                tenantId: createdTicket.tenantId,
+            });
+        } catch (notificationError) {
+            console.error('Failed to send ticket creation notification:', notificationError);
+        }
 
     } catch (error) {
         console.error('Failed to create ticket:', error);
@@ -402,6 +426,39 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                 )
             );
         });
+        // Fetch the created tickets to send notifications
+        const createdTickets = await tenantDb.ticket.findMany({
+            where: {
+                customerId: currentCustomerId,
+                createdAt: { gte: new Date(Date.now() - 5000) } // Recently created
+            },
+            include: {
+                customer: true,
+                assignedTo: true,
+            }
+        });
+
+        // Notify customer for each ticket created in the batch
+        for (const ticket of createdTickets) {
+            try {
+                await notifyTicketCreated({
+                    id: ticket.id,
+                    ticketNumber: (ticket as any).ticketNumber || ticket.id.slice(0, 8),
+                    deviceType: ticket.deviceType || 'PC',
+                    deviceModel: ticket.deviceModel || '',
+                    status: ticket.status,
+                    customer: {
+                        id: ticket.customer.id,
+                        name: ticket.customer.name,
+                        email: ticket.customer.email,
+                    },
+                    assignedTo: ticket.assignedTo,
+                    tenantId: ticket.tenantId,
+                });
+            } catch (notificationError) {
+                console.error('Failed to send batch ticket notification:', notificationError);
+            }
+        }
 
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
@@ -869,12 +926,12 @@ export async function updateTicket(prevState: any, formData: FormData) {
         if (isSuperAdmin) {
             existingTicket = await prisma.ticket.findUnique({
                 where: { id: ticketId },
-                include: { partsUsed: true } // Include parts to restore stock if cancelled
+                include: { partsUsed: true, customer: true, assignedTo: true } // Include all needed for notifications
             });
         } else {
             existingTicket = await tenantDb.ticket.findUnique({
                 where: { id: ticketId },
-                include: { partsUsed: true }
+                include: { partsUsed: true, customer: true, assignedTo: true }
             });
         }
 
@@ -940,16 +997,47 @@ export async function updateTicket(prevState: any, formData: FormData) {
 
         // Execute Notification OUTSIDE transaction to not block
         if (assignedToId && assignedToId !== existingTicket.assignedToId) {
-            await createNotification({
-                userId: assignedToId,
-                tenantId: session.user.tenantId,
-                type: 'INFO',
-                title: 'Nuevo Ticket Asignado',
-                message: `Se te ha asignado el ticket #${existingTicket.id.slice(0,8)}: ${title}`,
-                link: `/dashboard/tickets/${ticketId}`
-            });
+             try {
+                // Fetch full ticket for tech notification if needed or use existingTicket + updateData
+                const updatedFullTicket = await tenantDb.ticket.findUnique({
+                    where: { id: ticketId },
+                    include: { customer: true, assignedTo: true }
+                });
+
+                if (updatedFullTicket) {
+                    await notifyTechnicianAssigned(assignedToId, session.user.tenantId, {
+                        ...updatedFullTicket,
+                        ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                    } as any);
+                }
+             } catch (e) {
+                console.error('Failed to notify technician assignment:', e);
+             }
         }
 
+        // Notify customer if status changed
+        if (status !== existingTicket.status) {
+            try {
+                const updatedFullTicket = await tenantDb.ticket.findUnique({
+                    where: { id: ticketId },
+                    include: { customer: true, assignedTo: true }
+                });
+
+                if (updatedFullTicket) {
+                    await notifyTicketStatusChange({
+                        ...updatedFullTicket,
+                        ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                    } as any, {
+                        oldStatus: existingTicket.status as any,
+                        newStatus: status as any,
+                        note: formData.get('note') as string || undefined
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to notify status change:', e);
+            }
+        }
+        
         // Audit Log handled by middleware
 
 
@@ -990,7 +1078,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
         // Since we have session.user.tenantId, let's use it.
         const existingTicket = await tenantDb.ticket.findUnique({
             where: { id: ticketId },
-            include: { partsUsed: true }
+            include: { partsUsed: true, customer: true, assignedTo: true }
         });
 
         if (!existingTicket) {
@@ -1027,16 +1115,43 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
             await handleStatusUpdate(txTenantDb, ticketId, status, existingTicket, session.user.id);
         });
 
-        // Notify Assigned User if different from updater
+        // Notify Assigned User if DIFFERENT from updater (Technician alert)
         if (existingTicket.assignedToId && existingTicket.assignedToId !== session.user.id) {
+            // We use simple notification here as it's just a status sync, 
+            // but notifyTicketStatusChange already handles customer.
+            // Still, for the technician, we stick to the existing logic or use notifyTechnicianAssigned if relevant.
+            // But notifyTechnicianAssigned is for NEW assignments.
+            // If it's just a status change, technician might want to know too.
+            // However, notifyTicketStatusChange handles IN-APP and EMAIL for CUSTOMER.
+            // For TECHNICIAN we can keep the simple notification or improve it.
             await createNotification({
                 userId: existingTicket.assignedToId,
                 tenantId: session.user.tenantId,
                 type: 'INFO',
                 title: 'Estado del Ticket Actualizado',
-                message: `El ticket #${existingTicket.id.slice(0, 8)} cambió a estado ${status}`,
+                message: `El ticket #${(existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8)} cambió a estado ${status}`,
                 link: `/dashboard/tickets/${ticketId}`
             });
+        }
+
+        // Notify CUSTOMER via centralized system
+        try {
+            const updatedFullTicket = await tenantDb.ticket.findUnique({
+                where: { id: ticketId },
+                include: { customer: true, assignedTo: true }
+            });
+            
+            if (updatedFullTicket) {
+                await notifyTicketStatusChange({
+                    ...updatedFullTicket,
+                    ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                } as any, {
+                    oldStatus: existingTicket.status as any,
+                    newStatus: status as any,
+                });
+            }
+        } catch (e) {
+            console.error('Failed to notify customer of status update:', e);
         }
 
         return { success: true, message: 'Estado actualizado' };

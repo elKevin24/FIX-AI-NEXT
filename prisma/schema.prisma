@@ -8,6 +8,460 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tenant {
+  id               String            @id @default(uuid())
+  name             String
+  slug             String            @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  auditLogs        AuditLog[]
+  cashRegisters    CashRegister[]
+  cashTransactions CashTransaction[]
+  customers        Customer[]
+  invoices         Invoice[]
+  notifications    Notification[]
+  parts            Part[]
+  payments         Payment[]
+  purchaseOrders   PurchaseOrder[]
+  serviceTemplates ServiceTemplate[]
+  tickets          Ticket[]
+  users            User[]
+
+  @@map("tenants")
+}
+
+model User {
+  id                   String                     @id @default(uuid())
+  email                String                     @unique
+  password             String
+  name                 String?
+  role                 UserRole                   @default(TECHNICIAN)
+  tenantId             String
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  status               TechnicianStatus           @default(AVAILABLE)
+  maxConcurrentTickets Int                        @default(5)
+  statusReason         String?
+  availableFrom        DateTime?
+  availableUntil       DateTime?
+  auditLogs            AuditLog[]
+  closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
+  openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
+  cashTransactions     CashTransaction[]
+  createdCustomers     Customer[]                 @relation("CustomerCreatedBy")
+  updatedCustomers     Customer[]                 @relation("CustomerUpdatedBy")
+  createdInvoices      Invoice[]                  @relation("InvoiceCreatedBy")
+  updatedInvoices      Invoice[]                  @relation("InvoiceUpdatedBy")
+  notifications        Notification[]
+  createdParts         Part[]                     @relation("PartCreatedBy")
+  updatedParts         Part[]                     @relation("PartUpdatedBy")
+  receivedPayments     Payment[]
+  createdTemplates     ServiceTemplate[]          @relation("TemplateCreatedBy")
+  updatedTemplates     ServiceTemplate[]          @relation("TemplateUpdatedBy")
+  specializations      TechnicianSpecialization[]
+  unavailabilities     TechnicianUnavailability[]
+  ticketNotes          TicketNote[]
+  assignedTickets      Ticket[]
+  createdTickets       Ticket[]                   @relation("TicketCreatedBy")
+  updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id])
+
+  @@map("users")
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  tenantId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById String?
+  updatedById String?
+  dpi         String?
+  nit         String?
+  createdBy   User?     @relation("CustomerCreatedBy", fields: [createdById], references: [id])
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  updatedBy   User?     @relation("CustomerUpdatedBy", fields: [updatedById], references: [id])
+  invoices    Invoice[]
+  tickets     Ticket[]
+
+  @@unique([dpi, tenantId], name: "unique_dpi_per_tenant")
+  @@unique([nit, tenantId], name: "unique_nit_per_tenant")
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([tenantId])
+  @@map("customers")
+}
+
+model Ticket {
+  id                      String           @id @default(uuid())
+  title                   String
+  description             String
+  status                  TicketStatus     @default(OPEN)
+  tenantId                String
+  customerId              String
+  assignedToId            String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  accessories             String?
+  cancellationReason      String?
+  checkInNotes            String?
+  deviceModel             String?
+  deviceType              String?          @default("PC")
+  serialNumber            String?
+  createdById             String?
+  serviceTemplateId       String?
+  updatedById             String?
+  priority                TicketPriority   @default(MEDIUM)
+  dueDate                 DateTime?
+  estimatedCompletionDate DateTime?
+  invoice                 Invoice?
+  partsUsed               PartUsage[]
+  notes                   TicketNote[]
+  services                TicketService[]
+  assignedTo              User?            @relation(fields: [assignedToId], references: [id])
+  createdBy               User?            @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  customer                Customer         @relation(fields: [customerId], references: [id])
+  serviceTemplate         ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
+  tenant                  Tenant           @relation(fields: [tenantId], references: [id])
+  updatedBy               User?            @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([status, priority])
+  @@index([assignedToId, status])
+  @@index([serviceTemplateId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("tickets")
+}
+
+model Part {
+  id                   String                @id @default(uuid())
+  name                 String
+  sku                  String?
+  quantity             Int                   @default(0)
+  cost                 Decimal               @db.Decimal(10, 2)
+  price                Decimal               @db.Decimal(10, 2)
+  tenantId             String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  createdById          String?
+  updatedById          String?
+  category             String?
+  location             String?
+  minStock             Int                   @default(1)
+  usages               PartUsage[]
+  createdBy            User?                 @relation("PartCreatedBy", fields: [createdById], references: [id])
+  tenant               Tenant                @relation(fields: [tenantId], references: [id])
+  updatedBy            User?                 @relation("PartUpdatedBy", fields: [updatedById], references: [id])
+  purchaseItems        PurchaseItem[]
+  templateDefaultParts TemplateDefaultPart[]
+
+  @@unique([sku, tenantId], name: "unique_sku_per_tenant")
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([tenantId])
+  @@map("parts")
+}
+
+model PurchaseOrder {
+  id           String         @id @default(uuid())
+  supplier     String
+  status       PurchaseStatus @default(PENDING)
+  orderDate    DateTime       @default(now())
+  receivedDate DateTime?
+  totalCost    Decimal        @default(0) @db.Decimal(10, 2)
+  tenantId     String
+  createdById  String?
+  updatedById  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  items        PurchaseItem[]
+  tenant       Tenant         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("purchase_orders")
+}
+
+model PurchaseItem {
+  id              String        @id @default(uuid())
+  quantity        Int
+  unitCost        Decimal       @db.Decimal(10, 2)
+  partId          String
+  purchaseOrderId String
+  part            Part          @relation(fields: [partId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  @@map("purchase_items")
+}
+
+model PartUsage {
+  id        String   @id @default(uuid())
+  quantity  Int
+  ticketId  String
+  partId    String
+  createdAt DateTime @default(now())
+  part      Part     @relation(fields: [partId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@map("part_usages")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  userId    String?
+  tenantId  String
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@map("audit_logs")
+}
+
+model TicketNote {
+  id         String   @id @default(uuid())
+  content    String
+  isInternal Boolean  @default(true)
+  ticketId   String
+  authorId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_notes")
+}
+
+model ServiceTemplate {
+  id                 String                @id @default(uuid())
+  name               String
+  category           ServiceCategory
+  defaultTitle       String
+  defaultDescription String
+  defaultPriority    String                @default("Medium")
+  estimatedDuration  Int?
+  laborCost          Decimal?              @db.Decimal(10, 2)
+  isActive           Boolean               @default(true)
+  color              String?               @default("#3B82F6")
+  icon               String?               @default("🔧")
+  tenantId           String
+  createdById        String?
+  updatedById        String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  createdBy          User?                 @relation("TemplateCreatedBy", fields: [createdById], references: [id])
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy          User?                 @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
+  defaultParts       TemplateDefaultPart[]
+  usages             TicketService[]
+  tickets            Ticket[]
+
+  @@index([tenantId])
+  @@index([tenantId, category])
+  @@index([tenantId, isActive])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("service_templates")
+}
+
+model TemplateDefaultPart {
+  id         String          @id @default(uuid())
+  quantity   Int             @default(1)
+  required   Boolean         @default(false)
+  templateId String
+  partId     String
+  createdAt  DateTime        @default(now())
+  part       Part            @relation(fields: [partId], references: [id])
+  template   ServiceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([partId])
+  @@map("template_default_parts")
+}
+
+model TicketService {
+  id        String          @id @default(uuid())
+  ticketId  String
+  serviceId String
+  name      String
+  laborCost Decimal         @db.Decimal(10, 2)
+  createdAt DateTime        @default(now())
+  service   ServiceTemplate @relation(fields: [serviceId], references: [id])
+  ticket    Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([serviceId])
+  @@map("ticket_services")
+}
+
+model TechnicianSpecialization {
+  id             String         @id @default(uuid())
+  userId         String
+  specialization Specialization
+  createdAt      DateTime       @default(now())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, specialization])
+  @@index([userId])
+  @@map("technician_specializations")
+}
+
+model TechnicianUnavailability {
+  id        String           @id @default(uuid())
+  reason    TechnicianStatus @default(UNAVAILABLE)
+  notes     String?
+  userId    String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([startDate, endDate])
+  @@map("technician_unavailabilities")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  tenantId  String
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@map("notifications")
+}
+
+model Invoice {
+  id              String        @id @default(uuid())
+  invoiceNumber   String
+  status          InvoiceStatus @default(PENDING)
+  ticketId        String        @unique
+  customerId      String
+  laborCost       Decimal       @default(0) @db.Decimal(10, 2)
+  partsCost       Decimal       @default(0) @db.Decimal(10, 2)
+  partsMarkup     Decimal       @default(0) @db.Decimal(10, 2)
+  subtotal        Decimal       @default(0) @db.Decimal(10, 2)
+  taxRate         Decimal       @default(0) @db.Decimal(5, 2)
+  taxAmount       Decimal       @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal       @default(0) @db.Decimal(10, 2)
+  total           Decimal       @default(0) @db.Decimal(10, 2)
+  customerName    String
+  customerNIT     String?
+  customerDPI     String?
+  customerAddress String?
+  notes           String?
+  paymentTerms    String?
+  issuedAt        DateTime      @default(now())
+  dueAt           DateTime?
+  paidAt          DateTime?
+  tenantId        String
+  createdById     String
+  updatedById     String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       User          @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  ticket          Ticket        @relation(fields: [ticketId], references: [id])
+  updatedBy       User          @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
+  payments        Payment[]
+
+  @@unique([invoiceNumber, tenantId], name: "unique_invoice_number_per_tenant")
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([ticketId])
+  @@index([status])
+  @@index([issuedAt])
+  @@map("invoices")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  paymentNumber  String
+  invoiceId      String
+  amount         Decimal       @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod
+  transactionRef String?
+  notes          String?
+  paidAt         DateTime      @default(now())
+  tenantId       String
+  receivedById   String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id])
+  receivedBy     User          @relation(fields: [receivedById], references: [id])
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@unique([paymentNumber, tenantId], name: "unique_payment_number_per_tenant")
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@index([paidAt])
+  @@map("payments")
+}
+
+model CashRegister {
+  id              String            @id @default(uuid())
+  name            String
+  isOpen          Boolean           @default(false)
+  openedAt        DateTime?
+  closedAt        DateTime?
+  openingBalance  Decimal           @default(0) @db.Decimal(10, 2)
+  closingBalance  Decimal           @default(0) @db.Decimal(10, 2)
+  expectedBalance Decimal           @default(0) @db.Decimal(10, 2)
+  difference      Decimal           @default(0) @db.Decimal(10, 2)
+  closingNotes    String?
+  tenantId        String
+  openedById      String?
+  closedById      String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  closedBy        User?             @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
+  openedBy        User?             @relation("CashRegisterOpenedBy", fields: [openedById], references: [id])
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  transactions    CashTransaction[]
+
+  @@index([tenantId])
+  @@index([isOpen])
+  @@index([openedAt])
+  @@map("cash_registers")
+}
+
+model CashTransaction {
+  id             String       @id @default(uuid())
+  type           String
+  amount         Decimal      @db.Decimal(10, 2)
+  description    String
+  reference      String?
+  cashRegisterId String
+  tenantId       String
+  createdById    String
+  createdAt      DateTime     @default(now())
+  cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([cashRegisterId])
+  @@index([createdAt])
+  @@map("cash_transactions")
+}
+
 enum UserRole {
   ADMIN
   TECHNICIAN
@@ -60,594 +514,24 @@ enum Specialization {
   GENERAL
 }
 
-model Tenant {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users            User[]
-  tickets          Ticket[]
-  customers        Customer[]
-  parts            Part[]
-  auditLogs        AuditLog[]
-  serviceTemplates ServiceTemplate[]
-  purchaseOrders   PurchaseOrder[]
-  notifications    Notification[]
-  invoices         Invoice[]
-  payments         Payment[]
-  cashRegisters    CashRegister[]
-  cashTransactions CashTransaction[]
-
-  @@map("tenants")
-}
-
-model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  password String
-  name     String?
-  role     UserRole @default(TECHNICIAN)
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  // Configuración del técnico
-  status               TechnicianStatus @default(AVAILABLE)
-  maxConcurrentTickets Int              @default(5) // Límite de tickets simultáneos
-  statusReason         String? // Razón de unavailable/leave
-  availableFrom        DateTime? // Fecha de regreso si está ausente
-  availableUntil       DateTime? // Fecha fin de ausencia
-
-  assignedTickets     Ticket[]
-  auditLogs           AuditLog[]
-  ticketNotes         TicketNote[]
-  createdTickets      Ticket[]                   @relation("TicketCreatedBy")
-  updatedTickets      Ticket[]                   @relation("TicketUpdatedBy")
-  createdCustomers    Customer[]                 @relation("CustomerCreatedBy")
-  updatedCustomers    Customer[]                 @relation("CustomerUpdatedBy")
-  createdParts        Part[]                     @relation("PartCreatedBy")
-  updatedParts        Part[]                     @relation("PartUpdatedBy")
-  createdTemplates    ServiceTemplate[]          @relation("TemplateCreatedBy")
-  updatedTemplates    ServiceTemplate[]          @relation("TemplateUpdatedBy")
-  specializations     TechnicianSpecialization[]
-  unavailabilities    TechnicianUnavailability[]
-  notifications       Notification[]
-  createdInvoices     Invoice[]                  @relation("InvoiceCreatedBy")
-  updatedInvoices     Invoice[]                  @relation("InvoiceUpdatedBy")
-  receivedPayments    Payment[]
-  openedCashRegisters CashRegister[]             @relation("CashRegisterOpenedBy")
-  closedCashRegisters CashRegister[]             @relation("CashRegisterClosedBy")
-  cashTransactions    CashTransaction[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("users")
-}
-
-model Customer {
-  id      String  @id @default(uuid())
-  name    String
-  email   String?
-  phone   String?
-  address String?
-  dpi     String?
-  nit     String?
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  tickets  Ticket[]
-  invoices Invoice[]
-
-  createdById String?
-  createdBy   User?   @relation("CustomerCreatedBy", fields: [createdById], references: [id])
-  updatedById String?
-  updatedBy   User?   @relation("CustomerUpdatedBy", fields: [updatedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([dpi, tenantId], name: "unique_dpi_per_tenant")
-  @@unique([nit, tenantId], name: "unique_nit_per_tenant")
-  @@index([createdById])
-  @@index([updatedById])
-  @@index([tenantId])
-  @@map("customers")
-}
-
-model Ticket {
-  id                 String         @id @default(uuid())
-  title              String
-  description        String
-  status             TicketStatus   @default(OPEN)
-  priority           TicketPriority @default(MEDIUM)
-  deviceType         String?        @default("PC")
-  deviceModel        String?
-  serialNumber       String?
-  accessories        String?
-  checkInNotes       String?
-  cancellationReason String?
-
-  estimatedCompletionDate DateTime? // Calculated based on services
-  dueDate                 DateTime? // Promised delivery date (SLA)
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-
-  assignedToId String?
-  assignedTo   User?   @relation(fields: [assignedToId], references: [id])
-
-  serviceTemplateId String?
-  serviceTemplate   ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
-
-  partsUsed PartUsage[]
-  services  TicketService[]
-  notes     TicketNote[]
-  invoice   Invoice?
-
-  createdById String?
-  createdBy   User?   @relation("TicketCreatedBy", fields: [createdById], references: [id])
-  updatedById String?
-  updatedBy   User?   @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status, priority]) // Para queries del pool
-  @@index([assignedToId, status]) // Para workload por técnico
-  @@index([serviceTemplateId])
-  @@index([createdById])
-  @@index([updatedById])
-  @@map("tickets")
-}
-
-model Part {
-  id       String  @id @default(uuid())
-  name     String
-  sku      String?
-  quantity Int     @default(0)
-  cost     Decimal @db.Decimal(10, 2)
-  price    Decimal @db.Decimal(10, 2)
-  category String? // 'SCREEN', 'KEYBOARD', etc.
-  location String? // 'Estante A1'
-  minStock Int     @default(1) // Alerta cuando quantity <= minStock
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  usages               PartUsage[]
-  templateDefaultParts TemplateDefaultPart[]
-  purchaseItems        PurchaseItem[]
-
-  createdById String?
-  createdBy   User?   @relation("PartCreatedBy", fields: [createdById], references: [id])
-  updatedById String?
-  updatedBy   User?   @relation("PartUpdatedBy", fields: [updatedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([sku, tenantId], name: "unique_sku_per_tenant")
-  @@index([createdById])
-  @@index([updatedById])
-  @@index([tenantId])
-  @@map("parts")
-}
-
-model PurchaseOrder {
-  id           String         @id @default(uuid())
-  supplier     String // 'Intelaf', 'Amazon', etc.
-  status       PurchaseStatus @default(PENDING) // PENDING, RECEIVED, CANCELLED
-  orderDate    DateTime       @default(now())
-  receivedDate DateTime?
-  totalCost    Decimal        @default(0) @db.Decimal(10, 2)
-
-  items PurchaseItem[]
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  createdById String?
-  updatedById String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([tenantId])
-  @@map("purchase_orders")
-}
-
-model PurchaseItem {
-  id       String  @id @default(uuid())
-  quantity Int
-  unitCost Decimal @db.Decimal(10, 2)
-
-  partId String
-  part   Part   @relation(fields: [partId], references: [id])
-
-  purchaseOrderId String
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
-
-  @@map("purchase_items")
-}
-
 enum PurchaseStatus {
   PENDING
   RECEIVED
   CANCELLED
 }
 
-model PartUsage {
-  id       String @id @default(uuid())
-  quantity Int
-
-  ticketId String
-  ticket   Ticket @relation(fields: [ticketId], references: [id])
-
-  partId String
-  part   Part   @relation(fields: [partId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@map("part_usages")
-}
-
-model AuditLog {
-  id      String  @id @default(uuid())
-  action  String
-  details String?
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@index([tenantId])
-  @@map("audit_logs")
-}
-
-model TicketNote {
-  id         String  @id @default(uuid())
-  content    String
-  isInternal Boolean @default(true)
-
-  ticketId String
-  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("ticket_notes")
-}
-
-model ServiceTemplate {
-  id                 String          @id @default(uuid())
-  name               String
-  category           ServiceCategory
-  defaultTitle       String
-  defaultDescription String          @db.Text
-  defaultPriority    String          @default("Medium")
-  estimatedDuration  Int? // en minutos
-  laborCost          Decimal?        @db.Decimal(10, 2)
-  isActive           Boolean         @default(true)
-  color              String?         @default("#3B82F6") // Color para UI
-  icon               String?         @default("🔧") // Emoji o nombre de icono
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  defaultParts TemplateDefaultPart[]
-  tickets      Ticket[]
-  usages       TicketService[]
-
-  createdById String?
-  createdBy   User?   @relation("TemplateCreatedBy", fields: [createdById], references: [id])
-  updatedById String?
-  updatedBy   User?   @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([tenantId])
-  @@index([tenantId, category])
-  @@index([tenantId, isActive])
-  @@index([createdById])
-  @@index([updatedById])
-  @@map("service_templates")
-}
-
-model TemplateDefaultPart {
-  id       String  @id @default(uuid())
-  quantity Int     @default(1)
-  required Boolean @default(false) // Si es obligatorio o sugerido
-
-  templateId String
-  template   ServiceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  partId String
-  part   Part   @relation(fields: [partId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@index([templateId])
-  @@index([partId])
-  @@map("template_default_parts")
-}
-
-model TicketService {
-  id String @id @default(uuid())
-
-  ticketId String
-  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  serviceId String
-  service   ServiceTemplate @relation(fields: [serviceId], references: [id])
-
-  // Snapshot of values at time of addition
-  name      String
-  laborCost Decimal @db.Decimal(10, 2)
-
-  createdAt DateTime @default(now())
-
-  @@index([ticketId])
-  @@index([serviceId])
-  @@map("ticket_services")
-}
-
-// Especialidades del técnico
-model TechnicianSpecialization {
-  id String @id @default(uuid())
-
-  userId         String
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  specialization Specialization
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, specialization])
-  @@index([userId])
-  @@map("technician_specializations")
-}
-
-// Períodos de indisponibilidad del técnico
-model TechnicianUnavailability {
-  id     String           @id @default(uuid())
-  reason TechnicianStatus @default(UNAVAILABLE)
-  notes  String?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  startDate DateTime
-  endDate   DateTime
-  isActive  Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([userId, isActive])
-  @@index([startDate, endDate])
-  @@map("technician_unavailabilities")
-}
-
-model Notification {
-  id      String  @id @default(uuid())
-  userId  String
-  user    User    @relation(fields: [userId], references: [id])
-  type    String // 'INFO', 'WARNING', 'SUCCESS', 'ERROR'
-  title   String
-  message String
-  link    String? // URL to redirect to
-  isRead  Boolean @default(false)
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([tenantId])
-  @@map("notifications")
-}
-
-// ============================================================================
-// BILLING & FINANCE MODELS
-// ============================================================================
-
 enum PaymentMethod {
-  CASH // Efectivo
-  CARD // Tarjeta (débito/crédito)
-  TRANSFER // Transferencia bancaria
-  CHECK // Cheque
-  OTHER // Otro
+  CASH
+  CARD
+  TRANSFER
+  CHECK
+  OTHER
 }
 
 enum InvoiceStatus {
-  DRAFT // Borrador
-  PENDING // Pendiente de pago
-  PAID // Pagada
-  CANCELLED // Cancelada
-  OVERDUE // Vencida
-}
-
-// Factura/Recibo generado para un ticket cerrado
-model Invoice {
-  id            String        @id @default(uuid())
-  invoiceNumber String // Numeración secuencial: INV-0001, INV-0002, etc.
-  status        InvoiceStatus @default(PENDING)
-
-  // Relación con ticket
-  ticketId String @unique
-  ticket   Ticket @relation(fields: [ticketId], references: [id])
-
-  // Relación con cliente
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-
-  // Desglose financiero
-  laborCost      Decimal @default(0) @db.Decimal(10, 2) // Mano de obra
-  partsCost      Decimal @default(0) @db.Decimal(10, 2) // Costo de repuestos
-  partsMarkup    Decimal @default(0) @db.Decimal(10, 2) // Ganancia en repuestos
-  subtotal       Decimal @default(0) @db.Decimal(10, 2) // Subtotal antes de impuestos
-  taxRate        Decimal @default(0) @db.Decimal(5, 2) // Tasa de IVA (ej: 12.00 para 12%)
-  taxAmount      Decimal @default(0) @db.Decimal(10, 2) // Monto de IVA
-  discountAmount Decimal @default(0) @db.Decimal(10, 2) // Descuento aplicado
-  total          Decimal @default(0) @db.Decimal(10, 2) // Total a pagar
-
-  // Información fiscal (Guatemala)
-  customerName    String
-  customerNIT     String? // NIT del cliente (factura fiscal)
-  customerDPI     String? // DPI del cliente
-  customerAddress String?
-
-  // Notas y términos
-  notes        String? @db.Text
-  paymentTerms String? // Ej: "Pago al retirar equipo"
-
-  // Fechas
-  issuedAt DateTime  @default(now()) // Fecha de emisión
-  dueAt    DateTime? // Fecha de vencimiento
-  paidAt   DateTime? // Fecha de pago
-
-  // Multi-tenancy
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  // Auditoría
-  createdById String
-  createdBy   User   @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
-  updatedById String
-  updatedBy   User   @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relación con pagos
-  payments Payment[]
-
-  @@unique([invoiceNumber, tenantId], name: "unique_invoice_number_per_tenant")
-  @@index([tenantId])
-  @@index([customerId])
-  @@index([ticketId])
-  @@index([status])
-  @@index([issuedAt])
-  @@map("invoices")
-}
-
-// Registro de pagos recibidos
-model Payment {
-  id            String @id @default(uuid())
-  paymentNumber String // Numeración: PAY-0001, PAY-0002, etc.
-
-  // Relación con factura
-  invoiceId String
-  invoice   Invoice @relation(fields: [invoiceId], references: [id])
-
-  // Detalles del pago
-  amount         Decimal       @db.Decimal(10, 2) // Monto pagado
-  paymentMethod  PaymentMethod
-  transactionRef String? // Referencia de transacción (número de cheque, referencia bancaria)
-  notes          String?       @db.Text
-
-  // Fecha
-  paidAt DateTime @default(now())
-
-  // Multi-tenancy
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  // Auditoría
-  receivedById String
-  receivedBy   User   @relation(fields: [receivedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([paymentNumber, tenantId], name: "unique_payment_number_per_tenant")
-  @@index([tenantId])
-  @@index([invoiceId])
-  @@index([paidAt])
-  @@map("payments")
-}
-
-// Caja registradora - Registro de apertura/cierre de caja
-model CashRegister {
-  id   String @id @default(uuid())
-  name String // Ej: "Caja Principal", "Caja Sucursal 1"
-
-  // Estado de la caja
-  isOpen   Boolean   @default(false)
-  openedAt DateTime?
-  closedAt DateTime?
-
-  // Montos
-  openingBalance  Decimal @default(0) @db.Decimal(10, 2) // Saldo inicial
-  closingBalance  Decimal @default(0) @db.Decimal(10, 2) // Saldo final
-  expectedBalance Decimal @default(0) @db.Decimal(10, 2) // Saldo esperado (calculado)
-  difference      Decimal @default(0) @db.Decimal(10, 2) // Diferencia (real - esperado)
-
-  // Notas del cierre
-  closingNotes String? @db.Text
-
-  // Multi-tenancy
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  // Usuario que abrió/cerró
-  openedById String?
-  openedBy   User?   @relation("CashRegisterOpenedBy", fields: [openedById], references: [id])
-  closedById String?
-  closedBy   User?   @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relación con transacciones de caja
-  transactions CashTransaction[]
-
-  @@index([tenantId])
-  @@index([isOpen])
-  @@index([openedAt])
-  @@map("cash_registers")
-}
-
-// Transacciones de caja (movimientos de efectivo)
-model CashTransaction {
-  id          String  @id @default(uuid())
-  type        String // 'INCOME' (ingreso), 'EXPENSE' (gasto), 'WITHDRAWAL' (retiro)
-  amount      Decimal @db.Decimal(10, 2)
-  description String
-  reference   String? // Referencia a factura, ticket, etc.
-
-  // Relación con caja
-  cashRegisterId String
-  cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
-
-  // Multi-tenancy
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-
-  // Auditoría
-  createdById String
-  createdBy   User   @relation(fields: [createdById], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@index([tenantId])
-  @@index([cashRegisterId])
-  @@index([createdAt])
-  @@map("cash_transactions")
+  DRAFT
+  PENDING
+  PAID
+  CANCELLED
+  OVERDUE
 }
