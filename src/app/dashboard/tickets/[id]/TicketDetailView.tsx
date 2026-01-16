@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { updateTicket, deleteTicket, updateTicketStatus, addTicketNote, deleteTicketNote } from '@/lib/actions';
+import { generateInvoiceFromTicket } from '@/lib/invoice-actions';
 import styles from '../tickets.module.css';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
@@ -82,6 +83,7 @@ interface Ticket {
     notes: TicketNote[];
     partsUsed: PartUsage[];
     services: ServiceUsage[];
+    invoice?: any | null;
 }
 
 interface User {
@@ -127,6 +129,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [noteContent, setNoteContent] = useState('');
+    const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
 
     const currentStatus = STATUS_OPTIONS.find(s => s.value === ticket.status);
@@ -389,6 +392,55 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             >
                                 📄 Orden de Ingreso
                             </a>
+
+                            {/* Facturación */}
+                            {ticket.invoice ? (
+                                <Link
+                                    href={`/dashboard/invoices/${ticket.invoice.id}`}
+                                    className={styles.createBtn}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        textAlign: 'center',
+                                        textDecoration: 'none',
+                                        fontSize: '0.9rem',
+                                        display: 'block',
+                                        backgroundColor: '#8b5cf6'
+                                    }}
+                                >
+                                    💰 Ver Factura ({ticket.invoice.invoiceNumber})
+                                </Link>
+                            ) : (
+                                (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && isAdmin && (
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm('¿Generar factura para este ticket?')) {
+                                                setIsGeneratingInvoice(true);
+                                                try {
+                                                    await generateInvoiceFromTicket({ ticketId: ticket.id });
+                                                    router.refresh();
+                                                } catch (e: any) {
+                                                    alert(e.message || 'Error al generar factura');
+                                                } finally {
+                                                    setIsGeneratingInvoice(false);
+                                                }
+                                            }
+                                        }}
+                                        disabled={isGeneratingInvoice}
+                                        className={styles.createBtn}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            textAlign: 'center',
+                                            fontSize: '0.9rem',
+                                            display: 'block',
+                                            backgroundColor: '#f59e0b',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {isGeneratingInvoice ? 'Generando...' : '💰 Generar Factura'}
+                                    </button>
+                                )
+                            )}
+
                             {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && (
                                 <a
                                     href={`/api/tickets/${ticket.id}/pdf/delivery-receipt`}

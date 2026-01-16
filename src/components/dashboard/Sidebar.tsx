@@ -9,9 +9,10 @@ import styles from './Sidebar.module.css';
 
 interface SidebarProps {
     logoutButton: React.ReactNode;
+    userRole?: string;
 }
 
-export default function Sidebar({ logoutButton }: SidebarProps) {
+export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
 
@@ -80,6 +81,12 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
                         <TicketIcon className={styles.navIcon} />
                         Tickets
                     </Link>
+                    {userRole === 'ADMIN' && (
+                        <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')}>
+                            <TemplatesIcon className={styles.navIcon} />
+                            Plantillas
+                        </Link>
+                    )}
                     <Link href="/dashboard/tickets/pool" className={getLinkClass('/dashboard/tickets/pool')}>
                         <PoolIcon className={styles.navIcon} />
                         Pool de Tickets
@@ -91,6 +98,14 @@ export default function Sidebar({ logoutButton }: SidebarProps) {
                     <Link href="/dashboard/reports" className={getLinkClass('/dashboard/reports')}>
                         <ChartIcon className={styles.navIcon} />
                         Reportes
+                    </Link>
+                    <Link href="/dashboard/invoices" className={getLinkClass('/dashboard/invoices')}>
+                        <InvoiceIcon className={styles.navIcon} />
+                        Facturación
+                    </Link>
+                    <Link href="/dashboard/cash-register" className={getLinkClass('/dashboard/cash-register')}>
+                        <CashIcon className={styles.navIcon} />
+                        Caja
                     </Link>
                     <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')}>
                         <UsersIcon className={styles.navIcon} />
@@ -179,6 +194,31 @@ function ChartIcon({ className }: { className?: string }) {
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+        </svg>
+    );
+}
+
+function InvoiceIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
+function CashIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+    );
+}
+
+function TemplatesIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2v6h6" />
         </svg>
     );
 }

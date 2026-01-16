@@ -173,5 +173,6 @@ function makeTicketInclude() {
                 createdAt: 'desc',
             } as const,
         },
+        invoice: true,
     };
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getActiveServiceTemplates } from '@/lib/service-template-actions';
+import { getPartStockStatus, calculateTemplateCost, formatCurrency } from '@/lib/template-utils';
 import styles from './TemplateSelector.module.css';
 
 export type ServiceTemplate = {
@@ -51,6 +52,7 @@ export default function TemplateSelector({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function loadTemplates() {
@@ -72,9 +74,43 @@ export default function TemplateSelector({
 
   const categories = Array.from(new Set(templates.map((t) => t.category)));
 
-  const filteredTemplates = selectedCategory
-    ? templates.filter((t) => t.category === selectedCategory)
-    : templates;
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((t) => {
+      const matchesCategory = !selectedCategory || t.category === selectedCategory;
+      const matchesSearch = !searchQuery ||
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.defaultTitle.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [templates, selectedCategory, searchQuery]);
+
+  // Calculate stock status and cost for selected template
+  const selectedTemplateData = useMemo(() => {
+    if (!selectedTemplate) return null;
+
+    const requiredParts = selectedTemplate.defaultParts.filter(p => p.required);
+    const hasInsufficientStock = requiredParts.some(
+      dp => dp.part.quantity < dp.quantity
+    );
+
+    const costBreakdown = calculateTemplateCost(
+      selectedTemplate.laborCost,
+      selectedTemplate.defaultParts.map(dp => ({
+        price: dp.part.price,
+        quantity: dp.quantity
+      }))
+    );
+
+    return {
+      hasInsufficientStock,
+      costBreakdown,
+      requiredParts: requiredParts.map(dp => ({
+        ...dp,
+        stockStatus: getPartStockStatus(dp.part.quantity, dp.quantity)
+      })),
+      optionalParts: selectedTemplate.defaultParts.filter(p => !p.required)
+    };
+  }, [selectedTemplate]);
 
   if (loading) {
     return (
@@ -121,6 +157,17 @@ export default function TemplateSelector({
           Las plantillas pre-configuran el ticket con título, descripción y
           partes recomendadas
         </p>
+      </div>
+
+      {/* Search Bar */}
+      <div className={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="🔍 Buscar plantillas por nombre..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
       </div>
 
       {/* Category Filter */}
@@ -221,11 +268,18 @@ export default function TemplateSelector({
       </div>
 
       {/* Selected Template Preview */}
-      {selectedTemplate && (
+      {selectedTemplate && selectedTemplateData && (
         <div className={styles.preview}>
           <h4 className={styles.previewTitle}>
             📄 Vista Previa: {selectedTemplate.name}
           </h4>
+
+          {selectedTemplateData.hasInsufficientStock && (
+            <div className={styles.warningBanner}>
+              ⚠️ Stock insuficiente para algunos repuestos requeridos
+            </div>
+          )}
+
           <div className={styles.previewContent}>
             <div className={styles.previewRow}>
               <strong>Título:</strong>
@@ -239,31 +293,82 @@ export default function TemplateSelector({
               <strong>Prioridad:</strong>
               <span>{selectedTemplate.defaultPriority}</span>
             </div>
-            {selectedTemplate.defaultParts.length > 0 && (
+
+            {/* Required Parts with Stock Status */}
+            {selectedTemplateData.requiredParts.length > 0 && (
               <div className={styles.previewRow}>
-                <strong>Partes:</strong>
+                <strong>✅ Repuestos Requeridos (se consumirán automáticamente):</strong>
                 <ul className={styles.partsList}>
-                  {selectedTemplate.defaultParts.map((dp) => (
-                    <li key={dp.id}>
-                      {dp.part.name} - Cantidad: {dp.quantity}
-                      {dp.required && (
-                        <span className={styles.requiredBadge}>
-                          ✓ Requerido
+                  {selectedTemplateData.requiredParts.map((dp) => (
+                    <li key={dp.id} className={styles.partItem}>
+                      <span>{dp.part.name} × {dp.quantity}</span>
+                      <div className={styles.partBadges}>
+                        <span
+                          className={`${styles.stockBadge} ${
+                            dp.stockStatus === 'insufficient' ? styles.stockInsufficient :
+                            dp.stockStatus === 'low' ? styles.stockLow :
+                            styles.stockSufficient
+                          }`}
+                        >
+                          {dp.stockStatus === 'insufficient' && '❌ Sin stock'}
+                          {dp.stockStatus === 'low' && '⚠️ Stock bajo'}
+                          {dp.stockStatus === 'sufficient' && '✅ Disponible'}
+                          {' '}({dp.part.quantity} disponible)
                         </span>
-                      )}
-                      {!dp.required && (
-                        <span className={styles.optionalBadge}>
-                          Sugerido
+                        <span className={styles.priceBadge}>
+                          {formatCurrency(dp.part.price * dp.quantity)}
                         </span>
-                      )}
-                      <span className={styles.stock}>
-                        (Stock: {dp.part.quantity})
-                      </span>
+                      </div>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+
+            {/* Optional Parts */}
+            {selectedTemplateData.optionalParts.length > 0 && (
+              <div className={styles.previewRow}>
+                <strong>💡 Repuestos Sugeridos (opcionales):</strong>
+                <ul className={styles.partsList}>
+                  {selectedTemplateData.optionalParts.map((dp) => (
+                    <li key={dp.id} className={styles.partItem}>
+                      <span>{dp.part.name} × {dp.quantity}</span>
+                      <div className={styles.partBadges}>
+                        <span className={styles.optionalBadge}>Opcional</span>
+                        <span className={styles.stock}>
+                          Stock: {dp.part.quantity}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Cost Breakdown */}
+            <div className={styles.costBreakdown}>
+              <h5 className={styles.costTitle}>💰 Costo Estimado</h5>
+              <div className={styles.costRow}>
+                <span>Mano de obra:</span>
+                <span>{formatCurrency(selectedTemplateData.costBreakdown.laborCost)}</span>
+              </div>
+              <div className={styles.costRow}>
+                <span>Repuestos:</span>
+                <span>{formatCurrency(selectedTemplateData.costBreakdown.partsCost)}</span>
+              </div>
+              <div className={`${styles.costRow} ${styles.costSubtotal}`}>
+                <span>Subtotal:</span>
+                <span>{formatCurrency(selectedTemplateData.costBreakdown.subtotal)}</span>
+              </div>
+              <div className={styles.costRow}>
+                <span>IVA (12%):</span>
+                <span>{formatCurrency(selectedTemplateData.costBreakdown.tax)}</span>
+              </div>
+              <div className={`${styles.costRow} ${styles.costTotal}`}>
+                <strong>TOTAL:</strong>
+                <strong>{formatCurrency(selectedTemplateData.costBreakdown.total)}</strong>
+              </div>
+            </div>
           </div>
         </div>
       )}
