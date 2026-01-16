@@ -19,6 +19,26 @@
   color: var(--color-text-secondary, #6b7280);
 }
 
+/* Search Bar */
+.searchContainer {
+  margin-bottom: 1rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border-light, #e5e7eb);
+  border-radius: 0.5rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* Loading & Error States */
 .loading,
 .error,
@@ -280,6 +300,108 @@
   font-size: 0.75rem;
   color: var(--color-text-tertiary, #9ca3af);
   margin-left: auto;
+}
+
+/* Part Item Styles */
+.partItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.partBadges {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Stock Status Badges */
+.stockBadge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.stockSufficient {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stockLow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stockInsufficient {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.priceBadge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Warning Banner */
+.warningBanner {
+  padding: 0.75rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 0.5rem;
+  color: #92400e;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Cost Breakdown */
+.costBreakdown {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-light, #e5e7eb);
+}
+
+.costTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6b7280);
+  margin-bottom: 0.75rem;
+}
+
+.costRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
+}
+
+.costRow:last-child {
+  border-bottom: none;
+}
+
+.costSubtotal {
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--color-border-light, #e5e7eb);
+}
+
+.costTotal {
+  padding-top: 0.75rem;
+  font-size: 1rem;
+  color: #0c4a6e;
+  border-top: 2px solid #0c4a6e;
 }
 
 /* Responsive */

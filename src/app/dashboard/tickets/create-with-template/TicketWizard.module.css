@@ -201,6 +201,38 @@
   font-weight: 500;
 }
 
+/* Required Parts Section */
+.requiredPartsInfo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(to bottom, #d1fae5, #ecfdf5);
+  border: 2px solid #86efac;
+  border-radius: 0.5rem;
+}
+
+.requiredPartsTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 0.75rem;
+}
+
+.requiredPartItem {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 0.375rem;
+}
+
+.partStock {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: auto;
+}
+
 /* Actions */
 .actions {
   display: flex;

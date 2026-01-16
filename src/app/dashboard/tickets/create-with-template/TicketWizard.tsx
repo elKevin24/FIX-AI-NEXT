@@ -6,6 +6,7 @@ import TemplateSelector, {
   ServiceTemplate,
 } from '@/components/tickets/TemplateSelector';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
+import SuggestedPartsList, { SuggestedPart } from '@/components/tickets/SuggestedPartsList';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { createBatchTickets } from '@/lib/actions';
@@ -57,6 +58,7 @@ export default function TicketWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [addedOptionalPartIds, setAddedOptionalPartIds] = useState<Set<string>>(new Set());
 
   // Auto-fill fields when template changes
   useEffect(() => {
@@ -362,29 +364,53 @@ export default function TicketWizard() {
               />
 
               {selectedTemplate && selectedTemplate.defaultParts.length > 0 && (
-                <div className={styles.templateInfo}>
-                  <h3>📦 Partes de la Plantilla</h3>
-                  <ul className={styles.partsList}>
-                    {selectedTemplate.defaultParts.map((dp) => (
-                      <li key={dp.id}>
-                        <span className={styles.partName}>{dp.part.name}</span>
-                        <span className={styles.partQty}>
-                          Cantidad: {dp.quantity}
-                        </span>
-                        {dp.required && (
-                          <span className={styles.requiredBadge}>
-                            ✓ Requerido (se consumirá stock)
-                          </span>
-                        )}
-                        {!dp.required && (
-                          <span className={styles.optionalBadge}>
-                            Sugerido (sin consumo)
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <>
+                  {/* Required Parts Section */}
+                  {selectedTemplate.defaultParts.filter(dp => dp.required).length > 0 && (
+                    <div className={styles.requiredPartsInfo}>
+                      <h3 className={styles.requiredPartsTitle}>
+                        ✅ Repuestos Requeridos (se consumirán automáticamente)
+                      </h3>
+                      <ul className={styles.partsList}>
+                        {selectedTemplate.defaultParts
+                          .filter(dp => dp.required)
+                          .map((dp) => (
+                            <li key={dp.id} className={styles.requiredPartItem}>
+                              <span className={styles.partName}>{dp.part.name}</span>
+                              <span className={styles.partQty}>
+                                Cantidad: {dp.quantity}
+                              </span>
+                              <span className={styles.partStock}>
+                                Stock: {dp.part.quantity}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Suggested Parts Section */}
+                  {selectedTemplate.defaultParts.filter(dp => !dp.required).length > 0 && (
+                    <SuggestedPartsList
+                      parts={selectedTemplate.defaultParts
+                        .filter(dp => !dp.required)
+                        .map(dp => ({
+                          partId: dp.part.id,
+                          name: dp.part.name,
+                          sku: dp.part.sku,
+                          quantity: dp.quantity,
+                          price: dp.part.price,
+                          stockAvailable: dp.part.quantity,
+                        }))}
+                      onAddPart={(partId, quantity) => {
+                        setAddedOptionalPartIds(prev => new Set(prev).add(partId));
+                        // Note: In a real implementation, you'd store this to send with the form
+                        console.log(`Added optional part: ${partId}, qty: ${quantity}`);
+                      }}
+                      addedPartIds={addedOptionalPartIds}
+                    />
+                  )}
+                </>
               )}
             </div>
 
