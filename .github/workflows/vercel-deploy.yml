@@ -1,23 +1,28 @@
 name: Vercel Deploy
 
 on:
-  push:
-    branches: [master, main]
-  pull_request:
+  # Only trigger after CI workflow completes successfully
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [master, main]
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    # Only deploy if CI passed
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
-          issues: write          # Para comentar en issues
-          pull-requests: write   # Para comentar en Pull Requests
-   
+      issues: write
+      pull-requests: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,46 +30,99 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache node_modules
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Install project dependencies
-        run: npm install # Assumes package-lock.json is present
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event.workflow_run.event }}" == "push" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "prod_flag=--prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=preview" >> $GITHUB_OUTPUT
+            echo "prod_flag=" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Run Prisma Migrations
-        run: npm run neon:migrate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }} # Must be configured in GitHub Secrets
-        
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ github.event_name == 'push' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ steps.env.outputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Build Project Artifacts
-        run: vercel build ${{ github.event_name == 'push' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
+        id: deploy
         run: |
-          url=$(vercel deploy --prebuilt ${{ github.event_name == 'push' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prebuilt ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "Deployment URL: $url"
-          echo "DEPLOYMENT_URL=$url" >> $GITHUB_ENV
+          echo "url=$url" >> $GITHUB_OUTPUT
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+      # Run migrations AFTER successful build (safer - can rollback deploy if migrations fail)
+      - name: Run Prisma Migrations
+        if: steps.env.outputs.environment == 'production'
+        run: npm run neon:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Find associated PR
+        id: find-pr
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const response = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.payload.workflow_run.head_branch}`
+            });
+            if (response.data.length > 0) {
+              return response.data[0].number;
+            }
+            return null;
+
       - name: Comment PR with deployment URL
-        if: github.event_name == 'pull_request'
+        if: steps.find-pr.outputs.result != 'null'
         uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
+              issue_number: ${{ steps.find-pr.outputs.result }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 Preview deployment ready!\n\n**Deployment URL:** ${process.env.DEPLOYMENT_URL}`
+              body: `🚀 **Preview deployment ready!**\n\n**URL:** ${{ steps.deploy.outputs.url }}\n\n*Deployed from commit: \`${{ github.event.workflow_run.head_sha }}\`*`
             })
+
+  # Notify if CI failed
+  notify-failure:
+    name: Notify CI Failure
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+
+    steps:
+      - name: Log CI failure
+        run: |
+          echo "::error::CI workflow failed. Deployment skipped."
+          echo "Check the CI workflow run: ${{ github.event.workflow_run.html_url }}"
