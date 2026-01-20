@@ -9,7 +9,9 @@ import { TicketStatus } from '@prisma/client';
 
 // Initialize Resend with API key if available, otherwise use a placeholder to prevent build errors
 // logic handles missing key by returning early in send functions
-const apiKey = process.env.RESEND_API_KEY || 're_123456789';
+const apiKey = (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.length > 0) 
+  ? process.env.RESEND_API_KEY 
+  : 're_123456789';
 const resend = new Resend(apiKey);
 
 // Default sender email (must be verified in Resend)
@@ -20,10 +22,7 @@ const isEmailConfigured = () => {
   return !!process.env.RESEND_API_KEY;
 };
 
-// Helper to check if email service is configured
-const isEmailConfigured = () => {
-  return !!process.env.RESEND_API_KEY;
-};
+
 
 interface TicketEmailData {
   ticketId: string;
@@ -44,6 +43,11 @@ interface TicketEmailData {
  * Envía notificación de creación de ticket al cliente
  */
 export async function sendTicketCreatedEmail(data: TicketEmailData): Promise<void> {
+  if (!isEmailConfigured()) {
+    console.warn('Email service not configured (missing RESEND_API_KEY). Skipping email.');
+    return;
+  }
+
   if (!data.customerEmail) {
     console.warn(`No email for customer: ${data.customerName}`);
     return;
@@ -66,6 +70,11 @@ export async function sendTicketCreatedEmail(data: TicketEmailData): Promise<voi
  * Envía notificación de cambio de estado al cliente
  */
 export async function sendTicketStatusChangeEmail(data: TicketEmailData): Promise<void> {
+  if (!isEmailConfigured()) {
+    console.warn('Email service not configured (missing RESEND_API_KEY). Skipping email.');
+    return;
+  }
+
   if (!data.customerEmail) {
     console.warn(`No email for customer: ${data.customerName}`);
     return;
@@ -88,6 +97,11 @@ export async function sendTicketStatusChangeEmail(data: TicketEmailData): Promis
  * Envía notificación de ticket resuelto al cliente
  */
 export async function sendTicketResolvedEmail(data: TicketEmailData): Promise<void> {
+  if (!isEmailConfigured()) {
+    console.warn('Email service not configured (missing RESEND_API_KEY). Skipping email.');
+    return;
+  }
+
   if (!data.customerEmail) {
     console.warn(`No email for customer: ${data.customerName}`);
     return;
@@ -110,6 +124,11 @@ export async function sendTicketResolvedEmail(data: TicketEmailData): Promise<vo
  * Envía notificación de ticket entregado/cerrado al cliente
  */
 export async function sendTicketClosedEmail(data: TicketEmailData): Promise<void> {
+  if (!isEmailConfigured()) {
+    console.warn('Email service not configured (missing RESEND_API_KEY). Skipping email.');
+    return;
+  }
+
   if (!data.customerEmail) {
     console.warn(`No email for customer: ${data.customerName}`);
     return;

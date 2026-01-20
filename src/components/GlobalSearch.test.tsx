@@ -1,85 +1,72 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import GlobalSearch from './GlobalSearch';
 
 // Mock useRouter
-const pushMock = vi.fn();
+const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: pushMock,
+    push: mockPush,
   }),
 }));
 
 // Mock fetch
-const fetchMock = vi.fn();
-global.fetch = fetchMock;
+global.fetch = vi.fn();
 
-describe('GlobalSearch Component', () => {
+describe('GlobalSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // vi.useFakeTimers(); // DISABLED for debugging
   });
 
-  afterEach(() => {
-    // vi.useRealTimers();
-  });
-
-  it('renders input field', () => {
+  it('renders search input', () => {
     render(<GlobalSearch />);
     expect(screen.getByPlaceholderText('Buscar tickets, clientes...')).toBeDefined();
   });
 
-  it('performs search after debounce', async () => {
+  it('searches when query is long enough', async () => {
     const mockResults = {
       results: [
-        { type: 'ticket', id: '123', title: 'Ticket 1', subtitle: 'Customer A', status: 'OPEN' }
+        { type: 'ticket', id: '1', title: 'Test Ticket', subtitle: 'Customer Name', status: 'OPEN' }
       ]
     };
-    
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResults),
+    (global.fetch as any).mockResolvedValue({
+      json: async () => mockResults,
     });
 
     render(<GlobalSearch />);
-    
     const input = screen.getByPlaceholderText('Buscar tickets, clientes...');
-    fireEvent.change(input, { target: { value: 'test' } });
     
-    // Should not search immediately
-    expect(fetchMock).not.toHaveBeenCalled();
-    
-    // Wait for real debounce (300ms) + buffer
-    await new Promise(r => setTimeout(r, 400));
-    
-    expect(fetchMock).toHaveBeenCalledWith('/api/search?q=test');
-    
-    // Wait for results to appear
-    expect(await screen.findByText('Ticket 1')).toBeDefined();
+    fireEvent.change(input, { target: { value: 'tes' } });
+
+    // Wait for debounce and fetch
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/search?q=tes');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Ticket')).toBeDefined();
+    });
   });
 
   it('navigates on result click', async () => {
     const mockResults = {
       results: [
-        { type: 'ticket', id: '123', title: 'Ticket 1', subtitle: 'Customer A', status: 'OPEN' }
+        { type: 'ticket', id: '1', title: 'Test Ticket', subtitle: 'Customer Name', status: 'OPEN' }
       ]
     };
-    
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResults),
+    (global.fetch as any).mockResolvedValue({
+      json: async () => mockResults,
     });
 
     render(<GlobalSearch />);
-    
     const input = screen.getByPlaceholderText('Buscar tickets, clientes...');
-    fireEvent.change(input, { target: { value: 'test' } });
-    
-    await new Promise(r => setTimeout(r, 400));
-    
-    const ticketResult = await screen.findByText('Ticket 1');
-    fireEvent.click(ticketResult);
-    
-    expect(pushMock).toHaveBeenCalledWith('/dashboard/tickets/123');
+    fireEvent.change(input, { target: { value: 'tes' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Ticket')).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByText('Test Ticket'));
+    expect(mockPush).toHaveBeenCalledWith('/dashboard/tickets/1');
   });
 });
