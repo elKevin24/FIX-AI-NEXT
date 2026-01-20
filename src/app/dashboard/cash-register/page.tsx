@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getOpenCashRegister } from '@/lib/cash-register-actions';
 import CashRegisterClient from './CashRegisterClient';
+import { serializeDecimal } from '@/lib/utils';
 
 export const metadata = {
   title: 'Caja Registradora | FIX-AI',
@@ -16,6 +17,7 @@ export default async function CashRegisterPage() {
   }
 
   const openRegister = await getOpenCashRegister();
+  const serializedRegister = serializeDecimal(openRegister);
 
-  return <CashRegisterClient initialOpenRegister={openRegister as any} />;
+  return <CashRegisterClient initialOpenRegister={serializedRegister} />;
 }

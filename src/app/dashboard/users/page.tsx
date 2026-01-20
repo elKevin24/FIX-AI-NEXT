@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Card, CardHeader, CardBody, Badge, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
 import styles from './users.module.css';
@@ -33,95 +33,81 @@ export default async function UsersPage() {
     },
   });
 
-  const isAdmin = session.user.role === 'ADMIN';
-
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'ADMIN':
-        return 'error' as const;
-      case 'TECHNICIAN':
-        return 'primary' as const;
-      case 'RECEPTIONIST':
-        return 'info' as const;
-      default:
-        return 'gray' as const;
+      case 'ADMIN': return 'Administrador';
+      case 'TECHNICIAN': return 'Técnico';
+      case 'RECEPTIONIST': return 'Recepcionista';
+      default: return role;
     }
   };
 
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'Administrador';
-      case 'TECHNICIAN':
-        return 'Técnico';
-      case 'RECEPTIONIST':
-        return 'Recepcionista';
-      default:
-        return role;
-    }
+  const getInitials = (name: string | null, email: string) => {
+    if (!name) return email.slice(0, 2).toUpperCase();
+    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1>Usuarios</h1>
-          <p>Administra los usuarios y sus roles</p>
+          <h1>Equipo</h1>
+          <p>Gestiona los perfiles y accesos de tu equipo técnico.</p>
         </div>
-        {isAdmin && (
-          <Link href="/dashboard/users/create">
-            <Button variant="primary">+ Nuevo Usuario</Button>
-          </Link>
+        <Link href="/dashboard/users/create">
+          <Button variant="primary">
+            <span>+</span> Nuevo Usuario
+          </Button>
+        </Link>
+      </header>
+
+      <div className={styles.usersGrid}>
+        {users.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>No se han encontrado usuarios registrados.</p>
+          </div>
+        ) : (
+          users.map((user: any) => (
+            <div key={user.id} className={styles.userCard}>
+              <div className={styles.userAvatar}>
+                {getInitials(user.name, user.email)}
+              </div>
+              
+              <div className={styles.userInfo}>
+                <h3 className={styles.userName}>{user.name || 'Sin nombre'}</h3>
+                <span className={styles.userEmail}>{user.email}</span>
+              </div>
+
+              <div className={styles.roleBadge}>
+                {getRoleLabel(user.role)}
+              </div>
+
+              <div className={styles.actions}>
+                <Link href={`/dashboard/users/${user.id}/edit`} className={styles.btnAction} title="Editar Perfil">
+                  <EditIcon />
+                  Editar
+                </Link>
+                {user.id !== session.user.id && (
+                  <DeleteUserButton 
+                    userId={user.id} 
+                    userName={user.name || user.email} 
+                    className={styles.btnAction}
+                  />
+                )}
+              </div>
+            </div>
+          ))
         )}
       </div>
-
-      {users.length === 0 ? (
-        <Card>
-          <CardBody>
-            <div className={styles.emptyState}>
-              <p>No hay usuarios registrados</p>
-              {isAdmin && (
-                <Link href="/dashboard/users/create">
-                  <Button variant="primary">Agregar Primer Usuario</Button>
-                </Link>
-              )}
-            </div>
-          </CardBody>
-        </Card>
-      ) : (
-        <div className={styles.usersGrid}>
-          {users.map((user: any) => (
-            <Card key={user.id} className={styles.userCard}>
-              <CardHeader>
-                <div className={styles.cardHeader}>
-                  <div className={styles.userInfo}>
-                    <h3 className={styles.userName}>{user.name || 'Sin nombre'}</h3>
-                    <p className={styles.userEmail}>{user.email}</p>
-                  </div>
-                  <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {getRoleLabel(user.role)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <div className={styles.userMeta}>
-                  Creado: {new Date(user.createdAt).toLocaleDateString('es-ES')}
-                </div>
-              </CardBody>
-              {isAdmin && user.id !== session.user.id && (
-                <div className={styles.cardActions}>
-                  <Link href={`/dashboard/users/${user.id}/edit`}>
-                    <Button variant="secondary" size="sm">
-                      Editar
-                    </Button>
-                  </Link>
-                  <DeleteUserButton userId={user.id} userName={user.name || user.email} />
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
     </div>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
   );
 }
