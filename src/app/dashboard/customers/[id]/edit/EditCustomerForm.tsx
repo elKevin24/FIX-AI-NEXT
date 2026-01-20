@@ -52,11 +52,11 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
             )}
 
             <div className={styles.tableContainer} style={{ padding: '2rem' }}>
-                <form action={updateAction} className="flex flex-col gap-4 max-w-lg">
+                <form action={updateAction} className={styles.form} style={{ maxWidth: '32rem' }}>
                     <input type="hidden" name="customerId" value={customer.id} />
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="name">Nombre *</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="name" className={styles.label}>Nombre *</label>
                         <input
                             id="name"
                             name="name"
@@ -64,84 +64,85 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                             required
                             defaultValue={customer.name}
                             placeholder="Nombre completo del cliente"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="email">Email</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="email" className={styles.label}>Email</label>
                         <input
                             id="email"
                             name="email"
                             type="email"
                             defaultValue={customer.email || ''}
                             placeholder="cliente@ejemplo.com"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="phone">Teléfono</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="phone" className={styles.label}>Teléfono</label>
                         <input
                             id="phone"
                             name="phone"
                             type="tel"
                             defaultValue={customer.phone || ''}
                             placeholder="+52 555 123 4567"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="flex flex-col gap-2 flex-1">
-                            <label htmlFor="dpi">DPI (ID)</label>
+                    <div className={styles.gridTwoColumns}>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="dpi" className={styles.label}>DPI (ID)</label>
                             <input
                                 id="dpi"
                                 name="dpi"
                                 type="text"
                                 defaultValue={customer.dpi || ''}
                                 placeholder="1234 56789 0101"
-                                className="p-2 border rounded text-black"
+                                className={styles.input}
                             />
                         </div>
-                        <div className="flex flex-col gap-2 flex-1">
-                            <label htmlFor="nit">NIT (Tax ID)</label>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="nit" className={styles.label}>NIT (Tax ID)</label>
                             <input
                                 id="nit"
                                 name="nit"
                                 type="text"
                                 defaultValue={customer.nit || ''}
                                 placeholder="123456-7"
-                                className="p-2 border rounded text-black"
+                                className={styles.input}
                             />
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="address">Dirección</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="address" className={styles.label}>Dirección</label>
                         <textarea
                             id="address"
                             name="address"
                             rows={2}
                             defaultValue={customer.address || ''}
                             placeholder="Calle, número, colonia, ciudad..."
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
+                            style={{ resize: 'vertical' }}
                         />
                     </div>
 
-                    <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded">
-                        Tickets asociados: <strong>{customer._count.tickets}</strong>
+                    <div className={styles.resultsInfo} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-base)' }}>
+                        <p>Tickets asociados: <strong>{customer._count.tickets}</strong></p>
                     </div>
 
                     <div aria-live="polite">
                         {updateState?.message && (
-                            <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200">
+                            <p className={styles.errorMessage}>
                                 {updateState.message}
                             </p>
                         )}
                     </div>
 
-                    <div className="flex gap-3 mt-4">
+                    <div className={styles.actions}>
                         <button
                             type="submit"
                             className={styles.createBtn}
@@ -151,7 +152,8 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                         </button>
                         <Link
                             href="/dashboard/customers"
-                            className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                            className={styles.cancelBtn}
+                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                         >
                             Cancelar
                         </Link>
@@ -161,24 +163,24 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
 
             {/* Delete Section - Solo para admins */}
             {isAdmin && (
-                <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '2rem', borderColor: '#fee2e2' }}>
-                    <h2 className="text-lg font-semibold text-red-600 mb-4">Zona de Peligro</h2>
+                <div className={styles.dangerZone} style={{ marginTop: '2rem' }}>
+                    <h2 className={styles.dangerTitle}>Zona de Peligro</h2>
 
                     {hasTickets ? (
-                        <div className="text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                        <div className={styles.errorMessage} style={{ color: 'var(--color-warning-700)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
                             No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
                         </div>
                     ) : !showDeleteConfirm ? (
                         <button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            className={styles.dangerBtn}
                         >
                             Eliminar Cliente
                         </button>
                     ) : (
-                        <div className="flex flex-col gap-4">
-                            <p className="text-red-600">
+                        <div className={styles.formGroup}>
+                            <p style={{ color: 'var(--color-danger-600)' }}>
                                 ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>?
                                 Esta acción no se puede deshacer.
                             </p>
@@ -187,15 +189,15 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                                 <input type="hidden" name="customerId" value={customer.id} />
 
                                 {deleteState?.message && (
-                                    <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mb-4">
+                                    <p className={styles.errorMessage}>
                                         {deleteState.message}
                                     </p>
                                 )}
 
-                                <div className="flex gap-3">
+                                <div className={styles.actions}>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                        className={styles.dangerBtn}
                                         disabled={isDeleting}
                                     >
                                         {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Cliente'}
@@ -203,7 +205,7 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                                     <button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                                        className={styles.cancelBtn}
                                     >
                                         Cancelar
                                     </button>
