@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
-import NotificationBell from './NotificationBell';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -126,7 +125,6 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                 </nav>
                 <div className={styles.userProfile}>
                     <div className={styles.themeSwitcherWrapper} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <NotificationBell />
                         <ThemeSwitcher />
                     </div>
                     {logoutButton}
