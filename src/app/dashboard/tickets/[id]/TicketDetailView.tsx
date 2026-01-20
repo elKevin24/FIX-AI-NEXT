@@ -193,7 +193,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                     ))}
                 </div>
                 {statusState?.message && !statusState.success && (
-                    <p className="text-red-500 mt-2">{statusState.message}</p>
+                    <p className={styles.errorMessage}>{statusState.message}</p>
                 )}
             </div>
 
@@ -219,7 +219,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{ticket.description}</p>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className={styles.gridTwoColumns}>
                                 <div>
                                     <h4 style={{ color: '#666', marginBottom: '0.5rem' }}>Prioridad</h4>
                                     <span className={`${styles.status} ${ticket.priority === 'High' ? styles.waiting_for_parts : ticket.priority === 'Medium' ? styles.in_progress : styles.closed}`}>
@@ -233,41 +233,41 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             </div>
                         </>
                     ) : (
-                        <form action={updateAction} className="flex flex-col gap-4">
+                        <form action={updateAction} className={styles.form}>
                             <input type="hidden" name="ticketId" value={ticket.id} />
 
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="title">Título *</label>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="title" className={styles.label}>Título *</label>
                                 <input
                                     id="title"
                                     name="title"
                                     type="text"
                                     required
                                     defaultValue={ticket.title}
-                                    className="p-2 border rounded text-black"
+                                    className={styles.input}
                                 />
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="description">Descripción *</label>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="description" className={styles.label}>Descripción *</label>
                                 <textarea
                                     id="description"
                                     name="description"
                                     required
                                     rows={5}
                                     defaultValue={ticket.description}
-                                    className="p-2 border rounded text-black"
+                                    className={styles.input}
                                 />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="status">Estado</label>
+                            <div className={styles.gridTwoColumns}>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="status" className={styles.label}>Estado</label>
                                     <select
                                         id="status"
                                         name="status"
                                         defaultValue={ticket.status}
-                                        className="p-2 border rounded text-black"
+                                        className={styles.input}
                                     >
                                         {STATUS_OPTIONS.map((status) => (
                                             <option key={status.value} value={status.value}>
@@ -277,13 +277,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                     </select>
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="priority">Prioridad</label>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="priority" className={styles.label}>Prioridad</label>
                                     <select
                                         id="priority"
                                         name="priority"
                                         defaultValue={ticket.priority || ''}
-                                        className="p-2 border rounded text-black"
+                                        className={styles.input}
                                     >
                                         {PRIORITY_OPTIONS.map((priority) => (
                                             <option key={priority.value} value={priority.value}>
@@ -294,13 +294,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="assignedToId">Asignar a</label>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="assignedToId" className={styles.label}>Asignar a</label>
                                 <select
                                     id="assignedToId"
                                     name="assignedToId"
                                     defaultValue={ticket.assignedTo?.id || ''}
-                                    className="p-2 border rounded text-black"
+                                    className={styles.input}
                                 >
                                     <option value="">Sin asignar</option>
                                     {availableUsers.map((user) => (
@@ -312,12 +312,12 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             </div>
 
                             {updateState?.message && (
-                                <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200">
+                                <p className={styles.errorMessage}>
                                     {updateState.message}
                                 </p>
                             )}
 
-                            <div className="flex gap-3 mt-4">
+                            <div className={styles.actions}>
                                 <button
                                     type="submit"
                                     className={styles.createBtn}
@@ -328,7 +328,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(false)}
-                                    className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                                    className={styles.cancelBtn}
                                 >
                                     Cancelar
                                 </button>
@@ -464,20 +464,21 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
 
                     {/* Delete Zone - Only for admins */}
                     {isAdmin && (
-                        <div className={styles.tableContainer} style={{ padding: '1.5rem', borderColor: '#fee2e2' }}>
-                            <h3 style={{ color: '#dc2626', marginBottom: '1rem' }}>Zona de Peligro</h3>
+                        <div className={styles.dangerZone}>
+                            <h3 className={styles.dangerTitle}>Zona de Peligro</h3>
 
                             {!showDeleteConfirm ? (
                                 <button
                                     type="button"
                                     onClick={() => setShowDeleteConfirm(true)}
-                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 w-full"
+                                    className={styles.dangerBtn}
+                                    style={{ width: '100%' }}
                                 >
                                     Eliminar Ticket
                                 </button>
                             ) : (
-                                <div className="flex flex-col gap-3">
-                                    <p className="text-red-600 text-sm">
+                                <div className={styles.formGroup}>
+                                    <p className={styles.errorMessage} style={{ backgroundColor: 'transparent', border: 'none', padding: 0 }}>
                                         ¿Eliminar este ticket? Esta acción no se puede deshacer.
                                     </p>
 
@@ -485,15 +486,15 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         <input type="hidden" name="ticketId" value={ticket.id} />
 
                                         {deleteState?.message && (
-                                            <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mb-2 text-sm">
+                                            <p className={styles.errorMessage}>
                                                 {deleteState.message}
                                             </p>
                                         )}
 
-                                        <div className="flex gap-2">
+                                        <div className={styles.actions}>
                                             <button
                                                 type="submit"
-                                                className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                                                className={styles.dangerBtn}
                                                 disabled={isDeleting}
                                             >
                                                 {isDeleting ? 'Eliminando...' : 'Confirmar'}
@@ -501,7 +502,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                             <button
                                                 type="button"
                                                 onClick={() => setShowDeleteConfirm(false)}
-                                                className="px-3 py-2 border rounded text-gray-600 hover:bg-gray-100 text-sm"
+                                                className={styles.cancelBtn}
                                             >
                                                 Cancelar
                                             </button>
@@ -537,25 +538,25 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                     <input type="hidden" name="ticketId" value={ticket.id} />
                     <input type="hidden" name="isInternal" value="true" />
 
-                    <div className="flex flex-col gap-2">
+                    <div className={styles.formGroup}>
                         <textarea
                             name="content"
                             rows={3}
                             placeholder="Agregar una nota sobre la reparación..."
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
-                            className="p-3 border rounded text-black w-full"
-                            style={{ resize: 'vertical', minHeight: '80px' }}
+                            className={styles.input}
+                            style={{ resize: 'vertical', minHeight: '80px', width: '100%' }}
                         />
                     </div>
 
                     {noteState?.message && !noteState.success && (
-                        <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mt-2">
+                        <p className={styles.errorMessage}>
                             {noteState.message}
                         </p>
                     )}
 
-                    <div className="flex justify-end mt-3">
+                    <div className={styles.actions} style={{ justifyContent: 'flex-end' }}>
                         <button
                             type="submit"
                             className={styles.createBtn}
@@ -645,7 +646,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 </div>
 
                 {deleteNoteState?.message && !deleteNoteState.success && (
-                    <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mt-2">
+                    <p className={styles.errorMessage}>
                         {deleteNoteState.message}
                     </p>
                 )}
