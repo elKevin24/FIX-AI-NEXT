@@ -46,11 +46,11 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
             )}
 
             <div className={styles.tableContainer} style={{ padding: '2rem' }}>
-                <form action={updateAction} className="flex flex-col gap-4 max-w-lg">
+                <form action={updateAction} className={styles.form} style={{ maxWidth: '32rem' }}>
                     <input type="hidden" name="userId" value={user.id} />
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="name">Nombre</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="name" className={styles.label}>Nombre</label>
                         <input
                             id="name"
                             name="name"
@@ -58,12 +58,12 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                             required
                             defaultValue={user.name || ''}
                             placeholder="Nombre completo"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="email">Email</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="email" className={styles.label}>Email</label>
                         <input
                             id="email"
                             name="email"
@@ -71,33 +71,33 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                             required
                             defaultValue={user.email}
                             placeholder="usuario@ejemplo.com"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="password">Nueva Contraseña (opcional)</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="password" className={styles.label}>Nueva Contraseña (opcional)</label>
                         <input
                             id="password"
                             name="password"
                             type="password"
                             minLength={6}
                             placeholder="Dejar vacío para mantener la actual"
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                         />
-                        <span className="text-sm text-gray-500">
+                        <span className={styles.textGray} style={{ fontSize: '0.875rem' }}>
                             Solo completa si deseas cambiar la contraseña
                         </span>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="role">Rol</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="role" className={styles.label}>Rol</label>
                         <select
                             id="role"
                             name="role"
                             required
                             defaultValue={user.role}
-                            className="p-2 border rounded text-black"
+                            className={styles.input}
                             disabled={isCurrentUser}
                         >
                             <option value="ADMIN">Administrador</option>
@@ -105,7 +105,7 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                             <option value="RECEPTIONIST">Recepcionista</option>
                         </select>
                         {isCurrentUser && (
-                            <span className="text-sm text-amber-600">
+                            <span style={{ color: 'var(--color-warning-600)', fontSize: '0.875rem' }}>
                                 No puedes cambiar tu propio rol
                             </span>
                         )}
@@ -113,13 +113,13 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
 
                     <div aria-live="polite">
                         {updateState?.message && (
-                            <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200">
+                            <p className={styles.errorMessage}>
                                 {updateState.message}
                             </p>
                         )}
                     </div>
 
-                    <div className="flex gap-3 mt-4">
+                    <div className={styles.actions}>
                         <button
                             type="submit"
                             className={styles.createBtn}
@@ -129,7 +129,8 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                         </button>
                         <Link
                             href="/dashboard/users"
-                            className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                            className={styles.cancelBtn}
+                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                         >
                             Cancelar
                         </Link>
@@ -139,20 +140,20 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
 
             {/* Delete Section */}
             {!isCurrentUser && (
-                <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '2rem', borderColor: '#fee2e2' }}>
-                    <h2 className="text-lg font-semibold text-red-600 mb-4">Zona de Peligro</h2>
+                <div className={styles.dangerZone} style={{ marginTop: '2rem' }}>
+                    <h2 className={styles.dangerTitle}>Zona de Peligro</h2>
 
                     {!showDeleteConfirm ? (
                         <button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            className={styles.dangerBtn}
                         >
                             Eliminar Usuario
                         </button>
                     ) : (
-                        <div className="flex flex-col gap-4">
-                            <p className="text-red-600">
+                        <div className={styles.formGroup}>
+                            <p style={{ color: 'var(--color-danger-600)' }}>
                                 ¿Estás seguro de que deseas eliminar a <strong>{user.name || user.email}</strong>?
                                 Esta acción no se puede deshacer.
                             </p>
@@ -161,15 +162,15 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                                 <input type="hidden" name="userId" value={user.id} />
 
                                 {deleteState?.message && (
-                                    <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mb-4">
+                                    <p className={styles.errorMessage}>
                                         {deleteState.message}
                                     </p>
                                 )}
 
-                                <div className="flex gap-3">
+                                <div className={styles.actions}>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                        className={styles.dangerBtn}
                                         disabled={isDeleting}
                                     >
                                         {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Usuario'}
@@ -177,7 +178,7 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                                     <button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                                        className={styles.cancelBtn}
                                     >
                                         Cancelar
                                     </button>
