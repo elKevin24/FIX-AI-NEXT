@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { markMyNotificationAsRead, deleteMyNotification, markAllMyNotificationsAsRead } from '@/lib/notifications';
+import styles from './notifications.module.css';
 
 interface Notification {
     id: string;
@@ -27,7 +28,6 @@ export default function NotificationList({ initialNotifications, totalPages, cur
     const [isPending, startTransition] = useTransition();
 
     const handleMarkAsRead = async (id: string) => {
-        // Optimistic update
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         await markMyNotificationAsRead(id);
         router.refresh();
@@ -46,56 +46,56 @@ export default function NotificationList({ initialNotifications, totalPages, cur
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <span className="text-gray-500 text-sm">Mostrando página {currentPage} de {totalPages || 1}</span>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <span className={styles.pageInfo}>Mostrando página {currentPage} de {totalPages || 1}</span>
                 <button 
                     onClick={handleMarkAllRead}
                     disabled={isPending || notifications.every(n => n.isRead)}
-                    className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 disabled:opacity-50"
+                    className={styles.markAllBtn}
                 >
                     Marcar todas como leídas
                 </button>
             </div>
 
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className={styles.list}>
                 {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className={styles.empty}>
                         No tienes notificaciones.
                     </div>
                 ) : (
                     notifications.map((notification) => (
                         <div 
                             key={notification.id} 
-                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                            className={`${styles.item} ${!notification.isRead ? styles.unread : ''}`}
                         >
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className={`font-semibold ${getNotificationColor(notification.type)}`}>
+                            <div className={styles.itemContent}>
+                                <div className={styles.mainInfo}>
+                                    <div className={styles.titleRow}>
+                                        <span className={`${styles.title} ${getNotificationColor(notification.type, styles)}`}>
                                             {notification.title}
                                         </span>
                                         {!notification.isRead && (
-                                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                                            <span className={styles.newBadge}>
                                                 Nueva
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-300 mb-2">{notification.message}</p>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    <p className={styles.message}>{notification.message}</p>
+                                    <div className={styles.meta}>
                                         <span>{new Date(notification.createdAt).toLocaleString()}</span>
                                         {notification.link && (
-                                            <Link href={notification.link} className="text-blue-600 hover:underline">
+                                            <Link href={notification.link} className={styles.link}>
                                                 Ver detalles
                                             </Link>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
+                                <div className={styles.actions}>
                                     {!notification.isRead && (
                                         <button 
                                             onClick={() => handleMarkAsRead(notification.id)}
-                                            className="text-gray-400 hover:text-blue-600"
+                                            className={`${styles.iconBtn} ${styles.checkBtn}`}
                                             title="Marcar como leída"
                                         >
                                             <CheckIcon />
@@ -103,7 +103,7 @@ export default function NotificationList({ initialNotifications, totalPages, cur
                                     )}
                                     <button 
                                         onClick={() => handleDelete(notification.id)}
-                                        className="text-gray-400 hover:text-red-600"
+                                        className={`${styles.iconBtn} ${styles.trashBtn}`}
                                         title="Eliminar"
                                     >
                                         <TrashIcon />
@@ -117,16 +117,16 @@ export default function NotificationList({ initialNotifications, totalPages, cur
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-center gap-2">
+                <div className={styles.pagination}>
                     <Link 
                         href={`/dashboard/notifications?page=${Math.max(1, currentPage - 1)}`}
-                        className={`px-3 py-1 rounded border ${currentPage === 1 ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                        className={`${styles.pageLink} ${currentPage === 1 ? styles.disabledLink : ''}`}
                     >
                         Anterior
                     </Link>
                     <Link 
                         href={`/dashboard/notifications?page=${Math.min(totalPages, currentPage + 1)}`}
-                        className={`px-3 py-1 rounded border ${currentPage === totalPages ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                        className={`${styles.pageLink} ${currentPage === totalPages ? styles.disabledLink : ''}`}
                     >
                         Siguiente
                     </Link>
@@ -136,12 +136,12 @@ export default function NotificationList({ initialNotifications, totalPages, cur
     );
 }
 
-function getNotificationColor(type: string) {
+function getNotificationColor(type: string, styles: any) {
     switch (type) {
-        case 'WARNING': return 'text-orange-600 dark:text-orange-400';
-        case 'ERROR': return 'text-red-600 dark:text-red-400';
-        case 'SUCCESS': return 'text-green-600 dark:text-green-400';
-        default: return 'text-blue-600 dark:text-blue-400';
+        case 'WARNING': return styles.typeWarning;
+        case 'ERROR': return styles.typeError;
+        case 'SUCCESS': return styles.typeSuccess;
+        default: return styles.typeInfo;
     }
 }
 
