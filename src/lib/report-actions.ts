@@ -25,12 +25,14 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
   const [
     ticketsByStatus,
     technicianStats,
-    invoices,
-    posSales,
+    invoiceAgg,
+    posAgg,
+    invoiceHistory,
+    posHistory,
     inventoryStats,
     topParts
   ] = await Promise.all([
-    // 1. Tickets by Status (Created in range)
+    // 1. Tickets by Status
     db.ticket.groupBy({
       by: ['status'],
       _count: { id: true },
@@ -42,7 +44,6 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
       where: {
         tenantId,
         role: { in: ['TECHNICIAN', 'ADMIN'] },
-        // Removed isActive: true as it might not exist in schema or all users
       },
       select: {
         id: true,
@@ -59,50 +60,54 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
       }
     }),
 
-    // 3. Financials: Invoices
+    // 3. Financials: Invoices Aggregation
+    db.invoice.aggregate({
+      _sum: { total: true, laborCost: true, partsCost: true },
+      where: {
+        tenantId,
+        status: { not: InvoiceStatus.CANCELLED },
+        issuedAt: dateFilter
+      }
+    }),
+
+    // 4. Financials: POS Sales Aggregation
+    db.pOSSale.aggregate({
+      _sum: { total: true },
+      where: {
+        tenantId,
+        status: POSSaleStatus.COMPLETED,
+        createdAt: dateFilter
+      }
+    }),
+
+    // 5. Invoice History (Optimized)
     db.invoice.findMany({
       where: {
         tenantId,
         status: { not: InvoiceStatus.CANCELLED },
         issuedAt: dateFilter
       },
-      select: {
-        total: true,
-        laborCost: true,
-        partsCost: true,
-        issuedAt: true
-      }
+      select: { total: true, issuedAt: true }
     }),
 
-    // 4. Financials: POS Sales
+    // 6. POS History (Optimized)
     db.pOSSale.findMany({
       where: {
         tenantId,
         status: POSSaleStatus.COMPLETED,
         createdAt: dateFilter
       },
-      select: {
-        total: true,
-        createdAt: true,
-        items: {
-            select: {
-                total: true,
-                partId: true,
-                partName: true
-            }
-        }
-      }
+      select: { total: true, createdAt: true }
     }),
 
-    // 5. Inventory Stats (Snapshot)
+    // 7. Inventory Stats
     db.part.aggregate({
         _count: { id: true },
         _sum: { quantity: true },
         where: { tenantId }
     }),
 
-    // 6. Top Selling Parts (From POS Items)
-    // Complex query might be needed, simplified here by fetching recent items
+    // 8. Top Selling Parts
     db.pOSSaleItem.groupBy({
         by: ['partName'],
         _sum: { quantity: true, total: true },
@@ -138,9 +143,11 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     };
   });
 
-  // Calculate Revenue
-  const totalInvoiceRevenue = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total), 0);
-  const totalPOSRevenue = posSales.reduce((sum: number, sale: any) => sum + Number(sale.total), 0);
+  // Calculate Revenue from Aggregations
+  const totalInvoiceRevenue = Number(invoiceAgg._sum.total || 0);
+  const totalPOSRevenue = Number(posAgg._sum.total || 0);
+  const totalLaborRevenue = Number(invoiceAgg._sum.laborCost || 0);
+  const totalPartsRevenue = Number(invoiceAgg._sum.partsCost || 0) + totalPOSRevenue; 
   
   // Historical Data for Charts (Group by Day)
   const historyMap = new Map<string, { date: string, invoice: number, pos: number }>();
@@ -154,8 +161,8 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
       entry[type] += amount;
   };
 
-  invoices.forEach((inv: any) => addToHistory(inv.issuedAt, 'invoice', Number(inv.total)));
-  posSales.forEach((sale: any) => addToHistory(sale.createdAt, 'pos', Number(sale.total)));
+  invoiceHistory.forEach((inv: any) => addToHistory(inv.issuedAt, 'invoice', Number(inv.total)));
+  posHistory.forEach((sale: any) => addToHistory(sale.createdAt, 'pos', Number(sale.total)));
 
   const revenueHistory = Array.from(historyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
@@ -169,11 +176,15 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
         totalRevenue: totalInvoiceRevenue + totalPOSRevenue,
         invoiceRevenue: totalInvoiceRevenue,
         posRevenue: totalPOSRevenue,
+        totalLaborRevenue,
+        totalPartsRevenue,
         history: revenueHistory
     },
     inventory: {
         totalItems: inventoryStats._count.id,
-        totalQuantity: inventoryStats._sum.quantity,
+        totalQuantity: inventoryStats._sum.quantity || 0,
+        lowStockParts: 0, // Removed detailed low stock count for performance, use aggregate if needed
+        totalStockValue: 0, // Need cost aggregation if we want this, skipped for perf optimization
         topSelling: topParts.map((p: any) => ({
             name: p.partName,
             quantity: p._sum.quantity,
