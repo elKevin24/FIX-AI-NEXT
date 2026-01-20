@@ -1,0 +1,94 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90m/home/kev/Documentos/GitHub/FIX-AI-NEXT[39m
+
+ [31m❯[39m src/lib/pos-actions.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 19[2mms[22m[39m
+[31m       [31m×[31m should create sale successfully[39m[32m 13[2mms[22m[39m
+       [32m✓[39m should fail if insuficient stock[32m 2[2mms[22m[39m
+       [32m✓[39m should fail if payment is not enough[32m 0[2mms[22m[39m
+[31m       [31m×[31m should void sale and restore stock[39m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/pos-actions.test.ts[2m > [22mPOS Actions[2m > [22mcreatePOSSale[2m > [22mshould create sale successfully
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, …(1) ][90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[32m-   ObjectContaining {[90m
+[32m-     "where": {[90m
+[32m-       "id": "123e4567-e89b-12d3-a456-426614174000",[90m
+[32m-     },[90m
+[32m-   },[90m
+[32m-   ObjectContaining {[90m
+[31m+   {[90m
+[2m      "data": {[22m
+[2m        "quantity": {[22m
+[2m          "decrement": 1,[22m
+[31m+       },[90m
+[2m      },[22m
+[31m+     "where": {[90m
+[31m+       "id": "123e4567-e89b-12d3-a456-426614174000",[90m
+[2m      },[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/lib/pos-actions.test.ts:[2m74:36[22m[39m
+    [90m 72| [39m
+    [90m 73| [39m        [34mexpect[39m(mockDb[33m.[39mpOSSale[33m.[39mcreate)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 74| [39m        [34mexpect[39m(mockDb[33m.[39mpart[33m.[39mupdate)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m   | [39m                                   [31m^[39m
+    [90m 75| [39m            expect[33m.[39m[34mobjectContaining[39m({ where[33m:[39m { id[33m:[39m validPartId } })[33m,[39m
+    [90m 76| [39m            expect.objectContaining({ data: { quantity: { decrement: 1…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/pos-actions.test.ts[2m > [22mPOS Actions[2m > [22mvoidPOSSale[2m > [22mshould void sale and restore stock
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, …(1) ][90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[32m-   ObjectContaining {[90m
+[31m+   {[90m
+[31m+     "data": {[90m
+[31m+       "notes": "ANULADA: Mistake",[90m
+[31m+       "status": "VOIDED",[90m
+[31m+     },[90m
+[2m      "where": {[22m
+[2m        "id": "123e4567-e89b-12d3-a456-426614174001",[22m
+[32m-     },[90m
+[32m-   },[90m
+[32m-   ObjectContaining {[90m
+[32m-     "data": ObjectContaining {[90m
+[32m-       "status": "VOIDED",[90m
+[2m      },[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/lib/pos-actions.test.ts:[2m125:41[22m[39m
+    [90m123| [39m          [35mawait[39m [34mvoidPOSSale[39m(validSaleId[33m,[39m [32m'Mistake'[39m)[33m;[39m
+    [90m124| [39m
+    [90m125| [39m          [34mexpect[39m(mockDb[33m.[39mpOSSale[33m.[39mupdate)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m   | [39m                                        [31m^[39m
+    [90m126| [39m              expect[33m.[39m[34mobjectContaining[39m({ where[33m:[39m { id[33m:[39m validSaleId } })[33m,[39m
+    [90m127| [39m              expect[33m.[39m[34mobjectContaining[39m({ 
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 22:45:29
+[2m   Duration [22m 1.13s[2m (transform 134ms, setup 0ms, import 376ms, tests 19ms, environment 513ms)[22m
+

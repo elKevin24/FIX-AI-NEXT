@@ -94,25 +94,26 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
 
   const formatCost = (cost: any) => {
     if (!cost) return '-';
-    return `$${Number(cost).toFixed(2)}`;
+    // Fixed: Using Q instead of $ for consistency
+    return `Q${Number(cost).toFixed(2)}`;
   };
 
   return (
-    <div className="space-y-4">
+    <div className={styles.container}>
       {/* Filtros */}
-      <div className={`${styles.glassCard} space-y-4`}>
-        <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+      <div className={styles.glassCard}>
+        <div className={styles.filterBar}>
           <input
             type="text"
             placeholder="Buscar plantilla..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={styles.searchInput}
           />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as ServiceCategory | 'ALL')}
-            className="px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className={styles.selectInput}
           >
             <option value="ALL">Todas las categorías</option>
             {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
@@ -125,13 +126,13 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       </div>
 
       {/* Lista */}
-      <div className="grid gap-4">
+      <div className={styles.templateList}>
         {filteredTemplates.length === 0 ? (
           <div className={styles.emptyState}>
-            <p className="text-gray-500 text-base md:text-lg">No se encontraron plantillas</p>
+            <p>No se encontraron plantillas</p>
             <Link
               href="/dashboard/settings/service-templates/create"
-              className="mt-4 inline-block text-blue-600 hover:text-blue-700 text-sm md:text-base"
+              className={styles.createFirstLink}
             >
               Crear primera plantilla
             </Link>
@@ -141,95 +142,91 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
             <div
               key={template.id}
               className={styles.templateCard}
-              style={{ borderLeft: `4px solid ${template.color || '#3B82F6'}` }}
+              style={{ borderLeft: `6px solid ${template.color || 'var(--color-primary-500)'}` }}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">{template.icon || '🔧'}</span>
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {template.name}
-                      </h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-sm px-2 py-1 bg-gray-100 rounded-full text-gray-700">
-                          {CATEGORY_LABELS[template.category]}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          Prioridad: {template.defaultPriority}
-                        </span>
-                        {!template.isActive && (
-                          <span className="text-sm px-2 py-1 bg-red-100 rounded-full text-red-700">
-                            Inactiva
-                          </span>
-                        )}
-                      </div>
-                    </div>
+              <div className={styles.cardMain}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.templateIcon}>
+                    {template.icon || '🔧'}
                   </div>
-
-                  <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Duración:</span>
-                      <span className="ml-2 font-medium">
-                        {formatDuration(template.estimatedDuration)}
+                  <div>
+                    <h3 className={styles.templateTitle}>
+                      {template.name}
+                    </h3>
+                    <div className={styles.badgeGroup}>
+                      <span className={`${styles.badge} ${styles.badgeCategory}`}>
+                        {CATEGORY_LABELS[template.category]}
                       </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Costo:</span>
-                      <span className="ml-2 font-medium">
-                        {formatCost(template.laborCost)}
+                      <span className={styles.infoLabel} style={{ textTransform: 'none' }}>
+                        Prioridad: <strong>{template.defaultPriority}</strong>
                       </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Tickets creados:</span>
-                      <span className="ml-2 font-medium">{template._count.tickets}</span>
+                      {!template.isActive && (
+                        <span className={`${styles.badge} ${styles.badgeInactive}`}>
+                          Inactiva
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Acciones */}
-                <div className="flex flex-col gap-2 ml-4">
-                  <Link
-                    href={`/dashboard/settings/service-templates/${template.id}/edit`}
-                    className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded border border-blue-300"
-                  >
-                    Editar
-                  </Link>
-                  <button
-                    onClick={() => handleToggleActive(template.id, template.isActive)}
-                    disabled={loading === template.id}
-                    className={`px-4 py-2 text-sm rounded border ${
-                      template.isActive
-                        ? 'text-yellow-700 border-yellow-300 hover:bg-yellow-50'
-                        : 'text-green-700 border-green-300 hover:bg-green-50'
-                    } disabled:opacity-50`}
-                  >
-                    {loading === template.id
-                      ? 'Procesando...'
-                      : template.isActive
-                      ? 'Desactivar'
-                      : 'Activar'}
-                  </button>
-                  <button
-                    onClick={() => handleDuplicate(template.id)}
-                    disabled={loading === template.id}
-                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded border border-gray-300 disabled:opacity-50"
-                  >
-                    Duplicar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(template.id, template.name)}
-                    disabled={loading === template.id || template._count.tickets > 0}
-                    className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded border border-red-300 disabled:opacity-50"
-                    title={
-                      template._count.tickets > 0
-                        ? 'No se puede eliminar: tiene tickets asociados'
-                        : 'Eliminar plantilla'
-                    }
-                  >
-                    Eliminar
-                  </button>
+                <div className={styles.infoGrid}>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Duración</span>
+                    <span className={styles.infoValue}>
+                      {formatDuration(template.estimatedDuration)}
+                    </span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Costo Labor</span>
+                    <span className={styles.infoValue}>
+                      {formatCost(template.laborCost)}
+                    </span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Uso Histórico</span>
+                    <span className={styles.infoValue}>{template._count.tickets} tickets</span>
+                  </div>
                 </div>
+              </div>
+
+              {/* Acciones */}
+              <div className={styles.actions}>
+                <Link
+                  href={`/dashboard/settings/service-templates/${template.id}/edit`}
+                  className={`${styles.btn} ${styles.btnEdit}`}
+                >
+                  Editar
+                </Link>
+                <button
+                  onClick={() => handleToggleActive(template.id, template.isActive)}
+                  disabled={loading === template.id}
+                  className={`${styles.btn} ${template.isActive ? styles.btnDeactivate : styles.btnActivate}`}
+                >
+                  {loading === template.id
+                    ? '...'
+                    : template.isActive
+                    ? 'Desactivar'
+                    : 'Activar'}
+                </button>
+                <button
+                  onClick={() => handleDuplicate(template.id)}
+                  disabled={loading === template.id}
+                  className={`${styles.btn} ${styles.btnDuplicate}`}
+                >
+                  Duplicar
+                </button>
+                <button
+                  onClick={() => handleDelete(template.id, template.name)}
+                  disabled={loading === template.id || template._count.tickets > 0}
+                  className={`${styles.btn} ${styles.btnDelete}`}
+                  title={
+                    template._count.tickets > 0
+                      ? 'No se puede eliminar: tiene tickets asociados'
+                      : 'Eliminar plantilla'
+                  }
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
           ))
