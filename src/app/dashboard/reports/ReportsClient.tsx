@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { getReportData } from '@/lib/report-actions';
 import styles from './reports.module.css';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 
@@ -68,7 +68,7 @@ export default function ReportsClient({ initialData }: Props) {
             style={{ 
                 marginTop: 'auto', 
                 cursor: 'pointer', 
-                backgroundColor: '#3b82f6', 
+                backgroundColor: 'var(--color-primary-600)', 
                 color: 'white',
                 border: 'none',
                 fontWeight: 600,
@@ -89,19 +89,19 @@ export default function ReportsClient({ initialData }: Props) {
           <div className={styles.statGrid} style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '2rem' }}>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Facturación</span>
-              <span className={styles.statValue} style={{ color: '#3b82f6' }}>
+              <span className={`${styles.statValue} ${styles.valueInvoice}`}>
                 {formatCurrency(data.finances.invoiceRevenue)}
               </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Ventas POS</span>
-              <span className={styles.statValue} style={{ color: '#8b5cf6' }}>
+              <span className={`${styles.statValue} ${styles.valuePos}`}>
                 {formatCurrency(data.finances.posRevenue)}
               </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Total</span>
-              <span className={styles.statValue} style={{ color: '#10b981' }}>
+              <span className={`${styles.statValue} ${styles.valueTotal}`}>
                 {formatCurrency(data.finances.totalRevenue)}
               </span>
             </div>
@@ -120,8 +120,8 @@ export default function ReportsClient({ initialData }: Props) {
                     labelFormatter={(date) => new Date(date).toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="invoice" name="Facturación" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="pos" name="Ventas POS" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="invoice" name="Facturación" stroke="var(--color-primary-500)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="pos" name="Ventas POS" stroke="var(--color-secondary-500)" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -147,7 +147,7 @@ export default function ReportsClient({ initialData }: Props) {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend />
+                <Legend verticalAlign="bottom" height={36}/>
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -156,7 +156,7 @@ export default function ReportsClient({ initialData }: Props) {
         {/* Top Selling Products */}
         <div className={styles.card}>
             <h2 className={styles.cardTitle}>Top Ventas (POS)</h2>
-            <div className={styles.tableContainer} style={{ maxHeight: '300px', overflow: 'auto' }}>
+            <div className={styles.tableContainer} style={{ maxHeight: '300px' }}>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -167,13 +167,13 @@ export default function ReportsClient({ initialData }: Props) {
                     </thead>
                     <tbody>
                         {data.inventory.topSelling.length === 0 ? (
-                            <tr><td colSpan={3} style={{textAlign: 'center', color: '#999'}}>Sin ventas en este periodo</td></tr>
+                            <tr><td colSpan={3} style={{textAlign: 'center', color: 'var(--color-text-tertiary)'}}>Sin ventas en este periodo</td></tr>
                         ) : (
                             data.inventory.topSelling.map((p: any) => (
                                 <tr key={p.name}>
-                                    <td>{p.name}</td>
+                                    <td><strong>{p.name}</strong></td>
                                     <td style={{ textAlign: 'center' }}>{p.quantity}</td>
-                                    <td style={{ textAlign: 'right' }}>{formatCurrency(p.total)}</td>
+                                    <td style={{ textAlign: 'right' }}><strong>{formatCurrency(p.total)}</strong></td>
                                 </tr>
                             ))
                         )}
@@ -207,9 +207,9 @@ export default function ReportsClient({ initialData }: Props) {
             <thead>
               <tr>
                 <th>Técnico</th>
-                <th>Tickets Resueltos</th>
-                <th>Tickets Activos</th>
-                <th>Total Asignados</th>
+                <th style={{ textAlign: 'center' }}>Tickets Resueltos</th>
+                <th style={{ textAlign: 'center' }}>Tickets Activos</th>
+                <th style={{ textAlign: 'center' }}>Total Asignados</th>
                 <th>Efectividad</th>
               </tr>
             </thead>
@@ -218,26 +218,19 @@ export default function ReportsClient({ initialData }: Props) {
                 const efficiency = tech.total ? ((tech.closed / tech.total) * 100) : 0;
                 return (
                     <tr key={tech.name}>
-                    <td>{tech.name}</td>
-                    <td>{tech.closed}</td>
-                    <td>{tech.active}</td>
-                    <td>{tech.total}</td>
+                    <td><strong>{tech.name}</strong></td>
+                    <td style={{ textAlign: 'center' }}>{tech.closed}</td>
+                    <td style={{ textAlign: 'center' }}>{tech.active}</td>
+                    <td style={{ textAlign: 'center' }}>{tech.total}</td>
                     <td style={{ width: '30%' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ 
-                                flex: 1,
-                                height: '8px', 
-                                background: '#e2e8f0', 
-                                borderRadius: '4px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{ 
+                        <div className={styles.progressContainer}>
+                            <div className={styles.progressBar}>
+                                <div className={styles.progressFill} style={{ 
                                     width: `${efficiency}%`, 
-                                    height: '100%', 
-                                    background: efficiency > 75 ? '#10b981' : efficiency > 40 ? '#f59e0b' : '#ef4444' 
+                                    backgroundColor: efficiency > 75 ? 'var(--color-success-500)' : efficiency > 40 ? 'var(--color-warning-500)' : 'var(--color-error-500)' 
                                 }} />
                             </div>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, width: '40px' }}>{efficiency.toFixed(0)}%</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 700, width: '40px' }}>{efficiency.toFixed(0)}%</span>
                         </div>
                     </td>
                     </tr>

@@ -1,3 +1,8 @@
+/* ========================================
+   REPORTS MODULE - Minimalist Premium
+   CSS Modules - Design System Compliant
+   ======================================== */
+
 .reportsPage {
   padding: 2rem;
   display: flex;
@@ -16,19 +21,20 @@
 .header h1 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-gray-800);
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .filters {
   display: flex;
   gap: 1rem;
   align-items: center;
-  background: var(--bg-card);
+  background: var(--color-surface);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border-light);
 }
 
 .filterGroup {
@@ -40,105 +46,144 @@
 .filterGroup label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.05em;
 }
 
 .input {
   padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-main);
-  color: var(--text-primary);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 1.5rem;
 }
 
 .card {
-  background: var(--bg-card);
+  background: var(--color-surface);
   padding: 1.5rem;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border-light);
 }
 
 .cardTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
   margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .statGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1.25rem;
 }
 
 .statItem {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .statLabel {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
 }
 
 .statValue {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-gray-800);
 }
 
-.statValue.warning {
-  color: #f59e0b;
-}
+/* Semantics */
+.valueInvoice { color: var(--color-primary-600); }
+.valuePos { color: var(--color-secondary-600); }
+.valueTotal { color: var(--color-success-600); }
 
 .tableContainer {
   overflow-x: auto;
+  margin-top: 0.5rem;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
 .table th {
   text-align: left;
   padding: 0.75rem 1rem;
-  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  border-bottom: 2px solid var(--color-border-medium);
+  background-color: var(--color-bg-secondary);
 }
 
 .table td {
   padding: 1rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Progressive Bars */
+.progressContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.progressBar {
+    flex: 1;
+    height: 8px;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
   }
   
   .filters {
-    width: 100%;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .grid {
+      grid-template-columns: 1fr;
   }
 }

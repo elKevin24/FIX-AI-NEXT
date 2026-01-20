@@ -16,7 +16,6 @@ interface ServiceUsage {
     name: string;
     laborCost: any;
     createdAt: Date;
-    serviceId: string;
 }
 
 interface Props {
@@ -32,15 +31,12 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
     const [showAddForm, setShowAddForm] = useState(false);
     const [selectedServiceId, setSelectedServiceId] = useState('');
 
-    // Calculate total cost
-    const totalLaborCost = servicesUsed.reduce((sum, usage) => {
-        return sum + Number(usage.laborCost);
+    const totalLaborCost = servicesUsed.reduce((sum, service) => {
+        return sum + Number(service.laborCost);
     }, 0);
 
-    // Refresh on success
     useEffect(() => {
         if (addState?.success) {
-            // Defer state updates to avoid cascading renders
             queueMicrotask(() => {
                 setShowAddForm(false);
                 setSelectedServiceId('');
@@ -56,13 +52,12 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
     }, [removeState, router]);
 
     return (
-        <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3>Servicios / Mano de Obra ({servicesUsed.length})</h3>
+        <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={styles.createBtn}
-                    style={{ padding: '0.5rem 1rem' }}
+                    className={showAddForm ? styles.cancelBtn : styles.createBtn}
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Servicio'}
                 </button>
@@ -70,31 +65,23 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
 
             {/* Add Service Form */}
             {showAddForm && (
-                <form action={addAction} style={{
-                    marginBottom: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: '#f9fafb',
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb',
-                }}>
+                <form action={addAction} className={styles.inlineForm}>
                     <input type="hidden" name="ticketId" value={ticketId} />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'end' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
-                                Servicio
-                            </label>
+                    <div className={styles.gridForm} style={{ gridTemplateColumns: '1fr auto' }}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label}>Servicio / Labor</label>
                             <select
                                 name="serviceId"
                                 value={selectedServiceId}
                                 onChange={(e) => setSelectedServiceId(e.target.value)}
                                 required
-                                className="p-2 border rounded text-black w-full"
+                                className={styles.select}
                             >
                                 <option value="">Seleccionar servicio...</option>
                                 {availableServices.map(service => (
                                     <option key={service.id} value={service.id}>
-                                        {service.name} - ${Number(service.laborCost).toFixed(2)}
+                                        {service.name} - Q{Number(service.laborCost).toFixed(2)}
                                     </option>
                                 ))}
                             </select>
@@ -104,14 +91,13 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                             type="submit"
                             disabled={isAdding || !selectedServiceId}
                             className={styles.createBtn}
-                            style={{ padding: '0.5rem 1rem' }}
                         >
                             {isAdding ? 'Agregando...' : 'Agregar'}
                         </button>
                     </div>
 
                     {addState?.message && !addState.success && (
-                        <p style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '6px', fontSize: '0.875rem' }}>
+                        <p className={styles.errorMessage}>
                             {addState.message}
                         </p>
                     )}
@@ -120,46 +106,35 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
 
             {/* Services List */}
             {servicesUsed.length === 0 ? (
-                <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>
-                    No se han agregado servicios a esta reparación.
-                </p>
+                <div className={styles.emptyState}>
+                    No hay cargos de mano de obra registrados.
+                </div>
             ) : (
                 <>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{
-                            width: '100%',
-                            borderCollapse: 'collapse',
-                            fontSize: '0.875rem'
-                        }}>
+                    <div className={styles.tableWrapper}>
+                        <table className={styles.table}>
                             <thead>
-                                <tr style={{
-                                    backgroundColor: '#f9fafb',
-                                    borderBottom: '2px solid #e5e7eb'
-                                }}>
-                                    <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>Servicio</th>
-                                    <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600 }}>Costo</th>
-                                    <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600 }}>Acción</th>
+                                <tr className={styles.tableHeaderRow}>
+                                    <th>Descripción del Servicio</th>
+                                    <th>Fecha Registro</th>
+                                    <th style={{ textAlign: 'right' }}>Costo Labor</th>
+                                    <th style={{ textAlign: 'center' }}>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {servicesUsed.map((usage) => (
-                                    <tr key={usage.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                        <td style={{ padding: '0.75rem' }}>{usage.name}</td>
-                                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600 }}>${Number(usage.laborCost).toFixed(2)}</td>
-                                        <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                            <form action={removeAction} style={{ display: 'inline' }}>
+                                    <tr key={usage.id} className={styles.tableRow}>
+                                        <td><strong>{usage.name}</strong></td>
+                                        <td className={styles.textMuted}>{new Date(usage.createdAt).toLocaleDateString()}</td>
+                                        <td style={{ textAlign: 'right' }}><strong>Q{Number(usage.laborCost).toFixed(2)}</strong></td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <form action={removeAction}>
                                                 <input type="hidden" name="serviceUsageId" value={usage.id} />
                                                 <button
                                                     type="submit"
                                                     disabled={isRemoving}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: 'none',
-                                                        color: '#dc2626',
-                                                        cursor: 'pointer',
-                                                        fontSize: '0.875rem',
-                                                        textDecoration: 'underline',
-                                                    }}
+                                                    className={styles.textDanger}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
                                                 >
                                                     Eliminar
                                                 </button>
@@ -171,27 +146,18 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                         </table>
                     </div>
 
-                    {/* Totals */}
-                    <div style={{
-                        marginTop: '1.5rem',
-                        padding: '1rem',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        maxWidth: '400px',
-                        marginLeft: 'auto',
-                    }}>
-                        <div style={{ textAlign: 'right' }}>
-                            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Total Mano de Obra:</p>
-                            <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10b981' }}>${totalLaborCost.toFixed(2)}</p>
+                    {/* Total Labor */}
+                    <div className={styles.summaryCard}>
+                        <div className={styles.summaryItem} style={{ gridColumn: 'span 2' }}>
+                            <span className={styles.summaryLabel}>Total Mano de Obra</span>
+                            <span className={`${styles.summaryValue} ${styles.textInfo}`}>Q{totalLaborCost.toFixed(2)}</span>
                         </div>
                     </div>
                 </>
             )}
 
             {removeState?.message && !removeState.success && (
-                <p style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '6px', fontSize: '0.875rem' }}>
+                <p className={styles.errorMessage}>
                     {removeState.message}
                 </p>
             )}
