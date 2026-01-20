@@ -1,0 +1,4 @@
+error: permisos insuficientes para agregar un objeto a la base de datos del repositorio .git/objects
+error: src/components/dashboard/UrgentTicketsWidget.tsx: falló al insertar en la base de datos
+error: no es posible indexar archivo 'src/components/dashboard/UrgentTicketsWidget.tsx'
+fatal: falló la actualización de archivos

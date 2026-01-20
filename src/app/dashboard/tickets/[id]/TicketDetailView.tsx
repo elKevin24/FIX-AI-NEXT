@@ -9,7 +9,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PartsSection from './PartsSection';
 import ServicesSection from './ServicesSection';
-import TimelineSection from './TimelineSection';
 import { TimelineEvent } from '@/lib/timeline';
 
 interface Part {
@@ -132,8 +131,6 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
     const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
 
-    const currentStatus = STATUS_OPTIONS.find(s => s.value === ticket.status);
-
     // Refresh page when note is added successfully
     useEffect(() => {
         if (noteState?.success) {
@@ -169,8 +166,8 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
             </div>
 
             {/* Quick Status Update */}
-            <div className={styles.tableContainer} style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-                <h3 style={{ marginBottom: '1rem' }}>Estado Actual</h3>
+            <div className={styles.section}>
+                <h3 className={styles.label} style={{ marginBottom: '1rem' }}>Estado Actual</h3>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {STATUS_OPTIONS.map((status) => (
                         <form key={status.value} action={statusAction} style={{ display: 'inline' }}>
@@ -200,11 +197,11 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
             {/* Main Content */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                 {/* Left Column - Ticket Details */}
-                <div className={styles.tableContainer} style={{ padding: '2rem' }}>
+                <div className={styles.section}>
                     {!isEditing ? (
                         <>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.5rem' }}>
-                                <h2>{ticket.title}</h2>
+                            <div className={styles.sectionHeader}>
+                                <h2 className={styles.sectionTitle}>{ticket.title}</h2>
                                 <button
                                     onClick={() => setIsEditing(true)}
                                     className={styles.createBtn}
@@ -215,20 +212,20 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             </div>
 
                             <div style={{ marginBottom: '1.5rem' }}>
-                                <h4 style={{ color: '#666', marginBottom: '0.5rem' }}>Descripción</h4>
+                                <h4 className={styles.label} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Descripción</h4>
                                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{ticket.description}</p>
                             </div>
 
                             <div className={styles.gridTwoColumns}>
                                 <div>
-                                    <h4 style={{ color: '#666', marginBottom: '0.5rem' }}>Prioridad</h4>
+                                    <h4 className={styles.label} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Prioridad</h4>
                                     <span className={`${styles.status} ${ticket.priority === 'High' ? styles.waiting_for_parts : ticket.priority === 'Medium' ? styles.in_progress : styles.closed}`}>
                                         {ticket.priority || 'Sin definir'}
                                     </span>
                                 </div>
                                 <div>
-                                    <h4 style={{ color: '#666', marginBottom: '0.5rem' }}>Asignado a</h4>
-                                    <p>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</p>
+                                    <h4 className={styles.label} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Asignado a</h4>
+                                    <p><strong>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</strong></p>
                                 </div>
                             </div>
                         </>
@@ -267,7 +264,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         id="status"
                                         name="status"
                                         defaultValue={ticket.status}
-                                        className={styles.input}
+                                        className={styles.select}
                                     >
                                         {STATUS_OPTIONS.map((status) => (
                                             <option key={status.value} value={status.value}>
@@ -283,7 +280,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         id="priority"
                                         name="priority"
                                         defaultValue={ticket.priority || ''}
-                                        className={styles.input}
+                                        className={styles.select}
                                     >
                                         {PRIORITY_OPTIONS.map((priority) => (
                                             <option key={priority.value} value={priority.value}>
@@ -300,7 +297,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                     id="assignedToId"
                                     name="assignedToId"
                                     defaultValue={ticket.assignedTo?.id || ''}
-                                    className={styles.input}
+                                    className={styles.select}
                                 >
                                     <option value="">Sin asignar</option>
                                     {availableUsers.map((user) => (
@@ -340,14 +337,14 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 {/* Right Column - Info & Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {/* Customer Info */}
-                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Cliente</h3>
+                    <div className={styles.section} style={{ padding: '1.5rem', marginTop: 0 }}>
+                        <h3 className={styles.label} style={{ marginBottom: '1rem' }}>Cliente</h3>
                         <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{ticket.customer.name}</p>
                         {ticket.customer.email && (
-                            <p style={{ fontSize: '0.9rem', color: '#666' }}>{ticket.customer.email}</p>
+                            <p className={styles.textMuted} style={{ fontSize: '0.9rem' }}>{ticket.customer.email}</p>
                         )}
                         {ticket.customer.phone && (
-                            <p style={{ fontSize: '0.9rem', color: '#666' }}>{ticket.customer.phone}</p>
+                            <p className={styles.textMuted} style={{ fontSize: '0.9rem' }}>{ticket.customer.phone}</p>
                         )}
                         <Link
                             href={`/dashboard/customers/${ticket.customer.id}/edit`}
@@ -359,24 +356,24 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                     </div>
 
                     {/* Dates */}
-                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Fechas</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
+                    <div className={styles.section} style={{ padding: '1.5rem', marginTop: 0 }}>
+                        <h3 className={styles.label} style={{ marginBottom: '1rem' }}>Fechas</h3>
+                        <div className={styles.flexCol} style={{ fontSize: '0.9rem' }}>
                             <div>
-                                <span style={{ color: '#666' }}>Creado:</span>{' '}
+                                <span className={styles.textMuted}>Creado:</span>{' '}
                                 {new Date(ticket.createdAt).toLocaleString('es-ES')}
                             </div>
                             <div>
-                                <span style={{ color: '#666' }}>Actualizado:</span>{' '}
+                                <span className={styles.textMuted}>Actualizado:</span>{' '}
                                 {new Date(ticket.updatedAt).toLocaleString('es-ES')}
                             </div>
                         </div>
                     </div>
 
                     {/* PDF Documents */}
-                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Documentos</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className={styles.section} style={{ padding: '1.5rem', marginTop: 0 }}>
+                        <h3 className={styles.label} style={{ marginBottom: '1rem' }}>Documentos</h3>
+                        <div className={styles.flexCol}>
                             <a
                                 href={`/api/tickets/${ticket.id}/pdf/work-order`}
                                 target="_blank"
@@ -404,7 +401,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         textDecoration: 'none',
                                         fontSize: '0.9rem',
                                         display: 'block',
-                                        backgroundColor: '#8b5cf6'
+                                        backgroundColor: 'var(--color-secondary-600)'
                                     }}
                                 >
                                     💰 Ver Factura ({ticket.invoice.invoiceNumber})
@@ -432,7 +429,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                             textAlign: 'center',
                                             fontSize: '0.9rem',
                                             display: 'block',
-                                            backgroundColor: '#f59e0b',
+                                            backgroundColor: 'var(--color-warning-600)',
                                             width: '100%'
                                         }}
                                     >
@@ -453,7 +450,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         textDecoration: 'none',
                                         fontSize: '0.9rem',
                                         display: 'block',
-                                        backgroundColor: '#10b981'
+                                        backgroundColor: 'var(--color-success-600)'
                                     }}
                                 >
                                     ✓ Comprobante de Entrega
@@ -464,7 +461,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
 
                     {/* Delete Zone - Only for admins */}
                     {isAdmin && (
-                        <div className={styles.dangerZone}>
+                        <div className={styles.dangerZone} style={{ marginTop: 0 }}>
                             <h3 className={styles.dangerTitle}>Zona de Peligro</h3>
 
                             {!showDeleteConfirm ? (
@@ -478,7 +475,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 </button>
                             ) : (
                                 <div className={styles.formGroup}>
-                                    <p className={styles.errorMessage} style={{ backgroundColor: 'transparent', border: 'none', padding: 0 }}>
+                                    <p className={styles.textDanger} style={{ fontSize: '0.875rem' }}>
                                         ¿Eliminar este ticket? Esta acción no se puede deshacer.
                                     </p>
 
@@ -530,8 +527,8 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
             />
 
             {/* Notes Section & Timeline */}
-            <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '1.5rem' }}>
-                <h3 style={{ marginBottom: '1.5rem' }}>Bitácora de Reparación y Auditoría ({timelineEvents.length} eventos)</h3>
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle} style={{ marginBottom: '1.5rem' }}>Bitácora de Reparación y Auditoría ({timelineEvents.length} eventos)</h3>
 
                 {/* Add Note Form */}
                 <form ref={formRef} action={noteAction} style={{ marginBottom: '2rem' }}>
@@ -545,8 +542,8 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             placeholder="Agregar una nota sobre la reparación..."
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
-                            className={styles.input}
-                            style={{ resize: 'vertical', minHeight: '80px', width: '100%' }}
+                            className={styles.textarea}
+                            style={{ minHeight: '80px' }}
                         />
                     </div>
 
@@ -556,12 +553,11 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                         </p>
                     )}
 
-                    <div className={styles.actions} style={{ justifyContent: 'flex-end' }}>
+                    <div className={styles.actions} style={{ justifyContent: 'flex-end', marginTop: '1rem' }}>
                         <button
                             type="submit"
                             className={styles.createBtn}
                             disabled={isAddingNote || !noteContent.trim()}
-                            style={{ padding: '0.5rem 1rem' }}
                         >
                             {isAddingNote ? 'Agregando...' : 'Agregar Nota'}
                         </button>
@@ -569,43 +565,28 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 </form>
 
                 {/* Unified Timeline List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className={styles.timeline}>
                     {timelineEvents.length === 0 ? (
-                        <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>
+                        <div className={styles.emptyState}>
                             No hay eventos registrados.
-                        </p>
+                        </div>
                     ) : (
                         timelineEvents.map((event) => (
                             <div
                                 key={event.id}
-                                style={{
-                                    padding: '1rem',
-                                    backgroundColor: event.type === 'NOTE' ? '#f9f9f9' : '#f0f9ff',
-                                    borderRadius: '8px',
-                                    border: event.type === 'NOTE' ? '1px solid #eee' : '1px solid #bae6fd',
-                                }}
+                                className={`${styles.logEntry} ${event.type === 'NOTE' ? styles.logEntryNote : styles.logEntrySystem}`}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ 
-                                            fontWeight: '600', 
-                                            color: event.type === 'NOTE' ? '#333' : '#0369a1' 
-                                        }}>
+                                <div className={styles.logHeader}>
+                                    <div className={styles.logMeta}>
+                                        <span className={styles.authorName}>
                                             {event.author.name || event.author.email || 'Sistema'}
                                         </span>
                                         {event.type === 'LOG' && (
-                                            <span style={{
-                                                fontSize: '0.7rem',
-                                                backgroundColor: '#0ea5e9',
-                                                color: 'white',
-                                                padding: '2px 6px',
-                                                borderRadius: '4px',
-                                                textTransform: 'uppercase'
-                                            }}>
+                                            <span className={styles.systemTag}>
                                                 Sistema
                                             </span>
                                         )}
-                                        <span style={{ fontSize: '0.8rem', color: '#999' }}>
+                                        <span className={styles.logDate}>
                                             {new Date(event.date).toLocaleString('es-ES')}
                                         </span>
                                     </div>
@@ -617,27 +598,21 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                             <button
                                                 type="submit"
                                                 disabled={isDeletingNote}
+                                                className={styles.textDanger}
                                                 style={{
                                                     background: 'none',
                                                     border: 'none',
-                                                    color: '#999',
                                                     cursor: 'pointer',
                                                     fontSize: '0.8rem',
-                                                    padding: '0.25rem 0.5rem',
+                                                    textDecoration: 'underline'
                                                 }}
-                                                onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
-                                                onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
                                             >
                                                 Eliminar
                                             </button>
                                         </form>
                                     )}
                                 </div>
-                                <p style={{ 
-                                    whiteSpace: 'pre-wrap', 
-                                    lineHeight: '1.5', 
-                                    color: event.type === 'NOTE' ? '#444' : '#0c4a6e'
-                                }}>
+                                <p className={styles.logContent}>
                                     {event.content}
                                 </p>
                             </div>

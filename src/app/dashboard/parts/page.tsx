@@ -41,11 +41,12 @@ export default async function PartsPage() {
     });
 
     // Calculate total value and low stock count
-    const lowStockThreshold = 5;
-    const lowStockCount = parts.filter((p: typeof parts[number]) => p.quantity <= lowStockThreshold).length;
-    const totalValue = parts.reduce((sum: number, part: typeof parts[number]) => {
+    const lowStockCount = parts.filter((p: any) => p.quantity <= p.minStock).length;
+    const totalValue = parts.reduce((sum: number, part: any) => {
         return sum + (Number(part.price) * part.quantity);
     }, 0);
+
+    const formatCurrency = (val: number) => `Q${val.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`;
 
     return (
         <div className={styles.container}>
@@ -53,7 +54,7 @@ export default async function PartsPage() {
                 <div>
                     <h1>Inventario de Repuestos</h1>
                     {lowStockCount > 0 && (
-                        <p style={{ color: '#dc2626', fontWeight: 600, marginTop: '0.5rem' }}>
+                        <p className={styles.textDanger} style={{ fontWeight: 600, marginTop: '0.5rem' }}>
                             ⚠️ {lowStockCount} repuesto{lowStockCount !== 1 ? 's' : ''} con stock bajo
                         </p>
                     )}
@@ -69,124 +70,86 @@ export default async function PartsPage() {
             </div>
 
             {/* Summary Cards */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem',
-            }}>
-                <div style={{
-                    background: '#fff',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
-                    border: '1px solid #eaeaea',
-                }}>
-                    <h3 style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
-                        Total Repuestos
-                    </h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>
-                        {parts.length}
-                    </p>
+            <div className={styles.gridTwoColumns} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '2rem' }}>
+                <div className={styles.section} style={{ padding: '1.5rem', marginTop: 0 }}>
+                    <h3 className={styles.summaryLabel}>Total Repuestos</h3>
+                    <p className={styles.summaryValue} style={{ fontSize: '2rem' }}>{parts.length}</p>
                 </div>
-                <div style={{
-                    background: '#fff',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
-                    border: '1px solid #eaeaea',
-                }}>
-                    <h3 style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
-                        Valor Total Inventario
-                    </h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>
-                        ${totalValue.toFixed(2)}
-                    </p>
+                
+                <div className={styles.section} style={{ padding: '1.5rem', marginTop: 0 }}>
+                    <h3 className={styles.summaryLabel}>Valor Total (Precio Venta)</h3>
+                    <p className={styles.summaryValue} style={{ fontSize: '2rem' }}>{formatCurrency(totalValue)}</p>
                 </div>
-                <div style={{
-                    background: lowStockCount > 0 ? '#fee2e2' : '#fff',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
-                    border: `1px solid ${lowStockCount > 0 ? '#fecaca' : '#eaeaea'}`,
-                }}>
-                    <h3 style={{ fontSize: '0.875rem', color: lowStockCount > 0 ? '#991b1b' : '#666', marginBottom: '0.5rem' }}>
-                        Stock Bajo (≤{lowStockThreshold})
+
+                <div className={`${styles.section} ${lowStockCount > 0 ? styles.dangerZone : ''}`} style={{ padding: '1.5rem', marginTop: 0, borderColor: lowStockCount > 0 ? 'var(--color-error-200)' : 'var(--color-border-light)' }}>
+                    <h3 className={styles.summaryLabel} style={{ color: lowStockCount > 0 ? 'var(--color-error-700)' : 'inherit' }}>
+                        Alertas de Stock
                     </h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: lowStockCount > 0 ? '#dc2626' : 'inherit' }}>
+                    <p className={styles.summaryValue} style={{ fontSize: '2rem', color: lowStockCount > 0 ? 'var(--color-error-600)' : 'inherit' }}>
                         {lowStockCount}
                     </p>
                 </div>
             </div>
 
             <div className={styles.resultsInfo}>
-                {parts.length > 0 ? (
-                    <p>Mostrando {parts.length} repuesto{parts.length !== 1 ? 's' : ''}</p>
-                ) : (
-                    <p>No se encontraron repuestos</p>
-                )}
+                <p>
+                    {parts.length > 0 
+                        ? `Mostrando ${parts.length} repuesto${parts.length !== 1 ? 's' : ''}` 
+                        : 'No se encontraron repuestos'}
+                </p>
             </div>
 
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead>
-                        <tr>
+                        <tr className={styles.tableHeaderRow}>
                             <th>Nombre</th>
                             <th>SKU</th>
-                            <th>Cantidad</th>
-                            <th>Costo</th>
-                            <th>Precio</th>
-                            <th>Margen</th>
-                            <th>Veces Usado</th>
+                            <th style={{ textAlign: 'center' }}>Cantidad</th>
+                            <th style={{ textAlign: 'right' }}>Costo</th>
+                            <th style={{ textAlign: 'right' }}>Precio</th>
+                            <th style={{ textAlign: 'right' }}>Margen</th>
+                            <th style={{ textAlign: 'center' }}>Uso</th>
                             {isSuperAdmin && <th>Tenant</th>}
-                            <th>Acciones</th>
+                            <th style={{ textAlign: 'center' }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {parts.map((part: typeof parts[number]) => {
+                        {parts.map((part: any) => {
                             const cost = Number(part.cost);
                             const price = Number(part.price);
                             const margin = cost > 0 ? ((price - cost) / cost * 100) : 0;
-                            const isLowStock = part.quantity <= lowStockThreshold;
-                            const timesUsed = part.usages.reduce((sum: number, usage: typeof part.usages[number]) => sum + usage.quantity, 0);
+                            const isLowStock = part.quantity <= part.minStock;
+                            const timesUsed = part.usages.reduce((sum: number, usage: any) => sum + usage.quantity, 0);
 
                             return (
-                                <tr key={part.id} style={isLowStock ? { backgroundColor: '#fef2f2' } : undefined}>
+                                <tr key={part.id} className={styles.tableRow} style={isLowStock ? { backgroundColor: 'var(--color-error-50)' } : undefined}>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {part.name}
+                                            <strong>{part.name}</strong>
                                             {isLowStock && (
-                                                <span style={{
-                                                    padding: '0.125rem 0.5rem',
-                                                    backgroundColor: '#fee2e2',
-                                                    color: '#991b1b',
-                                                    borderRadius: '9999px',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 600,
-                                                }}>
-                                                    Stock Bajo
+                                                <span className={`${styles.status} ${styles.textDanger}`} style={{ backgroundColor: 'var(--color-error-100)', fontSize: '0.65rem' }}>
+                                                    Bajo Stock
                                                 </span>
                                             )}
                                         </div>
                                     </td>
-                                    <td>{part.sku || '-'}</td>
-                                    <td>
-                                        <span style={{
-                                            fontWeight: 600,
-                                            color: isLowStock ? '#dc2626' : 'inherit'
-                                        }}>
+                                    <td className={styles.textMuted}>{part.sku || '-'}</td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <strong className={isLowStock ? styles.textDanger : ''}>
                                             {part.quantity}
-                                        </span>
+                                        </strong>
                                     </td>
-                                    <td>${cost.toFixed(2)}</td>
-                                    <td>${price.toFixed(2)}</td>
-                                    <td>
-                                        <span style={{
-                                            color: margin > 0 ? '#10b981' : margin < 0 ? '#dc2626' : 'inherit'
-                                        }}>
+                                    <td style={{ textAlign: 'right' }}>{formatCurrency(cost)}</td>
+                                    <td style={{ textAlign: 'right' }}>{formatCurrency(price)}</td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <span className={margin > 0 ? styles.textSuccess : margin < 0 ? styles.textDanger : ''}>
                                             {margin > 0 ? '+' : ''}{margin.toFixed(1)}%
                                         </span>
                                     </td>
-                                    <td>{timesUsed}</td>
+                                    <td style={{ textAlign: 'center' }}>{timesUsed}</td>
                                     {isSuperAdmin && <td>{part.tenant.name}</td>}
-                                    <td>
+                                    <td style={{ textAlign: 'center' }}>
                                         <Link
                                             href={`/dashboard/parts/${part.id}/edit`}
                                             className={styles.viewLink}
