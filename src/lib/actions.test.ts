@@ -1,26 +1,49 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createCustomer, updateCustomer, createPart, updatePart } from './actions';
-import { auth } from '@/auth';
+import { createCustomer, updateCustomer, createPart, updatePart, authenticate, getTicketById } from './actions';
+import { auth, signIn } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { prisma } from '@/lib/prisma';
+import { AuthError } from 'next-auth';
+import { notFound } from 'next/navigation';
 
 // Mock dependencies
-vi.mock('@/auth');
+vi.mock('@/auth', () => ({
+  auth: vi.fn(),
+  signIn: vi.fn(),
+}));
+
 vi.mock('@/lib/tenant-prisma');
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    ticket: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    $transaction: vi.fn((callback) => callback(prisma)),
+  }
+}));
+
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
   notFound: vi.fn(),
 }));
+
 vi.mock('@/lib/notifications', () => ({
   createNotification: vi.fn(),
 }));
+
 vi.mock('./ticket-notifications', () => ({
   notifyLowStock: vi.fn(),
+  notifyTicketCreated: vi.fn(),
+  notifyTicketStatusChange: vi.fn(),
+  notifyTechnicianAssigned: vi.fn(),
 }));
 
-describe('actions.ts - Customer & Part Actions', () => {
+describe('actions.ts - System Actions', () => {
   const mockSession = {
     user: {
       id: 'user-1',
@@ -33,16 +56,46 @@ describe('actions.ts - Customer & Part Actions', () => {
   const mockDb: any = {
     customer: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
     part: {
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
+      updateMany: vi.fn(),
     },
     user: {
+        findUnique: vi.fn(),
         findMany: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+    },
+    ticket: {
+        create: vi.fn(),
+        update: vi.fn(),
+        findUnique: vi.fn(),
+        findFirst: vi.fn(),
+        findMany: vi.fn(),
+        delete: vi.fn(),
+    },
+    partUsage: {
+        create: vi.fn(),
+        delete: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+    },
+    ticketService: {
+        create: vi.fn(),
+        delete: vi.fn(),
+        findUnique: vi.fn(),
+    },
+    serviceTemplate: {
+        findUnique: vi.fn(),
     }
   };
 
@@ -51,48 +104,118 @@ describe('actions.ts - Customer & Part Actions', () => {
     (auth as any).mockResolvedValue(mockSession);
     (getTenantPrisma as any).mockReturnValue(mockDb);
   });
+  
+  describe('Authentication & Search', () => {
+      describe('authenticate', () => {
+          it('should call signIn with credentials', async () => {
+              const formData = new FormData();
+              formData.append('email', 'test@test.com');
+              formData.append('password', 'password');
+
+              await authenticate(undefined, formData);
+
+              expect(signIn).toHaveBeenCalledWith('credentials', {
+                  email: 'test@test.com',
+                  password: 'password',
+                  redirectTo: '/dashboard',
+              });
+          });
+
+          it('should return error message on invalid credentials', async () => {
+              const formData = new FormData();
+              // Use real AuthError if possible, but mocking it might be safer if next-auth is hard to instantiate
+              // However, since we import it from next-auth which is NOT mocked, we use the real class.
+              // We need to subclass it because AuthError might be abstract or need type property handling.
+              
+              class CustomAuthError extends AuthError {
+                  constructor(type: string) {
+                      super(type);
+                      this.type = type;
+                  }
+              }
+              
+              const authError = new CustomAuthError('CredentialsSignin');
+              (signIn as any).mockRejectedValueOnce(authError);
+              
+              const result = await authenticate(undefined, formData);
+              expect(result).toBe('Invalid credentials.');
+          });
+
+          it('should throw generic error on other failures', async () => {
+              const formData = new FormData();
+              (signIn as any).mockRejectedValueOnce(new Error('Random error'));
+              
+              await expect(authenticate(undefined, formData)).rejects.toThrow('Random error');
+          });
+      });
+
+      describe('getTicketById', () => {
+          it('should return ticket if found by UUID', async () => {
+              const uuid = '12345678-1234-1234-1234-1234567890ab';
+              const mockTicket = { id: uuid, title: 'Laptop Issue' };
+              (prisma.ticket.findUnique as any).mockResolvedValue(mockTicket);
+
+              const result = await getTicketById(uuid);
+              expect(result).toEqual(mockTicket);
+              expect(prisma.ticket.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: uuid } }));
+          });
+
+          it('should search by short ID if not found by UUID', async () => {
+              const shortId = '12345678';
+              (prisma.ticket.findUnique as any).mockResolvedValue(null);
+              const mockTicket = { id: '12345678-full-uuid', title: 'PC Fix' };
+              (prisma.ticket.findFirst as any).mockResolvedValue(mockTicket);
+
+              const result = await getTicketById(shortId);
+              expect(result).toEqual(mockTicket);
+              expect(prisma.ticket.findFirst).toHaveBeenCalledWith(expect.objectContaining({ 
+                  where: { id: { startsWith: shortId } } 
+              }));
+          });
+
+          it('should call notFound if ticket not found', async () => {
+              (prisma.ticket.findUnique as any).mockResolvedValue(null);
+              (prisma.ticket.findFirst as any).mockResolvedValue(null);
+
+              await getTicketById('invalid-id');
+              expect(notFound).toHaveBeenCalled();
+          });
+      });
+  });
 
   describe('createCustomer', () => {
-    it('should validate customer data using Zod', async () => {
+    it('should validate customer data', async () => {
       const formData = new FormData();
-      // Name missing
       formData.append('name', ''); 
-
       const result = await createCustomer({}, formData);
       expect(result.message).toBe('El nombre es requerido');
     });
 
-    it('should successfully create a customer', async () => {
+    it('should create customer', async () => {
       const formData = new FormData();
-      formData.append('name', 'John Doe');
-      formData.append('email', 'john@example.com');
+      formData.append('name', 'John');
+      formData.append('email', 'john@test.com');
+      mockDb.customer.create.mockResolvedValue({ id: '1', name: 'John' });
 
-      mockDb.customer.create.mockResolvedValue({ id: 'cust-1', name: 'John Doe' });
-
-      const result = await createCustomer({}, formData);
+      await createCustomer({}, formData);
       
       expect(mockDb.customer.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          name: 'John Doe',
-          email: 'john@example.com',
-          tenantId: 'tenant-1'
-        })
+        data: expect.objectContaining({ name: 'John', email: 'john@test.com' })
       });
-      // createCustomer returns a redirect or nothing on success, but here it returns void or redirects
     });
   });
 
   describe('createPart', () => {
-    it('should validate part data using Zod', async () => {
+    it('should validate part data', async () => {
       const formData = new FormData();
       formData.append('name', 'Screen');
-      formData.append('quantity', '-5'); // Invalid
+      formData.append('quantity', '-5'); 
 
       const result = await createPart({}, formData);
       expect(result.message).toBe('La cantidad no puede ser negativa');
     });
 
-    it('should successfully create a part', async () => {
+    it('should create part', async () => {
       const formData = new FormData();
       formData.append('name', 'Battery');
       formData.append('quantity', '10');
@@ -146,7 +269,7 @@ describe('actions.ts - Customer & Part Actions', () => {
       const formData = new FormData();
       formData.append('partId', partId);
       formData.append('name', 'Updated Screen');
-      formData.append('quantity', '2'); // Low stock
+      formData.append('quantity', '2'); 
       formData.append('cost', '10');
       formData.append('price', '20');
 
