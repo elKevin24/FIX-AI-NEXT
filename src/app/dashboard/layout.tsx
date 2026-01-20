@@ -2,6 +2,8 @@ import { signOut, auth } from '@/auth';
 import styles from './dashboard.module.css';
 import Sidebar from '@/components/dashboard/Sidebar';
 import TopNav from '@/components/dashboard/TopNav';
+import { ToastProvider } from '@/context/ToastContext';
+import ToastContainer from '@/components/ui/ToastContainer';
 // We don't import Sidebar.module.css here, the component handles it.
 
 export default async function DashboardLayout({
@@ -49,12 +51,15 @@ export default async function DashboardLayout({
     );
 
     return (
-        <div className={styles.container}>
-            <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-            <main className={styles.mainContent}>
-                <TopNav />
-                {children}
-            </main>
-        </div>
+        <ToastProvider>
+            <div className={styles.container}>
+                <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
+                <main className={styles.mainContent}>
+                    <TopNav />
+                    {children}
+                </main>
+                <ToastContainer />
+            </div>
+        </ToastProvider>
     );
 }

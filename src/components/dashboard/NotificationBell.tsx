@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getMyNotifications, markMyNotificationAsRead, markAllMyNotificationsAsRead } from '@/lib/notifications';
+import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import styles from './NotificationBell.module.css';
 
@@ -20,6 +21,8 @@ export default function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { addToast } = useToast();
+    const lastNotifIdRef = useRef<string | null>(null);
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -30,6 +33,17 @@ export default function NotificationBell() {
                     ...n,
                     createdAt: new Date(n.createdAt)
                 }));
+
+                // Check for new notifications to show toast
+                if (parsedData.length > 0) {
+                    const latest = parsedData[0];
+                    if (lastNotifIdRef.current && lastNotifIdRef.current !== latest.id && !latest.isRead) {
+                        // New notification detected
+                        addToast(latest.message, latest.type as any, latest.title);
+                    }
+                    lastNotifIdRef.current = latest.id;
+                }
+
                 setNotifications(parsedData);
             } catch (error) {
                 console.error('Error fetching notifications:', error);
@@ -39,7 +53,7 @@ export default function NotificationBell() {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 60000); // Poll every minute
         return () => clearInterval(interval);
-    }, []);
+    }, [addToast]);
 
     // Close on click outside
     useEffect(() => {
