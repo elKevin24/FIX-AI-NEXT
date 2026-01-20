@@ -69,8 +69,10 @@ describe('Cash Register Actions', () => {
             });
 
             expect(mockDb.cashRegister.update).toHaveBeenCalledWith(
-                expect.objectContaining({ where: { id: validId } }),
-                expect.objectContaining({ data: expect.objectContaining({ isOpen: false }) })
+                expect.objectContaining({ 
+                    where: { id: validId },
+                    data: expect.objectContaining({ isOpen: false }) 
+                })
             );
         });
     });

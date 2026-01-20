@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { InvoiceStatus } from '@prisma/client';
 import styles from './invoices.module.css';
 
 interface InvoicesClientProps {
@@ -10,7 +9,7 @@ interface InvoicesClientProps {
 }
 
 export default function InvoicesClient({ initialInvoices }: InvoicesClientProps) {
-  const [invoices, setInvoices] = useState(initialInvoices);
+  const [invoices] = useState(initialInvoices);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -61,11 +60,11 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Cobrado</span>
-          <span className={styles.statValue} style={{ color: '#16a34a' }}>{formatCurrency(stats.paid)}</span>
+          <span className={`${styles.statValue} ${styles.valuePaid}`}>{formatCurrency(stats.paid)}</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Pendiente</span>
-          <span className={styles.statValue} style={{ color: '#ca8a04' }}>{formatCurrency(stats.pending)}</span>
+          <span className={`${styles.statValue} ${styles.valuePending}`}>{formatCurrency(stats.pending)}</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Cant. Facturas</span>
@@ -109,7 +108,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
               <th>Ticket Relevante</th>
               <th>Estado</th>
               <th>Total</th>
-              <th>Acciones</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -135,7 +134,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
                     </span>
                   </td>
                   <td className={styles.amount}>{formatCurrency(Number(invoice.total))}</td>
-                  <td className={styles.actions}>
+                  <td style={{ display: 'flex', justifyContent: 'center' }}>
                     <Link href={`/dashboard/invoices/${invoice.id}`} className={styles.viewButton} title="Ver detalle">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
