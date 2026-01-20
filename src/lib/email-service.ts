@@ -7,11 +7,23 @@
 import { Resend } from 'resend';
 import { TicketStatus } from '@prisma/client';
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API key if available, otherwise use a placeholder to prevent build errors
+// logic handles missing key by returning early in send functions
+const apiKey = process.env.RESEND_API_KEY || 're_123456789';
+const resend = new Resend(apiKey);
 
 // Default sender email (must be verified in Resend)
 const DEFAULT_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@fixai.app';
+
+// Helper to check if email service is configured
+const isEmailConfigured = () => {
+  return !!process.env.RESEND_API_KEY;
+};
+
+// Helper to check if email service is configured
+const isEmailConfigured = () => {
+  return !!process.env.RESEND_API_KEY;
+};
 
 interface TicketEmailData {
   ticketId: string;
