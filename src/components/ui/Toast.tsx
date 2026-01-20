@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import styles from './Toast.module.css';
 
 export type ToastType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
@@ -17,21 +17,21 @@ export interface ToastProps {
 export default function Toast({ id, type, title, message, duration = 5000, onDismiss }: ToastProps) {
   const [isExiting, setIsExiting] = useState(false);
 
+  const handleDismiss = useCallback(() => {
+    setIsExiting(true);
+    // Wait for animation to finish
+    setTimeout(() => {
+      onDismiss(id);
+    }, 300);
+  }, [id, onDismiss]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       handleDismiss();
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration]);
-
-  const handleDismiss = () => {
-    setIsExiting(true);
-    // Wait for animation to finish
-    setTimeout(() => {
-      onDismiss(id);
-    }, 300);
-  };
+  }, [duration, handleDismiss]);
 
   const getTypeClass = () => {
     switch (type) {
