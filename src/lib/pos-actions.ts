@@ -642,39 +642,44 @@ export async function getPOSSalesStats(from?: Date, to?: Date) {
     }
   }
 
-  const sales = await db.pOSSale.findMany({
-    where,
-    select: {
+  // 1. Main Aggregations (DB Side)
+  const stats = await db.pOSSale.aggregate({
+    _sum: {
       total: true,
       taxAmount: true,
       discountAmount: true,
-      payments: {
-        select: {
-          paymentMethod: true,
-          amount: true,
-        },
-      },
+    },
+    _count: {
+      id: true,
+    },
+    where,
+  });
+
+  // 2. Payment Method Aggregation (DB Side)
+  // We query the payment table filtering by the parent sale criteria
+  const paymentsByMethod = await db.pOSSalePayment.groupBy({
+    by: ['paymentMethod'],
+    _sum: {
+      amount: true,
+    },
+    where: {
+      sale: where,
     },
   });
 
-  const totalSales = sales.reduce((sum: number, s: any) => sum + decimalToNumber(s.total), 0);
-  const totalTax = sales.reduce((sum: number, s: any) => sum + decimalToNumber(s.taxAmount), 0);
-  const totalDiscount = sales.reduce((sum: number, s: any) => sum + decimalToNumber(s.discountAmount), 0);
-
-  // Group by payment method
+  // Transform Data
   const byPaymentMethod: Record<string, number> = {};
-  for (const sale of sales) {
-    for (const payment of sale.payments) {
-      const method = payment.paymentMethod;
-      byPaymentMethod[method] = (byPaymentMethod[method] || 0) + decimalToNumber(payment.amount);
+  paymentsByMethod.forEach((p: any) => {
+    if (p.paymentMethod) {
+      byPaymentMethod[p.paymentMethod] = decimalToNumber(p._sum.amount);
     }
-  }
+  });
 
   return {
-    salesCount: sales.length,
-    totalSales,
-    totalTax,
-    totalDiscount,
+    salesCount: stats._count.id,
+    totalSales: decimalToNumber(stats._sum.total),
+    totalTax: decimalToNumber(stats._sum.taxAmount),
+    totalDiscount: decimalToNumber(stats._sum.discountAmount),
     byPaymentMethod,
   };
 }
