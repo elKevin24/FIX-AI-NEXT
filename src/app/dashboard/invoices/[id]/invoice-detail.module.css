@@ -1,55 +1,96 @@
+/* ========================================
+   INVOICE DETAIL - Liquid Glass Minimalista
+   Premium Document Look - WCAG AA
+   ======================================== */
+
 .container {
-    padding: 2rem;
+    padding: 1.5rem;
     max-width: 1000px;
     margin: 0 auto;
-    animation: fadeIn 0.4s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== NAVIGATION & ACTIONS ========== */
+.backButtonContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .backButton {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-decoration: none;
     font-size: 0.875rem;
-    margin-bottom: 2rem;
+    font-weight: 600;
     transition: color 0.2s;
 }
 
 .backButton:hover {
-    color: var(--primary-color);
+    color: var(--color-primary-600);
 }
 
+.btnPrint {
+    background-color: var(--color-secondary-600);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-base);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.btnPrint:hover {
+    background-color: var(--color-secondary-700);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ========== INVOICE PAPER (Glass Card) ========== */
 .invoicePaper {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    background: var(--color-surface);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--color-border-light);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
+    position: relative;
 }
 
 .invoiceHeader {
     padding: 3rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border-light);
     display: flex;
     justify-content: space-between;
+    background: linear-gradient(to bottom right, rgba(255,255,255,0.05), transparent);
 }
 
 .brand h2 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
-    color: var(--primary-color);
-    letter-spacing: -0.02em;
+    color: var(--color-primary-600);
+    letter-spacing: -0.04em;
 }
 
 .brand p {
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
+    font-weight: 500;
 }
 
 .invoiceTitle {
@@ -57,15 +98,17 @@
 }
 
 .invoiceTitle h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--color-gray-800);
+    letter-spacing: -0.04em;
 }
 
 .invoiceTitle p {
     font-size: 1.125rem;
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-mono);
+    font-weight: 600;
 }
 
 .infoGrid {
@@ -73,21 +116,23 @@
     grid-template-columns: 1fr 1fr;
     padding: 2rem 3rem;
     gap: 2rem;
-    background: var(--bg-tertiary);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 .infoBlock h3 {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
     margin-bottom: 0.75rem;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    font-weight: 800;
 }
 
 .infoBlock p {
-    font-size: 1rem;
-    color: var(--text-primary);
-    line-height: 1.5;
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+    line-height: 1.6;
 }
 
 .itemsSection {
@@ -100,52 +145,74 @@
 }
 
 .itemTable th {
-    padding: 0.75rem 0;
+    padding: 1rem 0;
     text-align: left;
-    border-bottom: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+    border-bottom: 2px solid var(--color-border-medium);
+    color: var(--color-text-tertiary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 .itemTable td {
     padding: 1.25rem 0;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
 }
 
 .summarySection {
-    padding: 2rem 3rem;
+    padding: 2.5rem 3rem;
     display: flex;
     justify-content: flex-end;
+    background: linear-gradient(to top, var(--color-bg-secondary), transparent);
 }
 
 .summaryTable {
-    min-width: 300px;
+    min-width: 320px;
 }
 
 .summaryRow {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0;
+    padding: 0.625rem 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
 }
 
 .summaryRow.total {
-    border-top: 2px solid var(--border-color);
+    border-top: 2px solid var(--color-border-medium);
     margin-top: 1rem;
     padding-top: 1rem;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--primary-color);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--color-primary-700);
 }
 
 .footer {
     padding: 2rem 3rem;
-    background: var(--bg-tertiary);
-    border-top: 1px solid var(--border-color);
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border-light);
 }
 
+.footer h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+
+.footer p {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+/* ========== PAYMENTS SECTION ========== */
 .paymentSection {
-    margin-top: 2rem;
+    margin-top: 3rem;
 }
 
 .paymentHeader {
@@ -155,20 +222,28 @@
     margin-bottom: 1.5rem;
 }
 
+.paymentHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-gray-800);
+}
+
 .paymentList {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .paymentItem {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: 1rem;
-    border-radius: 8px;
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--color-border-light);
+    padding: 1.25rem;
+    border-radius: var(--radius-base);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: var(--shadow-sm);
 }
 
 .paymentInfo {
@@ -177,62 +252,68 @@
     gap: 0.25rem;
 }
 
-.paymentDate { font-size: 0.75rem; color: var(--text-secondary); }
-.paymentMethod { font-size: 0.875rem; font-weight: 600; }
+.paymentDate { font-size: 0.75rem; color: var(--color-text-tertiary); }
+.paymentMethod { font-size: 0.875rem; font-weight: 700; color: var(--color-text-primary); }
 
 .paymentAmount {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    color: #16a34a;
+    font-family: var(--font-family-mono);
+    font-weight: 800;
+    color: var(--color-success-600);
+    font-size: 1.125rem;
 }
 
-/* Modal Styles */
+/* ========== MODAL & FORMS ========== */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: var(--z-modal);
     padding: 1rem;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .modalContent {
-    background: var(--bg-primary);
-    padding: 2rem;
-    border-radius: 12px;
+    background: var(--color-surface);
+    padding: 2.5rem;
+    border-radius: 1.5rem;
     width: 100%;
     max-width: 500px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-}
-
-.modalHeader {
-    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .formGroup {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .formGroup label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
 }
 
 .input, .select {
     width: 100%;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-border-medium);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.input:focus, .select:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
 .buttonGroup {
@@ -243,34 +324,54 @@
 
 .btn {
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: var(--radius-base);
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     flex: 1;
+    font-size: 0.875rem;
 }
 
-.btnPrimary { background: var(--primary-color); color: white; }
-.btnSecondary { background: var(--bg-tertiary); color: var(--text-primary); }
+.btnPrimary { 
+    background: var(--color-primary-600); 
+    color: white; 
+    box-shadow: var(--shadow-sm);
+}
+
+.btnPrimary:hover {
+    background: var(--color-primary-700);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btnSecondary { 
+    background: var(--color-bg-secondary); 
+    color: var(--color-text-secondary); 
+    border: 1px solid var(--color-border-medium);
+}
+
+.btnSecondary:hover {
+    background: var(--color-gray-200);
+}
 
 .paidBadge {
     display: inline-flex;
-    background: #dcfce7;
-    color: #166534;
-    padding: 0.5rem 1rem;
+    background: var(--color-success-100);
+    color: var(--color-success-700);
+    padding: 0.5rem 1.25rem;
     border-radius: 9999px;
-    font-weight: 700;
+    font-weight: 800;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
 @media (max-width: 640px) {
-    .invoiceHeader, .infoGrid {
-        flex-direction: column;
-        padding: 2rem;
-    }
-    .invoiceTitle { text-align: left; margin-top: 1rem; }
-    .infoGrid { grid-template-columns: 1fr; }
+    .invoiceHeader { padding: 2rem; flex-direction: column; text-align: left; }
+    .invoiceTitle { text-align: left; margin-top: 1.5rem; }
+    .infoGrid { grid-template-columns: 1fr; padding: 2rem; gap: 1.5rem; }
     .itemsSection, .summarySection, .footer { padding: 2rem; }
+    .summaryTable { min-width: 100%; }
 }

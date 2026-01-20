@@ -72,8 +72,10 @@ describe('POS Actions', () => {
 
         expect(mockDb.pOSSale.create).toHaveBeenCalled();
         expect(mockDb.part.update).toHaveBeenCalledWith(
-            expect.objectContaining({ where: { id: validPartId } }),
-            expect.objectContaining({ data: { quantity: { decrement: 1 } } })
+            expect.objectContaining({ 
+                where: { id: validPartId },
+                data: { quantity: { decrement: 1 } } 
+            })
         );
         expect(revalidatePath).toHaveBeenCalledWith('/dashboard/pos');
     });
@@ -123,17 +125,17 @@ describe('POS Actions', () => {
           await voidPOSSale(validSaleId, 'Mistake');
 
           expect(mockDb.pOSSale.update).toHaveBeenCalledWith(
-              expect.objectContaining({ where: { id: validSaleId } }),
               expect.objectContaining({ 
-                  data: expect.objectContaining({ 
-                      status: 'VOIDED'
-                  }) 
+                  where: { id: validSaleId },
+                  data: expect.objectContaining({ status: 'VOIDED' }) 
               })
           );
 
           expect(mockDb.part.update).toHaveBeenCalledWith(
-              expect.objectContaining({ where: { id: validPartId } }),
-              expect.objectContaining({ data: { quantity: { increment: 1 } } })
+              expect.objectContaining({ 
+                  where: { id: validPartId },
+                  data: { quantity: { increment: 1 } } 
+              })
           );
       });
   });

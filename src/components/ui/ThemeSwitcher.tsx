@@ -200,14 +200,12 @@ export default function ThemeSwitcher() {
             </div>
 
             {/* Screen reader announcement */}
-            <div
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-                className="sr-only"
-            >
-                {announcement}
-            </div>
+            <input
+                type="checkbox"
+                checked={theme === 'dark' || theme === 'dark-colorblind'}
+                onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className={styles.srOnly}
+            />
         </>
     );
 }

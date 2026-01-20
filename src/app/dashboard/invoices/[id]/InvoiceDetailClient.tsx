@@ -45,7 +45,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
       if (result) {
         setIsModalOpen(false);
-        router.refresh(); // Actualiza los datos de la página
+        router.refresh();
       }
     } catch (err: any) {
       setError(err.message || 'Error al registrar el pago');
@@ -56,7 +56,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
   return (
     <div className={styles.container}>
-      <div className={styles.backButtonContainer} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className={styles.backButtonContainer}>
         <Link href="/dashboard/invoices" className={styles.backButton}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -69,19 +69,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
           href={`/api/invoices/${invoice.id}/pdf`}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.btn}
-          style={{ 
-            backgroundColor: '#8b5cf6', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.5rem',
-            textDecoration: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 600
-          }}
+          className={styles.btnPrint}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -103,7 +91,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
             <p>{invoice.invoiceNumber}</p>
             {isFullyPaid && (
               <div className={styles.paidBadge}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 PAGADO
@@ -122,7 +110,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
           <div className={styles.infoBlock}>
             <h3>Detalles</h3>
             <p>Fecha: {new Date(invoice.issuedAt).toLocaleDateString()}</p>
-            <p>Ticket: #{invoice.ticket?.ticketNumber}</p>
+            <p>Ticket: #{invoice.ticket?.ticketNumber || invoice.ticketId.slice(0,8)}</p>
             <p>Equipo: {invoice.ticket?.deviceType} {invoice.ticket?.deviceModel}</p>
           </div>
         </div>
@@ -136,14 +124,12 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
               </tr>
             </thead>
             <tbody>
-              {/* Mano de Obra */}
               {Number(invoice.laborCost) > 0 && (
                 <tr>
-                  <td>Mano de Obra / Servicios Técnicos</td>
+                  <td><strong>Mano de Obra / Servicios Técnicos</strong></td>
                   <td style={{ textAlign: 'right' }}>{formatCurrency(Number(invoice.laborCost))}</td>
                 </tr>
               )}
-              {/* Repuestos */}
               {invoice.ticket?.partsUsed?.map((usage: any) => (
                 <tr key={usage.id}>
                   <td>{usage.part.name} (x{usage.quantity})</td>
@@ -167,7 +153,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
             {Number(invoice.discountAmount) > 0 && (
               <div className={styles.summaryRow}>
                 <span>Descuento</span>
-                <span style={{ color: '#dc2626' }}>-{formatCurrency(Number(invoice.discountAmount))}</span>
+                <span style={{ color: 'var(--color-error-600)', fontWeight: 600 }}>-{formatCurrency(Number(invoice.discountAmount))}</span>
               </div>
             )}
             <div className={`${styles.summaryRow} ${styles.total}`}>
@@ -179,7 +165,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
         <div className={styles.footer}>
           <h3>Notas</h3>
-          <p>{invoice.notes || 'Gracias por su preferencia.'}</p>
+          <p>{invoice.notes || 'Gracias por su preferencia. Este documento respalda la garantía del servicio realizado.'}</p>
         </div>
       </div>
 
@@ -210,9 +196,9 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
               </div>
             ))
           ) : (
-            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+            <div className={styles.emptyState} style={{ background: 'var(--color-surface)', borderRadius: '1rem', border: '1px dashed var(--color-border-medium)' }}>
               No hay pagos registrados para esta factura.
-            </p>
+            </div>
           )}
         </div>
       </section>
@@ -222,12 +208,12 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
-              <h2>Registrar Nuevo Pago</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>Deuda pendiente: {formatCurrency(remaining)}</p>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-gray-800)', marginBottom: '0.5rem' }}>Registrar Pago</h2>
+              <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.875rem' }}>Deuda pendiente: <strong>{formatCurrency(remaining)}</strong></p>
             </div>
 
             <form onSubmit={handleRegisterPayment}>
-              {error && <div style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+              {error && <div className={styles.errorMessage} style={{ color: 'var(--color-error-600)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
               
               <div className={styles.formGroup}>
                 <label>Monto a Pagar</label>
@@ -258,13 +244,13 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
               </div>
 
               <div className={styles.formGroup}>
-                <label>Referencia / No. Comprobante (Opcional)</label>
+                <label>Referencia (Opcional)</label>
                 <input 
                   type="text" 
                   className={styles.input}
                   value={reference}
                   onChange={(e) => setReference(e.target.value)}
-                  placeholder="No. de transacción o boleta"
+                  placeholder="No. de boleta o transacción"
                 />
               </div>
 

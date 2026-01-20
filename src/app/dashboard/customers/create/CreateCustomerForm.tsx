@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Textarea, Button, Alert } from '@/components/ui';
+import styles from '@/components/ui/Form.module.css';
 
 export default function CreateCustomerForm() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function CreateCustomerForm() {
     <form onSubmit={handleSubmit}>
       {error && (
         <Alert variant="error">
-          <strong>Error:</strong> {error}
+          {error}
         </Alert>
       )}
 
@@ -91,7 +92,7 @@ export default function CreateCustomerForm() {
         helper="Optional"
       />
 
-      <div className="flex gap-4">
+      <div className={styles.formRow}>
         <Input
           label="DPI (ID)"
           name="dpi"
@@ -100,7 +101,6 @@ export default function CreateCustomerForm() {
           onChange={handleChange}
           placeholder="1234 56789 0101"
           helper="Optional"
-          style={{ flex: 1 }}
         />
         <Input
           label="NIT (Tax ID)"
@@ -110,7 +110,6 @@ export default function CreateCustomerForm() {
           onChange={handleChange}
           placeholder="123456-7"
           helper="Optional"
-          style={{ flex: 1 }}
         />
       </div>
 
@@ -124,12 +123,11 @@ export default function CreateCustomerForm() {
         rows={3}
       />
 
-      <div className="flex gap-4" style={{ marginTop: 'var(--spacing-6)' }}>
+      <div className={styles.actions}>
         <Button
           type="button"
           variant="secondary"
           onClick={() => router.back()}
-          style={{ flex: 1 }}
         >
           Cancel
         </Button>
@@ -137,9 +135,9 @@ export default function CreateCustomerForm() {
           type="submit"
           variant="primary"
           disabled={isSubmitting}
-          style={{ flex: 1 }}
+          isLoading={isSubmitting}
         >
-          {isSubmitting ? 'Creating...' : 'Create Customer'}
+          Create Customer
         </Button>
       </div>
     </form>

@@ -143,340 +143,159 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
   );
 
   return (
-    <div className="space-y-4">
+    <div className={styles.container} style={{ padding: 0 }}>
       {/* Header */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          📦 Partes de la Plantilla
-        </h3>
-        <p className="text-sm text-gray-600">
-          Define las partes que se usarán por defecto al crear tickets con esta plantilla.
-        </p>
+      <div className={styles.pageHeader} style={{ marginBottom: '1rem' }}>
+        <div>
+          <h3 className={styles.sectionHeading}>📦 Partes de la Plantilla</h3>
+          <p className={styles.pageSubtitle} style={{ marginTop: 0 }}>
+            Define las partes que se usarán por defecto.
+          </p>
+        </div>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+        <div className={styles.errorMessage} style={{ marginTop: 0 }}>
           {error}
         </div>
       )}
 
-      {/* Current Parts - Mobile Cards / Desktop Table */}
-      {defaultParts.length > 0 && (
-        <>
-          {/* Mobile: Cards */}
-          <div className="block md:hidden space-y-3">
-            {defaultParts.map((dp) => (
-              <div key={dp.id} className={styles.partsCard}>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{dp.part.name}</div>
+      {/* Current Parts Table */}
+      {defaultParts.length > 0 ? (
+        <div className={styles.tableWrapper}>
+          <table className={styles.partsTable}>
+            <thead>
+              <tr>
+                <th>Parte</th>
+                <th style={{ textAlign: 'center' }}>Cant.</th>
+                <th>Tipo</th>
+                <th style={{ textAlign: 'center' }}>Stock</th>
+                <th style={{ textAlign: 'right' }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {defaultParts.map((dp) => (
+                <tr key={dp.id}>
+                  <td>
+                    <strong>{dp.part.name}</strong>
                     {dp.part.sku && (
-                      <div className="text-xs text-gray-500">{dp.part.sku}</div>
+                      <div className={styles.textMuted} style={{ fontSize: '0.7rem' }}>{dp.part.sku}</div>
                     )}
-                  </div>
-                  <span
-                    className={`${styles.glassBadge} ${
-                      dp.required ? styles.requiredBadge : styles.optionalBadge
-                    }`}
-                  >
-                    {dp.required ? 'Requerido' : 'Opcional'}
-                  </span>
-                </div>
-
-                {editingId === dp.id ? (
-                  <div className="space-y-2">
-                    <input
-                      type="number"
-                      min="1"
-                      value={editQuantity}
-                      onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Cantidad"
-                    />
-                    <label className="flex items-center gap-2">
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    {editingId === dp.id ? (
                       <input
-                        type="checkbox"
-                        checked={editRequired}
-                        onChange={(e) => setEditRequired(e.target.checked)}
-                        className="rounded border-gray-300"
+                        type="number"
+                        min="1"
+                        value={editQuantity}
+                        onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                        className={styles.numberInput}
+                        style={{ width: '60px', padding: '0.25rem' }}
                       />
-                      <span className="text-sm">Requerido</span>
-                    </label>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleSaveEdit(dp.id)}
-                        disabled={loading}
-                        className="flex-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                      <span>Cantidad: {dp.quantity}</span>
-                      <span
-                        className={
-                          dp.part.quantity >= dp.quantity
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }
-                      >
-                        Stock: {dp.part.quantity}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleStartEdit(dp)}
-                        className="flex-1 px-3 py-1.5 text-sm text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleRemove(dp.id)}
-                        disabled={loading}
-                        className="flex-1 px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 disabled:opacity-50"
-                      >
-                        Quitar
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop: Table */}
-          <div className={`hidden md:block ${styles.glassTable}`}>
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
-                    Parte
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
-                    Cantidad
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
-                    Tipo
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
-                    Stock
-                  </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {defaultParts.map((dp) => (
-                  <tr key={dp.id} className="hover:bg-gray-50">
-                    <td className="px-3 py-2">
-                      <div className="font-medium text-gray-900">{dp.part.name}</div>
-                      {dp.part.sku && (
-                        <div className="text-xs text-gray-500">{dp.part.sku}</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {editingId === dp.id ? (
+                    ) : (
+                      <strong>{dp.quantity}</strong>
+                    )}
+                  </td>
+                  <td>
+                    {editingId === dp.id ? (
+                      <label className={styles.checkboxLabel}>
                         <input
-                          type="number"
-                          min="1"
-                          value={editQuantity}
-                          onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
+                          type="checkbox"
+                          checked={editRequired}
+                          onChange={(e) => setEditRequired(e.target.checked)}
                         />
-                      ) : (
-                        <span className="text-sm">{dp.quantity}</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {editingId === dp.id ? (
-                        <label className="flex items-center gap-1.5">
-                          <input
-                            type="checkbox"
-                            checked={editRequired}
-                            onChange={(e) => setEditRequired(e.target.checked)}
-                            className="rounded border-gray-300"
-                          />
-                          <span className="text-sm">Req.</span>
-                        </label>
-                      ) : (
-                        <span
-                          className={`${styles.glassBadge} ${
-                            dp.required ? styles.requiredBadge : styles.optionalBadge
-                          }`}
-                        >
-                          {dp.required ? 'Req.' : 'Opc.'}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={`text-sm ${
-                          dp.part.quantity >= dp.quantity
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }`}
-                      >
-                        {dp.part.quantity}
+                        <span>Req.</span>
+                      </label>
+                    ) : (
+                      <span className={`${styles.badge} ${dp.required ? styles.requiredBadge : styles.optionalBadge}`}>
+                        {dp.required ? 'Obligatorio' : 'Sugerido'}
                       </span>
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {editingId === dp.id ? (
-                        <div className="flex gap-1.5 justify-end">
-                          <button
-                            onClick={() => handleSaveEdit(dp.id)}
-                            disabled={loading}
-                            className="text-sm px-2 py-1 text-green-600 hover:bg-green-50 rounded disabled:opacity-50"
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="text-sm px-2 py-1 text-gray-600 hover:bg-gray-50 rounded"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-1.5 justify-end">
-                          <button
-                            onClick={() => handleStartEdit(dp)}
-                            className="text-sm px-2 py-1 text-blue-600 hover:bg-blue-50 rounded"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleRemove(dp.id)}
-                            disabled={loading}
-                            className="text-sm px-2 py-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
-                          >
-                            Quitar
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-
-      {/* Empty State */}
-      {defaultParts.length === 0 && (
+                    )}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className={dp.part.quantity >= dp.quantity ? styles.textSuccess : styles.textDanger}>
+                      {dp.part.quantity}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    {editingId === dp.id ? (
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button onClick={() => handleSaveEdit(dp.id)} disabled={loading} className={`${styles.btn} ${styles.btnActivate}`}>
+                          OK
+                        </button>
+                        <button onClick={handleCancelEdit} className={`${styles.btn} ${styles.btnDuplicate}`}>
+                          X
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button onClick={() => handleStartEdit(dp)} className={`${styles.btn} ${styles.btnEdit}`}>
+                          Editar
+                        </button>
+                        <button onClick={() => handleRemove(dp.id)} disabled={loading} className={`${styles.btn} ${styles.btnDelete}`}>
+                          Borrar
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
         <div className={styles.emptyState}>
-          <p className="text-sm text-gray-500">
-            No hay partes agregadas. Agrega partes para que se usen automáticamente al crear tickets.
-          </p>
+          <p>No hay partes agregadas aún.</p>
         </div>
       )}
 
       {/* Add Part Form */}
       {availableParts.length > 0 && (
         <div className={styles.formSection}>
-          <h4 className="font-medium text-gray-900 text-sm mb-3">Agregar Parte</h4>
-          <div className="space-y-2">
-            {/* Mobile: Stacked */}
-            <div className="block md:hidden space-y-2">
-              <select
-                value={selectedPartId}
-                onChange={(e) => setSelectedPartId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="">Seleccionar parte...</option>
-                {availableParts.map((part) => (
-                  <option key={part.id} value={part.id}>
-                    {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
-                  </option>
-                ))}
-              </select>
+          <h4 className={styles.sectionHeading}>+ Agregar Nueva Parte</h4>
+          <div className={styles.addPartGrid}>
+            <select
+              value={selectedPartId}
+              onChange={(e) => setSelectedPartId(e.target.value)}
+              className={styles.selectInput}
+            >
+              <option value="">Seleccionar repuesto...</option>
+              {availableParts.map((part) => (
+                <option key={part.id} value={part.id}>
+                  {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              placeholder="Cant."
+              className={styles.numberInput}
+              style={{ width: '100%' }}
+            />
+            <label className={styles.checkboxLabel} style={{ background: 'white', padding: '0.5rem 1rem', borderRadius: 'var(--radius-base)', border: '1px solid var(--color-border-medium)' }}>
               <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                placeholder="Cantidad"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                type="checkbox"
+                checked={required}
+                onChange={(e) => setRequired(e.target.checked)}
               />
-              <label className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white">
-                <input
-                  type="checkbox"
-                  checked={required}
-                  onChange={(e) => setRequired(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <span className="text-sm">Requerido</span>
-              </label>
-              <button
-                onClick={handleAddPart}
-                disabled={loading || !selectedPartId}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? 'Agregando...' : 'Agregar'}
-              </button>
-            </div>
-
-            {/* Desktop: Grid */}
-            <div className="hidden md:grid md:grid-cols-[2fr_auto_auto_auto] gap-2">
-              <select
-                value={selectedPartId}
-                onChange={(e) => setSelectedPartId(e.target.value)}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="">Seleccionar parte...</option>
-                {availableParts.map((part) => (
-                  <option key={part.id} value={part.id}>
-                    {part.name} {part.sku ? `(${part.sku})` : ''} - Stock: {part.quantity}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                placeholder="Cant."
-                className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-              <label className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg bg-white whitespace-nowrap">
-                <input
-                  type="checkbox"
-                  checked={required}
-                  onChange={(e) => setRequired(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <span className="text-sm">Req.</span>
-              </label>
-              <button
-                onClick={handleAddPart}
-                disabled={loading || !selectedPartId}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap"
-              >
-                {loading ? 'Agregando...' : 'Agregar'}
-              </button>
-            </div>
+              <span>Requerido</span>
+            </label>
+            <button
+              onClick={handleAddPart}
+              disabled={loading || !selectedPartId}
+              className={`${styles.btn} ${styles.mainCreateBtn}`}
+              style={{ padding: '0.625rem 2rem' }}
+            >
+              {loading ? '...' : 'Agregar'}
+            </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Las partes <strong>requeridas</strong> consumen stock al crear el ticket. Las <strong>opcionales</strong> son sugerencias.
+          <p className={styles.textMuted} style={{ fontSize: '0.75rem', marginTop: '1rem' }}>
+            💡 Las partes requeridas se descuentan automáticamente al crear el ticket.
           </p>
-        </div>
-      )}
-
-      {/* Info Message */}
-      {availableParts.length === 0 && defaultParts.length > 0 && (
-        <div className={styles.infoAlert}>
-          ℹ️ Todas las partes disponibles ya están agregadas a esta plantilla.
         </div>
       )}
     </div>

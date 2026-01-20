@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Button, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
+import styles from '@/components/ui/Form.module.css';
 
 const roleOptions: SelectOption[] = [
   { value: 'ADMIN', label: 'Admin' },
@@ -62,7 +63,7 @@ export default function CreateUserForm() {
     <form onSubmit={handleSubmit}>
       {error && (
         <Alert variant="error">
-          <strong>Error:</strong> {error}
+          {error}
         </Alert>
       )}
 
@@ -107,12 +108,11 @@ export default function CreateUserForm() {
         helper="Choose the user's access level"
       />
 
-      <div className="flex gap-4" style={{ marginTop: 'var(--spacing-6)' }}>
+      <div className={styles.actions}>
         <Button
           type="button"
           variant="secondary"
           onClick={() => router.back()}
-          style={{ flex: 1 }}
         >
           Cancel
         </Button>
@@ -120,9 +120,9 @@ export default function CreateUserForm() {
           type="submit"
           variant="primary"
           disabled={isSubmitting}
-          style={{ flex: 1 }}
+          isLoading={isSubmitting}
         >
-          {isSubmitting ? 'Creating...' : 'Create User'}
+          Create User
         </Button>
       </div>
     </form>

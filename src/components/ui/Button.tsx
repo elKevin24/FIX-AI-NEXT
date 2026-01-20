@@ -47,9 +47,9 @@ export function Button({
       {...props}
     >
       {isLoading && <span className={styles.spinner} aria-hidden="true" />}
-      {!isLoading && leftIcon && <span className="inline-flex mr-2">{leftIcon}</span>}
+      {!isLoading && leftIcon && <span className={styles.iconLeft}>{leftIcon}</span>}
       {children}
-      {!isLoading && rightIcon && <span className="inline-flex ml-2">{rightIcon}</span>}
+      {!isLoading && rightIcon && <span className={styles.iconRight}>{rightIcon}</span>}
     </button>
   );
 }
