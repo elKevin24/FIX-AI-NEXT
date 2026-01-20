@@ -244,6 +244,10 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
         throw new Error('Unauthorized: Tenant mismatch');
     }
 
+    if (!customerName || customerName.trim() === '') {
+        throw new Error('Customer name is required');
+    }
+
     try {
         const tenantDb = getTenantPrisma(tenantId, session.user.id);
 
