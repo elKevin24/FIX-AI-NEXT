@@ -25,19 +25,18 @@ const getStatusLabel = (status: string) => {
         'WAITING_FOR_PARTS': 'Esperando Repuestos',
         'RESOLVED': 'Resuelto',
         'CLOSED': 'Cerrado',
+        'CANCELLED': 'Cancelado'
     };
     return labels[status] || status;
 };
 
-const getPriorityColor = (priority: string | null) => {
-    if (!priority) return '#9ca3af';
-    const colors: Record<string, string> = {
-        'URGENT': '#dc2626',
-        'HIGH': '#f59e0b',
-        'MEDIUM': '#3b82f6',
-        'LOW': '#6b7280',
-    };
-    return colors[priority] || '#9ca3af';
+const getPriorityClass = (priority: string | null) => {
+    switch (priority) {
+        case 'URGENT': return styles.priorityUrgent;
+        case 'HIGH': return styles.priorityHigh;
+        case 'MEDIUM': return styles.priorityMedium;
+        default: return styles.priorityLow;
+    }
 };
 
 export default function UrgentTicketsWidget({ tickets }: Props) {
@@ -72,11 +71,8 @@ export default function UrgentTicketsWidget({ tickets }: Props) {
                                     <h4 className={styles.ticketTitle}>{ticket.title}</h4>
                                     <p className={styles.ticketCustomer}>{ticket.customer.name}</p>
                                 </div>
-                                <div
-                                    className={styles.priorityBadge}
-                                    style={{ backgroundColor: getPriorityColor(ticket.priority) }}
-                                >
-                                    {ticket.priority || 'SIN DEFINIR'}
+                                <div className={`${styles.priorityBadge} ${getPriorityClass(ticket.priority)}`}>
+                                    {ticket.priority || 'NORMAL'}
                                 </div>
                             </div>
                             <div className={styles.ticketFooter}>
