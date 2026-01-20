@@ -230,19 +230,22 @@ export async function authenticate(
  * @todo Support customer email/phone lookup
  */
 export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema>, customerName: string, tenantId: string) {
-    if (!tenantId) {
-        throw new Error('Tenant ID is required to create a ticket.');
+    const session = await auth();
+    
+    // Security Check: Validate tenantId
+    if (!session?.user?.tenantId) {
+        throw new Error('Unauthorized');
+    }
+    
+    if (tenantId !== session.user.tenantId) {
+        // Allow Super Admin to bypass? For now, strict isolation.
+        // If createTicket is used by admins for other tenants, logic needs explicit check.
+        // Assuming strict isolation for this function signature.
+        throw new Error('Unauthorized: Tenant mismatch');
     }
 
     try {
-        // Get current user session to track who creates the ticket
-        const session = await auth();
-        // Since createTicket is called from a Server Action wrapper (usually), we might not have session passed in args,
-        // but we can get it here.
-        // However, if tenantId comes from args, we trust it? createTicket is exported.
-        // Usually creation should rely on session tenantId if possible, but this function takes tenantId.
-        
-        const tenantDb = getTenantPrisma(tenantId, session?.user?.id);
+        const tenantDb = getTenantPrisma(tenantId, session.user.id);
 
         // Simple customer creation/lookup for demo
         let customer = await tenantDb.customer.findFirst({
@@ -257,8 +260,8 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
                 data: {
                     name: customerName,
                     tenantId: tenantId, // Satisfy TS, enforced by extension
-                    createdById: session?.user?.id,
-                    updatedById: session?.user?.id,
+                    createdById: session.user.id,
+                    updatedById: session.user.id,
                 }
             });
         }
@@ -275,8 +278,8 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
                 serialNumber: ticketData.serialNumber,
                 accessories: ticketData.accessories,
                 checkInNotes: ticketData.checkInNotes,
-                createdById: session?.user?.id,
-                updatedById: session?.user?.id,
+                createdById: session.user.id,
+                updatedById: session.user.id,
             },
             include: {
                 customer: true,
@@ -400,12 +403,12 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
         const currentCustomerId = customer.id;
 
         // Use interactive transaction for batch creation and audit logging
-        await prisma.$transaction(async (tx: any) => {
+        const createdTicketIds = await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(tenantId, session.user.id, tx);
 
             // Execute creations in parallel within the transaction
             // The middleware will automatically create audit logs for each
-            await Promise.all(
+            const tickets = await Promise.all(
                 ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
                     txTenantDb.ticket.create({
                         data: {
@@ -422,15 +425,17 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                             createdById: session.user.id,
                             updatedById: session.user.id,
                         },
+                        select: { id: true } // Only select ID to minimize transaction result size
                     })
                 )
             );
+            return tickets.map((t: any) => t.id);
         });
-        // Fetch the created tickets to send notifications
+
+        // Fetch the actually created tickets using IDs from transaction
         const createdTickets = await tenantDb.ticket.findMany({
             where: {
-                customerId: currentCustomerId,
-                createdAt: { gte: new Date(Date.now() - 5000) } // Recently created
+                id: { in: createdTicketIds }
             },
             include: {
                 customer: true,
