@@ -17,13 +17,17 @@ model Tenant {
   auditLogs        AuditLog[]
   cashRegisters    CashRegister[]
   cashTransactions CashTransaction[]
+  creditNotes      CreditNote[]
   customers        Customer[]
   invoices         Invoice[]
   notifications    Notification[]
   parts            Part[]
   payments         Payment[]
+  posSales         POSSale[]
+  posQuotations    POSQuotation[]
   purchaseOrders   PurchaseOrder[]
   serviceTemplates ServiceTemplate[]
+  settings         TenantSettings?
   tickets          Ticket[]
   users            User[]
 
@@ -48,13 +52,17 @@ model User {
   closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
   openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
   cashTransactions     CashTransaction[]
+  creditNotes          CreditNote[]
   createdCustomers     Customer[]                 @relation("CustomerCreatedBy")
   updatedCustomers     Customer[]                 @relation("CustomerUpdatedBy")
   createdInvoices      Invoice[]                  @relation("InvoiceCreatedBy")
   updatedInvoices      Invoice[]                  @relation("InvoiceUpdatedBy")
+  invoiceHistory       InvoiceHistory[]
   notifications        Notification[]
   createdParts         Part[]                     @relation("PartCreatedBy")
   updatedParts         Part[]                     @relation("PartUpdatedBy")
+  posSales             POSSale[]
+  posQuotations        POSQuotation[]
   receivedPayments     Payment[]
   createdTemplates     ServiceTemplate[]          @relation("TemplateCreatedBy")
   updatedTemplates     ServiceTemplate[]          @relation("TemplateUpdatedBy")
@@ -70,23 +78,26 @@ model User {
 }
 
 model Customer {
-  id          String    @id @default(uuid())
-  name        String
-  email       String?
-  phone       String?
-  address     String?
-  tenantId    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  createdById String?
-  updatedById String?
-  dpi         String?
-  nit         String?
-  createdBy   User?     @relation("CustomerCreatedBy", fields: [createdById], references: [id])
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  updatedBy   User?     @relation("CustomerUpdatedBy", fields: [updatedById], references: [id])
-  invoices    Invoice[]
-  tickets     Ticket[]
+  id            String         @id @default(uuid())
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  tenantId      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  createdById   String?
+  updatedById   String?
+  dpi           String?
+  nit           String?
+  createdBy     User?          @relation("CustomerCreatedBy", fields: [createdById], references: [id])
+  creditNotes   CreditNote[]
+  invoices      Invoice[]
+  posSales      POSSale[]
+  posQuotations POSQuotation[]
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  tickets       Ticket[]
+  updatedBy     User?          @relation("CustomerUpdatedBy", fields: [updatedById], references: [id])
 
   @@unique([dpi, tenantId], name: "unique_dpi_per_tenant")
   @@unique([nit, tenantId], name: "unique_nit_per_tenant")
