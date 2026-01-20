@@ -136,6 +136,13 @@ export default function NotificationBell() {
                             ))
                         )}
                     </div>
+                    <Link 
+                        href="/dashboard/notifications" 
+                        onClick={() => setIsOpen(false)}
+                        className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium block hover:underline"
+                    >
+                        Ver todas las notificaciones
+                    </Link>
                 </div>
             )}
         </div>

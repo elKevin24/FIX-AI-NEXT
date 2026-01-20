@@ -23,6 +23,46 @@ export async function getMyNotifications() {
     return getUnreadNotifications(session.user.id, session.user.tenantId);
 }
 
+export async function getAllMyNotifications(page = 1, limit = 20) {
+    const session = await auth();
+    if (!session?.user?.id || !session?.user?.tenantId) {
+        return { notifications: [], total: 0, totalPages: 0 };
+    }
+    
+    const skip = (page - 1) * limit;
+    
+    try {
+        const [notifications, total] = await Promise.all([
+            prisma.notification.findMany({
+                where: {
+                    userId: session.user.id,
+                    tenantId: session.user.tenantId,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: limit,
+                skip: skip,
+            }),
+            prisma.notification.count({
+                where: {
+                    userId: session.user.id,
+                    tenantId: session.user.tenantId,
+                }
+            })
+        ]);
+        
+        return { 
+            notifications, 
+            total, 
+            totalPages: Math.ceil(total / limit) 
+        };
+    } catch (error) {
+        console.error('Failed to get all notifications', error);
+        return { notifications: [], total: 0, totalPages: 0 };
+    }
+}
+
 export async function markMyNotificationAsRead(id: string) {
      const session = await auth();
      if (!session?.user?.id) return;
@@ -33,6 +73,24 @@ export async function markAllMyNotificationsAsRead() {
      const session = await auth();
      if (!session?.user?.id || !session?.user?.tenantId) return;
      await markAllNotificationsAsRead(session.user.id, session.user.tenantId);
+}
+
+export async function deleteMyNotification(id: string) {
+     const session = await auth();
+     if (!session?.user?.id) return;
+     
+     try {
+        await prisma.notification.delete({
+            where: {
+                id: id,
+                userId: session.user.id,
+            }
+        });
+        revalidatePath('/dashboard');
+        revalidatePath('/dashboard/notifications');
+     } catch (error) {
+         console.error('Failed to delete notification', error);
+     }
 }
 
 export async function createNotification(params: CreateNotificationParams) {
@@ -47,10 +105,8 @@ export async function createNotification(params: CreateNotificationParams) {
                 link: params.link,
             }
         });
-        // We can't easily revalidate the specific user's view if we are in a server action triggered by someone else?
-        // But if the user is viewing their notifications, revalidatePath might help?
-        // usually notifications are polished by client side polling or real-time.
-        // For now, no revalidatePath here as it might not be relevant path.
+        // Note: We don't revalidatePath here as it's often triggered from background actions
+        // and specific user revalidation is tricky.
     } catch (error) {
         console.error('Failed to create notification', error);
     }
@@ -86,7 +142,8 @@ export async function markNotificationAsRead(notificationId: string, userId: str
                 isRead: true,
             },
         });
-        revalidatePath('/dashboard'); // Assuming bell is in layout
+        revalidatePath('/dashboard'); 
+        revalidatePath('/dashboard/notifications');
     } catch (error) {
         console.error('Failed to mark notification as read', error);
     }
@@ -105,6 +162,7 @@ export async function markAllNotificationsAsRead(userId: string, tenantId: strin
             },
         });
         revalidatePath('/dashboard');
+        revalidatePath('/dashboard/notifications');
     } catch (error) {
         console.error('Failed to mark all notifications as read', error);
     }
