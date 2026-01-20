@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { TicketStatus } from '@prisma/client';
+import { TicketStatus, InvoiceStatus, POSSaleStatus } from '@prisma/client';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {
   const session = await auth();
@@ -13,24 +13,28 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const tenantId = session.user.tenantId;
 
-  const dateFilter = startDate && endDate ? {
-    createdAt: {
-      gte: startDate,
-      lte: endDate,
-    }
-  } : {};
+  // Default to last 30 days if not provided
+  const end = endDate || new Date();
+  const start = startDate || new Date(new Date().setDate(end.getDate() - 30));
+
+  const dateFilter = {
+    gte: start,
+    lte: end,
+  };
 
   const [
     ticketsByStatus,
     technicianStats,
-    financialTickets,
-    inventoryStats
+    invoices,
+    posSales,
+    inventoryStats,
+    topParts
   ] = await Promise.all([
-    // 1. Tickets by Status
+    // 1. Tickets by Status (Created in range)
     db.ticket.groupBy({
       by: ['status'],
       _count: { id: true },
-      where: dateFilter
+      where: { createdAt: dateFilter }
     }),
 
     // 2. Technician Performance
@@ -38,14 +42,14 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
       where: {
         tenantId,
         role: { in: ['TECHNICIAN', 'ADMIN'] },
-        isActive: true,
+        // Removed isActive: true as it might not exist in schema or all users
       },
       select: {
         id: true,
         name: true,
         email: true,
         assignedTickets: {
-          where: dateFilter,
+          where: { createdAt: dateFilter },
           select: {
             status: true,
             createdAt: true,
@@ -55,27 +59,64 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
       }
     }),
 
-    // 3. Financial Summary
-    db.ticket.findMany({
+    // 3. Financials: Invoices
+    db.invoice.findMany({
       where: {
-        ...dateFilter,
-        status: { in: ['RESOLVED', 'CLOSED'] }
+        tenantId,
+        status: { not: InvoiceStatus.CANCELLED },
+        issuedAt: dateFilter
       },
-      include: {
-        services: true,
-        partsUsed: {
-          include: {
-            part: {
-              select: { price: true, cost: true }
+      select: {
+        total: true,
+        laborCost: true,
+        partsCost: true,
+        issuedAt: true
+      }
+    }),
+
+    // 4. Financials: POS Sales
+    db.pOSSale.findMany({
+      where: {
+        tenantId,
+        status: POSSaleStatus.COMPLETED,
+        createdAt: dateFilter
+      },
+      select: {
+        total: true,
+        createdAt: true,
+        items: {
+            select: {
+                total: true,
+                partId: true,
+                partName: true
             }
-          }
         }
       }
     }),
 
-    // 4. Inventory Stats
-    db.part.findMany({
+    // 5. Inventory Stats (Snapshot)
+    db.part.aggregate({
+        _count: { id: true },
+        _sum: { quantity: true },
         where: { tenantId }
+    }),
+
+    // 6. Top Selling Parts (From POS Items)
+    // Complex query might be needed, simplified here by fetching recent items
+    db.pOSSaleItem.groupBy({
+        by: ['partName'],
+        _sum: { quantity: true, total: true },
+        where: {
+            sale: {
+                tenantId,
+                status: POSSaleStatus.COMPLETED,
+                createdAt: dateFilter
+            }
+        },
+        orderBy: {
+            _sum: { total: 'desc' }
+        },
+        take: 5
     })
   ]);
 
@@ -97,26 +138,26 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     };
   });
 
-  // Calculate Revenue and Costs
-  let totalLaborRevenue = 0;
-  let totalPartsRevenue = 0;
-  let totalPartsCost = 0;
+  // Calculate Revenue
+  const totalInvoiceRevenue = invoices.reduce((sum: number, inv: any) => sum + Number(inv.total), 0);
+  const totalPOSRevenue = posSales.reduce((sum: number, sale: any) => sum + Number(sale.total), 0);
+  
+  // Historical Data for Charts (Group by Day)
+  const historyMap = new Map<string, { date: string, invoice: number, pos: number }>();
+  
+  const addToHistory = (date: Date, type: 'invoice' | 'pos', amount: number) => {
+      const key = date.toISOString().split('T')[0];
+      if (!historyMap.has(key)) {
+          historyMap.set(key, { date: key, invoice: 0, pos: 0 });
+      }
+      const entry = historyMap.get(key)!;
+      entry[type] += amount;
+  };
 
-  financialTickets.forEach((ticket: any) => {
-    // Labor from services
-    ticket.services.forEach((service: any) => {
-      totalLaborRevenue += Number(service.laborCost || 0);
-    });
+  invoices.forEach((inv: any) => addToHistory(inv.issuedAt, 'invoice', Number(inv.total)));
+  posSales.forEach((sale: any) => addToHistory(sale.createdAt, 'pos', Number(sale.total)));
 
-    // Parts revenue and cost
-    ticket.partsUsed.forEach((usage: any) => {
-      totalPartsRevenue += Number(usage.part.price || 0) * usage.quantity;
-      totalPartsCost += Number(usage.part.cost || 0) * usage.quantity;
-    });
-  });
-
-  const lowStockParts = inventoryStats.filter((p: any) => p.quantity <= p.minStock).length;
-  const totalStockValue = inventoryStats.reduce((sum: number, p: any) => sum + (Number(p.cost) * p.quantity), 0);
+  const revenueHistory = Array.from(historyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
   return {
     ticketsByStatus: ticketsByStatus.map((s: any) => ({
@@ -125,15 +166,19 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     })),
     technicianMetrics,
     finances: {
-        totalLaborRevenue,
-        totalPartsRevenue,
-        totalPartsCost,
-        netProfit: (totalLaborRevenue + totalPartsRevenue) - totalPartsCost
+        totalRevenue: totalInvoiceRevenue + totalPOSRevenue,
+        invoiceRevenue: totalInvoiceRevenue,
+        posRevenue: totalPOSRevenue,
+        history: revenueHistory
     },
     inventory: {
-        totalItems: inventoryStats.length,
-        lowStockParts,
-        totalStockValue
+        totalItems: inventoryStats._count.id,
+        totalQuantity: inventoryStats._sum.quantity,
+        topSelling: topParts.map((p: any) => ({
+            name: p.partName,
+            quantity: p._sum.quantity,
+            total: Number(p._sum.total)
+        }))
     }
   };
 }

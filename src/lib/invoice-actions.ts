@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { InvoiceStatus, PaymentMethod } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
+import { getTaxRate } from './tenant-settings-actions';
 
 // ============================================================================
 // TYPES
@@ -97,8 +98,9 @@ export async function generateInvoiceFromTicket(data: InvoiceData) {
   // 3. Subtotal
   const subtotal = laborCost + partsCost;
 
-  // 4. Impuestos (IVA - Guatemala: 12%)
-  const taxRate = data.taxRate ?? 12;
+  // 4. Impuestos (IVA - Configurable por tenant, default: 12%)
+  // Si se pasa un taxRate específico lo usamos, si no obtenemos del tenant
+  const taxRate = data.taxRate ?? await getTaxRate();
   const taxAmount = (subtotal * taxRate) / 100;
 
   // 5. Descuento
