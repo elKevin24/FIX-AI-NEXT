@@ -109,6 +109,7 @@ model Customer {
 
 model Ticket {
   id                      String           @id @default(uuid())
+  ticketNumber            String?
   title                   String
   description             String
   status                  TicketStatus     @default(OPEN)
@@ -140,6 +141,7 @@ model Ticket {
   tenant                  Tenant           @relation(fields: [tenantId], references: [id])
   updatedBy               User?            @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
 
+  @@unique([ticketNumber, tenantId])
   @@index([status, priority])
   @@index([assignedToId, status])
   @@index([serviceTemplateId])

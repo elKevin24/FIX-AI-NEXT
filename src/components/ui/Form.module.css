@@ -164,3 +164,10 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+.actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}

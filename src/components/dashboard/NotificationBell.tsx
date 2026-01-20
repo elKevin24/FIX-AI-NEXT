@@ -21,6 +21,7 @@ export default function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const { addToast } = useToast();
     const lastNotifIdRef = useRef<string | null>(null);
 
@@ -28,17 +29,14 @@ export default function NotificationBell() {
         const fetchNotifications = async () => {
             try {
                 const data = await getMyNotifications();
-                // Ensure dates are parsed if they come as strings
                 const parsedData = data.map((n: any) => ({
                     ...n,
                     createdAt: new Date(n.createdAt)
                 }));
 
-                // Check for new notifications to show toast
                 if (parsedData.length > 0) {
                     const latest = parsedData[0];
                     if (lastNotifIdRef.current && lastNotifIdRef.current !== latest.id && !latest.isRead) {
-                        // New notification detected
                         addToast(latest.message, latest.type as any, latest.title);
                     }
                     lastNotifIdRef.current = latest.id;
@@ -51,25 +49,34 @@ export default function NotificationBell() {
         };
 
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 60000); // Poll every minute
+        const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
     }, [addToast]);
 
-    // Close on click outside
+    // Manejadores para Hover
+    const handleMouseEnter = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        // Pequeño retraso antes de cerrar (300ms) para mejorar la UX
+        timeoutRef.current = setTimeout(() => {
+            setIsOpen(false);
+        }, 300);
+    };
+
+    // Limpiar timeout al desmontar
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent closing dropdown
+        e.stopPropagation();
         await markMyNotificationAsRead(id);
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     };
@@ -80,12 +87,17 @@ export default function NotificationBell() {
     };
 
     return (
-        <div className={styles.container} ref={containerRef}>
+        <div 
+            className={styles.container} 
+            ref={containerRef}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             <button 
-                onClick={() => setIsOpen(!isOpen)}
                 className={styles.bellButton}
                 aria-label="Notificaciones"
                 title="Notificaciones"
+                onClick={() => setIsOpen(!isOpen)} // Mantiene compatibilidad click/touch
             >
                 <BellIcon />
                 {unreadCount > 0 && (
