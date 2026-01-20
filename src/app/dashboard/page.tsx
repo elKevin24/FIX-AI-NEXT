@@ -25,11 +25,13 @@ import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
 import GlobalSearch from '@/components/GlobalSearch';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
+import { getFinancialStats } from "@/lib/invoice-actions";
+import { getPOSSalesStats } from "@/lib/pos-actions";
 
 export default async function DashboardPage() {
     const session = await auth();
 
-    if (!session?.user?.tenantId) {
+    if (!session?.user?.id || !session?.user?.tenantId) {
         redirect('/login');
     }
 
@@ -46,6 +48,8 @@ export default async function DashboardPage() {
         urgentTickets,
         technicianStats,
         recentTickets,
+        financialStats,
+        posStats,
     ] = await Promise.all([
         // Active tickets (OPEN + IN_PROGRESS)
         prisma.ticket.count({
@@ -156,10 +160,23 @@ export default async function DashboardPage() {
             },
             take: 5,
         }),
+        getFinancialStats(),
+        getPOSSalesStats(),
     ]);
 
+    // Format currency
+    const formatCurrency = (amount: number) => `Q${amount.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // Calculate daily income (Invoices paid today + POS sales today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // ... logic for daily income could be more complex, using totals for now
+
+    const totalIncome = (financialStats?.totalPaid || 0) + (posStats?.totalSales || 0);
+    const pendingCollection = financialStats?.totalPending || 0;
+
     // Transform tickets by status for chart
-    const statusChartData = ticketsByStatus.map((item: typeof ticketsByStatus[number]) => ({
+    const statusChartData = ticketsByStatus.map((item: any) => ({
         status: item.status,
         count: item._count.id,
     }));
@@ -249,6 +266,42 @@ export default async function DashboardPage() {
                     icon="👥"
                     iconBgColor="#e0e7ff"
                     iconColor="#3730a3"
+                />
+            </div>
+
+            {/* Financial Stats Grid */}
+            <div className={styles.statsGrid}>
+                <StatCard 
+                    title="Ingresos Totales"
+                    value={formatCurrency(totalIncome)}
+                    label="Facturación + POS"
+                    icon="💰"
+                    iconBgColor="#dcfce7"
+                    iconColor="#166534"
+                />
+                <StatCard 
+                    title="Cuentas por Cobrar"
+                    value={formatCurrency(pendingCollection)}
+                    label="Facturas pendientes"
+                    icon="📋"
+                    iconBgColor="#fef2f2"
+                    iconColor="#991b1b"
+                />
+                <StatCard 
+                    title="Ventas POS"
+                    value={posStats?.salesCount || 0}
+                    label="Ventas directas"
+                    icon="🛒"
+                    iconBgColor="#f0f9ff"
+                    iconColor="#075985"
+                />
+                <StatCard 
+                    title="Mano de Obra"
+                    value={formatCurrency(financialStats?.totalLaborIncome || 0)}
+                    label="Ingresos por servicio"
+                    icon="🔧"
+                    iconBgColor="#faf5ff"
+                    iconColor="#6b21a8"
                 />
             </div>
 

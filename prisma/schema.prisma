@@ -163,12 +163,15 @@ model Part {
   category             String?
   location             String?
   minStock             Int                   @default(1)
-  usages               PartUsage[]
+  creditNoteItems      CreditNoteItem[]
   createdBy            User?                 @relation("PartCreatedBy", fields: [createdById], references: [id])
-  tenant               Tenant                @relation(fields: [tenantId], references: [id])
-  updatedBy            User?                 @relation("PartUpdatedBy", fields: [updatedById], references: [id])
+  posQuotationItems    POSQuotationItem[]
+  posSaleItems         POSSaleItem[]
   purchaseItems        PurchaseItem[]
   templateDefaultParts TemplateDefaultPart[]
+  tenant               Tenant                @relation(fields: [tenantId], references: [id])
+  updatedBy            User?                 @relation("PartUpdatedBy", fields: [updatedById], references: [id])
+  usages               PartUsage[]
 
   @@unique([sku, tenantId], name: "unique_sku_per_tenant")
   @@index([createdById])
@@ -359,39 +362,40 @@ model Notification {
 }
 
 model Invoice {
-  id              String        @id @default(uuid())
+  id              String           @id @default(uuid())
   invoiceNumber   String
-  status          InvoiceStatus @default(PENDING)
-  ticketId        String        @unique
+  status          InvoiceStatus    @default(PENDING)
+  ticketId        String           @unique
   customerId      String
-  laborCost       Decimal       @default(0) @db.Decimal(10, 2)
-  partsCost       Decimal       @default(0) @db.Decimal(10, 2)
-  partsMarkup     Decimal       @default(0) @db.Decimal(10, 2)
-  subtotal        Decimal       @default(0) @db.Decimal(10, 2)
-  taxRate         Decimal       @default(0) @db.Decimal(5, 2)
-  taxAmount       Decimal       @default(0) @db.Decimal(10, 2)
-  discountAmount  Decimal       @default(0) @db.Decimal(10, 2)
-  total           Decimal       @default(0) @db.Decimal(10, 2)
+  laborCost       Decimal          @default(0) @db.Decimal(10, 2)
+  partsCost       Decimal          @default(0) @db.Decimal(10, 2)
+  partsMarkup     Decimal          @default(0) @db.Decimal(10, 2)
+  subtotal        Decimal          @default(0) @db.Decimal(10, 2)
+  taxRate         Decimal          @default(0) @db.Decimal(5, 2)
+  taxAmount       Decimal          @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal          @default(0) @db.Decimal(10, 2)
+  total           Decimal          @default(0) @db.Decimal(10, 2)
   customerName    String
   customerNIT     String?
   customerDPI     String?
   customerAddress String?
   notes           String?
   paymentTerms    String?
-  issuedAt        DateTime      @default(now())
+  issuedAt        DateTime         @default(now())
   dueAt           DateTime?
   paidAt          DateTime?
   tenantId        String
   createdById     String
   updatedById     String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  createdBy       User          @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
-  customer        Customer      @relation(fields: [customerId], references: [id])
-  tenant          Tenant        @relation(fields: [tenantId], references: [id])
-  ticket          Ticket        @relation(fields: [ticketId], references: [id])
-  updatedBy       User          @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User             @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  history         InvoiceHistory[]
   payments        Payment[]
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  ticket          Ticket           @relation(fields: [ticketId], references: [id])
+  updatedBy       User             @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
 
   @@unique([invoiceNumber, tenantId], name: "unique_invoice_number_per_tenant")
   @@index([tenantId])
@@ -444,6 +448,7 @@ model CashRegister {
   updatedAt       DateTime          @updatedAt
   closedBy        User?             @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
   openedBy        User?             @relation("CashRegisterOpenedBy", fields: [openedById], references: [id])
+  posSales        POSSale[]
   tenant          Tenant            @relation(fields: [tenantId], references: [id])
   transactions    CashTransaction[]
 
@@ -545,4 +550,210 @@ enum InvoiceStatus {
   PAID
   CANCELLED
   OVERDUE
+}
+
+// ==================== POS MODELS ====================
+
+model TenantSettings {
+  id                  String   @id @default(uuid())
+  tenantId            String   @unique
+  businessName        String?
+  businessNIT         String?
+  businessAddress     String?
+  businessPhone       String?
+  businessEmail       String?
+  taxRate             Decimal  @default(12) @db.Decimal(5, 2)
+  taxName             String   @default("IVA")
+  currency            String   @default("GTQ")
+  defaultPaymentTerms String?
+  invoiceFooter       String?
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("tenant_settings")
+}
+
+model InvoiceHistory {
+  id        String   @id @default(uuid())
+  invoiceId String
+  action    String
+  oldValue  String?
+  newValue  String?
+  notes     String?
+  userId    String
+  createdAt DateTime @default(now())
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([invoiceId])
+  @@map("invoice_history")
+}
+
+model POSSale {
+  id             String           @id @default(uuid())
+  saleNumber     String
+  customerId     String?
+  customerName   String           @default("Consumidor Final")
+  customerNIT    String?          @default("C/F")
+  subtotal       Decimal          @default(0) @db.Decimal(10, 2)
+  taxRate        Decimal          @default(0) @db.Decimal(5, 2)
+  taxAmount      Decimal          @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal          @default(0) @db.Decimal(10, 2)
+  total          Decimal          @default(0) @db.Decimal(10, 2)
+  amountPaid     Decimal          @default(0) @db.Decimal(10, 2)
+  changeGiven    Decimal          @default(0) @db.Decimal(10, 2)
+  status         POSSaleStatus    @default(COMPLETED)
+  notes          String?
+  tenantId       String
+  cashRegisterId String?
+  createdById    String
+  quotationId    String?          @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  cashRegister   CashRegister?    @relation(fields: [cashRegisterId], references: [id])
+  createdBy      User             @relation(fields: [createdById], references: [id])
+  creditNotes    CreditNote[]
+  customer       Customer?        @relation(fields: [customerId], references: [id])
+  items          POSSaleItem[]
+  payments       POSSalePayment[]
+  quotation      POSQuotation?    @relation(fields: [quotationId], references: [id])
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@unique([saleNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("pos_sales")
+}
+
+model POSSaleItem {
+  id        String  @id @default(uuid())
+  saleId    String
+  partId    String
+  partName  String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+  part      Part    @relation(fields: [partId], references: [id])
+  sale      POSSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("pos_sale_items")
+}
+
+model POSSalePayment {
+  id             String        @id @default(uuid())
+  saleId         String
+  amount         Decimal       @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod
+  transactionRef String?
+  createdAt      DateTime      @default(now())
+  sale           POSSale       @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("pos_sale_payments")
+}
+
+model POSQuotation {
+  id              String             @id @default(uuid())
+  quotationNumber String
+  customerId      String?
+  customerName    String             @default("Consumidor Final")
+  customerNIT     String?
+  subtotal        Decimal            @default(0) @db.Decimal(10, 2)
+  taxRate         Decimal            @default(0) @db.Decimal(5, 2)
+  taxAmount       Decimal            @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal            @default(0) @db.Decimal(10, 2)
+  total           Decimal            @default(0) @db.Decimal(10, 2)
+  status          QuotationStatus    @default(PENDING)
+  validUntil      DateTime?
+  notes           String?
+  tenantId        String
+  createdById     String
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  createdBy       User               @relation(fields: [createdById], references: [id])
+  customer        Customer?          @relation(fields: [customerId], references: [id])
+  items           POSQuotationItem[]
+  sale            POSSale?
+  tenant          Tenant             @relation(fields: [tenantId], references: [id])
+
+  @@unique([quotationNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("pos_quotations")
+}
+
+model POSQuotationItem {
+  id          String       @id @default(uuid())
+  quotationId String
+  partId      String
+  partName    String
+  quantity    Int
+  unitPrice   Decimal      @db.Decimal(10, 2)
+  total       Decimal      @db.Decimal(10, 2)
+  part        Part         @relation(fields: [partId], references: [id])
+  quotation   POSQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@map("pos_quotation_items")
+}
+
+model CreditNote {
+  id               String           @id @default(uuid())
+  creditNoteNumber String
+  saleId           String
+  customerId       String?
+  reason           String
+  subtotal         Decimal          @default(0) @db.Decimal(10, 2)
+  taxAmount        Decimal          @default(0) @db.Decimal(10, 2)
+  total            Decimal          @default(0) @db.Decimal(10, 2)
+  status           CreditNoteStatus @default(PENDING)
+  refundMethod     PaymentMethod?
+  refundedAt       DateTime?
+  tenantId         String
+  createdById      String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  createdBy        User             @relation(fields: [createdById], references: [id])
+  customer         Customer?        @relation(fields: [customerId], references: [id])
+  items            CreditNoteItem[]
+  sale             POSSale          @relation(fields: [saleId], references: [id])
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@unique([creditNoteNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("credit_notes")
+}
+
+model CreditNoteItem {
+  id           String     @id @default(uuid())
+  creditNoteId String
+  partId       String
+  partName     String
+  quantity     Int
+  unitPrice    Decimal    @db.Decimal(10, 2)
+  total        Decimal    @db.Decimal(10, 2)
+  creditNote   CreditNote @relation(fields: [creditNoteId], references: [id], onDelete: Cascade)
+  part         Part       @relation(fields: [partId], references: [id])
+
+  @@map("credit_note_items")
+}
+
+enum POSSaleStatus {
+  COMPLETED
+  VOIDED
+  PARTIALLY_REFUNDED
+  FULLY_REFUNDED
+}
+
+enum QuotationStatus {
+  PENDING
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+enum CreditNoteStatus {
+  PENDING
+  REFUNDED
+  APPLIED
 }

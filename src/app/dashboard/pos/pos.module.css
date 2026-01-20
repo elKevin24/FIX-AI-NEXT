@@ -1,0 +1,571 @@
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.alert {
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+/* Main Layout */
+.posLayout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+    .posLayout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+}
+
+/* Products Section */
+.productsSection {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.searchBar {
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.productsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 0.5rem;
+}
+
+.emptyProducts {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.productCard {
+    display: flex;
+    flex-direction: column;
+    padding: 0.875rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.productCard:hover:not(:disabled) {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.productCard:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.productName {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.productSku {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.productPrice {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: auto;
+}
+
+.productStock {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Cart Section */
+.cartSection {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.customerSection {
+    margin-bottom: 1rem;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.375rem;
+}
+
+.customerDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.customerOption {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-primary);
+    transition: background 0.15s;
+}
+
+.customerOption:hover {
+    background: var(--bg-secondary);
+}
+
+.customerNit {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.selectedCustomer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.selectedCustomer span:first-child {
+    font-weight: 500;
+}
+
+.selectedCustomer span:nth-child(2) {
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.selectedCustomer button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0 0.25rem;
+}
+
+/* Cart Items */
+.cartItems {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    min-height: 100px;
+}
+
+.emptyCart {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.emptyCartHint {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.cartItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.cartItemInfo {
+    display: flex;
+    justify-content: space-between;
+}
+
+.cartItemName {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.cartItemPrice {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.cartItemActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.qtyBtn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: all 0.15s;
+}
+
+.qtyBtn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.qtyValue {
+    min-width: 32px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.cartItemTotal {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0 0.25rem;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+
+.removeBtn:hover {
+    opacity: 1;
+}
+
+/* Discount */
+.discountSection {
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.discountRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.discountRow input {
+    flex: 1;
+}
+
+.discountSelect {
+    width: 60px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+/* Totals */
+.totals {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.grandTotal {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Cart Actions */
+.cartActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.cartActions button {
+    flex: 1;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--card-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modalClose {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modalFooter {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.modalFooter button {
+    flex: 1;
+}
+
+/* Payment Summary */
+.paymentSummary {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.summaryRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+}
+
+.summaryTotal {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.remaining {
+    color: var(--danger);
+    font-weight: 500;
+}
+
+.change {
+    color: var(--success);
+    font-weight: 500;
+}
+
+/* Payment Methods */
+.paymentMethods h3,
+.paymentsList h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.paymentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.paymentFormRow {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.methodSelect {
+    width: 140px;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+/* Payments List */
+.paymentsList {
+    margin-bottom: 1.5rem;
+}
+
+.paymentItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.paymentMethod {
+    font-weight: 500;
+}
+
+.paymentAmount {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.removePaymentBtn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+}
+
+/* Notes */
+.notesSection {
+    margin-bottom: 1rem;
+}
+
+.notesInput {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.notesInput:focus {
+    outline: none;
+    border-color: var(--primary);
+}

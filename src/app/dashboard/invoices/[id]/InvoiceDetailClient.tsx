@@ -56,13 +56,41 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
   return (
     <div className={styles.container}>
-      <Link href="/dashboard/invoices" className={styles.backButton}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Volver a Facturación
-      </Link>
+      <div className={styles.backButtonContainer} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <Link href="/dashboard/invoices" className={styles.backButton}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Volver a Facturación
+        </Link>
+
+        <a 
+          href={`/api/invoices/${invoice.id}/pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.btn}
+          style={{ 
+            backgroundColor: '#8b5cf6', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            textDecoration: 'none',
+            fontSize: '0.875rem',
+            fontWeight: 600
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Imprimir PDF
+        </a>
+      </div>
 
       <div className={styles.invoicePaper}>
         <div className={styles.invoiceHeader}>
