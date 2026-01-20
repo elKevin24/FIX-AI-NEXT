@@ -1,6 +1,7 @@
 import { signOut, auth } from '@/auth';
 import styles from './dashboard.module.css';
 import Sidebar from '@/components/dashboard/Sidebar';
+import TopNav from '@/components/dashboard/TopNav';
 // We don't import Sidebar.module.css here, the component handles it.
 
 export default async function DashboardLayout({
@@ -51,6 +52,7 @@ export default async function DashboardLayout({
         <div className={styles.container}>
             <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
             <main className={styles.mainContent}>
+                <TopNav />
                 {children}
             </main>
         </div>
