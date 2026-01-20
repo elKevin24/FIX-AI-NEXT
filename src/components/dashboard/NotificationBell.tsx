@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getMyNotifications, markMyNotificationAsRead, markAllMyNotificationsAsRead } from '@/lib/notifications';
 import Link from 'next/link';
+import styles from './NotificationBell.module.css';
 
 // Helper for type
 interface Notification {
@@ -65,68 +66,65 @@ export default function NotificationBell() {
     };
 
     return (
-        <div className="relative" ref={containerRef}>
+        <div className={styles.container} ref={containerRef}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
+                className={styles.bellButton}
                 aria-label="Notificaciones"
                 title="Notificaciones"
             >
                 <BellIcon />
                 {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full" style={{ fontSize: '10px' }}>
+                    <span className={styles.unreadBadge}>
                         {unreadCount}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div 
-                    className="absolute bottom-full left-0 mb-2 w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden z-50 transform -translate-y-2 origin-bottom-left"
-                    style={{ maxHeight: '400px', display: 'flex', flexDirection: 'column' }}
-                >
-                    <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
-                        <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-100">Notificaciones</h3>
+                <div className={styles.dropdown}>
+                    <div className={styles.header}>
+                        <h3 className={styles.title}>Notificaciones</h3>
                         {unreadCount > 0 && (
-                            <button onClick={handleMarkAllRead} className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                            <button onClick={handleMarkAllRead} className={styles.markAllRead}>
                                 Marcar leídas
                             </button>
                         )}
                     </div>
                     
-                    <div className="overflow-y-auto flex-1">
+                    <div className={styles.list}>
                         {notifications.length === 0 ? (
-                            <p className="p-4 text-center text-gray-500 text-sm">No tienes notificaciones.</p>
+                            <p className={styles.emptyState}>No tienes notificaciones.</p>
                         ) : (
                             notifications.map(notification => (
                                 <div 
                                     key={notification.id} 
-                                    className={`p-3 border-b border-gray-100 dark:border-gray-800 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                                    className={`${styles.notificationItem} ${!notification.isRead ? styles.unread : ''}`}
                                 >
-                                    <div className="flex justify-between items-start mb-1 gap-2">
-                                        <span className={`font-medium ${getNotificationColor(notification.type)}`}>
+                                    <div className={styles.itemHeader}>
+                                        <span className={`${styles.itemTitle} ${getNotificationTypeClass(notification.type, styles)}`}>
                                             {notification.title}
                                         </span>
                                         {!notification.isRead && (
                                             <button 
                                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                                className={styles.closeBtn}
                                                 title="Marcar como leída"
                                             >
                                                 ×
                                             </button>
                                         )}
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">{notification.message}</p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-xs text-gray-400">
+                                    <p className={styles.message}>{notification.message}</p>
+                                    <div className={styles.itemFooter}>
+                                        <span className={styles.date}>
                                             {new Date(notification.createdAt).toLocaleDateString()}
                                         </span>
                                         {notification.link && (
                                             <Link 
                                                 href={notification.link}
                                                 onClick={() => setIsOpen(false)}
-                                                className="text-blue-600 hover:underline text-xs"
+                                                className={styles.detailsLink}
                                             >
                                                 Ver detalles &rarr;
                                             </Link>
@@ -139,7 +137,7 @@ export default function NotificationBell() {
                     <Link 
                         href="/dashboard/notifications" 
                         onClick={() => setIsOpen(false)}
-                        className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium block hover:underline"
+                        className={styles.viewAll}
                     >
                         Ver todas las notificaciones
                     </Link>
@@ -149,12 +147,12 @@ export default function NotificationBell() {
     );
 }
 
-function getNotificationColor(type: string) {
+function getNotificationTypeClass(type: string, styles: any) {
     switch (type) {
-        case 'WARNING': return 'text-orange-600 dark:text-orange-400';
-        case 'ERROR': return 'text-red-600 dark:text-red-400';
-        case 'SUCCESS': return 'text-green-600 dark:text-green-400';
-        default: return 'text-blue-600 dark:text-blue-400';
+        case 'WARNING': return styles.typeWarning;
+        case 'ERROR': return styles.typeError;
+        case 'SUCCESS': return styles.typeSuccess;
+        default: return styles.typeInfo;
     }
 }
 
