@@ -1,367 +1,242 @@
 /* ========================================
-   SERVICE TEMPLATES - Liquid Glass Design
-   Mobile-First, Premium UX
+   SERVICE TEMPLATES - Ultra Minimalist Liquid Glass
+   "Less is More" Philosophy
    ======================================== */
 
-/* Container */
 .container {
-    max-width: 1280px;
+    max-width: 1000px; /* More focused width for readability */
     margin: 0 auto;
-    padding: 1rem;
+    padding: 2rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
-@media (min-width: 768px) {
-    .container {
-        padding: 1.5rem;
-    }
-}
-
-/* Glass Cards */
-.glassCard {
-    background: var(--color-surface);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--color-border-light);
-    border-radius: 1rem;
-    padding: 1rem;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.glassCard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            var(--color-border-medium) 50%,
-            transparent 100%);
-    opacity: 0.5;
-}
-
-/* Header Section */
+/* ========== HEADER ========== */
 .pageHeader {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .pageHeader {
-        flex-direction: row;
-        align-items: center;
-    }
+    align-items: flex-end;
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: 1.5rem;
 }
 
 .pageTitle {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 800;
     color: var(--color-gray-800);
-    margin: 0;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
 }
 
 .pageSubtitle {
-    font-size: 0.9375rem;
+    font-size: 0.9rem;
     color: var(--color-text-tertiary);
-    margin-top: 0.25rem;
 }
 
-/* Main Action Button */
-.mainCreateBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--color-primary-600);
-    color: white;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: var(--radius-lg);
-    text-decoration: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-sm);
-    white-space: nowrap;
-}
-
-.mainCreateBtn:hover {
-    background: var(--color-primary-700);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Error/Access Denied Container */
-.errorCard {
-    background: var(--color-error-50);
-    border: 1px solid var(--color-error-200);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    text-align: center;
-}
-
-.errorTitle {
-    color: var(--color-error-800);
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.errorMessage {
-    color: var(--color-error-600);
-    margin-bottom: 1.5rem;
-}
-
-/* Filter Bar Styles */
+/* ========== FILTERS (Floating Glass) ========== */
 .filterBar {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-@media (min-width: 768px) {
-    .filterBar {
-        flex-direction: row;
-    }
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
 }
 
 .searchInput, .selectInput {
-    padding: 0.625rem 1rem;
-    border-radius: var(--radius-base);
-    border: 1px solid var(--color-border-medium);
     background: var(--color-surface);
-    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-light);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
     font-size: 0.875rem;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
-.searchInput {
-    flex: 1;
+.searchInput:focus {
+    flex: 2; /* Expands on focus */
+    border-color: var(--color-primary-400);
 }
 
-.searchInput:focus, .selectInput:focus {
-    outline: none;
-    border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 3px var(--color-primary-100);
-}
-
-/* Template List Grid */
+/* ========== MINIMALIST LIST-CARDS ========== */
 .templateList {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
-/* Template Card */
 .templateCard {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
     background: var(--color-surface);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--color-border-light);
-    border-radius: 1.25rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
-    display: flex;
-    justify-content: space-between;
-    gap: 1.5rem;
 }
 
 .templateCard:hover {
-    transform: translateY(-2px);
+    transform: translateX(8px);
+    border-color: var(--color-primary-300);
     box-shadow: var(--shadow-md);
-    border-color: var(--color-border-medium);
 }
 
 .cardMain {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
     flex: 1;
 }
 
-.cardHeader {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
-
 .templateIcon {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    width: 3rem;
+    height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3.5rem;
-    height: 3.5rem;
     background: var(--color-bg-secondary);
-    border-radius: var(--radius-base);
+    border-radius: 50%; /* Rounded for softer feel */
+    flex-shrink: 0;
+}
+
+.cardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
 }
 
 .templateTitle {
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0;
+    color: var(--color-gray-800);
 }
 
 .badgeGroup {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
 }
 
-/* Info Grid */
+.categoryTag {
+    font-weight: 600;
+    color: var(--color-primary-600);
+}
+
+/* Stats in one line */
 .infoGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--color-border-light);
+    display: flex;
+    gap: 2rem;
+    margin-left: 2rem;
 }
 
 .infoItem {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    /* Increased contrast for values */
+    color: var(--color-text-secondary);
 }
 
 .infoLabel {
-    font-size: 0.75rem;
-    font-weight: 600;
+    /* Kept subtle but legible */
     color: var(--color-text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-}
-
-.infoValue {
-    font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--color-text-secondary);
 }
 
-/* Actions Column */
+/* Actions - Improved Contrast for Accessibility */
 .actions {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
-    min-width: 120px;
+    opacity: 0.85; /* Increased from 0.6 for WCAG AA */
+    transition: all 0.2s ease;
 }
 
-/* Buttons */
-.btn {
-    padding: 0.5rem 1rem;
+.templateCard:hover .actions {
+    opacity: 1;
+}
+
+.btnIcon {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-base);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    border: 1px solid var(--color-border-medium);
+    background: var(--color-surface);
     cursor: pointer;
     transition: all 0.2s;
-    text-align: center;
-    text-decoration: none;
-    border: 1px solid transparent;
+    box-shadow: var(--shadow-xs);
 }
 
-.btnEdit {
-    background-color: var(--color-primary-50);
-    color: var(--color-primary-700);
-    border-color: var(--color-primary-200);
+.btnIcon:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary-400);
+    transform: translateY(-1px);
 }
 
-.btnEdit:hover {
-    background-color: var(--color-primary-100);
+.btnEdit { color: var(--color-primary-600); }
+.btnDelete { color: var(--color-error-600); }
+.btnDelete:hover { background: var(--color-error-50); border-color: var(--color-error-300); }
+
+/* Inactive State - Safe Contrast */
+.inactive {
+    opacity: 0.8; /* Increased from 0.6 */
+    filter: grayscale(0.8);
+    background: var(--color-bg-secondary);
 }
 
-.btnActivate {
-    background-color: var(--color-success-50);
-    color: var(--color-success-700);
-    border-color: var(--color-success-200);
-}
-
-.btnDeactivate {
-    background-color: var(--color-warning-50);
-    color: var(--color-warning-700);
-    border-color: var(--color-warning-200);
-}
-
-.btnDuplicate {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
-    border-color: var(--color-border-medium);
-}
-
-.btnDelete {
-    background-color: var(--color-error-50);
-    color: var(--color-error-700);
-    border-color: var(--color-error-200);
-}
-
-.btnDelete:hover:not(:disabled) {
-    background-color: var(--color-error-100);
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Badges */
-.badge {
-    padding: 0.125rem 0.625rem;
-    border-radius: 9999px;
-    font-size: 0.6875rem;
+/* Main Action Button - Premium & High Contrast */
+.mainCreateBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary-600); /* Consistent Brand Blue */
+    color: white;
+    border-radius: var(--radius-base);
     font-weight: 700;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-base); /* Add elevation in base state */
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.badgeCategory { background: var(--color-bg-secondary); color: var(--color-text-secondary); }
-.badgeInactive { background: var(--color-error-100); color: var(--color-error-700); }
-
-/* Empty State */
-.emptyState {
-    background: var(--color-surface);
-    backdrop-filter: blur(12px);
-    border: 1px dashed var(--color-border-medium);
-    border-radius: 1rem;
-    padding: 4rem 2rem;
-    text-align: center;
-    color: var(--color-text-tertiary);
+.mainCreateBtn:hover {
+    background: var(--color-primary-700);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
-.createFirstLink {
-    margin-top: 1rem;
-    display: inline-block;
-    color: var(--color-primary-600);
-    font-weight: 600;
-    text-decoration: underline;
+.mainCreateBtn span {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-top: -2px; /* Visual optical alignment */
 }
 
 @media (max-width: 768px) {
     .templateCard {
         flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .actions {
-        flex-direction: row;
-        width: 100%;
-    }
-    
-    .btn {
-        flex: 1;
+        align-items: flex-start;
+        padding: 1.25rem;
     }
     
     .infoGrid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
+        margin-left: 0;
+        margin-top: 1rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .actions {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: space-between;
+        opacity: 1;
     }
 }

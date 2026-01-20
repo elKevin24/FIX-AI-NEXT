@@ -107,9 +107,11 @@ export default function SimpleTicketForm() {
                 </div>
 
                 {state?.message && (
-                    <Alert variant="error" className="mb-6">
-                        {state.message}
-                    </Alert>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <Alert variant="error">
+                            {state.message}
+                        </Alert>
+                    </div>
                 )}
 
                 <form action={handleSubmit} className={styles.form}>
@@ -118,7 +120,7 @@ export default function SimpleTicketForm() {
                     <div className={styles.glassCard}>
                         <div className={styles.cardHeader}>
                             <div className={styles.iconCircle}>
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                             </div>
                             <h2 className={styles.cardTitle}>Información del Cliente</h2>
                         </div>
@@ -180,10 +182,10 @@ export default function SimpleTicketForm() {
                                         <p className={styles.customerName}>{customer.name}</p>
                                         {(customer.email || customer.phone || customer.nit) && (
                                             <div className={styles.customerDetail}>
-                                                {customer.email && <span className="block">{customer.email}</span>}
-                                                {customer.phone && <span className="block">{customer.phone}</span>}
-                                                {customer.dpi && <span className="block">DPI: {customer.dpi}</span>}
-                                                {customer.nit && <span className="block">NIT: {customer.nit}</span>}
+                                                {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
+                                                {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
+                                                {customer.dpi && <span style={{ display: 'block' }}>DPI: {customer.dpi}</span>}
+                                                {customer.nit && <span style={{ display: 'block' }}>NIT: {customer.nit}</span>}
                                             </div>
                                         )}
                                     </div>
@@ -195,7 +197,7 @@ export default function SimpleTicketForm() {
                     {/* --- Devices Section Header --- */}
                     <div className={styles.devicesHeader}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                            <h2 className={styles.cardTitle} style={{ fontSize: '1.125rem', fontWeight: '600' }}>Dispositivos</h2>
+                            <h2 className={styles.cardTitle}>Dispositivos</h2>
                             <span className={styles.deviceCount}>
                                 {devices.length}
                             </span>
@@ -211,14 +213,12 @@ export default function SimpleTicketForm() {
                         </Button>
                     </div>
 
-                    <div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {devices.map((device, index) => (
-                            <div key={index} className={`${styles.glassCard} ${styles.deviceCard}`} style={{ animationDelay: `${index * 100}ms` }}>
+                            <div key={index} className={`${styles.glassCard} ${styles.deviceCard}`} style={{ animationDelay: `${index * 100}ms`, marginBottom: 0 }}>
                                 <div className={styles.deviceHeader}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <div className={styles.deviceNumber}>
-                                            #{index + 1}
-                                        </div>
+                                    <div className={styles.deviceNumber}>
+                                        #{index + 1}
                                     </div>
                                     {devices.length > 1 && (
                                         <button
@@ -227,13 +227,12 @@ export default function SimpleTicketForm() {
                                             className={styles.removeBtn}
                                             title="Eliminar dispositivo"
                                         >
-                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                         </button>
                                     )}
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    {/* Row 1 */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                     <div className={styles.gridRow}>
                                         <Input
                                             label="Problema Principal *"
@@ -256,7 +255,6 @@ export default function SimpleTicketForm() {
                                         />
                                     </div>
 
-                                    {/* Row 2: Description */}
                                     <div>
                                         <Textarea
                                             label="Descripción Detallada *"
@@ -268,7 +266,6 @@ export default function SimpleTicketForm() {
                                         />
                                     </div>
 
-                                    {/* Row 3: Extras */}
                                     <div className={styles.extrasGrid}>
                                         <Input
                                             label="🏷️ N° Serie / IMEI"
@@ -284,7 +281,6 @@ export default function SimpleTicketForm() {
                                         />
                                     </div>
 
-                                    {/* Row 4: Physical State */}
                                     <div>
                                         <Input
                                             label="🔍 Notas de Estado Físico"

@@ -140,6 +140,19 @@
   border-color: var(--color-border-strong);
 }
 
+/* Icon container styling */
+.iconLeft {
+  margin-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.iconRight {
+  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Sizes */
 .sm {
   padding: 0.5rem 1rem;

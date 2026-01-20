@@ -1,73 +1,109 @@
+/* ========================================
+   INVOICES MODULE - Liquid Glass Minimalista
+   Design System Compliant - WCAG AA
+   ======================================== */
+
 .container {
-    padding: 2rem;
+    padding: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
-    animation: fadeIn 0.5s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========== HEADER ========== */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
 }
 
 .titleSection h1 {
     font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    font-weight: 800;
+    color: var(--color-gray-800);
+    margin: 0;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--color-gray-800) 0%, var(--color-gray-600) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .titleSection p {
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
+    font-size: 0.9375rem;
+    margin-top: 0.25rem;
 }
 
+/* ========== STATS GRID (Glass Cards) ========== */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
 }
 
 .statCard {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--color-surface);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--color-border-light);
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.statCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-medium), transparent);
+    opacity: 0.5;
 }
 
 .statCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-medium);
 }
 
 .statLabel {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .statValue {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-gray-800);
 }
 
+.valuePaid { color: var(--color-success-600); }
+.valuePending { color: var(--color-warning-600); }
+
+/* ========== FILTERS ========== */
 .filters {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
@@ -83,56 +119,59 @@
 }
 
 .filterGroup label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
 }
 
 .input, .select {
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-border-medium);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     font-size: 0.875rem;
     transition: all 0.2s;
 }
 
 .input:focus, .select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
+/* ========== TABLE WRAPPER (Glass) ========== */
 .tableWrapper {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    background: var(--color-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border-light);
+    border-radius: 1.25rem;
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .table {
     width: 100%;
-    border-collapse: collapse;
-    text-align: left;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .table th {
-    background: var(--bg-tertiary);
+    background: var(--color-bg-secondary);
     padding: 1rem 1.5rem;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
     letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border-medium);
 }
 
 .table td {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
     font-size: 0.875rem;
 }
 
@@ -141,35 +180,39 @@
 }
 
 .table tr:hover {
-    background: rgba(var(--primary-rgb), 0.02);
+    background: var(--color-surface-hover);
 }
 
+/* ========== BADGES & UI ========== */
 .statusBadge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.6875rem;
+    font-weight: 700;
     display: inline-flex;
+    text-transform: uppercase;
 }
 
-.status_PAID { background: #dcfce7; color: #166534; }
-.status_PENDING { background: #fef9c3; color: #854d0e; }
-.status_CANCELLED { background: #fee2e2; color: #991b1b; }
-.status_OVERDUE { background: #ffedd5; color: #9a3412; }
+.status_PAID { background: var(--color-success-100); color: var(--color-success-700); }
+.status_PENDING { background: var(--color-warning-100); color: var(--color-warning-700); }
+.status_CANCELLED { background: var(--color-error-100); color: var(--color-error-700); }
+.status_OVERDUE { background: var(--color-accent-100); color: var(--color-accent-700); }
 
 .customerName {
-    font-weight: 500;
+    font-weight: 700;
     display: block;
+    color: var(--color-gray-800);
 }
 
 .ticketInfo {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-family-mono);
 }
 
 .amount {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--color-gray-800);
 }
 
 .actions {
@@ -179,10 +222,10 @@
 
 .viewButton {
     padding: 0.5rem;
-    border-radius: 6px;
-    color: var(--primary-color);
-    background: rgba(var(--primary-rgb), 0.1);
-    border: none;
+    border-radius: 0.5rem;
+    color: var(--color-primary-600);
+    background: var(--color-primary-50);
+    border: 1px solid var(--color-primary-100);
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -191,14 +234,15 @@
 }
 
 .viewButton:hover {
-    background: var(--primary-color);
+    background: var(--color-primary-600);
     color: white;
+    transform: scale(1.1);
 }
 
 .emptyState {
     padding: 4rem 2rem;
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--color-text-tertiary);
 }
 
 @media (max-width: 768px) {
@@ -211,5 +255,12 @@
     .filters {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .table th:nth-child(2),
+    .table td:nth-child(2),
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none; /* Hide date and ticket info on small mobile */
     }
 }
