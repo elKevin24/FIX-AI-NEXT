@@ -4,18 +4,29 @@
    ======================================== */
 
 .reportsPage {
-  padding: 2rem;
+  padding: 0; /* Eliminado padding redundante */
   display: flex;
   flex-direction: column;
   gap: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: -1.5rem; /* Zero Waste Alignment */
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .header h1 {

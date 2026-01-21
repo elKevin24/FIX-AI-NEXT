@@ -583,9 +583,11 @@ export async function createTicketFromTemplate(formData: FormData) {
       await notifyTicketCreated({
         id: ticketWithCustomer.id,
         ticketNumber: ticketWithCustomer.ticketNumber,
+        title: ticketWithCustomer.title,
         deviceType: ticketWithCustomer.deviceType,
         deviceModel: ticketWithCustomer.deviceModel,
         status: ticketWithCustomer.status,
+        customerId: ticketWithCustomer.customerId,
         customer: {
           id: ticketWithCustomer.customer.id,
           name: ticketWithCustomer.customer.name,

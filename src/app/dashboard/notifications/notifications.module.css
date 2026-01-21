@@ -4,6 +4,9 @@
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--color-border-light);
     overflow: hidden;
+    max-width: 1400px; /* Estandarización */
+    margin: 0 auto;    /* Centrado */
+    width: 100%;
 }
 
 .header {
@@ -13,6 +16,16 @@
     justify-content: space-between;
     align-items: center;
     background-color: var(--color-bg-secondary);
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-wrap: wrap;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .pageInfo {

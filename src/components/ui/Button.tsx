@@ -9,6 +9,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   children: React.ReactNode;
+  as?: any; // To support Link or other components
+  href?: string; // For Link
 }
 
 export function Button({
@@ -21,13 +23,14 @@ export function Button({
   className = '',
   children,
   disabled,
+  as: Component = 'button',
   ...props
 }: ButtonProps) {
   
   // Map variant strings to styles
   const variantStyle = styles[variant] || styles.primary;
   
-  // Map size strings to styles (handle 'base' specially if needed, but CSS map is cleaner)
+  // Map size strings to styles
   const sizeStyle = size === 'base' ? styles.baseSize : styles[size];
   
   const widthStyle = fullWidth ? styles.fullWidth : '';
@@ -41,7 +44,7 @@ export function Button({
   ].filter(Boolean).join(' ');
 
   return (
-    <button 
+    <Component 
       className={classes} 
       disabled={disabled || isLoading} 
       {...props}
@@ -50,6 +53,6 @@ export function Button({
       {!isLoading && leftIcon && <span className={styles.iconLeft}>{leftIcon}</span>}
       {children}
       {!isLoading && rightIcon && <span className={styles.iconRight}>{rightIcon}</span>}
-    </button>
+    </Component>
   );
 }

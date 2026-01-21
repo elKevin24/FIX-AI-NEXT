@@ -1,15 +1,17 @@
 .topNav {
-    position: absolute;
+    position: sticky;
     top: 0;
     right: 0;
     left: 0;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 1rem 2rem;
-    background: transparent;
+    padding: 0.25rem 0; /* Padding ultra compacto */
+    margin-bottom: 0; /* Cero margen inferior */
+    background: transparent; /* Ojo: si es sticky y transparente, el contenido pasará por debajo al scrollear. */
     z-index: 50;
     pointer-events: none;
+    height: 3rem; /* Altura fija pequeña para reservar espacio exacto */
 }
 
 .rightSection {

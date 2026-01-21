@@ -237,7 +237,22 @@ export async function getInvoices(filters?: {
     },
   });
 
-  return invoices;
+  // Convert Decimals to numbers for client components
+  return invoices.map((inv: any) => ({
+    ...inv,
+    laborCost: Number(inv.laborCost),
+    partsCost: Number(inv.partsCost),
+    partsMarkup: Number(inv.partsMarkup),
+    subtotal: Number(inv.subtotal),
+    taxRate: Number(inv.taxRate),
+    taxAmount: Number(inv.taxAmount),
+    discountAmount: Number(inv.discountAmount),
+    total: Number(inv.total),
+    payments: inv.payments.map((p: any) => ({
+      ...p,
+      amount: Number(p.amount),
+    })),
+  }));
 }
 
 /**

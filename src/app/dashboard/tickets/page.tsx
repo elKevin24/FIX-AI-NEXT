@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
 import TicketSearchFilters from './TicketSearchFilters';
+import { Button } from '@/components/ui';
 import styles from './tickets.module.css';
+import TicketsClient from './TicketsClient';
 
 interface TicketsPageProps {
     searchParams: Promise<{
@@ -79,86 +81,28 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         console.log('👑 Super Admin accessing all tickets');
     }
 
-    const getStatusLabel = (status: string) => {
-        const labels: Record<string, string> = {
-            'OPEN': 'Abierto',
-            'IN_PROGRESS': 'En Progreso',
-            'WAITING_FOR_PARTS': 'Esperando Repuestos',
-            'RESOLVED': 'Resuelto',
-            'CLOSED': 'Cerrado',
-        };
-        return labels[status] || status;
-    };
-
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1>Tickets</h1>
+                <div className={styles.headerContent}>
+                    <h1>Tickets</h1>
+                    <p>Gestiona las órdenes de servicio y su estado</p>
+                </div>
                 {isSuperAdmin && (
                     <span className={styles.superAdminBadge}>
                         👑 Super Admin
                     </span>
                 )}
-                <Link href="/dashboard/tickets/create" className={styles.createBtn}>
+                <Button as={Link} href="/dashboard/tickets/create" variant="primary">
                     + Nuevo Ticket
-                </Link>
+                </Button>
             </div>
 
             <Suspense fallback={<div>Cargando filtros...</div>}>
                 <TicketSearchFilters />
             </Suspense>
 
-            <div className={styles.resultsInfo}>
-                {tickets.length > 0 ? (
-                    <p>Mostrando {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</p>
-                ) : (
-                    <p>No se encontraron tickets</p>
-                )}
-            </div>
-
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Cliente</th>
-                            {isSuperAdmin && <th>Tenant</th>}
-                            <th>Estado</th>
-                            <th>Asignado a</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tickets.map((ticket: typeof tickets[number]) => (
-                            <tr key={ticket.id}>
-                                <td>{ticket.id.slice(0, 8)}</td>
-                                <td>{ticket.title}</td>
-                                <td>{ticket.customer.name}</td>
-                                {isSuperAdmin && <td>{ticket.tenant.name}</td>}
-                                <td>
-                                    <span className={`${styles.status} ${styles[ticket.status.toLowerCase()]}`}>
-                                        {getStatusLabel(ticket.status)}
-                                    </span>
-                                </td>
-                                <td>{ticket.assignedTo?.name || 'Sin asignar'}</td>
-                                <td>{new Date(ticket.createdAt).toLocaleDateString('es-ES')}</td>
-                                <td>
-                                    <Link href={`/dashboard/tickets/${ticket.id}`} className={styles.viewLink}>
-                                        Ver
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                        {tickets.length === 0 && (
-                            <tr>
-                                <td colSpan={isSuperAdmin ? 8 : 7} className={styles.empty}>No se encontraron tickets</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <TicketsClient data={tickets as any} isSuperAdmin={isSuperAdmin} />
         </div>
     );
 }
