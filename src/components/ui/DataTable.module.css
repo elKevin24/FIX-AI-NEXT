@@ -1,0 +1,122 @@
+/* ========================================
+   DATA TABLE PREMIUM - Liquid Glass
+   "Zero Waste" & High-End UX
+   ======================================== */
+
+.wrapper {
+    width: 100%;
+    background: var(--color-surface);
+    backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid var(--color-border-light);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.wrapper:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-medium);
+}
+
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    /* Cabecera pegajosa */
+    max-height: 70vh; 
+    scrollbar-width: thin;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+/* ========== HEADER STYLES ========== */
+
+.headerRow {
+    background: var(--color-bg-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.headerCell {
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-border-medium);
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.headerCell:hover {
+    background: var(--color-surface-hover);
+}
+
+.headerContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ========== ROW & CELL STYLES ========== */
+
+.row {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+}
+
+.row:hover {
+    background: var(--color-surface-hover);
+    /* Efecto Liquid Glass */
+    backdrop-filter: brightness(0.98);
+}
+
+.cell {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.row:last-child .cell {
+    border-bottom: none;
+}
+
+.clickableRow {
+    cursor: pointer;
+}
+
+/* ========== STATES ========== */
+
+.emptyCell {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+.loadingRow {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+    .cell, .headerCell {
+        padding: 0.75rem 1rem;
+    }
+}

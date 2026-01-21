@@ -2,10 +2,28 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/ui/DataTable';
+import { Badge, Button } from '@/components/ui';
 import styles from './invoices.module.css';
 
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  createdAt: Date;
+  customerName: string;
+  customerNIT: string | null;
+  status: string;
+  total: number | string;
+  ticket?: {
+    ticketNumber?: string | null;
+    deviceType?: string | null;
+    deviceModel?: string | null;
+  } | null;
+}
+
 interface InvoicesClientProps {
-  initialInvoices: any[];
+  initialInvoices: Invoice[];
 }
 
 export default function InvoicesClient({ initialInvoices }: InvoicesClientProps) {
@@ -33,7 +51,14 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
     return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(amount);
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
+      PAID: 'success',
+      PENDING: 'warning',
+      CANCELLED: 'error',
+      OVERDUE: 'error',
+      DRAFT: 'gray'
+    };
     const labels: Record<string, string> = {
       PAID: 'Pagado',
       PENDING: 'Pendiente',
@@ -41,13 +66,65 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
       OVERDUE: 'Vencido',
       DRAFT: 'Borrador'
     };
-    return labels[status] || status;
+    return <Badge variant={variants[status] || 'gray'}>{labels[status] || status}</Badge>;
   };
+
+  const columns: ColumnDef<Invoice>[] = [
+    {
+      accessorKey: 'invoiceNumber',
+      header: 'No. Factura',
+      cell: ({ row }) => <span className="font-bold text-gray-800">{row.original.invoiceNumber}</span>,
+    },
+    {
+      accessorKey: 'createdAt',
+      header: 'Fecha',
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    },
+    {
+      accessorKey: 'customerName',
+      header: 'Cliente',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-gray-900">{row.original.customerName}</span>
+          <span className="text-xs text-gray-500">NIT: {row.original.customerNIT || 'C/F'}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'ticket',
+      header: 'Ticket',
+      cell: ({ row }) => row.original.ticket ? (
+        <div className="flex flex-col text-xs text-gray-500">
+          <span>#{row.original.ticket.ticketNumber}</span>
+          <span>{row.original.ticket.deviceType} {row.original.ticket.deviceModel}</span>
+        </div>
+      ) : <span className="text-gray-400">-</span>,
+    },
+    {
+      accessorKey: 'status',
+      header: 'Estado',
+      cell: ({ row }) => getStatusBadge(row.original.status),
+    },
+    {
+      accessorKey: 'total',
+      header: 'Total',
+      cell: ({ row }) => <span className="font-bold text-gray-800">{formatCurrency(Number(row.original.total))}</span>,
+    },
+    {
+      id: 'actions',
+      header: 'Acciones',
+      cell: ({ row }) => (
+        <Link href={`/dashboard/invoices/${row.original.id}`}>
+          <Button variant="ghost" size="sm">Ver Detalle</Button>
+        </Link>
+      ),
+    },
+  ];
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.titleSection}>
+        <div className={styles.headerContent}>
           <h1>Facturación</h1>
           <p>Consulta y gestiona las facturas generadas a partir de tickets.</p>
         </div>
@@ -98,62 +175,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
         </div>
       </div>
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>No. Factura</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Ticket Relevante</th>
-              <th>Estado</th>
-              <th>Total</th>
-              <th style={{ textAlign: 'center' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInvoices.length > 0 ? (
-              filteredInvoices.map((invoice) => (
-                <tr key={invoice.id}>
-                  <td><strong>{invoice.invoiceNumber}</strong></td>
-                  <td>{new Date(invoice.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <span className={styles.customerName}>{invoice.customerName}</span>
-                    <span className={styles.ticketInfo}>NIT: {invoice.customerNIT || 'C/F'}</span>
-                  </td>
-                  <td>
-                    {invoice.ticket ? (
-                      <div className={styles.ticketInfo}>
-                        #{invoice.ticket.ticketNumber} - {invoice.ticket.deviceType} {invoice.ticket.deviceModel}
-                      </div>
-                    ) : '-'}
-                  </td>
-                  <td>
-                    <span className={`${styles.statusBadge} ${styles[`status_${invoice.status}`]}`}>
-                      {getStatusLabel(invoice.status)}
-                    </span>
-                  </td>
-                  <td className={styles.amount}>{formatCurrency(Number(invoice.total))}</td>
-                  <td style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Link href={`/dashboard/invoices/${invoice.id}`} className={styles.viewButton} title="Ver detalle">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} className={styles.emptyState}>
-                  No se encontraron facturas que coincidan con los filtros.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable columns={columns} data={filteredInvoices} />
     </div>
   );
 }

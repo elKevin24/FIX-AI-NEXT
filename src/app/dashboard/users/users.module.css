@@ -4,12 +4,13 @@
    ======================================== */
 
 .container {
-    padding: 2rem;
+    /* Padding eliminado, lo maneja el layout global */
     max-width: 1400px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
+    width: 100%;
 }
 
 /* ========== HEADER ========== */
@@ -17,7 +18,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1rem;
+    padding-bottom: 0.5rem; /* Ajustado a 0.5rem para coincidir con Tickets */
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-wrap: wrap;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .headerContent h1 {

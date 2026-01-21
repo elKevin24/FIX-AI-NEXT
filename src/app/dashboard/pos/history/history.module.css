@@ -1,12 +1,23 @@
 .container {
-    padding: 1.5rem;
+    padding: 0; /* Eliminado padding redundante */
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.5rem;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .header h1 {

@@ -97,7 +97,7 @@ export default function CashRegisterClient({ initialOpenRegister }: CashRegister
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.titleSection}>
+        <div className={styles.headerContent}>
           <h1>Caja Registradora</h1>
           <p>Control de ingresos, egresos y arqueo de caja.</p>
         </div>

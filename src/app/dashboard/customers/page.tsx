@@ -1,10 +1,10 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Card, CardHeader, CardTitle, CardBody, Badge, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
-import DeleteCustomerButton from './DeleteCustomerButton';
 import styles from './customers.module.css';
+import CustomersClient from './CustomersClient';
 
 export default async function CustomersPage() {
   const session = await auth();
@@ -43,84 +43,14 @@ export default async function CustomersPage() {
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <h1>Clientes</h1>
-          <p>Administra los clientes del taller</p>
+          <p>Gestiona la base de datos de clientes y su historial</p>
         </div>
-        <Link href="/dashboard/customers/create">
-          <Button variant="primary">+ Nuevo Cliente</Button>
-        </Link>
+        <Button as={Link} href="/dashboard/customers/create" variant="primary">
+          + Nuevo Cliente
+        </Button>
       </div>
 
-      {customers.length === 0 ? (
-        <Card>
-          <CardBody>
-            <div className={styles.emptyState}>
-              <p>No hay clientes registrados</p>
-              <Link href="/dashboard/customers/create">
-                <Button variant="primary">Agregar Primer Cliente</Button>
-              </Link>
-            </div>
-          </CardBody>
-        </Card>
-      ) : (
-        <div className={styles.customersGrid}>
-          {customers.map((customer: any) => (
-            <Card key={customer.id} className={styles.customerCard}>
-              <CardHeader>
-                <div className={styles.cardHeader}>
-                  <div className={styles.customerInfo}>
-                    <h3 className={styles.customerName}>{customer.name}</h3>
-                    {customer.email && (
-                      <p className={styles.customerEmail}>{customer.email}</p>
-                    )}
-                  </div>
-                  <Badge variant={customer._count.tickets > 0 ? 'primary' : 'gray'}>
-                    {customer._count.tickets} {customer._count.tickets === 1 ? 'Ticket' : 'Tickets'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardBody>
-                {customer.phone && (
-                  <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Teléfono:</span>
-                    <span className={styles.infoValue}>{customer.phone}</span>
-                  </div>
-                )}
-                {customer.address && (
-                  <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Dirección:</span>
-                    <span className={styles.infoValue}>{customer.address}</span>
-                  </div>
-                )}
-                {customer.dpi && (
-                  <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>DPI:</span>
-                    <span className={styles.infoValue}>{customer.dpi}</span>
-                  </div>
-                )}
-                {customer.nit && (
-                  <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>NIT:</span>
-                    <span className={styles.infoValue}>{customer.nit}</span>
-                  </div>
-                )}
-                <div className={styles.customerSince}>
-                  Cliente desde: {new Date(customer.createdAt).toLocaleDateString('es-ES')}
-                </div>
-              </CardBody>
-              <div className={styles.cardActions}>
-                <Link href={`/dashboard/customers/${customer.id}/edit`}>
-                  <Button variant="secondary" size="sm">
-                    Editar
-                  </Button>
-                </Link>
-                {isAdmin && customer._count.tickets === 0 && (
-                  <DeleteCustomerButton customerId={customer.id} customerName={customer.name} />
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+      <CustomersClient data={customers} isAdmin={isAdmin} />
     </div>
   );
 }

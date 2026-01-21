@@ -5,11 +5,28 @@ import { ServiceCategory } from '@prisma/client';
 // TICKET SCHEMAS
 // ============================================================================
 
+// Esquema para uso de partes iniciales
+const InitialPartSchema = z.object({
+    partId: z.string().uuid('ID de repuesto inválido'),
+    quantity: z.number().int().positive('La cantidad debe ser positiva')
+});
+
 // Esquema para la creación de un solo ticket (parte del flujo multi-dispositivo)
 // NOTA: customerName se envía por separado en FormData, no dentro de cada ticket
 export const CreateTicketSchema = z.object({
   title: z.string().min(1, 'El título es requerido.').max(255, 'El título es demasiado largo.'),
   description: z.string().min(1, 'La descripción es requerida.').max(1000, 'La descripción es demasiado larga.'),
+  
+  // Campos opcionales de estado y prioridad
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS'], {
+    errorMap: () => ({ message: 'Estado inicial inválido.' })
+  }).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'], {
+    errorMap: () => ({ message: 'Prioridad inválida.' })
+  }).optional(),
+
+  // Consumo inicial de inventario
+  initialParts: z.array(InitialPartSchema).optional(),
 
   // Campos del dispositivo
   deviceType: z.string().max(50, 'El tipo de dispositivo es demasiado largo.').optional().nullable(),

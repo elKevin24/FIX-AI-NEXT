@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { POSSaleStatus, PaymentMethod } from '@prisma/client';
 import { voidPOSSale, getPOSSales } from '@/lib/pos-actions';
@@ -8,12 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
+import { DataTable } from '@/components/ui/DataTable';
+import { ColumnDef } from '@tanstack/react-table';
 import styles from './history.module.css';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
+// ... (Types remain the same)
 interface SaleItem {
     id: string;
     partName: string;
@@ -60,10 +59,6 @@ interface SalesHistoryClientProps {
     initialSales: Sale[];
     stats: Stats | null;
 }
-
-// ============================================================================
-// COMPONENT
-// ============================================================================
 
 export default function SalesHistoryClient({ initialSales, stats }: SalesHistoryClientProps) {
     const router = useRouter();
@@ -156,6 +151,74 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
         }
     };
 
+    // Define columns
+    const columns: ColumnDef<Sale>[] = useMemo(() => [
+        {
+            accessorKey: 'saleNumber',
+            header: 'Número',
+            cell: ({ row }) => <span className="font-bold text-gray-800">{row.original.saleNumber}</span>,
+        },
+        {
+            accessorKey: 'createdAt',
+            header: 'Fecha',
+            cell: ({ row }) => formatDate(row.original.createdAt),
+        },
+        {
+            accessorKey: 'customerName',
+            header: 'Cliente',
+            cell: ({ row }) => (
+                <div className="flex flex-col">
+                    <span className="font-medium">{row.original.customerName}</span>
+                    {row.original.customerNIT && row.original.customerNIT !== 'C/F' && (
+                        <span className="text-xs text-gray-500">NIT: {row.original.customerNIT}</span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            id: 'items',
+            header: 'Items',
+            cell: ({ row }) => `${row.original.items.length} productos`,
+        },
+        {
+            accessorKey: 'total',
+            header: 'Total',
+            cell: ({ row }) => <span className="font-bold">{formatCurrency(row.original.total)}</span>,
+        },
+        {
+            accessorKey: 'status',
+            header: 'Estado',
+            cell: ({ row }) => getStatusBadge(row.original.status),
+        },
+        {
+            id: 'actions',
+            header: 'Acciones',
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedSale(row.original)}
+                    >
+                        Ver
+                    </Button>
+                    {row.original.status === POSSaleStatus.COMPLETED && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                setSelectedSale(row.original);
+                                setShowVoidModal(true);
+                            }}
+                        >
+                            Anular
+                        </Button>
+                    )}
+                </div>
+            ),
+        },
+    ], []);
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -215,72 +278,11 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                 </select>
             </div>
 
-            {/* Sales Table */}
-            <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Número</th>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredSales.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className={styles.emptyRow}>
-                                    No se encontraron ventas
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredSales.map(sale => (
-                                <tr key={sale.id}>
-                                    <td className={styles.saleNumber}>{sale.saleNumber}</td>
-                                    <td>{formatDate(sale.createdAt)}</td>
-                                    <td>
-                                        <div className={styles.customerCell}>
-                                            <span>{sale.customerName}</span>
-                                            {sale.customerNIT && sale.customerNIT !== 'C/F' && (
-                                                <span className={styles.customerNit}>NIT: {sale.customerNIT}</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td>{sale.items.length} productos</td>
-                                    <td className={styles.totalCell}>{formatCurrency(sale.total)}</td>
-                                    <td>{getStatusBadge(sale.status)}</td>
-                                    <td>
-                                        <div className={styles.actions}>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => setSelectedSale(sale)}
-                                            >
-                                                Ver
-                                            </Button>
-                                            {sale.status === POSSaleStatus.COMPLETED && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedSale(sale);
-                                                        setShowVoidModal(true);
-                                                    }}
-                                                >
-                                                    Anular
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* Sales Table - Premium DataTable */}
+            <DataTable 
+                columns={columns} 
+                data={filteredSales} 
+            />
 
             {/* Sale Detail Modal */}
             {selectedSale && !showVoidModal && (

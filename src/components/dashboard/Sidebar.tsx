@@ -80,6 +80,10 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                         <TicketIcon className={styles.navIcon} />
                         Tickets
                     </Link>
+                    <Link href="/dashboard/parts" className={getLinkClass('/dashboard/parts')}>
+                        <CubeIcon className={styles.navIcon} />
+                        Repuestos
+                    </Link>
                     {userRole === 'ADMIN' && (
                         <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')}>
                             <TemplatesIcon className={styles.navIcon} />
@@ -109,6 +113,14 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                     <Link href="/dashboard/pos" className={getLinkClass('/dashboard/pos')}>
                         <POSIcon className={styles.navIcon} />
                         Punto de Venta
+                    </Link>
+                    <Link href="/dashboard/pos/quotations" className={getLinkClass('/dashboard/pos/quotations')}>
+                        <QuotationIcon className={styles.navIcon} />
+                        Cotizaciones
+                    </Link>
+                    <Link href="/dashboard/pos/returns" className={getLinkClass('/dashboard/pos/returns')}>
+                        <ReturnIcon className={styles.navIcon} />
+                        Devoluciones
                     </Link>
                     <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')}>
                         <UsersIcon className={styles.navIcon} />
@@ -229,6 +241,30 @@ function POSIcon({ className }: { className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+    );
+}
+
+function QuotationIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+    );
+}
+
+function ReturnIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+    );
+}
+
+function CubeIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
     );
 }

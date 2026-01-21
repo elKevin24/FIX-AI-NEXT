@@ -77,58 +77,62 @@ export default function TicketSearchFilters() {
     ];
 
     return (
-        <div className={styles.filtersContainer}>
-            <div className={styles.searchRow}>
-                <div className={styles.searchInput}>
-                    <SearchInputGroup
-                        value={search}
-                        onChange={setSearch}
-                        onSearch={handleSearch}
-                        placeholder="Buscar por ID, título o cliente..."
-                        buttonText="Buscar"
-                        isLoading={isPending}
-                    />
-                </div>
-                {(search || status || priority || assignedTo) && (
+        <div className={styles.gridContainer}>
+            {/* Buscador (ocupa más espacio) */}
+            <div className={styles.searchItem}>
+                <label className={styles.searchLabel}>Búsqueda</label>
+                <SearchInputGroup
+                    value={search}
+                    onChange={setSearch}
+                    onSearch={handleSearch}
+                    placeholder="Buscar por ID, título o cliente..."
+                    buttonText="Buscar"
+                    isLoading={isPending}
+                />
+            </div>
+
+            {/* Filtros */}
+            <div className={styles.filterItem}>
+                <Select
+                    label="Estado"
+                    value={status}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value)}
+                    options={statusOptions}
+                />
+            </div>
+            <div className={styles.filterItem}>
+                <Select
+                    label="Prioridad"
+                    value={priority}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value)}
+                    options={priorityOptions}
+                />
+            </div>
+            <div className={styles.filterItem}>
+                <Select
+                    label="Asignado a"
+                    value={assignedTo}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAssignedTo(e.target.value)}
+                    options={[
+                        { value: '', label: 'Todos' },
+                        // Aquí podrías cargar usuarios dinámicamente
+                    ]}
+                />
+            </div>
+
+            {/* Botón Limpiar */}
+            {(search || status || priority || assignedTo) && (
+                <div className={styles.actionItem}>
                     <Button
                         variant="ghost"
                         onClick={handleClear}
                         disabled={isPending}
+                        className="h-[42px]" // Forzar altura para igualar inputs si es necesario
                     >
                         Limpiar
                     </Button>
-                )}
-            </div>
-
-            <div className={styles.filtersRow}>
-                <div className={styles.filterGroup}>
-                    <Select
-                        label="Estado"
-                        value={status}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value)}
-                        options={statusOptions}
-                    />
                 </div>
-                <div className={styles.filterGroup}>
-                    <Select
-                        label="Prioridad"
-                        value={priority}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value)}
-                        options={priorityOptions}
-                    />
-                </div>
-                <div className={styles.filterGroup}>
-                    <Select
-                        label="Asignado a"
-                        value={assignedTo}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAssignedTo(e.target.value)}
-                        options={[
-                            { value: '', label: 'Todos' },
-                            // Aquí podrías cargar usuarios dinámicamente
-                        ]}
-                    />
-                </div>
-            </div>
+            )}
         </div>
     );
 }

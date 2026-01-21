@@ -4,33 +4,46 @@
    ======================================== */
 
 .container {
-    max-width: 1000px; /* More focused width for readability */
+    max-width: 1400px; /* Estandarizado a 1400px */
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0; /* Eliminado padding redundante */
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    width: 100%;
 }
 
 /* ========== HEADER ========== */
-.pageHeader {
+.header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center; /* Estandarizado con el resto del sistema */
     border-bottom: 1px solid var(--color-border-light);
-    padding-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-wrap: wrap;
 }
 
-.pageTitle {
+.header > * {
+    pointer-events: auto;
+}
+
+.headerContent h1 {
     font-size: 2rem;
     font-weight: 800;
     color: var(--color-gray-800);
     letter-spacing: -0.04em;
+    margin: 0;
 }
 
-.pageSubtitle {
+.headerContent p {
     font-size: 0.9rem;
     color: var(--color-text-tertiary);
+    margin-top: 0.25rem;
 }
 
 /* ========== FILTERS (Floating Glass) ========== */
@@ -188,35 +201,6 @@
     opacity: 0.8; /* Increased from 0.6 */
     filter: grayscale(0.8);
     background: var(--color-bg-secondary);
-}
-
-/* Main Action Button - Premium & High Contrast */
-.mainCreateBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--color-primary-600); /* Consistent Brand Blue */
-    color: white;
-    border-radius: var(--radius-base);
-    font-weight: 700;
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-base); /* Add elevation in base state */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mainCreateBtn:hover {
-    background: var(--color-primary-700);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.mainCreateBtn span {
-    font-size: 1.25rem;
-    line-height: 1;
-    margin-top: -2px; /* Visual optical alignment */
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,658 @@
+.container {
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.titleSection h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.titleSection p {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Stats Cards */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.statCard {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+}
+
+.statCard h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+}
+
+.statCard .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statCard.warning .value {
+    color: #f59e0b;
+}
+
+.statCard.success .value {
+    color: #10b981;
+}
+
+.statCard.info .value {
+    color: #3b82f6;
+}
+
+/* Filters */
+.filtersBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.searchInput {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filterSelect {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: white;
+    min-width: 150px;
+}
+
+/* Table */
+.tableContainer {
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background: var(--color-bg-secondary);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.quotationNumber {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.customerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.customerName {
+    font-weight: 500;
+}
+
+.customerContact {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.amount {
+    font-weight: 600;
+    text-align: right;
+}
+
+.dateInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.dateLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.dateExpired {
+    color: #ef4444;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.actionBtn {
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: white;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+    background: var(--color-bg-secondary);
+}
+
+.actionBtn.primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.actionBtn.primary:hover {
+    background: var(--color-primary-dark);
+}
+
+.actionBtn.success {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.actionBtn.success:hover {
+    background: #059669;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-text-secondary);
+}
+
+.emptyState h3 {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: white;
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modalHeader h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.closeBtn:hover {
+    color: var(--color-text-primary);
+}
+
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+/* Form Layout */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.formGroup.full {
+    grid-column: 1 / -1;
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* Product Search in Modal */
+.productSearch {
+    margin-bottom: 1.5rem;
+}
+
+.productSearchInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.productResults {
+    margin-top: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.productResult {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.productResult:last-child {
+    border-bottom: none;
+}
+
+.productResult:hover {
+    background: var(--color-bg-secondary);
+}
+
+.productResultInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.productResultName {
+    font-weight: 500;
+}
+
+.productResultSku {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.productResultPrice {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* Items Table in Modal */
+.itemsSection {
+    margin-bottom: 1.5rem;
+}
+
+.itemsSection h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-primary);
+}
+
+.itemsTable {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.itemsTable th {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.itemsTable td {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.itemsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.itemInput {
+    width: 70px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.removeItemBtn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+}
+
+.removeItemBtn:hover {
+    color: #dc2626;
+}
+
+.noItems {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Totals */
+.totalsSection {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.totalsBox {
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    min-width: 280px;
+}
+
+.totalsRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+}
+
+.totalsRow.total {
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* Detail Modal */
+.detailGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detailSection {
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.detailSection h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    margin: 0 0 0.75rem 0;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+}
+
+.detailRow label {
+    color: var(--color-text-secondary);
+}
+
+.detailRow span {
+    font-weight: 500;
+}
+
+/* Payment Modal for Conversion */
+.paymentSection {
+    margin-bottom: 1.5rem;
+}
+
+.paymentSection h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.paymentMethods {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.paymentMethodBtn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.paymentMethodBtn:hover {
+    border-color: var(--color-primary);
+}
+
+.paymentMethodBtn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.paymentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.paymentRow {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+}
+
+.paymentRow input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.paymentRow .method {
+    min-width: 100px;
+    font-weight: 500;
+}
+
+.removePaymentBtn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.25rem;
+}
+
+.paymentSummary {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.paymentSummary .remaining {
+    font-weight: 700;
+}
+
+.paymentSummary .remaining.error {
+    color: #ef4444;
+}
+
+.paymentSummary .remaining.success {
+    color: #10b981;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .detailGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .table {
+        font-size: 0.8125rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
