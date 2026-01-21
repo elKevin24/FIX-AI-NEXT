@@ -4,13 +4,14 @@
    ======================================== */
 
 .container {
-    padding: 1.5rem;
+    padding: 0; /* Eliminado padding redundante */
     max-width: 1400px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
 }
 
 @keyframes slideUp {
@@ -23,9 +24,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 0.5rem;
+    padding-bottom: 1rem; /* Estandarizado */
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-wrap: wrap;
 }
 
-.titleSection h1 {
+.header > * {
+    pointer-events: auto;
+}
+
+.headerContent h1 {
     font-size: 2rem;
     font-weight: 800;
     color: var(--color-gray-800);
@@ -36,7 +48,7 @@
     -webkit-text-fill-color: transparent;
 }
 
-.titleSection p {
+.headerContent p {
     color: var(--color-text-tertiary);
     font-size: 0.9375rem;
     margin-top: 0.25rem;

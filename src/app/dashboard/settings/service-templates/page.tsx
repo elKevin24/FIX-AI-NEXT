@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getServiceTemplates } from '@/lib/service-template-actions';
 import Link from 'next/link';
+import { Button } from '@/components/ui';
 import { ServiceTemplateList } from './ServiceTemplateList';
 import styles from './service-templates.module.css';
 
@@ -26,12 +27,9 @@ export default async function ServiceTemplatesPage() {
           <p className={styles.errorMessage}>
             Solo los administradores pueden gestionar plantillas de servicio.
           </p>
-          <Link
-            href="/dashboard"
-            className={styles.mainCreateBtn}
-          >
+          <Button as={Link} href="/dashboard" variant="primary">
             Volver al Dashboard
-          </Link>
+          </Button>
         </div>
       </div>
     );
@@ -41,20 +39,16 @@ export default async function ServiceTemplatesPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.pageTitle}>Plantillas de Servicio</h1>
-          <p className={styles.pageSubtitle}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1>Plantillas de Servicio</h1>
+          <p>
             Gestiona plantillas para agilizar la creación de tickets
           </p>
         </div>
-        <Link
-          href="/dashboard/settings/service-templates/create"
-          className={styles.mainCreateBtn}
-        >
-          <span>+</span>
-          Nueva Plantilla
-        </Link>
+        <Button as={Link} href="/dashboard/settings/service-templates/create" variant="primary">
+          + Nueva Plantilla
+        </Button>
       </div>
 
       <ServiceTemplateList templates={templates} />

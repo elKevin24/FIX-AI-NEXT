@@ -496,22 +496,27 @@ export async function POST(
     // ========================================================================
     if (updatedTicket) {
       try {
-        // Notify customer about status change
-        await notifyTicketStatusChange(
-          {
+        const ticketNotificationData = {
             id: updatedTicket.id,
             ticketNumber: updatedTicket.ticketNumber,
+            title: updatedTicket.title,
             deviceType: updatedTicket.deviceType,
             deviceModel: updatedTicket.deviceModel,
             status: updatedTicket.status,
+            customerId: updatedTicket.customerId,
             customer: {
               id: updatedTicket.customer.id,
               name: updatedTicket.customer.name,
               email: updatedTicket.customer.email,
             },
+            assignedToId: updatedTicket.assignedToId,
             assignedTo: updatedTicket.assignedTo,
             tenantId: updatedTicket.tenantId,
-          },
+        };
+
+        // Notify customer about status change
+        await notifyTicketStatusChange(
+          ticketNotificationData,
           {
             oldStatus: ticket.status,
             newStatus: updatedTicket.status,
@@ -526,22 +531,8 @@ export async function POST(
           updatedTicket.assignedTo
         ) {
           await notifyTechnicianAssigned(
-            updatedTicket.assignedToId,
-            updatedTicket.tenantId,
-            {
-              id: updatedTicket.id,
-              ticketNumber: updatedTicket.ticketNumber,
-              deviceType: updatedTicket.deviceType,
-              deviceModel: updatedTicket.deviceModel,
-              status: updatedTicket.status,
-              customer: {
-                id: updatedTicket.customer.id,
-                name: updatedTicket.customer.name,
-                email: updatedTicket.customer.email,
-              },
-              assignedTo: updatedTicket.assignedTo,
-              tenantId: updatedTicket.tenantId,
-            }
+            ticketNotificationData,
+            session.user.name || 'Un administrador'
           );
         }
       } catch (notificationError) {

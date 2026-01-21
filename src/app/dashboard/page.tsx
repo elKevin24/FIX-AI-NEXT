@@ -1,6 +1,15 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import styles from './page.module.css';
+import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
+import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
+import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
+import GlobalSearch from '@/components/GlobalSearch';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { getFinancialStats } from "@/lib/invoice-actions";
+import { getPOSSalesStats } from "@/lib/pos-actions";
+import RecentTicketsTable from '@/components/dashboard/RecentTicketsTable';
 
 // Define types locally since they may not be exported yet
 enum TicketPriority {
@@ -18,15 +27,6 @@ enum TicketStatus {
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
 }
-import styles from './page.module.css';
-import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
-import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
-import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
-import GlobalSearch from '@/components/GlobalSearch';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
-import { getFinancialStats } from "@/lib/invoice-actions";
-import { getPOSSalesStats } from "@/lib/pos-actions";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -167,11 +167,6 @@ export default async function DashboardPage() {
     // Format currency
     const formatCurrency = (amount: number) => `Q${amount.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    // Calculate daily income (Invoices paid today + POS sales today)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    // ... logic for daily income could be more complex, using totals for now
-
     const totalIncome = (financialStats?.totalPaid || 0) + (posStats?.totalSales || 0);
     const pendingCollection = financialStats?.totalPending || 0;
 
@@ -182,23 +177,23 @@ export default async function DashboardPage() {
     }));
 
     // Calculate technician metrics
-    const technicianMetrics = technicianStats.map((tech: typeof technicianStats[number]) => {
-        const completed = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
+    const technicianMetrics = technicianStats.map((tech: any) => {
+        const completed = tech.assignedTickets.filter((t: any) =>
             t.status === TicketStatus.RESOLVED || t.status === TicketStatus.CLOSED
         ).length;
 
-        const inProgress = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
+        const inProgress = tech.assignedTickets.filter((t: any) =>
             t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
         ).length;
 
         // Calculate average days to complete
-        const completedTickets = tech.assignedTickets.filter((t: typeof tech.assignedTickets[number]) =>
+        const completedTickets = tech.assignedTickets.filter((t: any) =>
             t.status === TicketStatus.RESOLVED || t.status === TicketStatus.CLOSED
         );
 
         let avgDays = 0;
         if (completedTickets.length > 0) {
-            const totalDays = completedTickets.reduce((sum: number, ticket: typeof completedTickets[number]) => {
+            const totalDays = completedTickets.reduce((sum: number, ticket: any) => {
                 const days = Math.floor(
                     (new Date(ticket.updatedAt).getTime() - new Date(ticket.createdAt).getTime()) /
                     (1000 * 60 * 60 * 24)
@@ -337,50 +332,7 @@ export default async function DashboardPage() {
             {recentTickets.length > 0 && (
                 <div className={styles.fullWidthCard}>
                     <h2 className={styles.chartTitle}>Tickets Recientes</h2>
-                    <div className={styles.recentTicketsTable}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Título</th>
-                                    <th>Cliente</th>
-                                    <th>Estado</th>
-                                    <th>Asignado a</th>
-                                    <th>Creado por</th>
-                                    <th>Modificado por</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recentTickets.map((ticket: typeof recentTickets[number]) => (
-                                    <tr key={ticket.id}>
-                                        <td>
-                                            <a href={`/dashboard/tickets/${ticket.id}`} className={styles.ticketLink}>
-                                                {ticket.id.slice(0, 8)}
-                                            </a>
-                                        </td>
-                                        <td>{ticket.title}</td>
-                                        <td>{ticket.customer.name}</td>
-                                        <td>
-                                            <TicketStatusBadge status={ticket.status} />
-                                        </td>
-                                        <td>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</td>
-                                        <td>
-                                            <span className={styles.auditInfo}>
-                                                {ticket.createdBy?.name || ticket.createdBy?.email || '-'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={styles.auditInfo}>
-                                                {ticket.updatedBy?.name || ticket.updatedBy?.email || '-'}
-                                            </span>
-                                        </td>
-                                        <td>{new Date(ticket.createdAt).toLocaleDateString('es-ES')}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <RecentTicketsTable data={recentTickets as any} />
                 </div>
             )}
         </div>

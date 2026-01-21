@@ -4,13 +4,14 @@
    ======================================== */
 
 .container {
-    padding: 1.5rem;
-    max-width: 1000px;
+    padding: 0; /* Eliminado padding redundante */
+    max-width: 1400px; /* Estandarizado */
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
 }
 
 @keyframes slideUp {
@@ -23,6 +24,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.backButtonContainer > * {
+    pointer-events: auto;
 }
 
 .backButton {

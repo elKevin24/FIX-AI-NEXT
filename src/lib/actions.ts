@@ -229,7 +229,12 @@ export async function authenticate(
  * @todo Add input sanitization/validation with Zod
  * @todo Support customer email/phone lookup
  */
-export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema>, customerName: string, tenantId: string) {
+export async function createTicket(
+    ticketData: z.infer<typeof CreateTicketSchema>, 
+    customerName: string, 
+    tenantId: string,
+    customerContact?: { email?: string | null, phone?: string | null }
+) {
     const session = await auth();
     
     // Security Check: Validate tenantId
@@ -238,9 +243,6 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
     }
     
     if (tenantId !== session.user.tenantId) {
-        // Allow Super Admin to bypass? For now, strict isolation.
-        // If createTicket is used by admins for other tenants, logic needs explicit check.
-        // Assuming strict isolation for this function signature.
         throw new Error('Unauthorized: Tenant mismatch');
     }
 
@@ -251,54 +253,122 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
     try {
         const tenantDb = getTenantPrisma(tenantId, session.user.id);
 
-        // Simple customer creation/lookup for demo
-        let customer = await tenantDb.customer.findFirst({
-            where: {
-                name: customerName,
-            }
-        });
+        // 1. SMART CUSTOMER LOOKUP
+        let customer = null;
 
+        // Try lookup by Email
+        if (customerContact?.email) {
+            customer = await tenantDb.customer.findFirst({
+                where: { email: customerContact.email }
+            });
+        }
 
+        // Try lookup by Phone if not found
+        if (!customer && customerContact?.phone) {
+            customer = await tenantDb.customer.findFirst({
+                where: { phone: customerContact.phone }
+            });
+        }
+
+        // Fallback to Name lookup
+        if (!customer) {
+            customer = await tenantDb.customer.findFirst({
+                where: { name: customerName }
+            });
+        }
+
+        // Create if not found
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {
                     name: customerName,
-                    tenantId: tenantId, // Satisfy TS, enforced by extension
+                    email: customerContact?.email || null,
+                    phone: customerContact?.phone || null,
+                    tenantId: tenantId,
                     createdById: session.user.id,
                     updatedById: session.user.id,
                 }
             });
         }
 
-        const createdTicket = await tenantDb.ticket.create({
-            data: {
-                title: ticketData.title,
-                description: ticketData.description,
-                customerId: customer.id,
-                status: 'OPEN',
-                tenantId: tenantId, // Satisfy TS, enforced by extension
-                deviceType: ticketData.deviceType,
-                deviceModel: ticketData.deviceModel,
-                serialNumber: ticketData.serialNumber,
-                accessories: ticketData.accessories,
-                checkInNotes: ticketData.checkInNotes,
-                createdById: session.user.id,
-                updatedById: session.user.id,
-            },
-            include: {
-                customer: true,
-                assignedTo: true,
+        // 2. ATOMIC TRANSACTION: Ticket + Stock
+        const createdTicket = await prisma.$transaction(async (tx: any) => {
+            // Create Ticket (Manual tenant injection for safety inside TX)
+            const newTicket = await tx.ticket.create({
+                data: {
+                    title: ticketData.title,
+                    description: ticketData.description,
+                    customerId: customer.id,
+                    status: ticketData.status || 'OPEN',
+                    priority: ticketData.priority || 'MEDIUM',
+                    tenantId: tenantId,
+                    deviceType: ticketData.deviceType,
+                    deviceModel: ticketData.deviceModel,
+                    serialNumber: ticketData.serialNumber,
+                    accessories: ticketData.accessories,
+                    checkInNotes: ticketData.checkInNotes,
+                    createdById: session.user.id,
+                    updatedById: session.user.id,
+                },
+                include: {
+                    customer: true,
+                    assignedTo: true,
+                }
+            });
+
+            // Manual Audit Log for Ticket Creation
+            await tx.auditLog.create({
+                data: {
+                    action: 'CREATE_TICKET',
+                    details: JSON.stringify({ id: newTicket.id, title: newTicket.title }),
+                    userId: session.user.id,
+                    tenantId: tenantId
+                }
+            });
+
+            // Process Initial Parts (Stock Consumption)
+            if (ticketData.initialParts && ticketData.initialParts.length > 0) {
+                for (const partItem of ticketData.initialParts) {
+                    // Check availability first (Read-only check)
+                    // Note: The actual decrement happens via DB Trigger 'trg_update_stock_on_usage'
+                    // when partUsage is created.
+                    const part = await tx.part.findUnique({
+                        where: { id: partItem.partId }
+                    });
+
+                    if (!part || part.quantity < partItem.quantity) {
+                        throw new Error(`Stock insuficiente para el repuesto: ${part?.name || partItem.partId}`);
+                    }
+
+                    // Create usage record (Trigger will update stock)
+                    await tx.partUsage.create({
+                        data: {
+                            ticketId: newTicket.id,
+                            partId: partItem.partId,
+                            quantity: partItem.quantity,
+                        },
+                    });
+
+                    // Check Low Stock (Notify later)
+                    if (part.quantity - partItem.quantity <= part.minStock) {
+                        // TODO: Queue notification
+                    }
+                }
             }
+
+            return newTicket;
         });
 
-        // Notify customer about ticket creation
+        // 3. NOTIFICATIONS
         try {
             await notifyTicketCreated({
                 id: createdTicket.id,
                 ticketNumber: (createdTicket as any).ticketNumber || createdTicket.id.slice(0, 8),
+                title: createdTicket.title,
                 deviceType: createdTicket.deviceType || 'PC',
                 deviceModel: createdTicket.deviceModel || '',
                 status: createdTicket.status,
+                customerId: createdTicket.customerId,
                 customer: {
                     id: createdTicket.customer.id,
                     name: createdTicket.customer.name,
@@ -311,8 +381,12 @@ export async function createTicket(ticketData: z.infer<typeof CreateTicketSchema
             console.error('Failed to send ticket creation notification:', notificationError);
         }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to create ticket:', error);
+        // Pass through specific errors like stock insufficient
+        if (error.message.includes('Stock insuficiente')) {
+            throw error;
+        }
         throw new Error('Database Error: Failed to create ticket.');
     }
 }
@@ -381,11 +455,15 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
             });
         }
 
-        // Fallback to name lookup (loose match)
+        // Smart Lookup: Try Email -> Phone -> Name
+        if (!customer && customerEmail) {
+            customer = await tenantDb.customer.findFirst({ where: { email: customerEmail } });
+        }
+        if (!customer && customerPhone) {
+            customer = await tenantDb.customer.findFirst({ where: { phone: customerPhone } });
+        }
         if (!customer) {
-            customer = await tenantDb.customer.findFirst({
-                where: { name: customerName },
-            });
+            customer = await tenantDb.customer.findFirst({ where: { name: customerName } });
         }
 
         // Create if not found
@@ -453,9 +531,11 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                 await notifyTicketCreated({
                     id: ticket.id,
                     ticketNumber: (ticket as any).ticketNumber || ticket.id.slice(0, 8),
+                    title: ticket.title,
                     deviceType: ticket.deviceType || 'PC',
                     deviceModel: ticket.deviceModel || '',
                     status: ticket.status,
+                    customerId: ticket.customerId,
                     customer: {
                         id: ticket.customer.id,
                         name: ticket.customer.name,
@@ -1014,10 +1094,19 @@ export async function updateTicket(prevState: any, formData: FormData) {
                 });
 
                 if (updatedFullTicket) {
-                    await notifyTechnicianAssigned(assignedToId, session.user.tenantId, {
+                    const ticketData = {
                         ...updatedFullTicket,
                         ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
-                    } as any);
+                        title: updatedFullTicket.title,
+                        customerId: updatedFullTicket.customerId,
+                        customer: {
+                            id: updatedFullTicket.customer.id,
+                            name: updatedFullTicket.customer.name,
+                            email: updatedFullTicket.customer.email,
+                        }
+                    } as any;
+
+                    await notifyTechnicianAssigned(ticketData, session.user.name || 'Admin');
                 }
              } catch (e) {
                 console.error('Failed to notify technician assignment:', e);
@@ -1033,10 +1122,19 @@ export async function updateTicket(prevState: any, formData: FormData) {
                 });
 
                 if (updatedFullTicket) {
-                    await notifyTicketStatusChange({
+                    const ticketData = {
                         ...updatedFullTicket,
                         ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
-                    } as any, {
+                        title: updatedFullTicket.title,
+                        customerId: updatedFullTicket.customerId,
+                        customer: {
+                            id: updatedFullTicket.customer.id,
+                            name: updatedFullTicket.customer.name,
+                            email: updatedFullTicket.customer.email,
+                        }
+                    } as any;
+
+                    await notifyTicketStatusChange(ticketData, {
                         oldStatus: existingTicket.status as any,
                         newStatus: status as any,
                         note: formData.get('note') as string || undefined

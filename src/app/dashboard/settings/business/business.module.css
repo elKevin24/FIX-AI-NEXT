@@ -1,10 +1,20 @@
 .container {
-    padding: 1.5rem;
-    max-width: 800px;
+    padding: 0; /* Eliminado padding redundante */
+    max-width: 1400px; /* Estandarizado */
+    margin: 0 auto;
+    width: 100%;
 }
 
 .header {
-    margin-bottom: 2rem;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .header h1 {

@@ -3,9 +3,10 @@
    ======================================== */
 
 .container {
-    padding: 1.5rem;
-    max-width: 1600px;
+    /* Padding eliminado */
+    max-width: 1400px; /* Estandarizado a 1400px */
     margin: 0 auto;
+    width: 100%;
 }
 
 /* ========== HEADER - REFINED ========== */
@@ -14,8 +15,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.75rem;
+    margin-bottom: 0.5rem;
     padding-bottom: 1rem;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-wrap: wrap;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .headerContent h1 {

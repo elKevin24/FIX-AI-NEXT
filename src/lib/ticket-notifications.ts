@@ -6,13 +6,17 @@ import { sendEmail } from './email-service';
 
 export interface TicketNotificationData {
     id: string;
-    ticketNumber?: string;
+    ticketNumber?: string | null;
     title: string;
+    description?: string;
     status: string;
     tenantId: string;
     customerId: string;
+    deviceType?: string | null;
+    deviceModel?: string | null;
     assignedToId?: string | null;
     customer: {
+        id?: string;
         name: string;
         email?: string | null;
     };
@@ -39,7 +43,7 @@ const STATUS_LABELS: Record<string, string> = {
  */
 export async function notifyTicketStatusChange(
     ticket: TicketNotificationData,
-    { oldStatus, newStatus }: { oldStatus: string; newStatus: string }
+    { oldStatus, newStatus, note }: { oldStatus: string; newStatus: string; note?: string }
 ) {
     const ticketRef = ticket.ticketNumber || ticket.id.slice(0, 8);
     const statusLabel = STATUS_LABELS[newStatus] || newStatus;

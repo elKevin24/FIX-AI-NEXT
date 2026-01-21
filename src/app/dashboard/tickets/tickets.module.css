@@ -6,7 +6,10 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0; /* Eliminamos el gap global para control manual preciso */
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* ========== HEADER & GENERAL ========== */
@@ -16,8 +19,17 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem; /* Espacio controlado entre Header y Buscador */
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
+    margin-top: -1.5rem;
+    pointer-events: none;
+}
+
+.header > * {
+    pointer-events: auto; /* Hijos clickeables */
 }
 
 .header h1 {
@@ -26,6 +38,12 @@
     color: var(--color-gray-800);
     margin: 0;
     letter-spacing: -0.02em;
+}
+
+.headerContent p {
+    font-size: 0.9375rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.25rem;
 }
 
 .superAdminBadge {
@@ -40,31 +58,6 @@
     border-radius: var(--radius-base);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-}
-
-.createBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    background: var(--color-primary-600);
-    color: white;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: var(--radius-base);
-    text-decoration: none;
-    transition: background var(--transition-fast);
-    border: none;
-    cursor: pointer;
-}
-
-.createBtn:hover {
-    background: var(--color-primary-700);
-}
-
-.createBtn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
 }
 
 /* ========== SECTION STYLES (Ticket Detail) ========== */

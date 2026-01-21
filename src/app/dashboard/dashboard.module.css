@@ -30,7 +30,7 @@
 /* Main Content Area - Liquid Glass */
 .mainContent {
     flex: 1;
-    padding: 1rem;
+    padding: 0 1rem 1rem 1rem; /* Eliminado padding superior */
     position: relative;
     z-index: 1;
     overflow-y: auto;
@@ -44,7 +44,7 @@
     }
 
     .mainContent {
-        padding: 2rem;
+        padding: 0 2rem 2rem 2rem; /* Eliminado padding superior */
     }
 }
 

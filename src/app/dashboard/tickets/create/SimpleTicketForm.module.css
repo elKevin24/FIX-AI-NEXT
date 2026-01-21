@@ -72,9 +72,16 @@
 /* Header */
 .header {
     text-align: center;
-    margin-bottom: 0.25rem;
-    /* Reduced margin */
+    margin-bottom: 0.5rem;
     padding: 0;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.header > * {
+    pointer-events: auto;
 }
 
 .title {

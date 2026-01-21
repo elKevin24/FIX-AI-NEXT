@@ -1,0 +1,606 @@
+.container {
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.titleSection h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.titleSection p {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Stats Cards */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.statCard {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+}
+
+.statCard h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+}
+
+.statCard .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statCard.warning .value {
+    color: #f59e0b;
+}
+
+.statCard.error .value {
+    color: #ef4444;
+}
+
+/* Filters */
+.filtersBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.searchInput {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filterSelect {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: white;
+    min-width: 150px;
+}
+
+/* Table */
+.tableContainer {
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background: var(--color-bg-secondary);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.creditNoteNumber {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.saleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.saleNumber {
+    font-weight: 500;
+}
+
+.customerName {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.amount {
+    font-weight: 600;
+    text-align: right;
+    color: #ef4444;
+}
+
+.reason {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.actionBtn {
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: white;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+    background: var(--color-bg-secondary);
+}
+
+.actionBtn.primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.actionBtn.primary:hover {
+    background: var(--color-primary-dark);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-text-secondary);
+}
+
+.emptyState h3 {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: white;
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modalHeader h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.closeBtn:hover {
+    color: var(--color-text-primary);
+}
+
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+/* Search Sale Section */
+.searchSection {
+    margin-bottom: 1.5rem;
+}
+
+.searchSection h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.searchResults {
+    margin-top: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.searchResult {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.searchResult:last-child {
+    border-bottom: none;
+}
+
+.searchResult:hover {
+    background: var(--color-bg-secondary);
+}
+
+.searchResultInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.searchResultNumber {
+    font-weight: 500;
+}
+
+.searchResultCustomer {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.searchResultTotal {
+    font-weight: 600;
+}
+
+/* Sale Details */
+.saleDetails {
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.saleDetails h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+}
+
+.saleDetailsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.saleDetailRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+}
+
+.saleDetailRow label {
+    color: var(--color-text-secondary);
+}
+
+.saleDetailRow span {
+    font-weight: 500;
+}
+
+/* Items Selection */
+.itemsSection {
+    margin-bottom: 1.5rem;
+}
+
+.itemsSection h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.itemsTable {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.itemsTable th {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.itemsTable td {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.itemsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.itemInput {
+    width: 70px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.itemInput:disabled {
+    background: var(--color-bg-secondary);
+    cursor: not-allowed;
+}
+
+.itemCheckbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.noAvailable {
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+/* Form */
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.formGroup .required {
+    color: #ef4444;
+}
+
+/* Totals */
+.totalsSection {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.totalsBox {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    min-width: 250px;
+}
+
+.totalsRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+}
+
+.totalsRow.total {
+    border-top: 1px solid #fecaca;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #dc2626;
+}
+
+/* Detail Modal */
+.detailGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detailSection {
+    background: var(--color-bg-secondary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.detailSection h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    margin: 0 0 0.75rem 0;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
+}
+
+.detailRow label {
+    color: var(--color-text-secondary);
+}
+
+.detailRow span {
+    font-weight: 500;
+}
+
+/* Refund Modal */
+.refundSection {
+    margin-bottom: 1.5rem;
+}
+
+.refundSection h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.refundMethods {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.refundMethodBtn {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.refundMethodBtn:hover {
+    border-color: var(--color-primary);
+}
+
+.refundMethodBtn.active {
+    border-color: var(--color-primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.refundMethodBtn .icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detailGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .saleDetailsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .table {
+        font-size: 0.8125rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
