@@ -30,7 +30,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-top: -1.5rem; /* Ajuste solicitado por el usuario */
+    margin-bottom: 0.5rem; /* Restaurado con valor compacto */
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.header > * {
+    pointer-events: auto; /* Reactivar clicks en elementos hijos */
 }
 
 .header h1 {
@@ -277,7 +285,7 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
 
     .searchBar {
