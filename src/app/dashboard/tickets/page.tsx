@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
 import TicketSearchFilters from './TicketSearchFilters';
@@ -28,11 +29,10 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
     // Super Admin: adminkev@example.com puede ver TODO
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const tenantId = session.user.tenantId;
 
-    // Construir el where clause dinámicamente
-    const where: any = isSuperAdmin ? {} : {
-        tenantId: session.user.tenantId,
-    };
+    // Construir el where clause base
+    const where: any = {};
 
     // Filtro de búsqueda (ID, título o cliente)
     if (search) {
@@ -63,22 +63,40 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         };
     }
 
-    // Query con filtros
-    const tickets = await prisma.ticket.findMany({
-        where,
-        include: {
-            customer: true,
-            assignedTo: true,
-            tenant: true, // Para mostrar el tenant en la tabla si es super admin
-        },
-        orderBy: {
-            updatedAt: 'desc',
-        },
-    });
+    let tickets;
 
-    // Debug info (console only)
     if (isSuperAdmin) {
+        // Super Admin usa prisma directo sin filtro de tenant
+        tickets = await prisma.ticket.findMany({
+            where,
+            include: {
+                customer: true,
+                assignedTo: true,
+                tenant: true,
+            },
+            orderBy: {
+                updatedAt: 'desc',
+            },
+        });
         console.log('👑 Super Admin accessing all tickets');
+    } else {
+        // Usuarios normales usan tenantPrisma
+        if (!tenantId) {
+             return <div>Error: Tenant ID missing for user</div>;
+        }
+        
+        const tenantPrisma = getTenantPrisma(tenantId);
+        tickets = await tenantPrisma.ticket.findMany({
+            where, // El wrapper inyecta { tenantId } automáticamente
+            include: {
+                customer: true,
+                assignedTo: true,
+                tenant: true,
+            },
+            orderBy: {
+                updatedAt: 'desc',
+            },
+        });
     }
 
     return (

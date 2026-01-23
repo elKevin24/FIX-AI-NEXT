@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 
 /**
  * GET /api/search - Global search endpoint
@@ -26,42 +27,79 @@ export async function GET(request: NextRequest) {
     }
 
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
-    const tenantFilter = isSuperAdmin ? {} : { tenantId: session.user.tenantId };
+    const tenantId = session.user.tenantId;
 
     try {
-        // Search tickets
-        const tickets = await prisma.ticket.findMany({
-            where: {
-                ...tenantFilter,
-                OR: [
-                    { title: { contains: query, mode: 'insensitive' } },
-                    { description: { contains: query, mode: 'insensitive' } },
-                    { id: { contains: query, mode: 'insensitive' } },
-                    { customer: { name: { contains: query, mode: 'insensitive' } } },
-                ],
-            },
-            include: {
-                customer: {
-                    select: { name: true },
-                },
-            },
-            take: 5,
-            orderBy: { updatedAt: 'desc' },
-        });
+        let tickets;
+        let customers;
 
-        // Search customers
-        const customers = await prisma.customer.findMany({
-            where: {
-                ...tenantFilter,
-                OR: [
-                    { name: { contains: query, mode: 'insensitive' } },
-                    { email: { contains: query, mode: 'insensitive' } },
-                    { phone: { contains: query, mode: 'insensitive' } },
-                ],
-            },
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-        });
+        if (isSuperAdmin) {
+            // Super Admin searches everything
+            tickets = await prisma.ticket.findMany({
+                where: {
+                    OR: [
+                        { title: { contains: query, mode: 'insensitive' } },
+                        { description: { contains: query, mode: 'insensitive' } },
+                        { id: { contains: query, mode: 'insensitive' } },
+                        { customer: { name: { contains: query, mode: 'insensitive' } } },
+                    ],
+                },
+                include: {
+                    customer: {
+                        select: { name: true },
+                    },
+                },
+                take: 5,
+                orderBy: { updatedAt: 'desc' },
+            });
+
+            customers = await prisma.customer.findMany({
+                where: {
+                    OR: [
+                        { name: { contains: query, mode: 'insensitive' } },
+                        { email: { contains: query, mode: 'insensitive' } },
+                        { phone: { contains: query, mode: 'insensitive' } },
+                    ],
+                },
+                take: 5,
+                orderBy: { createdAt: 'desc' },
+            });
+        } else {
+            // Standard users use tenant-scoped client
+            const tenantPrisma = getTenantPrisma(tenantId);
+            
+            tickets = await tenantPrisma.ticket.findMany({
+                where: {
+                    // tenantId auto-injected
+                    OR: [
+                        { title: { contains: query, mode: 'insensitive' } },
+                        { description: { contains: query, mode: 'insensitive' } },
+                        { id: { contains: query, mode: 'insensitive' } },
+                        { customer: { name: { contains: query, mode: 'insensitive' } } },
+                    ],
+                },
+                include: {
+                    customer: {
+                        select: { name: true },
+                    },
+                },
+                take: 5,
+                orderBy: { updatedAt: 'desc' },
+            });
+
+            customers = await tenantPrisma.customer.findMany({
+                where: {
+                    // tenantId auto-injected
+                    OR: [
+                        { name: { contains: query, mode: 'insensitive' } },
+                        { email: { contains: query, mode: 'insensitive' } },
+                        { phone: { contains: query, mode: 'insensitive' } },
+                    ],
+                },
+                take: 5,
+                orderBy: { createdAt: 'desc' },
+            });
+        }
 
         const statusLabels: Record<string, string> = {
             'OPEN': 'Abierto',
@@ -72,14 +110,14 @@ export async function GET(request: NextRequest) {
         };
 
         const results = [
-            ...tickets.map((ticket: typeof tickets[number]) => ({
+            ...tickets.map((ticket: any) => ({
                 type: 'ticket' as const,
                 id: ticket.id,
                 title: ticket.title,
                 subtitle: `Cliente: ${ticket.customer.name}`,
                 status: statusLabels[ticket.status] || ticket.status,
             })),
-            ...customers.map((customer: typeof customers[number]) => ({
+            ...customers.map((customer: any) => ({
                 type: 'customer' as const,
                 id: customer.id,
                 title: customer.name,

@@ -16,17 +16,17 @@ import { redirect } from 'next/navigation';
 export async function createPurchaseOrder(formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Permiso denegado' };
+        return { success: false, message: 'Permiso denegado' };
     }
 
     const supplier = formData.get('supplier') as string;
     
     if (!supplier) {
-        return { message: 'El proveedor es requerido' };
+        return { success: false, message: 'El proveedor es requerido' };
     }
 
     let po;
@@ -46,7 +46,7 @@ export async function createPurchaseOrder(formData: FormData) {
         
     } catch (error) {
         console.error('Failed to create purchase order:', error);
-        return { message: 'Error al crear la orden de compra' };
+        return { success: false, message: 'Error al crear la orden de compra' };
     }
 
     revalidatePath('/dashboard/inventory/purchases');
@@ -55,10 +55,10 @@ export async function createPurchaseOrder(formData: FormData) {
 
 export async function addPurchaseItem(orderId: string, partId: string, quantity: number, unitCost: number) {
      const session = await auth();
-     if (!session?.user?.tenantId) return { message: 'No autorizado' };
-     if (session.user.role !== 'ADMIN') return { message: 'Permiso denegado' };
+     if (!session?.user?.tenantId) return { success: false, message: 'No autorizado' };
+     if (session.user.role !== 'ADMIN') return { success: false, message: 'Permiso denegado' };
 
-     if (quantity <= 0 || unitCost < 0) return { message: 'Cantidad o costo inválidos' };
+     if (quantity <= 0 || unitCost < 0) return { success: false, message: 'Cantidad o costo inválidos' };
 
      try {
          const db = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -66,7 +66,7 @@ export async function addPurchaseItem(orderId: string, partId: string, quantity:
          // Verify order is PENDING
          const order = await db.purchaseOrder.findUnique({ where: { id: orderId } });
          if (!order || order.status !== 'PENDING') {
-             return { message: 'La orden no existe o ya no es editable' };
+             return { success: false, message: 'La orden no existe o ya no es editable' };
          }
 
          await db.purchaseItem.create({
@@ -102,14 +102,14 @@ export async function addPurchaseItem(orderId: string, partId: string, quantity:
 
      } catch (error) {
          console.error(error);
-         return { message: 'Error al agregar item' };
+         return { success: false, message: 'Error al agregar item' };
      }
 }
 
 export async function receivePurchaseOrder(orderId: string) {
     const session = await auth();
-     if (!session?.user?.tenantId) return { message: 'No autorizado' };
-     if (session.user.role !== 'ADMIN') return { message: 'Permiso denegado' };
+     if (!session?.user?.tenantId) return { success: false, message: 'No autorizado' };
+     if (session.user.role !== 'ADMIN') return { success: false, message: 'Permiso denegado' };
 
      try {
          const db = getTenantPrisma(session.user.tenantId, session.user.id); // Base client
@@ -174,6 +174,6 @@ export async function receivePurchaseOrder(orderId: string) {
 
      } catch (error: any) {
          console.error('Error receiving order:', error);
-         return { message: error.message || 'Error al procesar la recepción' };
+         return { success: false, message: error.message || 'Error al procesar la recepción' };
      }
 }

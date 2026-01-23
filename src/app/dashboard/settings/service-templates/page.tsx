@@ -46,9 +46,14 @@ export default async function ServiceTemplatesPage() {
             Gestiona plantillas para agilizar la creación de tickets
           </p>
         </div>
-        <Button as={Link} href="/dashboard/settings/service-templates/create" variant="primary">
-          + Nueva Plantilla
-        </Button>
+        <div className={styles.headerActions}>
+          <Button as={Link} href="/dashboard/settings/service-templates/analytics" variant="secondary">
+            📊 Analytics
+          </Button>
+          <Button as={Link} href="/dashboard/settings/service-templates/create" variant="primary">
+            + Nueva Plantilla
+          </Button>
+        </div>
       </div>
 
       <ServiceTemplateList templates={templates} />

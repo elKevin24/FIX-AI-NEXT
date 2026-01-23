@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { renderToStream } from '@react-pdf/renderer';
 import { WorkOrderPDF } from '@/components/pdf/WorkOrderPDF';
 
@@ -11,41 +12,61 @@ export async function GET(
     try {
         const session = await auth();
 
-        if (!session?.user) {
+        if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
         const { id } = await params;
         const isSuperAdmin = session.user.email === 'adminkev@example.com';
+        const tenantId = session.user.tenantId;
 
-        // Buscar el ticket con toda la información necesaria
-        const ticket = await prisma.ticket.findUnique({
-            where: { id },
-            include: {
-                customer: true,
-                assignedTo: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
+        let ticket;
+
+        if (isSuperAdmin) {
+            ticket = await prisma.ticket.findUnique({
+                where: { id },
+                include: {
+                    customer: true,
+                    assignedTo: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                        },
+                    },
+                    tenant: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
                     },
                 },
-                tenant: {
-                    select: {
-                        id: true,
-                        name: true,
+            });
+        } else {
+            const tenantPrisma = getTenantPrisma(tenantId);
+            ticket = await tenantPrisma.ticket.findUnique({
+                where: { id },
+                include: {
+                    customer: true,
+                    assignedTo: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                        },
+                    },
+                    tenant: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
                     },
                 },
-            },
-        });
+            });
+        }
 
         if (!ticket) {
             return NextResponse.json({ error: 'Ticket no encontrado' }, { status: 404 });
-        }
-
-        // Verificar permisos de tenant (a menos que sea super admin)
-        if (!isSuperAdmin && ticket.tenantId !== session.user.tenantId) {
-            return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
         }
 
         // Generar el PDF
