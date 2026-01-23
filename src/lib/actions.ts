@@ -7,7 +7,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
-import { CreateTicketSchema, CreateBatchTicketsSchema, CreateUserSchema, UpdateUserSchema, CreateCustomerSchema, UpdateCustomerSchema, CreatePartSchema, UpdatePartSchema } from './schemas';
+import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema, CreateUserSchema, UpdateUserSchema, CreateCustomerSchema, UpdateCustomerSchema, CreatePartSchema, UpdatePartSchema } from './schemas';
 import { createNotification } from '@/lib/notifications';
 import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTechnicianAssigned } from './ticket-notifications';
 
@@ -153,22 +153,35 @@ export async function searchTicket(rawId: string) {
  * - Redirects to /dashboard on success (via signIn)
  * - Sets authentication cookies
  */
+import { ActionState } from '@/lib/types';
+
+// ... (existing imports, but add ActionState above if not reusing existing replacement block)
+
+// We need to keep the file imports valid. I will assume imports are at the top.
+// Since I can't easily jump to top and back without multiple replace calls, I'll update the functions first and assume I add imports later or if I did it already.
+// Wait, I haven't added the import yet. I should add it with the `authenticate` change if it's close to top, or just add it.
+// The file starts with imports. I'll add the import first.
+
+/**
+ * Authenticate user with credentials (Server Action)
+ */
 export async function authenticate(
-    prevState: string | undefined,
+    prevState: any | undefined,
     formData: FormData,
-) {
+): Promise<ActionState> {
     try {
         await signIn('credentials', {
             ...Object.fromEntries(formData),
             redirectTo: '/dashboard',
         });
+        return { success: true, message: 'Redirecting...' };
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
                 case 'CredentialsSignin':
-                    return 'Invalid credentials.';
+                    return { success: false, message: 'Invalid credentials.' };
                 default:
-                    return 'Something went wrong.';
+                    return { success: false, message: 'Something went wrong.' };
             }
         }
         throw error;
@@ -177,113 +190,76 @@ export async function authenticate(
 
 /**
  * Create a new ticket with automatic customer lookup/creation (Server Action)
- *
- * @description Creates a ticket for authenticated users. Automatically creates or finds
- * a customer by name within the user's tenant. Validates required fields and enforces
- * tenant isolation. Redirects to tickets list on success.
- *
- * @param {any} prevState - Previous form state (from useFormState, unused)
- * @param {FormData} formData - Form data with title, description, customerName fields
- *
- * @returns {Promise<{ message: string } | void>} Error object or void (redirects on success)
- *
- * @example
- * // In a React form
- * const [state, formAction] = useFormState(createTicket, undefined);
- *
- * <form action={formAction}>
- *   <input name="title" required />
- *   <textarea name="description" required />
- *   <input name="customerName" required />
- *   <button type="submit">Create Ticket</button>
- *   {state?.message && <p>{state.message}</p>}
- * </form>
- *
- * @example
- * // Success: Redirects to /dashboard/tickets
- *
- * @example
- * // Error responses
- * { message: "Unauthorized" }
- * { message: "Missing fields" }
- * { message: "Database Error: Failed to create ticket." }
- *
- * @security
- * - Requires authenticated session with tenantId
- * - Automatic tenant isolation for customer lookup
- * - Created ticket inherits user's tenantId
- *
- * @sideEffects
- * - May create new Customer record if name doesn't exist
- * - Creates Ticket record with status "OPEN"
- * - Redirects to /dashboard/tickets on success
- * - Does NOT create audit log (should be added)
- *
- * @edgeCases
- * - Customer name match is exact (case-sensitive)
- * - Multiple customers with same name: uses first found
- * - Empty strings fail "Missing fields" validation
- * - Trims whitespace from inputs (FormData behavior)
- *
- * @todo Add audit log creation for ticket creation
- * @todo Add input sanitization/validation with Zod
- * @todo Support customer email/phone lookup
  */
-export async function createTicket(
-    ticketData: z.infer<typeof CreateTicketSchema>, 
-    customerName: string, 
-    tenantId: string,
-    customerContact?: { email?: string | null, phone?: string | null }
-) {
+export async function createTicket(prevState: any, formData: FormData): Promise<ActionState> {
     const session = await auth();
-    
-    // Security Check: Validate tenantId
     if (!session?.user?.tenantId) {
-        throw new Error('Unauthorized');
+        return { success: false, message: 'No autorizado' };
     }
+
+    const tenantId = session.user.tenantId;
+
+    // Extract basic fields
+    const rawData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        status: formData.get('status'),
+        priority: formData.get('priority'),
+        deviceType: formData.get('deviceType'),
+        deviceModel: formData.get('deviceModel'),
+        serialNumber: formData.get('serialNumber'),
+        accessories: formData.get('accessories'),
+        checkInNotes: formData.get('checkInNotes'),
+    };
     
-    if (tenantId !== session.user.tenantId) {
-        throw new Error('Unauthorized: Tenant mismatch');
+    // Parse Initial Parts safely
+    let initialParts = [];
+    try {
+        const partsJson = formData.get('initialParts');
+        if (partsJson && typeof partsJson === 'string') {
+             initialParts = JSON.parse(partsJson);
+        }
+    } catch (e) {
+        // Ignore parse error, validation will catch it if needed or it will be empty
+    }
+
+    const customerName = formData.get('customerName') as string;
+
+    // Validate with Zod
+    const validatedFields = CreateTicketSchema.safeParse({
+        ...rawData,
+        initialParts
+    });
+
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: 'Error de validación',
+            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>
+        };
     }
 
     if (!customerName || customerName.trim() === '') {
-        throw new Error('Customer name is required');
+        return { success: false, message: 'El nombre del cliente es requerido '};
     }
+
+    const ticketData = validatedFields.data;
 
     try {
         const tenantDb = getTenantPrisma(tenantId, session.user.id);
+        
+        // 1. Find or Create Customer
+        let customer = await tenantDb.customer.findFirst({
+            where: { name: customerName } // Tenant filter applied by getTenantPrisma? 
+            // WAIT: getTenantPrisma returns a client where read operations might NOT be filtered automatically if using `findFirst` without explicit `where: { tenantId }` unless using an extension. 
+            // The instruction says "getTenantPrisma(tenantId)... Esto inyecta automáticamente el filtro where: { tenantId }".
+            // So we trust `findFirst({ where: { name } })` effectively becomes `where: { name, tenantId }`.
+        });
 
-        // 1. SMART CUSTOMER LOOKUP
-        let customer = null;
-
-        // Try lookup by Email
-        if (customerContact?.email) {
-            customer = await tenantDb.customer.findFirst({
-                where: { email: customerContact.email }
-            });
-        }
-
-        // Try lookup by Phone if not found
-        if (!customer && customerContact?.phone) {
-            customer = await tenantDb.customer.findFirst({
-                where: { phone: customerContact.phone }
-            });
-        }
-
-        // Fallback to Name lookup
-        if (!customer) {
-            customer = await tenantDb.customer.findFirst({
-                where: { name: customerName }
-            });
-        }
-
-        // Create if not found
         if (!customer) {
             customer = await tenantDb.customer.create({
                 data: {
                     name: customerName,
-                    email: customerContact?.email || null,
-                    phone: customerContact?.phone || null,
                     tenantId: tenantId,
                     createdById: session.user.id,
                     updatedById: session.user.id,
@@ -292,8 +268,10 @@ export async function createTicket(
         }
 
         // 2. ATOMIC TRANSACTION: Ticket + Stock
-        const createdTicket = await prisma.$transaction(async (tx: any) => {
-            // Create Ticket (Manual tenant injection for safety inside TX)
+        const transactionResult = await prisma.$transaction(async (tx: any) => {
+            const lowStockAlerts: Array<{name: string, quantity: number}> = [];
+            
+            // Create Ticket
             const newTicket = await tx.ticket.create({
                 data: {
                     title: ticketData.title,
@@ -316,7 +294,7 @@ export async function createTicket(
                 }
             });
 
-            // Manual Audit Log for Ticket Creation
+            // Audit Log
             await tx.auditLog.create({
                 data: {
                     action: 'CREATE_TICKET',
@@ -326,12 +304,11 @@ export async function createTicket(
                 }
             });
 
-            // Process Initial Parts (Stock Consumption)
+             // Process Initial Parts
             if (ticketData.initialParts && ticketData.initialParts.length > 0) {
+                // IMPORTANT: TypeScript constraint - explicitly cast to any or correct type inside tx context if needed
+                // But generally tx inherits Prisma Client types.
                 for (const partItem of ticketData.initialParts) {
-                    // Check availability first (Read-only check)
-                    // Note: The actual decrement happens via DB Trigger 'trg_update_stock_on_usage'
-                    // when partUsage is created.
                     const part = await tx.part.findUnique({
                         where: { id: partItem.partId }
                     });
@@ -340,7 +317,6 @@ export async function createTicket(
                         throw new Error(`Stock insuficiente para el repuesto: ${part?.name || partItem.partId}`);
                     }
 
-                    // Create usage record (Trigger will update stock)
                     await tx.partUsage.create({
                         data: {
                             ticketId: newTicket.id,
@@ -349,72 +325,75 @@ export async function createTicket(
                         },
                     });
 
-                    // Check Low Stock (Notify later)
+                    // Check Low Stock
                     if (part.quantity - partItem.quantity <= part.minStock) {
-                        // TODO: Queue notification
+                       lowStockAlerts.push({
+                           name: part.name,
+                           quantity: part.quantity - partItem.quantity
+                       });
                     }
                 }
             }
 
-            return newTicket;
+            return { ticket: newTicket, lowStockAlerts };
         });
 
+        // Destructure result
+        const { ticket: createdTicket, lowStockAlerts: alerts } = transactionResult;
+
         // 3. NOTIFICATIONS
+        // Low Stock
+        if (alerts.length > 0) {
+            Promise.all(alerts.map(async (alert) => {
+                try {
+                    await notifyLowStock(alert.name, alert.quantity, tenantId);
+                } catch (e) {
+                    console.error(`Failed to notify low stock for ${alert.name}`, e);
+                }
+            })).catch(err => console.error('Error processing low stock alerts', err));
+        }
+
+        // Ticket Created
         try {
             await notifyTicketCreated({
                 id: createdTicket.id,
                 ticketNumber: (createdTicket as any).ticketNumber || createdTicket.id.slice(0, 8),
                 title: createdTicket.title,
-                deviceType: createdTicket.deviceType || 'PC',
-                deviceModel: createdTicket.deviceModel || '',
                 status: createdTicket.status,
+                tenantId: createdTicket.tenantId,
                 customerId: createdTicket.customerId,
+                deviceType: createdTicket.deviceType,
+                deviceModel: createdTicket.deviceModel,
+                assignedToId: createdTicket.assignedToId,
                 customer: {
                     id: createdTicket.customer.id,
                     name: createdTicket.customer.name,
                     email: createdTicket.customer.email,
                 },
-                assignedTo: createdTicket.assignedTo,
-                tenantId: createdTicket.tenantId,
+                assignedTo: createdTicket.assignedTo ? {
+                    name: createdTicket.assignedTo.name,
+                    email: createdTicket.assignedTo.email
+                } : null,
             });
-        } catch (notificationError) {
-            console.error('Failed to send ticket creation notification:', notificationError);
+        } catch (e) {
+            console.error('Error sending ticket created notification:', e);
         }
 
-    } catch (error: any) {
-        console.error('Failed to create ticket:', error);
-        // Pass through specific errors like stock insufficient
-        if (error.message.includes('Stock insuficiente')) {
-            throw error;
-        }
-        throw new Error('Database Error: Failed to create ticket.');
+    } catch (error) {
+         console.error('Failed to create ticket:', error);
+         return { success: false, message: error instanceof Error ? error.message : 'Error creando el ticket' };
     }
+
+    redirect('/dashboard/tickets');
 }
 
 /**
  * Create multiple new tickets for a single customer (Server Action for batch creation)
- *
- * @description Creates multiple tickets for authenticated users. It expects an array of
- * ticket data, validates each entry with Zod, and then processes them in a Prisma transaction.
- * Automatically creates or finds a customer by name within the user's tenant.
- * Redirects to tickets list on success.
- *
- * @param {any} prevState - Previous form state (from useFormState, unused)
- * @param {FormData} formData - Form data containing customerName and an array of ticket details
- *
- * @returns {Promise<{ message: string } | void>} Error object or void (redirects on success)
- *
- * @security
- * - Requires authenticated session with tenantId
- * - Automatic tenant isolation for customer lookup
- * - Created tickets inherit user's tenantId
- * - Uses Zod for robust input validation
- * - Uses Prisma transactions for atomicity (all or nothing)
  */
-export async function createBatchTickets(prevState: any, formData: FormData) {
+export async function createBatchTickets(prevState: any, formData: FormData): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'Unauthorized' };
+        return { success: false, message: 'Unauthorized' };
     }
 
     const customerName = formData.get('customerName') as string;
@@ -423,23 +402,27 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
     const customerPhone = formData.get('customerPhone') as string;
     const customerDpi = formData.get('customerDpi') as string;
     const customerNit = formData.get('customerNit') as string;
-    const rawTickets = formData.get('tickets') as string; // Expecting a JSON string of tickets
+    const rawTickets = formData.get('tickets') as string;
 
     if (!customerName || !rawTickets) {
-        return { message: 'Customer name and ticket data are required.' };
+        return { success: false, message: 'Customer name and ticket data are required.' };
     }
 
     let ticketsData;
     try {
         ticketsData = JSON.parse(rawTickets);
-        // Validate the entire array of tickets using Zod
-        // CreateBatchTicketsSchema is an array of CreateTicketSchema
-        CreateBatchTicketsSchema.parse(ticketsData);
-    } catch (e) {
-        if (e instanceof z.ZodError) {
-            return { message: `Validation Error: ${e.errors.map(err => err.message).join(', ')}` };
+        const validated = CreateBatchTicketsSchema.safeParse(ticketsData);
+        if (!validated.success) {
+            return { 
+                success: false, 
+                message: 'Error de validación de tickets',
+                // Flatten array errors is tricky, so just sending a summary message or first error
+                errors: { tickets: [validated.error.errors[0].message] }
+            };
         }
-        return { message: 'Invalid ticket data format.' };
+        ticketsData = validated.data;
+    } catch (e) {
+        return { success: false, message: 'Invalid ticket data format.' };
     }
 
     try {
@@ -484,12 +467,11 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
 
         const currentCustomerId = customer.id;
 
-        // Use interactive transaction for batch creation and audit logging
+        // Use interactive transaction for batch creation
         const createdTicketIds = await prisma.$transaction(async (tx: any) => {
             const txTenantDb = getTenantPrisma(tenantId, session.user.id, tx);
-
-            // Execute creations in parallel within the transaction
-            // The middleware will automatically create audit logs for each
+            
+            // We map the validated data
             const tickets = await Promise.all(
                 ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
                     txTenantDb.ticket.create({
@@ -507,107 +489,91 @@ export async function createBatchTickets(prevState: any, formData: FormData) {
                             createdById: session.user.id,
                             updatedById: session.user.id,
                         },
-                        select: { id: true } // Only select ID to minimize transaction result size
+                        select: { id: true }
                     })
                 )
             );
             return tickets.map((t: any) => t.id);
         });
 
-        // Fetch the actually created tickets using IDs from transaction
-        const createdTickets = await tenantDb.ticket.findMany({
-            where: {
-                id: { in: createdTicketIds }
-            },
-            include: {
-                customer: true,
-                assignedTo: true,
-            }
-        });
+        // Notify customer for each ticket created in the batch (Background)
+        (async () => {
+             const createdTickets = await tenantDb.ticket.findMany({
+                where: { id: { in: createdTicketIds } },
+                include: { customer: true, assignedTo: true }
+            });
 
-        // Notify customer for each ticket created in the batch
-        for (const ticket of createdTickets) {
-            try {
-                await notifyTicketCreated({
-                    id: ticket.id,
-                    ticketNumber: (ticket as any).ticketNumber || ticket.id.slice(0, 8),
-                    title: ticket.title,
-                    deviceType: ticket.deviceType || 'PC',
-                    deviceModel: ticket.deviceModel || '',
-                    status: ticket.status,
-                    customerId: ticket.customerId,
-                    customer: {
-                        id: ticket.customer.id,
-                        name: ticket.customer.name,
-                        email: ticket.customer.email,
-                    },
-                    assignedTo: ticket.assignedTo,
-                    tenantId: ticket.tenantId,
-                });
-            } catch (notificationError) {
-                console.error('Failed to send batch ticket notification:', notificationError);
+            for (const ticket of createdTickets) {
+                try {
+                    await notifyTicketCreated({
+                        id: ticket.id,
+                        ticketNumber: (ticket as any).ticketNumber || ticket.id.slice(0, 8),
+                        title: ticket.title,
+                        deviceType: ticket.deviceType,
+                        deviceModel: ticket.deviceModel,
+                        status: ticket.status,
+                        customerId: ticket.customerId,
+                        customer: {
+                            id: ticket.customer.id,
+                            name: ticket.customer.name,
+                            email: ticket.customer.email,
+                        },
+                        assignedTo: ticket.assignedTo,
+                        tenantId: ticket.tenantId,
+                    });
+                } catch (notificationError) {
+                    console.error('Failed to send batch ticket notification:', notificationError);
+                }
             }
-        }
+        })();
+
+        return { success: true, message: 'Tickets creados exitosamente' };
 
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
-        return { message: 'Database Error: Failed to create multiple tickets.' };
+        return { success: false, message: 'Error de base de datos: No se pudieron crear los tickets.' };
     }
-
-    redirect('/dashboard/tickets');
 }
 
-// The old createTicket function needs to be removed as it's being replaced.
 // ==================== USER ACTIONS ====================
 
 /**
  * Create a new user (Server Action)
- *
- * @description Creates a new user for the current tenant. Only ADMIN users can create users.
- * Password is hashed using bcrypt before storing.
- *
- * @security
- * - Requires ADMIN role
- * - Automatic tenant isolation
- * - Password hashed with bcrypt (10 rounds)
  */
-export async function createUser(prevState: any, formData: FormData) {
+export async function createUser(prevState: any, formData: FormData): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden crear usuarios' };
+        return { success: false, message: 'Solo los administradores pueden crear usuarios' };
     }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = CreateUserSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { 
+            success: false, 
+            message: 'Error de validación', 
+            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>
+        };
     }
 
     const { name, email, password, role } = validatedFields.data;
 
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        // Check if email already exists
-        // Note: We use findFirst because findUnique requires a unique constraint, which email should have,
-        // but scoped calls might behave effectively like findFirst with tenant filter.
-        // Actually, user email is globally unique usually, but let's check via tenantDb to be safe with isolation if needed.
-        // However, User model might not have tenantId compound unique in schema yet?
-        // Let's stick to simple findFirst to check existence.
-        const existingUser = await tenantDb.user.findFirst({
+        
+        const existingUser = await tenantDb.user.findUnique({
             where: { email }
         });
 
         if (existingUser) {
-            return { message: 'Ya existe un usuario con este email' };
+            return { success: false, message: 'El usuario ya existe' };
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await tenantDb.user.create({
@@ -617,40 +583,17 @@ export async function createUser(prevState: any, formData: FormData) {
                 password: hashedPassword,
                 role,
                 tenantId: session.user.tenantId,
-                // createdById/updatedById not in User model yet based on previous file reads?
-                // Checking previous reads: User model fields were not explicitly shown but implied.
-                // Safest to just rely on schema. If User doesn't have createdById, the extension
-                // logic 'if (userId)' will try to add it.
-                // We better verify if User model supports it. If not, the extension might throw 
-                // "Unknown arg" if strict mode.
-                // The extension logic: "(args.data as any).createdById = userId;"
-                // If the model doesn't have it, Prisma validation will fail *before* SQL if strictly typed,
-                // BUT the extension uses 'any' casting for args.data so it bypasses TS check there.
-                // However, the query(args) will fail if the field doesn't exist in Prisma Schema.
-                // Let's assume User model DOES NOT have createdById yet (it wasn't in list of changes).
-                // Wait, I should double check schema or risk breaking it.
-                // I will proceed assuming it might fail and will check schema next if needed.
-                // Actually, I can check schema.prisma first!
-                // But I'm in the middle of a tool call.
-                // Let's just use tenantDb, and if User doesn't have those fields, I rely on the logic 
-                // in extension: `if (userId && model !== 'AuditLog')` it tries audit log.
-                // The injection of createdById happens: 
-                // `(args.data as any).createdById = userId;`
-                // If I am not sure, maybe I should check schema first.
-                // But wait, the previous code for Ticket HAD createdById.
-                // User model usually doesn't have it in common iterations unless added.
-                // Let's stick to the plan. I will check schema in next step if this fails, or check it now
-                // via `view_file`. I'll assume for now I should just convert to tenantDb.
             }
         });
 
+        return { success: true, message: 'Usuario creado exitosamente' };
     } catch (error) {
         console.error('Failed to create user:', error);
-        return { message: 'Error de base de datos: No se pudo crear el usuario.' };
+        return { success: false, message: 'Error al crear usuario' };
     }
-
-    redirect('/dashboard/users');
 }
+
+
 
 /**
  * Update an existing user (Server Action)
@@ -658,18 +601,18 @@ export async function createUser(prevState: any, formData: FormData) {
 export async function updateUser(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden editar usuarios' };
+        return { success: false, message: 'Solo los administradores pueden editar usuarios' };
     }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = UpdateUserSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0].message };
     }
 
     const { userId, name, email, password, role } = validatedFields.data;
@@ -699,7 +642,7 @@ export async function updateUser(prevState: any, formData: FormData) {
         });
 
         if (!existingUser) {
-            return { message: 'Usuario no encontrado' };
+            return { success: false, message: 'Usuario no encontrado' };
         }
 
         // Check email uniqueness
@@ -708,7 +651,7 @@ export async function updateUser(prevState: any, formData: FormData) {
                  where: { email }
              });
              if (emailTaken) {
-                 return { message: 'Ya existe un usuario con este email' };
+                 return { success: false, message: 'Ya existe un usuario con este email' };
              }
         }
 
@@ -720,7 +663,7 @@ export async function updateUser(prevState: any, formData: FormData) {
 
         if (password && password.length > 0) {
             if (password.length < 6) {
-                return { message: 'La contraseña debe tener al menos 6 caracteres' };
+                return { success: false, message: 'La contraseña debe tener al menos 6 caracteres' };
             }
             updateData.password = await bcrypt.hash(password, 10);
         }
@@ -732,7 +675,7 @@ export async function updateUser(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to update user:', error);
-        return { message: 'Error de base de datos: No se pudo actualizar el usuario.' };
+        return { success: false, message: 'Error de base de datos: No se pudo actualizar el usuario.' };
     }
 
     redirect('/dashboard/users');
@@ -744,21 +687,21 @@ export async function updateUser(prevState: any, formData: FormData) {
 export async function deleteUser(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden eliminar usuarios' };
+        return { success: false, message: 'Solo los administradores pueden eliminar usuarios' };
     }
 
     const userId = formData.get('userId') as string;
 
     if (!userId) {
-        return { message: 'ID de usuario requerido' };
+        return { success: false, message: 'ID de usuario requerido' };
     }
 
     if (userId === session.user.id) {
-        return { message: 'No puedes eliminar tu propia cuenta' };
+        return { success: false, message: 'No puedes eliminar tu propia cuenta' };
     }
 
     try {
@@ -769,7 +712,7 @@ export async function deleteUser(prevState: any, formData: FormData) {
         });
 
         if (!existingUser) {
-            return { message: 'Usuario no encontrado' };
+            return { success: false, message: 'Usuario no encontrado' };
         }
 
         await tenantDb.user.delete({
@@ -778,7 +721,7 @@ export async function deleteUser(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to delete user:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar el usuario.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar el usuario.' };
     }
 
     redirect('/dashboard/users');
@@ -798,14 +741,14 @@ export async function deleteUser(prevState: any, formData: FormData) {
 export async function createCustomer(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = CreateCustomerSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0].message };
     }
 
     const { name, email, phone, address, dpi, nit } = validatedFields.data;
@@ -829,7 +772,7 @@ export async function createCustomer(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to create customer:', error);
-        return { message: 'Error de base de datos: No se pudo crear el cliente.' };
+        return { success: false, message: 'Error de base de datos: No se pudo crear el cliente.' };
     }
 
     redirect('/dashboard/customers');
@@ -848,14 +791,14 @@ export async function createCustomer(prevState: any, formData: FormData) {
 export async function updateCustomer(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = UpdateCustomerSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0].message };
     }
 
     const { customerId, name, email, phone, address, dpi, nit } = validatedFields.data;
@@ -872,11 +815,11 @@ export async function updateCustomer(prevState: any, formData: FormData) {
         });
 
         if (!existingCustomer) {
-            return { message: 'Cliente no encontrado' };
+            return { success: false, message: 'Cliente no encontrado' };
         }
 
         if (!isSuperAdmin && existingCustomer.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para editar este cliente' };
+            return { success: false, message: 'No autorizado para editar este cliente' };
         }
 
         await tenantDb.customer.update({
@@ -894,7 +837,7 @@ export async function updateCustomer(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to update customer:', error);
-        return { message: 'Error de base de datos: No se pudo actualizar el cliente.' };
+        return { success: false, message: 'Error de base de datos: No se pudo actualizar el cliente.' };
     }
 
     redirect('/dashboard/customers');
@@ -914,17 +857,17 @@ export async function updateCustomer(prevState: any, formData: FormData) {
 export async function deleteCustomer(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden eliminar clientes' };
+        return { success: false, message: 'Solo los administradores pueden eliminar clientes' };
     }
 
     const customerId = formData.get('customerId') as string;
 
     if (!customerId) {
-        return { message: 'ID de cliente requerido' };
+        return { success: false, message: 'ID de cliente requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -944,16 +887,16 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
         });
 
         if (!existingCustomer) {
-            return { message: 'Cliente no encontrado' };
+            return { success: false, message: 'Cliente no encontrado' };
         }
 
         if (!isSuperAdmin && existingCustomer.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para eliminar este cliente' };
+            return { success: false, message: 'No autorizado para eliminar este cliente' };
         }
 
         // Check if customer has tickets
         if (existingCustomer.tickets.length > 0) {
-            return { message: `No se puede eliminar: el cliente tiene ${existingCustomer.tickets.length} ticket(s) asociado(s)` };
+            return { success: false, message: `No se puede eliminar: el cliente tiene ${existingCustomer.tickets.length} ticket(s) asociado(s)` };
         }
 
         await tenantDb.customer.delete({
@@ -962,7 +905,7 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to delete customer:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar el cliente.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar el cliente.' };
     }
 
     redirect('/dashboard/customers');
@@ -980,42 +923,55 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
  * - Enforces tenant isolation
  * - Creates audit log entry
  */
-export async function updateTicket(prevState: any, formData: FormData) {
+export async function updateTicket(prevState: any, formData: FormData): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
-    const ticketId = formData.get('ticketId') as string;
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const status = formData.get('status') as string;
-    const priority = formData.get('priority') as string;
-    const assignedToId = formData.get('assignedToId') as string;
+    const { user } = session;
 
-    // New V2 Fields
-    const deviceType = formData.get('deviceType') as string;
-    const deviceModel = formData.get('deviceModel') as string;
-    const serialNumber = formData.get('serialNumber') as string;
-    const accessories = formData.get('accessories') as string;
-    const checkInNotes = formData.get('checkInNotes') as string;
-    const cancellationReason = formData.get('cancellationReason') as string;
+    // Convert FormData to object for Zod
+    const rawData: Record<string, any> = Object.fromEntries(formData);
+    
+    // Normalize empty strings to null for Zod nullable fields
+    if (rawData.assignedToId === '') rawData.assignedToId = null;
+    if (rawData.priority === '') rawData.priority = null;
+    if (rawData.status === '') rawData.status = undefined; 
+    if (rawData.deviceType === '') rawData.deviceType = null;
+    if (rawData.deviceModel === '') rawData.deviceModel = null;
+    if (rawData.serialNumber === '') rawData.serialNumber = null;
+    if (rawData.accessories === '') rawData.accessories = null;
+    if (rawData.checkInNotes === '') rawData.checkInNotes = null;
+    if (rawData.cancellationReason === '') rawData.cancellationReason = null;
 
-    if (!ticketId || !title || !description || !status) {
-        return { message: 'Campos requeridos faltantes' };
+    // Temporary Super Admin Check
+    const isSuperAdmin = user.email === 'adminkev@example.com';
+
+    // Validate
+    const validatedFields = UpdateTicketSchema.safeParse(rawData);
+
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: 'Error de validación',
+            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>
+        };
     }
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const { 
+        ticketId, title, description, status, priority, assignedToId,
+        deviceType, deviceModel, serialNumber, accessories, checkInNotes, cancellationReason
+    } = validatedFields.data;
 
     try {
+        const tenantDb = getTenantPrisma(user.tenantId, user.id);
+        
         let existingTicket;
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        if (isSuperAdmin) {
+         if (isSuperAdmin) {
             existingTicket = await prisma.ticket.findUnique({
                 where: { id: ticketId },
-                include: { partsUsed: true, customer: true, assignedTo: true } // Include all needed for notifications
+                include: { partsUsed: true, customer: true, assignedTo: true }
             });
         } else {
             existingTicket = await tenantDb.ticket.findUnique({
@@ -1025,135 +981,114 @@ export async function updateTicket(prevState: any, formData: FormData) {
         }
 
         if (!existingTicket) {
-            return { message: 'Ticket no encontrado' };
+             return { success: false, message: 'Ticket no encontrado' };
         }
 
-        // ... (Assignee validation logic remains same)
+        const updateData: any = {};
+        if (title) updateData.title = title;
+        if (description) updateData.description = description;
+        if (status) updateData.status = status;
+        if (priority !== undefined) updateData.priority = priority;
+        if (assignedToId !== undefined) updateData.assignedToId = assignedToId;
+        
+        if (deviceType !== undefined) updateData.deviceType = deviceType;
+        if (deviceModel !== undefined) updateData.deviceModel = deviceModel;
+        if (serialNumber !== undefined) updateData.serialNumber = serialNumber;
+        if (accessories !== undefined) updateData.accessories = accessories;
+        if (checkInNotes !== undefined) updateData.checkInNotes = checkInNotes;
+        if (status === 'CANCELLED' && cancellationReason) updateData.cancellationReason = cancellationReason;
 
-        const updateData: any = {
-            title,
-            description,
-            status: status as any,
-            priority: priority || null,
-            assignedToId: assignedToId || null,
-            deviceType: deviceType || null,
-            deviceModel: deviceModel || null,
-            serialNumber: serialNumber || null,
-            accessories: accessories || null,
-            checkInNotes: checkInNotes || null,
-            cancellationReason: status === 'CANCELLED' ? cancellationReason : null,
-            updatedById: session.user.id,
-        };
+        updateData.updatedById = user.id;
 
-        // Notification Logic: Check if assignedToId changed
-        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
-             // Create notification asynchronously (don't block update)
-             // But we need to make sure we don't fail silently? 
-             // Ideally this runs AFTER transaction commits, but we can fire and forget here or await.
-             // We can trigger it outside the transaction.
-        }
-
-        // Execute transaction
+        // Execute Transaction
         await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(existingTicket.tenantId, session.user.id, tx);
+             const txTenantDb = getTenantPrisma(existingTicket.tenantId, user.id, tx);
 
-            // Logic for CANCELLATION: Restore stock
-            if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-                if (existingTicket.partsUsed.length > 0) {
-                    // Prepare restoration operations
-                    for (const usage of existingTicket.partsUsed) {
-                        // Use tx directly for internal ops or txTenantDb for audit?
-                        // Using tx directly avoids "UPDATE_PART" log flood if we don't want it,
-                        // but maybe we DO want it. Let's use txTenantDb.
-                        await txTenantDb.part.update({
-                            where: { id: usage.partId },
-                            data: { quantity: { increment: usage.quantity } }
-                        });
-                        await txTenantDb.partUsage.delete({
-                            where: { id: usage.id }
-                        });
-                    }
-                }
-            }
+             // CANCELLATION Logic: Restore stock
+             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
+                 if (existingTicket.partsUsed.length > 0) {
+                     for (const usage of existingTicket.partsUsed) {
+                         // Direct restore logic matching previous implementation behavior
+                         await txTenantDb.part.update({
+                             where: { id: usage.partId },
+                             data: { quantity: { increment: usage.quantity } }
+                         });
+                         await txTenantDb.partUsage.delete({
+                             where: { id: usage.id }
+                         });
+                     }
+                 }
+             }
 
-            await txTenantDb.ticket.update({
-                where: { id: ticketId },
-                data: updateData,
-            });
+             await txTenantDb.ticket.update({
+                 where: { id: ticketId },
+                 data: updateData,
+             });
         });
 
-        // Audit Log handled by middleware
-
-        // Execute Notification OUTSIDE transaction to not block
-        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
+        // Notifications
+        // Status Change
+        if (status && status !== existingTicket.status) {
              try {
-                // Fetch full ticket for tech notification if needed or use existingTicket + updateData
-                const updatedFullTicket = await tenantDb.ticket.findUnique({
-                    where: { id: ticketId },
-                    include: { customer: true, assignedTo: true }
-                });
-
-                if (updatedFullTicket) {
-                    const ticketData = {
-                        ...updatedFullTicket,
-                        ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
-                        title: updatedFullTicket.title,
-                        customerId: updatedFullTicket.customerId,
-                        customer: {
-                            id: updatedFullTicket.customer.id,
-                            name: updatedFullTicket.customer.name,
-                            email: updatedFullTicket.customer.email,
-                        }
-                    } as any;
-
-                    await notifyTechnicianAssigned(ticketData, session.user.name || 'Admin');
-                }
+                 await notifyTicketStatusChange(
+                    {
+                        id: existingTicket.id,
+                        ticketNumber: (existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8),
+                        title: updateData.title || existingTicket.title,
+                        status: existingTicket.status,
+                        tenantId: existingTicket.tenantId,
+                        customerId: existingTicket.customerId,
+                        customer: existingTicket.customer,
+                        assignedToId: existingTicket.assignedToId,
+                        deviceType: existingTicket.deviceType || 'PC',
+                        deviceModel: existingTicket.deviceModel || '',
+                        assignedTo: existingTicket.assignedTo,
+                    }, 
+                    { 
+                        oldStatus: existingTicket.status, 
+                        newStatus: status,
+                        note: updateData.cancellationReason
+                    }
+                 );
              } catch (e) {
-                console.error('Failed to notify technician assignment:', e);
+                 console.error('Notification error', e);
              }
         }
 
-        // Notify customer if status changed
-        if (status !== existingTicket.status) {
-            try {
-                const updatedFullTicket = await tenantDb.ticket.findUnique({
+        // Technician Assignment
+        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
+             try {
+                 const updatedFullTicket = await tenantDb.ticket.findUnique({
                     where: { id: ticketId },
                     include: { customer: true, assignedTo: true }
-                });
-
-                if (updatedFullTicket) {
-                    const ticketData = {
-                        ...updatedFullTicket,
-                        ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
-                        title: updatedFullTicket.title,
-                        customerId: updatedFullTicket.customerId,
-                        customer: {
-                            id: updatedFullTicket.customer.id,
-                            name: updatedFullTicket.customer.name,
-                            email: updatedFullTicket.customer.email,
-                        }
-                    } as any;
-
-                    await notifyTicketStatusChange(ticketData, {
-                        oldStatus: existingTicket.status as any,
-                        newStatus: status as any,
-                        note: formData.get('note') as string || undefined
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to notify status change:', e);
-            }
+                 });
+                 
+                 if (updatedFullTicket) {
+                     await notifyTechnicianAssigned({
+                         id: updatedFullTicket.id,
+                         ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                         title: updatedFullTicket.title,
+                         status: updatedFullTicket.status,
+                         tenantId: updatedFullTicket.tenantId,
+                         customerId: updatedFullTicket.customerId,
+                         customer: updatedFullTicket.customer,
+                         assignedTo: updatedFullTicket.assignedTo || undefined,
+                         assignedToId: updatedFullTicket.assignedToId,
+                         deviceType: updatedFullTicket.deviceType || 'PC', // Added missing field
+                         deviceModel: updatedFullTicket.deviceModel || '' // Added missing field
+                     }, user.name || 'Admin');
+                 }
+             } catch (e) {
+                 console.error('Notification error', e);
+             }
         }
-        
-        // Audit Log handled by middleware
 
+        return { success: true, message: 'Ticket actualizado exitosamente' };
 
     } catch (error) {
         console.error('Failed to update ticket:', error);
-        return { message: 'Error de base de datos: No se pudo actualizar el ticket.' };
+        return { success: false, message: 'Error de base de datos: No se pudo actualizar el ticket.' };
     }
-
-    redirect(`/dashboard/tickets/${ticketId}`);
 }
 
 /**
@@ -1162,65 +1097,100 @@ export async function updateTicket(prevState: any, formData: FormData) {
  * @description Quickly updates only the status of a ticket.
  * Used for status workflow transitions.
  */
-export async function updateTicketStatus(prevState: any, formData: FormData) {
+export async function updateTicketStatus(prevState: any, formData: FormData): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const ticketId = formData.get('ticketId') as string;
-    const status = formData.get('status') as string;
-
+    const status = formData.get('status') as string; 
+    // Need to validate status is valid enum
+    const validStatuses = ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'];
+    
     if (!ticketId || !status) {
-        return { message: 'Campos requeridos faltantes' };
+        return { success: false, message: 'Campos requeridos faltantes' };
+    }
+    
+    if (!validStatuses.includes(status)) {
+        return { success: false, message: 'Estado inválido' };
     }
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const { user } = session;
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+        const tenantDb = getTenantPrisma(user.tenantId, user.id);
         
-        // Use tenantDb to ensure isolation immediately (or use findUnique with manual check if mimicking updateTicket)
-        // Since we have session.user.tenantId, let's use it.
-        const existingTicket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId },
-            include: { partsUsed: true, customer: true, assignedTo: true }
-        });
-
-        if (!existingTicket) {
-             // If manual check style: perhaps it exists but wrong tenant. 
-             // utilizing getTenantPrisma(session.tenantId) filters by tenantId automatically.
-             // So if not found, it's either not existing or not authorized.
-             // However, for SuperAdmin this might block access if they try to edit other tenant's ticket via this action?
-             // If SuperAdmin should edit ANY ticket, we should pass existingTicket.tenantId to getTenantPrisma.
-             // But we don't know existingTicket.tenantId until we fetch it!
-             // So for SuperAdmin, we must fetch globally first.
-             if (isSuperAdmin) {
-                 // Fallback to global fetch for super admin
-                 const adminTicket = await prisma.ticket.findUnique({
-                     where: { id: ticketId },
-                     include: { partsUsed: true }
-                 });
-                 if (!adminTicket) return { message: 'Ticket no encontrado' };
-                 
-                 // Re-init tenantDb with ticket's tenant
-                 const itemTenantDb = getTenantPrisma(adminTicket.tenantId, session.user.id);
-                 
-                 await prisma.$transaction(async (tx: any) => {
-                     const txTenantDb = getTenantPrisma(adminTicket.tenantId, session.user.id, tx);
-                     await handleStatusUpdate(txTenantDb, adminTicket.id, status, adminTicket, session.user.id);
-                 });
-                 return { success: true, message: 'Estado actualizado' };
-             }
-             return { message: 'Ticket no encontrado' };
+        // 1. Fetch Existing
+        let existingTicket;
+        if (isSuperAdmin) {
+            existingTicket = await prisma.ticket.findUnique({
+                 where: { id: ticketId },
+                 include: { partsUsed: true, customer: true, assignedTo: true }
+            });
+        } else {
+             existingTicket = await tenantDb.ticket.findUnique({
+                where: { id: ticketId },
+                include: { partsUsed: true, customer: true, assignedTo: true }
+            });
         }
 
-        // Normal user flow
+        if (!existingTicket) {
+             return { success: false, message: 'Ticket no encontrado' };
+        }
+
+        // 2. Transaction for Update (and Stock Restore if Cancelled)
         await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
-            await handleStatusUpdate(txTenantDb, ticketId, status, existingTicket, session.user.id);
+             const txTenantDb = getTenantPrisma(existingTicket.tenantId, user.id, tx);
+             
+             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
+                 if (existingTicket.partsUsed.length > 0) {
+                     for (const usage of existingTicket.partsUsed) {
+                         await txTenantDb.part.update({
+                             where: { id: usage.partId },
+                             data: { quantity: { increment: usage.quantity } }
+                         });
+                         await txTenantDb.partUsage.delete({
+                             where: { id: usage.id }
+                         });
+                     }
+                 }
+             }
+
+             await txTenantDb.ticket.update({
+                 where: { id: ticketId },
+                 data: { status: status as any, updatedById: user.id }
+             });
         });
+
+        // 3. Notifications
+         if (status !== existingTicket.status) {
+             try {
+                await notifyTicketStatusChange(
+                    {
+                        id: existingTicket.id,
+                        ticketNumber: (existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8),
+                        title: existingTicket.title,
+                        status: existingTicket.status, // Old status
+                        tenantId: existingTicket.tenantId,
+                        customerId: existingTicket.customerId,
+                        customer: existingTicket.customer,
+                        assignedToId: existingTicket.assignedToId,
+                        deviceType: existingTicket.deviceType || 'PC',
+                        deviceModel: existingTicket.deviceModel || '',
+                        assignedTo: existingTicket.assignedTo,
+                    }, 
+                    { 
+                        oldStatus: existingTicket.status, 
+                        newStatus: status,
+                        note: "Cambio rápido de estado"
+                    }
+                 );
+             } catch (e) {
+                 console.error('Notification error', e);
+             }
+        }
 
         // Notify Assigned User if DIFFERENT from updater (Technician alert)
         if (existingTicket.assignedToId && existingTicket.assignedToId !== session.user.id) {
@@ -1265,7 +1235,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to update ticket status:', error);
-        return { message: 'Error al actualizar el estado.' };
+        return { success: false, message: 'Error al actualizar el estado.' };
     }
 }
 
@@ -1309,17 +1279,17 @@ async function handleStatusUpdate(txTenantDb: any, ticketId: string, status: str
 export async function deleteTicket(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden eliminar tickets' };
+        return { success: false, message: 'Solo los administradores pueden eliminar tickets' };
     }
 
     const ticketId = formData.get('ticketId') as string;
 
     if (!ticketId) {
-        return { message: 'ID de ticket requerido' };
+        return { success: false, message: 'ID de ticket requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1333,11 +1303,11 @@ export async function deleteTicket(prevState: any, formData: FormData) {
         });
 
         if (!existingTicket) {
-            return { message: 'Ticket no encontrado' };
+            return { success: false, message: 'Ticket no encontrado' };
         }
 
         if (!isSuperAdmin && existingTicket.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para eliminar este ticket' };
+            return { success: false, message: 'No autorizado para eliminar este ticket' };
         }
 
         // Automatic audit logging handles the log creation
@@ -1347,7 +1317,7 @@ export async function deleteTicket(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to delete ticket:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar el ticket.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar el ticket.' };
     }
 
     redirect('/dashboard/tickets');
@@ -1368,7 +1338,7 @@ export async function deleteTicket(prevState: any, formData: FormData) {
 export async function addTicketNote(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId || !session?.user?.id) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const ticketId = formData.get('ticketId') as string;
@@ -1376,7 +1346,7 @@ export async function addTicketNote(prevState: any, formData: FormData) {
     const isInternal = formData.get('isInternal') === 'true';
 
     if (!ticketId || !content || content.trim().length === 0) {
-        return { message: 'El contenido de la nota es requerido' };
+        return { success: false, message: 'El contenido de la nota es requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1391,11 +1361,11 @@ export async function addTicketNote(prevState: any, formData: FormData) {
         });
 
         if (!ticket) {
-            return { message: 'Ticket no encontrado' };
+            return { success: false, message: 'Ticket no encontrado' };
         }
 
         if (!isSuperAdmin && ticket.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para agregar notas a este ticket' };
+            return { success: false, message: 'No autorizado para agregar notas a este ticket' };
         }
 
         await tenantDb.ticketNote.create({
@@ -1429,7 +1399,7 @@ export async function addTicketNote(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to add note:', error);
-        return { message: 'Error de base de datos: No se pudo agregar la nota.' };
+        return { success: false, message: 'Error de base de datos: No se pudo agregar la nota.' };
     }
 }
 
@@ -1445,13 +1415,13 @@ export async function addTicketNote(prevState: any, formData: FormData) {
 export async function deleteTicketNote(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId || !session?.user?.id) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const noteId = formData.get('noteId') as string;
 
     if (!noteId) {
-        return { message: 'ID de nota requerido' };
+        return { success: false, message: 'ID de nota requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1471,7 +1441,7 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
         });
 
         if (!note) {
-            return { message: 'Nota no encontrada' };
+            return { success: false, message: 'Nota no encontrada' };
         }
 
         // Check permissions: must be author, admin of same tenant, or super admin
@@ -1479,7 +1449,7 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
         const isSameTenant = note.ticket.tenantId === session.user.tenantId;
 
         if (!isSuperAdmin && !isAuthor && !(isAdmin && isSameTenant)) {
-            return { message: 'No autorizado para eliminar esta nota' };
+            return { success: false, message: 'No autorizado para eliminar esta nota' };
         }
 
         await tenantDb.ticketNote.delete({
@@ -1490,7 +1460,7 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to delete note:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar la nota.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar la nota.' };
     }
 }
 
@@ -1508,7 +1478,7 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
 export async function createPart(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const data = {
@@ -1522,7 +1492,7 @@ export async function createPart(prevState: any, formData: FormData) {
     const validatedFields = CreatePartSchema.safeParse(data);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0].message };
     }
 
     const { name, sku, quantity, cost, price } = validatedFields.data;
@@ -1545,7 +1515,7 @@ export async function createPart(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to create part:', error);
-        return { message: 'Error de base de datos: No se pudo crear el repuesto.' };
+        return { success: false, message: 'Error de base de datos: No se pudo crear el repuesto.' };
     }
 
     redirect('/dashboard/parts');
@@ -1564,7 +1534,7 @@ export async function createPart(prevState: any, formData: FormData) {
 export async function updatePart(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const data = {
@@ -1579,7 +1549,7 @@ export async function updatePart(prevState: any, formData: FormData) {
     const validatedFields = UpdatePartSchema.safeParse(data);
 
     if (!validatedFields.success) {
-        return { message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0].message };
     }
 
     const { partId, name, sku, quantity, cost, price } = validatedFields.data;
@@ -1596,11 +1566,11 @@ export async function updatePart(prevState: any, formData: FormData) {
         });
 
         if (!existingPart) {
-            return { message: 'Repuesto no encontrado' };
+            return { success: false, message: 'Repuesto no encontrado' };
         }
 
         if (!isSuperAdmin && existingPart.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para editar este repuesto' };
+            return { success: false, message: 'No autorizado para editar este repuesto' };
         }
 
         const updatedPart = await tenantDb.part.update({
@@ -1630,7 +1600,7 @@ export async function updatePart(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to update part:', error);
-        return { message: 'Error de base de datos: No se pudo actualizar el repuesto.' };
+        return { success: false, message: 'Error de base de datos: No se pudo actualizar el repuesto.' };
     }
 
     redirect('/dashboard/parts');
@@ -1650,17 +1620,17 @@ export async function updatePart(prevState: any, formData: FormData) {
 export async function deletePart(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     if (session.user.role !== 'ADMIN') {
-        return { message: 'Solo los administradores pueden eliminar repuestos' };
+        return { success: false, message: 'Solo los administradores pueden eliminar repuestos' };
     }
 
     const partId = formData.get('partId') as string;
 
     if (!partId) {
-        return { message: 'ID de repuesto requerido' };
+        return { success: false, message: 'ID de repuesto requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1680,16 +1650,16 @@ export async function deletePart(prevState: any, formData: FormData) {
         });
 
         if (!existingPart) {
-            return { message: 'Repuesto no encontrado' };
+            return { success: false, message: 'Repuesto no encontrado' };
         }
 
         if (!isSuperAdmin && existingPart.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para eliminar este repuesto' };
+            return { success: false, message: 'No autorizado para eliminar este repuesto' };
         }
 
         // Check if part has usage records
         if (existingPart.usages.length > 0) {
-            return { message: `No se puede eliminar: el repuesto tiene ${existingPart.usages.length} registro(s) de uso` };
+            return { success: false, message: `No se puede eliminar: el repuesto tiene ${existingPart.usages.length} registro(s) de uso` };
         }
 
         await tenantDb.part.delete({
@@ -1698,7 +1668,7 @@ export async function deletePart(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to delete part:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar el repuesto.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar el repuesto.' };
     }
 
     redirect('/dashboard/parts');
@@ -1717,7 +1687,7 @@ export async function deletePart(prevState: any, formData: FormData) {
 export async function addPartToTicket(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const ticketId = formData.get('ticketId') as string;
@@ -1725,7 +1695,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
     const quantity = parseInt(formData.get('quantity') as string);
 
     if (!ticketId || !partId || !quantity || isNaN(quantity) || quantity <= 0) {
-        return { message: 'Datos inválidos' };
+        return { success: false, message: 'Datos inválidos' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1812,7 +1782,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
 
     } catch (error: any) {
         console.error('Failed to add part to ticket:', error);
-        return { message: error.message || 'Error de base de datos: No se pudo agregar el repuesto.' };
+        return { success: false, message: error.message || 'Error de base de datos: No se pudo agregar el repuesto.' };
     }
 }
 
@@ -1828,13 +1798,13 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
 export async function removePartFromTicket(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const usageId = formData.get('usageId') as string;
 
     if (!usageId) {
-        return { message: 'ID de uso requerido' };
+        return { success: false, message: 'ID de uso requerido' };
     }
 
     // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
@@ -1877,7 +1847,7 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
 
     } catch (error: any) {
         console.error('Failed to remove part from ticket:', error);
-        return { message: error.message || 'Error de base de datos: No se pudo remover el repuesto.' };
+        return { success: false, message: error.message || 'Error de base de datos: No se pudo remover el repuesto.' };
     }
 }
 
@@ -1895,14 +1865,14 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
 export async function addServiceToTicket(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const ticketId = formData.get('ticketId') as string;
     const serviceId = formData.get('serviceId') as string;
 
     if (!ticketId || !serviceId) {
-        return { message: 'Ticket y Servicio son requeridos' };
+        return { success: false, message: 'Ticket y Servicio son requeridos' };
     }
 
     try {
@@ -1913,11 +1883,11 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
         });
 
         if (!ticket) {
-            return { message: 'Ticket no encontrado' };
+            return { success: false, message: 'Ticket no encontrado' };
         }
 
         if (ticket.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para editar este ticket' };
+            return { success: false, message: 'No autorizado para editar este ticket' };
         }
 
         const service = await tenantDb.serviceTemplate.findUnique({
@@ -1925,11 +1895,11 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
         });
 
         if (!service) {
-            return { message: 'Servicio no encontrado' };
+            return { success: false, message: 'Servicio no encontrado' };
         }
 
         if (service.tenantId !== session.user.tenantId) {
-            return { message: 'Servicio no pertenece a este tenant' };
+            return { success: false, message: 'Servicio no pertenece a este tenant' };
         }
 
         await tenantDb.ticketService.create({
@@ -1945,7 +1915,7 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
 
     } catch (error) {
         console.error('Failed to add service to ticket:', error);
-        return { message: 'Error de base de datos: No se pudo agregar el servicio.' };
+        return { success: false, message: 'Error de base de datos: No se pudo agregar el servicio.' };
     }
 }
 
@@ -1961,7 +1931,7 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
 export async function removeServiceFromTicket(prevState: any, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { message: 'No autorizado' };
+        return { success: false, message: 'No autorizado' };
     }
 
     const serviceUsageId = formData.get('serviceUsageId') as string;
@@ -1975,11 +1945,11 @@ export async function removeServiceFromTicket(prevState: any, formData: FormData
         });
 
         if (!usage) {
-            return { message: 'Servicio no encontrado en el ticket' };
+            return { success: false, message: 'Servicio no encontrado en el ticket' };
         }
 
         if (usage.ticket.tenantId !== session.user.tenantId) {
-            return { message: 'No autorizado para editar este ticket' };
+            return { success: false, message: 'No autorizado para editar este ticket' };
         }
 
         await tenantDb.ticketService.delete({
@@ -1990,6 +1960,6 @@ export async function removeServiceFromTicket(prevState: any, formData: FormData
 
     } catch (error) {
         console.error('Failed to remove service from ticket:', error);
-        return { message: 'Error de base de datos: No se pudo eliminar el servicio.' };
+        return { success: false, message: 'Error de base de datos: No se pudo eliminar el servicio.' };
     }
 }
