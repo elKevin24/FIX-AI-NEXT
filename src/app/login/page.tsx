@@ -169,7 +169,7 @@ export default function LoginPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p>{errorMessage}</p>
+                <p>{errorMessage && typeof errorMessage === 'object' ? errorMessage.message : errorMessage}</p>
               </div>
             )}
 

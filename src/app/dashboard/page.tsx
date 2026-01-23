@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"; // Keep for count/groupBy if needed, or use tenantPrisma
+import { getTenantPrisma } from "@/lib/tenant-prisma";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
 
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const tenantId = session.user.tenantId;
+    const tenantPrisma = getTenantPrisma(tenantId);
 
     // Fetch all statistics in parallel
     const [
@@ -52,21 +54,21 @@ export default async function DashboardPage() {
         posStats,
     ] = await Promise.all([
         // Active tickets (OPEN + IN_PROGRESS)
-        prisma.ticket.count({
+        tenantPrisma.ticket.count({
             where: {
-                tenantId,
+                tenantId, // Explicitly kept as count() is not intercepted by current wrapper
                 status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] },
             },
         }),
         // Tickets waiting for parts
-        prisma.ticket.count({
+        tenantPrisma.ticket.count({
             where: {
                 tenantId,
                 status: TicketStatus.WAITING_FOR_PARTS,
             },
         }),
         // Completed today
-        prisma.ticket.count({
+        tenantPrisma.ticket.count({
             where: {
                 tenantId,
                 status: TicketStatus.RESOLVED,
@@ -76,21 +78,21 @@ export default async function DashboardPage() {
             },
         }),
         // Total customers
-        prisma.customer.count({
+        tenantPrisma.customer.count({
             where: { tenantId },
         }),
         // Tickets grouped by status
-        prisma.ticket.groupBy({
+        tenantPrisma.ticket.groupBy({
             by: ['status'],
-            where: { tenantId },
+            where: { tenantId }, // Explicitly kept
             _count: {
                 id: true,
             },
         }),
         // Urgent tickets (HIGH or URGENT priority, not resolved/closed)
-        prisma.ticket.findMany({
+        tenantPrisma.ticket.findMany({
             where: {
-                tenantId,
+                // tenantId auto-injected by findMany wrapper
                 priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
                 status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
             },
@@ -108,9 +110,9 @@ export default async function DashboardPage() {
             take: 10,
         }),
         // Technician statistics
-        prisma.user.findMany({
+        tenantPrisma.user.findMany({
             where: {
-                tenantId,
+                // tenantId auto-injected
                 role: { in: ['TECHNICIAN', 'ADMIN'] },
             },
             select: {
@@ -128,8 +130,9 @@ export default async function DashboardPage() {
             },
         }),
         // Recent tickets (last 5)
-        prisma.ticket.findMany({
-            where: { tenantId },
+        tenantPrisma.ticket.findMany({
+            // tenantId auto-injected
+            where: {}, 
             include: {
                 customer: {
                     select: {

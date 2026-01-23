@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { createNotification } from './notifications';
 import { sendEmail } from './email-service';
+import { TicketCreatedEmail } from '@/emails/TicketCreated';
+import { TicketStatusChangedEmail } from '@/emails/TicketStatusChanged';
+import { TechnicianAssignedEmail } from '@/emails/TechnicianAssigned';
 
 // --- Types ---
 
@@ -60,12 +63,21 @@ export async function notifyTicketStatusChange(
         });
     }
 
+
     // 2. Notificar al Cliente (Email)
     if (ticket.customer.email) {
         await sendEmail({
             to: ticket.customer.email,
-            subject: `[FIX-AI] Actualización de su servicio #${ticketRef}`,
-            text: `Hola ${ticket.customer.name},\n\nLe informamos que su ticket de servicio #${ticketRef} ha cambiado de estado.\n\nNuevo estado: ${statusLabel}\n\nPuede consultar el avance en nuestro portal.\n\nGracias por su confianza.`,
+            subject: `[FIX-AI] Actualización de ticket #${ticketRef}`,
+            react: TicketStatusChangedEmail({
+                customerName: ticket.customer.name,
+                ticketNumber: ticketRef,
+                ticketTitle: ticket.title,
+                oldStatus: STATUS_LABELS[oldStatus] || oldStatus,
+                newStatus: statusLabel,
+                ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`,
+                note: note
+            })
         });
     }
 }
@@ -94,9 +106,15 @@ export async function notifyTechnicianAssigned(
     // 2. Email
     if (ticket.assignedTo?.email) {
         await sendEmail({
-            to: ticket.assignedTo.email,
-            subject: `[FIX-AI] Nuevo ticket asignado: #${ticketRef}`,
-            text: `Hola,\n\nSe te ha asignado un nuevo ticket de servicio.\n\nTicket: #${ticketRef}\nTítulo: ${ticket.title}\nAsignado por: ${actorName}\n\nPor favor, revísalo en tu panel de control.`,
+             to: ticket.assignedTo.email,
+             subject: `[FIX-AI] Asignación: #${ticketRef}`,
+             react: TechnicianAssignedEmail({
+                 technicianName: ticket.assignedTo.name || 'Técnico',
+                 ticketNumber: ticketRef,
+                 ticketTitle: ticket.title,
+                 assignedBy: actorName,
+                 ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+             })
         });
     }
 }
@@ -110,9 +128,16 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
 
     if (ticket.customer.email) {
         await sendEmail({
-            to: ticket.customer.email,
-            subject: `[FIX-AI] Orden de Servicio Recibida: #${ticketRef}`,
-            text: `Hola ${ticket.customer.name},\n\nHemos registrado correctamente su equipo para servicio técnico.\n\nOrden No: #${ticketRef}\nServicio: ${ticket.title}\n\nLe notificaremos por esta vía cualquier cambio en el estado de su reparación.`,
+             to: ticket.customer.email,
+             subject: `[FIX-AI] Orden recibida: #${ticketRef}`,
+             react: TicketCreatedEmail({
+                 customerName: ticket.customer.name,
+                 ticketNumber: ticketRef,
+                 ticketTitle: ticket.title,
+                 deviceType: ticket.deviceType,
+                 deviceModel: ticket.deviceModel,
+                 ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+            })
         });
     }
 }
