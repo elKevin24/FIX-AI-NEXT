@@ -64,7 +64,7 @@ jobs:
           echo "has_vulnerabilities=$(jq '.metadata.vulnerabilities.high + .metadata.vulnerabilities.critical' audit-results.json)" >> $GITHUB_OUTPUT
 
       - name: Upload audit results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: npm-audit-results
           path: audit-results.json
@@ -149,7 +149,7 @@ jobs:
           output-file: sbom.spdx.json
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom
           path: sbom.spdx.json
