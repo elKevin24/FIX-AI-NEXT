@@ -246,15 +246,15 @@ export async function createPOSSale(data: CreatePOSSaleData) {
         },
       });
 
-      // 3. Decrement stock
-      await tx.part.update({
-        where: { id: item.partId },
-        data: {
-          quantity: {
-            decrement: item.quantity,
-          },
-        },
-      });
+      // 3. Decrement stock - HANDLED BY DB TRIGGER (trg_update_stock_on_pos_item)
+      // await tx.part.update({
+      //   where: { id: item.partId },
+      //   data: {
+      //     quantity: {
+      //       decrement: item.quantity,
+      //     },
+      //   },
+      // });
     }
 
     // 4. Create payments
@@ -364,7 +364,8 @@ export async function voidPOSSale(saleId: string, reason: string) {
       },
     });
 
-    // 2. Restore stock for each item
+    // 2. Restore stock for each item - HANDLED BY DB TRIGGER (trg_restore_stock_on_void)
+    /* 
     for (const item of sale.items) {
       await tx.part.update({
         where: { id: item.partId },
@@ -375,6 +376,7 @@ export async function voidPOSSale(saleId: string, reason: string) {
         },
       });
     }
+    */
 
     // 3. Register expense for cash payments
     if (openCashRegister) {
