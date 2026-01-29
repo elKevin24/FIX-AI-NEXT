@@ -109,6 +109,7 @@ export async function notifyTechnicianAssigned(
              to: ticket.assignedTo.email,
              subject: `[FIX-AI] Asignación: #${ticketRef}`,
              react: TechnicianAssignedEmail({
+                 technicianName: ticket.assignedTo.name || 'Técnico',
                  ticketNumber: ticketRef || '',
                  ticketTitle: ticket.title,
                  assignedBy: actorName,
