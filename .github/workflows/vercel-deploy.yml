@@ -112,12 +112,17 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         with:
           script: |
-            await github.rest.issues.createComment({
-              issue_number: Number(process.env.ISSUE_NUMBER),
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚀 **Preview deployment ready!**\n\n**URL:** ${process.env.DEPLOY_URL}\n\n*Deployed from commit: \`${process.env.HEAD_SHA}\`*`
-            })
+            const issueNumber = Number(process.env.ISSUE_NUMBER);
+            if (issueNumber > 0) {
+              await github.rest.issues.createComment({
+                issue_number: issueNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `🚀 **Preview deployment ready!**\n\n**URL:** ${process.env.DEPLOY_URL}\n\n*Deployed from commit: \`${process.env.HEAD_SHA}\`*`
+              });
+            } else {
+              console.log("No associated Pull Request found. Skipping comment step.");
+            }
 
   # Notify if CI failed
   notify-failure:
