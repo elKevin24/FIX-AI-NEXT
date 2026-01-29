@@ -106,13 +106,17 @@ jobs:
       - name: Comment PR with deployment URL
         if: steps.find-pr.outputs.result != 'null'
         uses: actions/github-script@v8
+        env:
+          ISSUE_NUMBER: ${{ steps.find-pr.outputs.result }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: ${{ steps.find-pr.outputs.result }},
+            await github.rest.issues.createComment({
+              issue_number: Number(process.env.ISSUE_NUMBER),
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 **Preview deployment ready!**\n\n**URL:** ${{ steps.deploy.outputs.url }}\n\n*Deployed from commit: \`${{ github.event.workflow_run.head_sha }}\`*`
+              body: `🚀 **Preview deployment ready!**\n\n**URL:** ${process.env.DEPLOY_URL}\n\n*Deployed from commit: \`${process.env.HEAD_SHA}\`*`
             })
 
   # Notify if CI failed
