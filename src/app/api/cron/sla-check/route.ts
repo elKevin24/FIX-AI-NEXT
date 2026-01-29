@@ -17,14 +17,14 @@ export async function GET() {
             const tickets = await prisma.ticket.findMany({
                 where: {
                     tenantId: setting.tenantId,
-                    status: { notIn: ['CLOSED', 'DELIVERED', 'CANCELLED', 'RESOLVED'] },
+                    status: { notIn: ['CLOSED', 'CANCELLED', 'RESOLVED'] },
                     dueDate: { not: null },
                     assignedToId: { not: null } // Only notify assigned
                 },
                 include: { assignedTo: true }
             });
 
-            for (const ticket of tickets) {
+            for (const ticket of tickets as any[]) {
                 if (!ticket.dueDate || !ticket.assignedTo) continue;
                 
                 const now = new Date();
