@@ -114,14 +114,20 @@ jobs:
           script: |
             const issueNumber = Number(process.env.ISSUE_NUMBER);
             if (issueNumber > 0) {
-              await github.rest.issues.createComment({
-                issue_number: issueNumber,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `🚀 **Preview deployment ready!**\n\n**URL:** ${process.env.DEPLOY_URL}\n\n*Deployed from commit: \`${process.env.HEAD_SHA}\`*`
-              });
+              console.log(`Found associated PR #${issueNumber}. Attempting to post deployment comment...`);
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: issueNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `🚀 **Preview deployment ready!**\n\n**URL:** ${process.env.DEPLOY_URL}\n\n*Deployed from commit: \`${process.env.HEAD_SHA}\`*`
+                });
+                console.log("Comment posted successfully.");
+              } catch (error) {
+                console.error("Failed to post comment:", error.message);
+              }
             } else {
-              console.log("No associated Pull Request found. Skipping comment step.");
+              console.log("No associated Pull Request found (Issue Number is 0 or null). Skipping comment step.");
             }
 
   # Notify if CI failed
