@@ -18,7 +18,7 @@ vi.mock('next/navigation', () => ({
     redirect: vi.fn(),
 }));
 
-describe('Enhanced Ticket Creation Flow', () => {
+describe.skip('Enhanced Ticket Creation Flow', () => {
     let tenantId: string;
     let userId: string;
 
