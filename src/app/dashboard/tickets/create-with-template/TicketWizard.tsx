@@ -96,6 +96,7 @@ export default function TicketWizard() {
         if (deviceType) formData.append('deviceType', deviceType);
         if (deviceModel) formData.append('deviceModel', deviceModel);
         formData.append('customerId', customer.id!);
+        formData.append('optionalParts', JSON.stringify(Array.from(addedOptionalPartIds)));
 
         const ticket = await createTicketFromTemplate(formData);
 

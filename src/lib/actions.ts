@@ -199,17 +199,17 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
 
     const tenantId = session.user.tenantId;
 
-    // Extract basic fields
+    // Extract basic fields with cleanup
     const rawData = {
         title: formData.get('title'),
         description: formData.get('description'),
-        status: formData.get('status'),
-        priority: formData.get('priority'),
-        deviceType: formData.get('deviceType'),
-        deviceModel: formData.get('deviceModel'),
-        serialNumber: formData.get('serialNumber'),
-        accessories: formData.get('accessories'),
-        checkInNotes: formData.get('checkInNotes'),
+        status: formData.get('status') || undefined,
+        priority: formData.get('priority') || undefined,
+        deviceType: formData.get('deviceType') || undefined,
+        deviceModel: formData.get('deviceModel') || undefined,
+        serialNumber: formData.get('serialNumber') || undefined,
+        accessories: formData.get('accessories') || undefined,
+        checkInNotes: formData.get('checkInNotes') || undefined,
     };
     
     // Parse Initial Parts safely
@@ -224,6 +224,11 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
     }
 
     const customerName = formData.get('customerName') as string;
+    const customerId = formData.get('customerId') as string;
+    const customerEmail = formData.get('customerEmail') as string;
+    const customerPhone = formData.get('customerPhone') as string;
+    const customerDpi = formData.get('customerDpi') as string;
+    const customerNit = formData.get('customerNit') as string;
 
     // Validate with Zod
     const validatedFields = CreateTicketSchema.safeParse({
@@ -232,6 +237,7 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
     });
 
     if (!validatedFields.success) {
+        console.error("Validation Errors:", validatedFields.error.flatten().fieldErrors);
         return {
             success: false,
             message: 'Error de validación',
@@ -239,8 +245,8 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
         };
     }
 
-    if (!customerName || customerName.trim() === '') {
-        return { success: false, message: 'El nombre del cliente es requerido '};
+    if ((!customerName || customerName.trim() === '') && !customerId) {
+        return { success: false, message: 'El nombre del cliente o un ID válido es requerido.'};
     }
 
     const ticketData = validatedFields.data;
@@ -248,18 +254,51 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
     try {
         const tenantDb = getTenantPrisma(tenantId, session.user.id);
         
-        // 1. Find or Create Customer
-        let customer = await tenantDb.customer.findFirst({
-            where: { name: customerName } // Tenant filter applied by getTenantPrisma? 
-            // WAIT: getTenantPrisma returns a client where read operations might NOT be filtered automatically if using `findFirst` without explicit `where: { tenantId }` unless using an extension. 
-            // The instruction says "getTenantPrisma(tenantId)... Esto inyecta automáticamente el filtro where: { tenantId }".
-            // So we trust `findFirst({ where: { name } })` effectively becomes `where: { name, tenantId }`.
-        });
+        // 1. Find or Create Customer (Smart Lookup)
+        let customer = null;
 
+        // A. Try direct ID match if provided
+        if (customerId) {
+            customer = await tenantDb.customer.findUnique({
+                where: { id: customerId }
+            });
+        }
+
+        // B. Try Email match
+        if (!customer && customerEmail) {
+            customer = await tenantDb.customer.findFirst({
+                where: { email: customerEmail }
+            });
+        }
+
+        // C. Try Phone match
+        if (!customer && customerPhone) {
+            customer = await tenantDb.customer.findFirst({
+                where: { phone: customerPhone }
+            });
+        }
+
+        // D. Fallback to Name match (Legacy behavior, but still useful)
+        if (!customer && customerName) {
+            customer = await tenantDb.customer.findFirst({
+                where: { name: customerName }
+            });
+        }
+
+        // Create if completely new
         if (!customer) {
+            // Basic validation for new customer creation if we rely on it here
+            if (!customerName) {
+                 return { success: false, message: 'Nombre de cliente requerido para crear uno nuevo.' };
+            }
+
             customer = await tenantDb.customer.create({
                 data: {
                     name: customerName,
+                    email: customerEmail || null,
+                    phone: customerPhone || null,
+                    dpi: customerDpi || null,
+                    nit: customerNit || null,
                     tenantId: tenantId,
                     createdById: session.user.id,
                     updatedById: session.user.id,
@@ -276,7 +315,7 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
                 data: {
                     title: ticketData.title,
                     description: ticketData.description,
-                    customerId: customer.id,
+                    customerId: customer!.id, // We know customer exists now
                     status: ticketData.status || 'OPEN',
                     priority: ticketData.priority || 'MEDIUM',
                     tenantId: tenantId,
@@ -299,24 +338,27 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
                 data: {
                     action: 'CREATE_TICKET',
                     details: JSON.stringify({ id: newTicket.id, title: newTicket.title }),
-                    userId: session.user.id,
-                    tenantId: tenantId
+                    user: { connect: { id: session.user.id } },
+                    tenant: { connect: { id: tenantId } }
                 }
             });
 
-             // Process Initial Parts
+             // Process Initial Parts (Stock Deduction)
             if (ticketData.initialParts && ticketData.initialParts.length > 0) {
-                // IMPORTANT: TypeScript constraint - explicitly cast to any or correct type inside tx context if needed
-                // But generally tx inherits Prisma Client types.
                 for (const partItem of ticketData.initialParts) {
-                    const part = await tx.part.findUnique({
-                        where: { id: partItem.partId }
-                    });
+                    const part = await tx.part.findUnique({ where: { id: partItem.partId } });
 
-                    if (!part || part.quantity < partItem.quantity) {
-                        throw new Error(`Stock insuficiente para el repuesto: ${part?.name || partItem.partId}`);
+                    if (!part) {
+                        throw new Error(`Repuesto no encontrado: ${partItem.partId}`);
+                    }
+                    if (part.tenantId !== tenantId) {
+                        throw new Error('No autorizado');
+                    }
+                    if (part.quantity < partItem.quantity) {
+                        throw new Error(`Stock insuficiente para '${part.name}'. Disponibles: ${part.quantity}, Solicitados: ${partItem.quantity}`);
                     }
 
+                    // Create usage record (Trigger handles decrement)
                     await tx.partUsage.create({
                         data: {
                             ticketId: newTicket.id,
@@ -325,12 +367,9 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
                         },
                     });
 
-                    // Check Low Stock
+                    // Check for low stock
                     if (part.quantity - partItem.quantity <= part.minStock) {
-                       lowStockAlerts.push({
-                           name: part.name,
-                           quantity: part.quantity - partItem.quantity
-                       });
+                        lowStockAlerts.push({ name: part.name, quantity: part.quantity - partItem.quantity });
                     }
                 }
             }
@@ -357,7 +396,7 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
         try {
             await notifyTicketCreated({
                 id: createdTicket.id,
-                ticketNumber: (createdTicket as any).ticketNumber || createdTicket.id.slice(0, 8),
+                ticketNumber: createdTicket.ticketNumber || createdTicket.id.slice(0, 8),
                 title: createdTicket.title,
                 status: createdTicket.status,
                 tenantId: createdTicket.tenantId,
@@ -507,7 +546,7 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
                 try {
                     await notifyTicketCreated({
                         id: ticket.id,
-                        ticketNumber: (ticket as any).ticketNumber || ticket.id.slice(0, 8),
+                        ticketNumber: ticket.ticketNumber,
                         title: ticket.title,
                         deviceType: ticket.deviceType,
                         deviceModel: ticket.deviceModel,
@@ -1009,10 +1048,6 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
                          // Direct restore logic matching previous implementation behavior
-                         await txTenantDb.part.update({
-                             where: { id: usage.partId },
-                             data: { quantity: { increment: usage.quantity } }
-                         });
                          await txTenantDb.partUsage.delete({
                              where: { id: usage.id }
                          });
@@ -1033,7 +1068,7 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
                  await notifyTicketStatusChange(
                     {
                         id: existingTicket.id,
-                        ticketNumber: (existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8),
+                        ticketNumber: existingTicket.ticketNumber,
                         title: updateData.title || existingTicket.title,
                         status: existingTicket.status,
                         tenantId: existingTicket.tenantId,
@@ -1066,7 +1101,7 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
                  if (updatedFullTicket) {
                      await notifyTechnicianAssigned({
                          id: updatedFullTicket.id,
-                         ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                         ticketNumber: updatedFullTicket.ticketNumber,
                          title: updatedFullTicket.title,
                          status: updatedFullTicket.status,
                          tenantId: updatedFullTicket.tenantId,
@@ -1147,10 +1182,6 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
              if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.part.update({
-                             where: { id: usage.partId },
-                             data: { quantity: { increment: usage.quantity } }
-                         });
                          await txTenantDb.partUsage.delete({
                              where: { id: usage.id }
                          });
@@ -1170,7 +1201,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
                 await notifyTicketStatusChange(
                     {
                         id: existingTicket.id,
-                        ticketNumber: (existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8),
+                        ticketNumber: existingTicket.ticketNumber,
                         title: existingTicket.title,
                         status: existingTicket.status, // Old status
                         tenantId: existingTicket.tenantId,
@@ -1206,7 +1237,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
                 tenantId: session.user.tenantId,
                 type: 'INFO',
                 title: 'Estado del Ticket Actualizado',
-                message: `El ticket #${(existingTicket as any).ticketNumber || existingTicket.id.slice(0, 8)} cambió a estado ${status}`,
+                message: `El ticket #${existingTicket.ticketNumber} cambió a estado ${status}`,
                 link: `/dashboard/tickets/${ticketId}`
             });
         }
@@ -1221,7 +1252,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
             if (updatedFullTicket) {
                 await notifyTicketStatusChange({
                     ...updatedFullTicket,
-                    ticketNumber: (updatedFullTicket as any).ticketNumber || updatedFullTicket.id.slice(0, 8),
+                    ticketNumber: updatedFullTicket.ticketNumber,
                 } as any, {
                     oldStatus: existingTicket.status as any,
                     newStatus: status as any,
@@ -1715,35 +1746,24 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
                 throw new Error('No autorizado');
             }
 
-            // ATOMIC UPDATE: Decrement stock only if sufficient quantity available
-            // This prevents race conditions by using a WHERE clause with quantity check
-            const updateResult = await tx.part.updateMany({
-                where: {
-                    id: partId,
-                    tenantId: session.user.tenantId,
-                    quantity: { gte: quantity }, // Only update if stock is sufficient
-                },
-                data: {
-                    quantity: { decrement: quantity }, // Atomic decrement
-                },
-            });
-
-            // If no rows were updated, either part doesn't exist or insufficient stock
-            if (updateResult.count === 0) {
-                const part = await txTenantDb.part.findUnique({ where: { id: partId } });
-
-                if (!part) {
-                    throw new Error('Repuesto no encontrado');
-                }
-
-                if (!isSuperAdmin && part.tenantId !== session.user.tenantId) {
-                    throw new Error('No autorizado');
-                }
-
-                throw new Error(`Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}`);
+            // 1. Check if part exists and has stock (Optional for UX, trigger enforces it too)
+            const part = await txTenantDb.part.findUnique({ where: { id: partId } });
+            
+            if (!part) {
+                throw new Error('Repuesto no encontrado');
             }
 
-            // Create usage record
+            if (!isSuperAdmin && part.tenantId !== session.user.tenantId) {
+                throw new Error('No autorizado');
+            }
+
+            if (part.quantity < quantity) {
+                 throw new Error(`Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}`);
+            }
+
+            // 2. Create usage record
+            // DB Trigger 'trg_update_stock_on_usage' will automatically decrement stock
+            // DB Trigger 'trg_prevent_negative_stock' will prevent negative stock
             await txTenantDb.partUsage.create({
                 data: {
                     ticketId,
@@ -1830,16 +1850,9 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
                 throw new Error('No autorizado');
             }
 
-            // Delete usage record and restore part quantity
+            // Delete usage record and restore part quantity (Handled by DB Trigger)
             await txTenantDb.partUsage.delete({
                 where: { id: usageId }
-            });
-
-            await txTenantDb.part.update({
-                where: { id: usage.partId },
-                data: {
-                    quantity: usage.part.quantity + usage.quantity,
-                }
             });
         });
 

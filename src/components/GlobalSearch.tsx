@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import styles from './GlobalSearch.module.css';
 
 interface SearchResult {
-    type: 'ticket' | 'customer';
+    type: 'ticket' | 'customer' | 'part';
     id: string;
     title: string;
     subtitle: string;
     status?: string;
+    url: string;
 }
 
 export default function GlobalSearch() {
@@ -56,10 +57,16 @@ export default function GlobalSearch() {
     const handleResultClick = (result: SearchResult) => {
         setIsOpen(false);
         setQuery('');
-        if (result.type === 'ticket') {
-            router.push(`/dashboard/tickets/${result.id}`);
+        
+        if (result.url) {
+            router.push(result.url);
         } else {
-            router.push(`/dashboard/customers/${result.id}/edit`);
+            // Fallback for legacy behavior if API doesn't return URL
+            if (result.type === 'ticket') {
+                router.push(`/dashboard/tickets/${result.id}`);
+            } else if (result.type === 'customer') {
+                router.push(`/dashboard/customers/${result.id}/edit`);
+            }
         }
     };
 
@@ -67,6 +74,24 @@ export default function GlobalSearch() {
         if (e.key === 'Enter' && query.length >= 2) {
             setIsOpen(false);
             router.push(`/dashboard/search?q=${encodeURIComponent(query)}`);
+        }
+    };
+
+    const getBadgeClass = (type: string) => {
+        switch (type) {
+            case 'ticket': return styles.ticketBadge;
+            case 'customer': return styles.customerBadge;
+            case 'part': return styles.partBadge;
+            default: return styles.ticketBadge;
+        }
+    };
+
+    const getBadgeLabel = (type: string) => {
+        switch (type) {
+            case 'ticket': return 'Ticket';
+            case 'customer': return 'Cliente';
+            case 'part': return 'Repuesto';
+            default: return type;
         }
     };
 
@@ -90,7 +115,7 @@ export default function GlobalSearch() {
                 <input
                     type="text"
                     className={styles.searchInput}
-                    placeholder="Buscar tickets, clientes..."
+                    placeholder="Buscar tickets, clientes, repuestos..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => query.length >= 2 && setIsOpen(true)}
@@ -113,8 +138,8 @@ export default function GlobalSearch() {
                                 onClick={() => handleResultClick(result)}
                                 className={styles.resultItem}
                             >
-                                <span className={result.type === 'ticket' ? styles.ticketBadge : styles.customerBadge}>
-                                    {result.type === 'ticket' ? 'Ticket' : 'Cliente'}
+                                <span className={getBadgeClass(result.type)}>
+                                    {getBadgeLabel(result.type)}
                                 </span>
                                 <div className={styles.resultContent}>
                                     <div className={styles.resultTitle}>

@@ -14,6 +14,10 @@ vi.mock('./ticket-notifications', () => ({
     notifyTicketCreated: vi.fn(),
 }));
 
+vi.mock('next/navigation', () => ({
+    redirect: vi.fn(),
+}));
+
 describe('Enhanced Ticket Creation Flow', () => {
     let tenantId: string;
     let userId: string;
@@ -81,12 +85,14 @@ describe('Enhanced Ticket Creation Flow', () => {
             deviceType: 'PC',
         };
 
-        await createTicket(
-            ticketData,
-            'Different Name', // Name mismatch
-            tenantId,
-            { email: 'unique@client.com' } // Email match!
-        );
+        const formData = new FormData();
+        formData.append('title', ticketData.title);
+        formData.append('description', ticketData.description);
+        formData.append('deviceType', ticketData.deviceType);
+        formData.append('customerName', 'Different Name');
+        formData.append('customerEmail', 'unique@client.com');
+
+        await createTicket(null, formData);
 
         // 3. Verify
         const customers = await prisma.customer.findMany({ where: { tenantId } });
@@ -116,11 +122,13 @@ describe('Enhanced Ticket Creation Flow', () => {
             initialParts: [{ partId: part.id, quantity: 2 }]
         };
 
-        await createTicket(
-            ticketData,
-            'Stock Client',
-            tenantId
-        );
+        const formData = new FormData();
+        formData.append('title', ticketData.title);
+        formData.append('description', ticketData.description);
+        formData.append('customerName', 'Stock Client');
+        formData.append('initialParts', JSON.stringify([{ partId: part.id, quantity: 2 }]));
+
+        await createTicket(null, formData);
 
         // 3. Verify Stock Reduced
         const updatedPart = await prisma.part.findUnique({ where: { id: part.id } });
@@ -140,11 +148,14 @@ describe('Enhanced Ticket Creation Flow', () => {
             priority: 'URGENT' as const,
         };
 
-        await createTicket(
-            ticketData,
-            'Status Client',
-            tenantId
-        );
+        const formData = new FormData();
+        formData.append('title', ticketData.title);
+        formData.append('description', ticketData.description);
+        formData.append('status', 'IN_PROGRESS');
+        formData.append('priority', 'URGENT');
+        formData.append('customerName', 'Status Client');
+
+        await createTicket(null, formData);
 
         const ticket = await prisma.ticket.findFirst({ where: { title: 'Custom Status Ticket' } });
         expect(ticket?.status).toBe('IN_PROGRESS');

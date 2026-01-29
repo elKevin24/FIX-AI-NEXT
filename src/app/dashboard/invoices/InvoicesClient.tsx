@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
+import ExportButton from '@/components/ui/ExportButton';
 import styles from './invoices.module.css';
 
 interface Invoice {
@@ -128,6 +129,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
           <h1>Facturación</h1>
           <p>Consulta y gestiona las facturas generadas a partir de tickets.</p>
         </div>
+        <ExportButton type="invoices" />
       </header>
 
       <section className={styles.statsGrid}>

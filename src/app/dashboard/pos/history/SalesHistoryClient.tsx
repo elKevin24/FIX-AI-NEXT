@@ -10,6 +10,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { DataTable } from '@/components/ui/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
+import ExportButton from '@/components/ui/ExportButton';
 import styles from './history.module.css';
 
 // ... (Types remain the same)
@@ -228,9 +229,12 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                         {stats ? `${stats.salesCount} ventas · Total: ${formatCurrency(stats.totalSales)}` : ''}
                     </p>
                 </div>
-                <Button variant="primary" onClick={() => router.push('/dashboard/pos')}>
-                    Nueva Venta
-                </Button>
+                <div className="flex gap-2 items-center">
+                    <ExportButton type="pos-sales" />
+                    <Button variant="primary" onClick={() => router.push('/dashboard/pos')}>
+                        Nueva Venta
+                    </Button>
+                </div>
             </header>
 
             {error && <Alert variant="error" className={styles.alert}>{error}</Alert>}

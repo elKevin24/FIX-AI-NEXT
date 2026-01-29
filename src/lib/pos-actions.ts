@@ -196,25 +196,12 @@ export async function createPOSSale(data: CreatePOSSaleData) {
     }
   }
 
-  // Generate sale number
-  const lastSale = await db.pOSSale.findFirst({
-    where: { tenantId: session.user.tenantId },
-    orderBy: { createdAt: 'desc' },
-    select: { saleNumber: true },
-  });
-
-  let saleNumber = 'POS-0001';
-  if (lastSale?.saleNumber) {
-    const lastNumber = parseInt(lastSale.saleNumber.split('-')[1]);
-    saleNumber = `POS-${String(lastNumber + 1).padStart(4, '0')}`;
-  }
-
   // Create sale in transaction
   const sale = await db.$transaction(async (tx: typeof db) => {
     // 1. Create the sale
     const newSale = await tx.pOSSale.create({
       data: {
-        saleNumber,
+        saleNumber: '', // Handled by DB Trigger
         customerId: data.customerId || null,
         customerName: data.customerName || 'Consumidor Final',
         customerNIT: data.customerNIT || 'C/F',
@@ -239,10 +226,8 @@ export async function createPOSSale(data: CreatePOSSaleData) {
         data: {
           saleId: newSale.id,
           partId: item.partId,
-          partName: item.partName,
           quantity: item.quantity,
           unitPrice: new Decimal(item.unitPrice),
-          total: new Decimal(item.total),
         },
       });
 
@@ -274,7 +259,7 @@ export async function createPOSSale(data: CreatePOSSaleData) {
           data: {
             type: 'INCOME',
             amount: new Decimal(payment.amount),
-            description: `Venta POS ${saleNumber}`,
+            description: `Venta POS ${newSale.saleNumber}`,
             reference: newSale.id,
             cashRegisterId: openCashRegister.id,
             tenantId: session.user.tenantId,

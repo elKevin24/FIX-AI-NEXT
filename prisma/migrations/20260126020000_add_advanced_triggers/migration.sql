@@ -24,6 +24,11 @@ CREATE TRIGGER trg_prevent_negative_stock
 BEFORE INSERT ON part_usages
 FOR EACH ROW EXECUTE FUNCTION prevent_negative_stock();
 
+DROP TRIGGER IF EXISTS trg_prevent_negative_stock_pos ON pos_sale_items;
+CREATE TRIGGER trg_prevent_negative_stock_pos
+BEFORE INSERT ON pos_sale_items
+FOR EACH ROW EXECUTE FUNCTION prevent_negative_stock();
+
 
 
 -- 3. Ticket Number Sequence (Per Tenant)
@@ -50,3 +55,28 @@ DROP TRIGGER IF EXISTS trg_assign_ticket_number ON tickets;
 CREATE TRIGGER trg_assign_ticket_number
 BEFORE INSERT ON tickets
 FOR EACH ROW EXECUTE FUNCTION assign_ticket_number();
+
+-- 4. POS Sale Number Sequence (Per Tenant)
+CREATE OR REPLACE FUNCTION assign_sale_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    next_num INTEGER;
+BEGIN
+    IF NEW."saleNumber" IS NULL OR NEW."saleNumber" = '' THEN
+        SELECT COALESCE(MAX(CAST(SUBSTRING("saleNumber" FROM '[0-9]+$') AS INTEGER)), 0) + 1
+        INTO next_num
+        FROM pos_sales 
+        WHERE "tenantId" = NEW."tenantId"
+        AND "saleNumber" ~ '^S-\d+$'; 
+
+        NEW."saleNumber" := 'S-' || next_num;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_assign_sale_number ON pos_sales;
+CREATE TRIGGER trg_assign_sale_number
+BEFORE INSERT ON pos_sales
+FOR EACH ROW EXECUTE FUNCTION assign_sale_number();
+

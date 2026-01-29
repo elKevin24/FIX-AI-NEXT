@@ -94,14 +94,16 @@ describe('service-template-actions', () => {
 
   describe('createTicketFromTemplate', () => {
 
-    const mockTx = {
-      ticket: { create: vi.fn() },
-      part: { updateMany: vi.fn(), findUnique: vi.fn() },
-      partUsage: { create: vi.fn() },
-      ticketNote: { create: vi.fn() },
-    };
+    let mockTx: any;
 
     beforeEach(() => {
+      mockTx = {
+        ticket: { create: vi.fn() },
+        part: { updateMany: vi.fn(), findUnique: vi.fn() },
+        partUsage: { create: vi.fn() },
+        ticketNote: { create: vi.fn() },
+      };
+      
       mockDb['$transaction'] = vi.fn((callback) => callback(mockTx));
       mockDb['customer'] = { findUnique: vi.fn() };
       mockDb['serviceTemplate'] = { findUnique: vi.fn() };
@@ -131,7 +133,7 @@ describe('service-template-actions', () => {
       mockDb.serviceTemplate.findUnique.mockResolvedValue(template);
       mockDb.customer.findUnique.mockResolvedValue(customer);
       mockTx.ticket.create.mockResolvedValue(newTicket);
-      mockTx.part.updateMany.mockResolvedValue({ count: 1 });
+      mockTx.part.findUnique.mockResolvedValue({ id: 'part-1', quantity: 10, tenantId: 'tenant-1' });
 
       // Mock for notification fetch
       mockDb.serviceTemplate.findUnique.mockResolvedValueOnce(template); // first call
@@ -157,10 +159,6 @@ describe('service-template-actions', () => {
       const result = await createTicketFromTemplate(formData);
 
       expect(mockTx.ticket.create).toHaveBeenCalled();
-      expect(mockTx.part.updateMany).toHaveBeenCalledWith({
-        where: { id: 'part-1', quantity: { gte: 2 } },
-        data: { quantity: { decrement: 2 } },
-      });
       expect(mockTx.partUsage.create).toHaveBeenCalled();
       expect(result.id).toBe('tick-1');
       expect(revalidatePath).toHaveBeenCalled();
@@ -182,7 +180,7 @@ describe('service-template-actions', () => {
 
       mockDb.serviceTemplate.findUnique.mockResolvedValue(template);
       mockDb.customer.findUnique.mockResolvedValue({ id: customerId, tenantId: 'tenant-1' });
-      mockTx.part.updateMany.mockResolvedValue({ count: 0 });
+      mockTx.part.findUnique.mockResolvedValue({ id: 'part-1', quantity: 1, tenantId: 'tenant-1' });
 
       const formData = new FormData();
       formData.append('templateId', templateId);

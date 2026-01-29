@@ -427,13 +427,20 @@ export async function createTicketFromTemplate(formData: FormData) {
   }
 
   const formDataObj = Object.fromEntries(formData);
-  const validatedFields = CreateTicketFromTemplateSchema.safeParse(formDataObj);
+  
+  let optionalParts: string[] | undefined;
+  try {
+      const raw = formData.get('optionalParts');
+      if (raw && typeof raw === 'string') optionalParts = JSON.parse(raw);
+  } catch (e) {}
+
+  const validatedFields = CreateTicketFromTemplateSchema.safeParse({ ...formDataObj, optionalParts });
 
   if (!validatedFields.success) {
     throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
   }
 
-  const { templateId, deviceType, deviceModel, customerId } = validatedFields.data;
+  const { templateId, deviceType, deviceModel, customerId, optionalParts: selectedOptionalPartIds } = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -480,6 +487,9 @@ export async function createTicketFromTemplate(formData: FormData) {
         tenantId: session.user.tenantId,
         serviceTemplateId: templateId,
         // Asignar automáticamente si el usuario es técnico
+        // Calcular DueDate basado en estimatedDuration
+        dueDate: template.estimatedDuration ? new Date(Date.now() + template.estimatedDuration * 60000) : undefined,
+        estimatedCompletionDate: template.estimatedDuration ? new Date(Date.now() + template.estimatedDuration * 60000) : undefined,
         assignedToId:
           session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
         createdById: session.user.id,
@@ -491,22 +501,13 @@ export async function createTicketFromTemplate(formData: FormData) {
     const requiredParts = template.defaultParts.filter((dp: any) => dp.required);
 
     for (const defaultPart of requiredParts) {
-      // ATOMIC UPDATE: Solo decrementa si hay stock suficiente
-      const updateResult = await tx.part.updateMany({
-        where: {
-          id: defaultPart.partId,
-          quantity: { gte: defaultPart.quantity }, // Condición atómica
-        },
-        data: {
-          quantity: { decrement: defaultPart.quantity }, // Decremento atómico
-        },
-      });
-
-      // Si no se actualizó ninguna fila, no hay stock suficiente
-      if (updateResult.count === 0) {
+      // Check stock (Trigger enforces it too, but we check for clear error)
+      const part = await tx.part.findUnique({ where: { id: defaultPart.partId } });
+      
+      if (!part || part.quantity < defaultPart.quantity) {
         throw new Error(
           `Stock insuficiente para ${defaultPart.part.name}. ` +
-            `Disponible: ${defaultPart.part.quantity}, Requerido: ${defaultPart.quantity}`
+            `Disponible: ${part?.quantity || 0}, Requerido: ${defaultPart.quantity}`
         );
       }
 
@@ -539,28 +540,39 @@ export async function createTicketFromTemplate(formData: FormData) {
       }
     }
 
-    // 3. Agregar partes OPCIONALES (no requieren stock, solo sugerencia)
+    // 3. Agregar partes OPCIONALES seleccionadas
     const optionalParts = template.defaultParts.filter((dp: any) => !dp.required);
 
-    if (optionalParts.length > 0) {
-      // Las partes opcionales se agregan como referencia pero NO consumen stock
-      // El técnico decide después si las usa
+    if (optionalParts.length > 0 && selectedOptionalPartIds) {
       for (const optionalPart of optionalParts) {
-        // Verificar si hay stock disponible para la sugerencia
-        const part = await tx.part.findUnique({
-          where: { id: optionalPart.partId },
-        });
+        // Verificar si el usuario seleccionó esta parte opcional
+        if (selectedOptionalPartIds.includes(optionalPart.partId)) {
+           // Verificar stock y consumir (igual que requeridas)
+           const part = await tx.part.findUnique({
+             where: { id: optionalPart.partId },
+           });
 
-        if (part && part.quantity >= optionalPart.quantity) {
-          // Solo registrar como "sugerencia" en notas
-          await tx.ticketNote.create({
-            data: {
-              ticketId: newTicket.id,
-              authorId: session.user.id,
-              content: `💡 Parte sugerida por plantilla: ${part.name} (Cantidad: ${optionalPart.quantity})`,
-              isInternal: true,
-            },
-          });
+           if (!part || part.quantity < optionalPart.quantity) {
+             throw new Error(
+               `Stock insuficiente para parte opcional ${part?.name || 'desconocida'}. ` +
+               `Disponible: ${part?.quantity || 0}, Requerido: ${optionalPart.quantity}`
+             );
+           }
+           
+           // Decrementar stock
+           await tx.part.update({
+             where: { id: optionalPart.partId },
+             data: { quantity: { decrement: optionalPart.quantity } }
+           });
+
+           // Registrar uso
+           await tx.partUsage.create({
+             data: {
+               ticketId: newTicket.id,
+               partId: optionalPart.partId,
+               quantity: optionalPart.quantity,
+             },
+           });
         }
       }
     }
