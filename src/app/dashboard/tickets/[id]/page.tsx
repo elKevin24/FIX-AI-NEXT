@@ -173,6 +173,19 @@ function makeTicketInclude() {
                 createdAt: 'desc',
             } as const,
         },
+        attachments: {
+            include: {
+                uploadedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            } as const,
+        },
         invoice: true,
     };
 }
