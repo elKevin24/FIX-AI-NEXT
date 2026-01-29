@@ -70,7 +70,7 @@ export const TicketStatusChangedEmail = ({
       {note && (
          <Section style={noteBox}>
             <Text style={noteLabel}>Nota del técnico:</Text>
-            <Text style={noteText}>"{note}"</Text>
+            <Text style={noteText}>&quot;{note}&quot;</Text>
          </Section>
       )}
 

@@ -71,7 +71,7 @@ export async function notifyTicketStatusChange(
             subject: `[FIX-AI] Actualización de ticket #${ticketRef}`,
             react: TicketStatusChangedEmail({
                 customerName: ticket.customer.name,
-                ticketNumber: ticketRef,
+                ticketNumber: ticketRef || '',
                 ticketTitle: ticket.title,
                 oldStatus: STATUS_LABELS[oldStatus] || oldStatus,
                 newStatus: statusLabel,
@@ -109,8 +109,7 @@ export async function notifyTechnicianAssigned(
              to: ticket.assignedTo.email,
              subject: `[FIX-AI] Asignación: #${ticketRef}`,
              react: TechnicianAssignedEmail({
-                 technicianName: ticket.assignedTo.name || 'Técnico',
-                 ticketNumber: ticketRef,
+                 ticketNumber: ticketRef || '',
                  ticketTitle: ticket.title,
                  assignedBy: actorName,
                  ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
@@ -132,10 +131,10 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
              subject: `[FIX-AI] Orden recibida: #${ticketRef}`,
              react: TicketCreatedEmail({
                  customerName: ticket.customer.name,
-                 ticketNumber: ticketRef,
+                 ticketNumber: ticketRef || '',
                  ticketTitle: ticket.title,
-                 deviceType: ticket.deviceType,
-                 deviceModel: ticket.deviceModel,
+                 deviceType: ticket.deviceType || '',
+                 deviceModel: ticket.deviceModel || '',
                  ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
             })
         });

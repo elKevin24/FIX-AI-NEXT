@@ -98,7 +98,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         `;
 
         // Normalizar formato
-        tickets = tickets.map(t => ({
+        tickets = tickets.map((t: any) => ({
             ...t,
             customer: { name: t.customerName },
             assignedTo: t.assignedToId ? { name: t.assignedToName, email: t.assignedToEmail } : null

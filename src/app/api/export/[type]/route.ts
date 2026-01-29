@@ -44,7 +44,7 @@ export async function GET(
                  orderBy: { createdAt: 'desc' }
              });
              
-             data = tickets.map(t => ({
+             data = tickets.map((t: any) => ({
                  ID: t.ticketNumber || t.id.slice(0, 8),
                  Title: t.title,
                  Status: t.status,
@@ -60,7 +60,7 @@ export async function GET(
                  where: {}, // filters?
                  orderBy: { name: 'asc' }
              });
-             data = parts.map(p => ({
+             data = parts.map((p: any) => ({
                  Name: p.name,
                  SKU: p.sku || '',
                  Quantity: p.quantity,
@@ -76,7 +76,7 @@ export async function GET(
                  include: { customer: true },
                  orderBy: { createdAt: 'desc' }
              });
-             data = invoices.map(i => ({
+             data = invoices.map((i: any) => ({
                  Number: i.invoiceNumber,
                  Customer: i.customer.name,
                  Date: i.createdAt.toISOString().split('T')[0],
@@ -91,7 +91,7 @@ export async function GET(
                   include: { customer: true },
                   orderBy: { createdAt: 'desc' }
               });
-              data = sales.map(s => ({
+              data = sales.map((s: any) => ({
                   Number: s.invoiceNumber || s.id.slice(0,8),
                   Customer: s.customer?.name || 'Walk-in',
                   Date: s.createdAt.toISOString().split('T')[0],
