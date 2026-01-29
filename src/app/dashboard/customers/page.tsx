@@ -68,8 +68,8 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
       LIMIT ${pageSize} OFFSET ${offset};
     `;
 
-    // Normalizar
-    customers = customers.map(c => ({
+    // Normalizar para CustomersClient
+    customers = customers.map((c: any) => ({
       ...c,
       _count: { tickets: c.ticketCount }
     }));
