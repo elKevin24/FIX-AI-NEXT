@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PartsSection from './PartsSection';
 import ServicesSection from './ServicesSection';
+import AttachmentsSection from '@/components/tickets/AttachmentsSection';
 import { TimelineEvent } from '@/lib/timeline';
 
 interface Part {
@@ -83,6 +84,7 @@ interface Ticket {
     partsUsed: PartUsage[];
     services: ServiceUsage[];
     invoice?: any | null;
+    attachments?: any[];
 }
 
 interface User {
@@ -457,6 +459,14 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 </a>
                             )}
                         </div>
+                    </div>
+
+                    {/* File Attachments */}
+                    <div className={styles.section} style={{ padding: 0, marginTop: 0, border: 'none' }}>
+                         <AttachmentsSection 
+                             ticketId={ticket.id} 
+                             initialAttachments={ticket.attachments || []} 
+                         />
                     </div>
 
                     {/* Delete Zone - Only for admins */}
