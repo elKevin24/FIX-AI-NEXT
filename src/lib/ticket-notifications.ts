@@ -48,7 +48,7 @@ export async function notifyTicketStatusChange(
     ticket: TicketNotificationData,
     { oldStatus, newStatus, note }: { oldStatus: string; newStatus: string; note?: string }
 ) {
-    const ticketRef = ticket.ticketNumber || ticket.id.slice(0, 8);
+    const ticketRef = ticket.ticketNumber;
     const statusLabel = STATUS_LABELS[newStatus] || newStatus;
 
     // 1. Notificar al Técnico Asignado (In-app)
@@ -91,7 +91,7 @@ export async function notifyTechnicianAssigned(
 ) {
     if (!ticket.assignedToId) return;
 
-    const ticketRef = ticket.ticketNumber || ticket.id.slice(0, 8);
+    const ticketRef = ticket.ticketNumber;
 
     // 1. In-app
     await createNotification({
@@ -124,7 +124,7 @@ export async function notifyTechnicianAssigned(
  */
 export async function notifyTicketCreated(ticket: TicketNotificationData) {
     // Implementación opcional: Notificar al cliente que recibimos su equipo
-    const ticketRef = ticket.ticketNumber || ticket.id.slice(0, 8);
+    const ticketRef = ticket.ticketNumber;
 
     if (ticket.customer.email) {
         await sendEmail({

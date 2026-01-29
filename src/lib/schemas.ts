@@ -151,6 +151,7 @@ export const CreateTicketFromTemplateSchema = z.object({
   deviceType: z.string().max(50, 'El tipo de dispositivo es demasiado largo.').optional().nullable(),
   deviceModel: z.string().max(255, 'El modelo del dispositivo es demasiado largo.').optional().nullable(),
   customerId: z.string().uuid('ID de cliente inválido'),
+  optionalParts: z.array(z.string().uuid()).optional(),
 });
 
 export const AddPartToTemplateSchema = z.object({

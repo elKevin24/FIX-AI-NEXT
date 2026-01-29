@@ -20,7 +20,7 @@ describe('GlobalSearch', () => {
 
   it('renders search input', () => {
     render(<GlobalSearch />);
-    expect(screen.getByPlaceholderText('Buscar tickets, clientes...')).toBeDefined();
+    expect(screen.getByPlaceholderText('Buscar tickets, clientes, repuestos...')).toBeDefined();
   });
 
   it('searches when query is long enough', async () => {
@@ -34,7 +34,7 @@ describe('GlobalSearch', () => {
     });
 
     render(<GlobalSearch />);
-    const input = screen.getByPlaceholderText('Buscar tickets, clientes...');
+    const input = screen.getByPlaceholderText('Buscar tickets, clientes, repuestos...');
     
     fireEvent.change(input, { target: { value: 'tes' } });
 
@@ -59,7 +59,7 @@ describe('GlobalSearch', () => {
     });
 
     render(<GlobalSearch />);
-    const input = screen.getByPlaceholderText('Buscar tickets, clientes...');
+    const input = screen.getByPlaceholderText('Buscar tickets, clientes, repuestos...');
     fireEvent.change(input, { target: { value: 'tes' } });
 
     await waitFor(() => {

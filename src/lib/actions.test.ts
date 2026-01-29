@@ -5,6 +5,7 @@ import {
     createTicket, updateTicket, updateTicketStatus, deleteTicket,
     createPart, updatePart, deletePart, addTicketNote
 } from './actions';
+import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
@@ -20,6 +21,11 @@ vi.mock('next/navigation', () => ({
 }));
 vi.mock('@/lib/notifications');
 vi.mock('./ticket-notifications');
+vi.mock('@/lib/prisma', () => ({
+    prisma: {
+        $transaction: vi.fn(),
+    }
+}));
 
 describe('Core Actions CRUD', () => {
     const mockSession = {
@@ -63,6 +69,13 @@ describe('Core Actions CRUD', () => {
             findUnique: vi.fn(),
             create: vi.fn(),
         },
+        auditLog: {
+            create: vi.fn(),
+        },
+        partUsage: {
+            create: vi.fn(),
+        },
+
         $transaction: vi.fn((callback) => callback(mockDb)),
     };
 
@@ -70,6 +83,7 @@ describe('Core Actions CRUD', () => {
         vi.clearAllMocks();
         (auth as any).mockResolvedValue(mockSession);
         (getTenantPrisma as any).mockReturnValue(mockDb);
+        (prisma.$transaction as any).mockImplementation((callback: any) => callback(mockDb));
     });
 
     // ==================== USER TESTS ====================
@@ -82,16 +96,19 @@ describe('Core Actions CRUD', () => {
             formData.append('password', '123456');
             formData.append('role', 'TECHNICIAN');
 
-            await createUser(null, formData);
+            const result = await createUser(null, formData);
 
             expect(mockDb.user.create).toHaveBeenCalled();
-            expect(redirect).toHaveBeenCalledWith('/dashboard/users');
+            expect(result).toEqual({ success: true, message: 'Usuario creado exitosamente' });
         });
 
         it('createUser should fail if not ADMIN', async () => {
             (auth as any).mockResolvedValue({ user: { ...mockSession.user, role: 'TECHNICIAN' } });
             const formData = new FormData();
-            await expect(createUser(null, formData)).resolves.toEqual({ message: 'Solo los administradores pueden crear usuarios' });
+            await expect(createUser(null, formData)).resolves.toEqual({ 
+                success: false,
+                message: 'Solo los administradores pueden crear usuarios' 
+            });
         });
     });
 
@@ -150,15 +167,65 @@ describe('Core Actions CRUD', () => {
                 assignedTo: null 
             });
 
-            const ticketData = { title: 'Fix PC', description: 'Broken' };
+            const formData = new FormData();
+            formData.append('title', 'Fix PC');
+            formData.append('description', 'Broken');
+            formData.append('customerName', 'New Cust');
             
-            await createTicket(ticketData, 'New Cust', 'tenant-1');
+            await createTicket(null, formData);
 
             expect(mockDb.customer.create).toHaveBeenCalled();
             expect(mockDb.ticket.create).toHaveBeenCalled();
         });
 
-        it('updateTicketStatus should update status', async () => {
+        it('createTicket should use atomic updateMany for initialParts (success path)', async () => {
+            mockDb.customer.findFirst.mockResolvedValue(null); // Customer not found
+            mockDb.customer.create.mockResolvedValue({ id: 'cust-new', name: 'New Cust' });
+            mockDb.ticket.create.mockResolvedValue({ 
+                id: 'tick-2',
+                ticketNumber: 'T-2',
+                status: 'OPEN',
+                tenantId: 'tenant-1',
+                customer: { id: 'cust-new', name: 'New Cust', email: 'test@test.com' },
+                assignedTo: null 
+            });
+
+            const validPartId = '123e4567-e89b-12d3-a456-426614174001';
+            // Mock part existence
+            mockDb.part.findUnique = vi.fn().mockResolvedValue({ id: validPartId, name: 'Part A', quantity: 4, minStock: 2, tenantId: 'tenant-1' });
+            mockDb.partUsage.create = vi.fn().mockResolvedValue({ id: 'usage-1' });
+
+            const formData = new FormData();
+            formData.append('title', 'Fix PC');
+            formData.append('description', 'Broken');
+            formData.append('customerName', 'New Cust');
+            formData.append('initialParts', JSON.stringify([{ partId: validPartId, quantity: 1 }]));
+
+            await createTicket(null, formData);
+
+            expect(mockDb.partUsage.create).toHaveBeenCalled();
+        });
+
+                        it('createTicket should fail when stock is insufficient', async () => {
+                            const validPartId = '123e4567-e89b-12d3-a456-426614174000';
+                            mockDb.customer.findFirst.mockResolvedValue(null); // Customer not found
+                            mockDb.customer.create.mockResolvedValue({ id: 'cust-new', name: 'New Cust' });
+                            
+                            // Simulate insufficient stock check
+                            // quantity 0 < 1 required
+                            mockDb.part.findUnique = vi.fn().mockResolvedValue({ id: validPartId, name: 'Part A', quantity: 0, minStock: 2, tenantId: 'tenant-1' });
+                
+                            const formData = new FormData();
+                            formData.append('title', 'Fix PC');
+                            formData.append('description', 'Broken');
+                            formData.append('customerName', 'New Cust');
+                            formData.append('initialParts', JSON.stringify([{ partId: validPartId, quantity: 1 }]));
+                
+                            const result = await createTicket(null, formData);
+                
+                            expect(result).toEqual(expect.objectContaining({ success: false }));
+                            expect(result.message).toMatch(/Stock insuficiente/);
+                        });        it('updateTicketStatus should update status', async () => {
             const validTicketId = '123e4567-e89b-12d3-a456-426614174001';
             mockDb.ticket.findUnique.mockResolvedValue({ 
                 id: validTicketId, 

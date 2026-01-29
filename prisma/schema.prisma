@@ -1,11 +1,13 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm]
 }
 
 model Tenant {
@@ -73,6 +75,7 @@ model User {
   assignedTickets      Ticket[]
   createdTickets       Ticket[]                   @relation("TicketCreatedBy")
   updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
+  uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
 
   @@map("users")
@@ -109,38 +112,39 @@ model Customer {
 }
 
 model Ticket {
-  id                      String           @id @default(uuid())
+  id                      String             @id @default(uuid())
   ticketNumber            String?
   title                   String
   description             String
-  status                  TicketStatus     @default(OPEN)
+  status                  TicketStatus       @default(OPEN)
   tenantId                String
   customerId              String
   assignedToId            String?
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
   accessories             String?
   cancellationReason      String?
   checkInNotes            String?
   deviceModel             String?
-  deviceType              String?          @default("PC")
+  deviceType              String?            @default("PC")
   serialNumber            String?
   createdById             String?
   serviceTemplateId       String?
   updatedById             String?
-  priority                TicketPriority   @default(MEDIUM)
+  priority                TicketPriority     @default(MEDIUM)
   dueDate                 DateTime?
   estimatedCompletionDate DateTime?
+  attachments             TicketAttachment[]
   invoice                 Invoice?
   partsUsed               PartUsage[]
   notes                   TicketNote[]
   services                TicketService[]
-  assignedTo              User?            @relation(fields: [assignedToId], references: [id])
-  createdBy               User?            @relation("TicketCreatedBy", fields: [createdById], references: [id])
-  customer                Customer         @relation(fields: [customerId], references: [id])
-  serviceTemplate         ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
-  tenant                  Tenant           @relation(fields: [tenantId], references: [id])
-  updatedBy               User?            @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
+  assignedTo              User?              @relation(fields: [assignedToId], references: [id])
+  createdBy               User?              @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  customer                Customer           @relation(fields: [customerId], references: [id])
+  serviceTemplate         ServiceTemplate?   @relation(fields: [serviceTemplateId], references: [id])
+  tenant                  Tenant             @relation(fields: [tenantId], references: [id])
+  updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
 
   @@unique([ticketNumber, tenantId])
   @@index([status, priority])
@@ -149,6 +153,24 @@ model Ticket {
   @@index([createdById])
   @@index([updatedById])
   @@map("tickets")
+}
+
+model TicketAttachment {
+  id           String   @id @default(uuid())
+  ticketId     String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedBy User   @relation("UploadedAttachments", fields: [uploadedById], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
 }
 
 model Part {
@@ -570,6 +592,11 @@ model TenantSettings {
   currency            String   @default("GTQ")
   defaultPaymentTerms String?
   invoiceFooter       String?
+  // SLA Configuration
+  slaWarningPercent   Int      @default(75)
+  slaCriticalPercent  Int      @default(90)
+  slaEmailEnabled     Boolean  @default(true)
+  slaInAppEnabled     Boolean  @default(true)
   tenant              Tenant   @relation(fields: [tenantId], references: [id])
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
