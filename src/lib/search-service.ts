@@ -134,7 +134,7 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
   // Normalizar resultados
   const results: SearchResult[] = [];
 
-  customers.forEach(c => {
+  customers.forEach((c: any) => {
     results.push({
       type: 'CUSTOMER',
       id: c.id,
@@ -145,7 +145,7 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
     });
   });
 
-  tickets.forEach(t => {
+  tickets.forEach((t: any) => {
     results.push({
       type: 'TICKET',
       id: t.id,
@@ -157,7 +157,7 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
     });
   });
 
-  parts.forEach(p => {
+  parts.forEach((p: any) => {
     results.push({
       type: 'PART',
       id: p.id,
