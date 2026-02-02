@@ -111,10 +111,15 @@ const calculateServicesCost = (ticket: Ticket80mmData): number => {
 const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
     ({ ticket, showParts = true, showServices = true, showCostSummary = true, showQR = true, baseUrl }, ref) => {
         const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+        const [generatedDate, setGeneratedDate] = useState<string>('');
 
         const partsCost = calculatePartsCost(ticket);
         const servicesCost = calculateServicesCost(ticket);
         const totalCost = partsCost + servicesCost;
+
+        useEffect(() => {
+            setGeneratedDate(formatDate(new Date()));
+        }, []);
 
         // Generar QR Code
         useEffect(() => {
@@ -378,7 +383,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* Footer */}
                 <div className={styles.footer}>
-                    <p className={styles.footerLine}>Generado: {formatDate(new Date())}</p>
+                    <p className={styles.footerLine}>Generado: {generatedDate}</p>
                     <p className={styles.footerLine}>FIX-AI - Sistema de Gestión de Talleres</p>
                     {ticket.status === 'RESOLVED' || ticket.status === 'CLOSED' ? (
                         <p className={styles.footerLine} style={{ fontWeight: 600, marginTop: '4px' }}>
