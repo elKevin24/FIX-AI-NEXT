@@ -161,8 +161,29 @@ export const AddPartToTemplateSchema = z.object({
   required: z.boolean(),
 });
 
+// ... (existing code)
+
 export const UpdateTemplateDefaultPartSchema = z.object({
   id: z.string().uuid('ID de parte por defecto inválido'),
   quantity: z.number().int('La cantidad debe ser un entero').positive('La cantidad debe ser positiva'),
   required: z.boolean(),
 });
+
+// ============================================================================
+// TECHNICIAN AVAILABILITY SCHEMAS
+// ============================================================================
+
+export const TechnicianUnavailabilitySchema = z.object({
+  userId: z.string().uuid('ID de usuario inválido').optional(), // Optional if checking current user
+  startDate: z.string().transform((str) => new Date(str)),
+  endDate: z.string().transform((str) => new Date(str)),
+  reason: z.enum(['AVAILABLE', 'UNAVAILABLE', 'ON_VACATION', 'ON_LEAVE', 'IN_TRAINING', 'SICK_LEAVE'], {
+    errorMap: () => ({ message: 'Razón inválida' })
+  }),
+  notes: z.string().optional().nullable(),
+}).refine((data) => data.endDate >= data.startDate, {
+  message: "La fecha de fin debe ser posterior a la fecha de inicio",
+  path: ["endDate"],
+});
+
+export const CreateUnavailabilitySchema = TechnicianUnavailabilitySchema;
