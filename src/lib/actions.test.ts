@@ -8,7 +8,6 @@ import {
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 // Mock dependencies
