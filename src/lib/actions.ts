@@ -1023,6 +1023,25 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
              return { success: false, message: 'Ticket no encontrado' };
         }
 
+        // CHECK AVAILABILITY if assigning
+        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
+             const unavailableRecord = await tenantDb.technicianUnavailability.findFirst({
+                 where: {
+                     userId: assignedToId,
+                     startDate: { lte: new Date() },
+                     endDate: { gte: new Date() },
+                     isActive: true
+                 }
+             });
+
+             if (unavailableRecord) {
+                 return { 
+                     success: false, 
+                     message: `El técnico seleccionado no está disponible (Motivo: ${unavailableRecord.reason}).` 
+                 };
+             }
+        }
+
         const updateData: any = {};
         if (title) updateData.title = title;
         if (description) updateData.description = description;
@@ -1140,6 +1159,8 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
 
     const ticketId = formData.get('ticketId') as string;
     const status = formData.get('status') as string; 
+    const note = formData.get('note') as string | null;
+
     // Need to validate status is valid enum
     const validStatuses = ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'];
     
@@ -1193,6 +1214,18 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
                  where: { id: ticketId },
                  data: { status: status as any, updatedById: user.id }
              });
+
+             // Add system note if note provided
+             if (note) {
+                await txTenantDb.ticketNote.create({
+                    data: {
+                        ticketId,
+                        content: `Cambio de estado a ${status}: ${note}`,
+                        isInternal: true,
+                        authorId: user.id
+                    }
+                });
+             }
         });
 
         // 3. Notifications
@@ -1215,7 +1248,7 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
                     { 
                         oldStatus: existingTicket.status, 
                         newStatus: status,
-                        note: "Cambio rápido de estado"
+                        note: note || "Cambio de estado"
                     }
                  );
              } catch (e) {
