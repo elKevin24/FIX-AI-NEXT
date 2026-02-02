@@ -15,7 +15,7 @@ export function serializeDecimal<T>(data: T): any {
     return data.map(item => serializeDecimal(item));
   }
 
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === 'object') {
     const serialized: any = {};
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
