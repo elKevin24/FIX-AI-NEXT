@@ -1,0 +1,22 @@
+failed to load config from /home/kev/Documentos/GitHub/FIX-AI-NEXT/vitest.config.ts
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Startup Error [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯⎯[39m
+Error: EACCES: permission denied, open '/home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/.vite-temp/vitest.config.ts.timestamp-1769990597480-53fdb3d1e13bf.mjs'
+    at async open (node:internal/fs/promises:636:25)
+    at async Object.writeFile (node:internal/fs/promises:1205:14)
+    at async loadConfigFromBundledFile (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vite/dist/node/chunks/config.js:35905:3)
+    at async bundleAndLoadConfigFile (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vite/dist/node/chunks/config.js:35795:17)
+    at async loadConfigFromFile (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vite/dist/node/chunks/config.js:35762:42)
+    at async resolveConfig (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vite/dist/node/chunks/config.js:35411:22)
+    at async _createServer (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vite/dist/node/chunks/config.js:25361:67)
+    at async createViteServer (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vitest/dist/chunks/cli-api.C7sYjHmQ.js:9810:17)
+    at async createVitest (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vitest/dist/chunks/cli-api.C7sYjHmQ.js:13099:17)
+    at async prepareVitest (file:///home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/vitest/dist/chunks/cli-api.C7sYjHmQ.js:13461:14) {
+  errno: -13,
+  code: 'EACCES',
+  syscall: 'open',
+  path: '/home/kev/Documentos/GitHub/FIX-AI-NEXT/node_modules/.vite-temp/vitest.config.ts.timestamp-1769990597480-53fdb3d1e13bf.mjs'
+}
+
+
+

@@ -1,0 +1,32 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90m/home/kev/Documentos/GitHub/FIX-AI-NEXT[39m
+
+ [32m✓[39m src/lib/timeline.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/technician-actions.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+[90mstderr[2m | src/lib/security.test.ts[2m > [22m[2m🛡️ EXTREME Security Testing[2m > [22m[2m💣 DoS / Large Payloads[2m > [22m[2mshould handle extremely long strings in createTicket
+[22m[39mValidation Errors: { title: [ [32m'El título es demasiado largo.'[39m ] }
+
+ [32m✓[39m src/lib/security.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 98[2mms[22m[39m
+ [2m[90m↓[39m[22m src/lib/actions-enhanced.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+ [32m✓[39m src/lib/cash-register-actions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/lib/invoice-actions.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/lib/pos-actions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/components/dashboard/Sidebar.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 156[2mms[22m[39m
+ [32m✓[39m src/lib/service-template-actions.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/app/api/tickets/[id]/actions/route.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+[90mstderr[2m | src/lib/actions.test.ts[2m > [22m[2mCore Actions CRUD[2m > [22m[2mTicket Actions[2m > [22m[2mcreateTicket should fail when stock is insufficient
+[22m[39mFailed to create ticket: Error: Stock insuficiente para 'Part A'. Disponibles: 0, Solicitados: 1
+    at [90m/home/kev/Documentos/GitHub/FIX-AI-NEXT/[39msrc/lib/actions.ts:358:31
+
+ [32m✓[39m src/lib/actions.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+ [32m✓[39m src/lib/auth-utils.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/app/login/page.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 217[2mms[22m[39m
+ [32m✓[39m src/components/GlobalSearch.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 679[2mms[22m[39m
+     [33m[2m✓[22m[39m searches when query is long enough [33m 326[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates on result click [33m 313[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m13 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (14)[39m
+[2m      Tests [22m [1m[32m58 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (61)[39m
+[2m   Start at [22m 18:15:17
+[2m   Duration [22m 3.46s[2m (transform 1.70s, setup 0ms, import 8.27s, tests 1.40s, environment 12.83s)[22m
+
