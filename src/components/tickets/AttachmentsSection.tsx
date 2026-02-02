@@ -110,6 +110,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
                         <a href={att.url} target="_blank" rel="noopener noreferrer" className={styles.link}>
                             <div className={styles.preview}>
                                 {att.mimeType.startsWith('image/') ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
                                     <img src={att.url} alt={att.filename} className={styles.imagePreview} />
                                 ) : (
                                     <span style={{fontSize: '2rem'}}>📄</span>

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
-    createUser, updateUser, deleteUser,
+import {
+    createUser,
     createCustomer, updateCustomer, deleteCustomer,
-    createTicket, updateTicket, updateTicketStatus, deleteTicket,
-    createPart, updatePart, deletePart, addTicketNote
+    createTicket, updateTicketStatus,
+    createPart, updatePart
 } from './actions';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';

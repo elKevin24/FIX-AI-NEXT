@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateInvoiceFromTicket, registerPayment } from './invoice-actions';
+import { registerPayment } from './invoice-actions';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { InvoiceStatus, PaymentMethod } from '@prisma/client';
@@ -70,7 +70,7 @@ describe('invoice-actions.ts', () => {
       mockDb.payment.create.mockResolvedValue({ id: 'pay-1', amount: 100 });
       mockDb.invoice.update.mockResolvedValue({ ...mockInvoice, status: InvoiceStatus.PAID });
 
-      const result = await registerPayment(paymentData);
+      await registerPayment(paymentData);
 
       expect(mockDb.payment.create).toHaveBeenCalled();
       expect(mockDb.invoice.update).toHaveBeenCalledWith(expect.objectContaining({

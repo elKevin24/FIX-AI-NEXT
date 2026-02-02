@@ -365,6 +365,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                 {showQR && qrCodeDataUrl && (
                     <div className={styles.qrSection}>
                         <div className={styles.qrContainer}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={qrCodeDataUrl}
                                 alt={`QR Code - Ticket ${ticket.id}`}

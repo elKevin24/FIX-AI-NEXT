@@ -6,7 +6,7 @@ import TemplateSelector, {
   ServiceTemplate,
 } from '@/components/tickets/TemplateSelector';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
-import SuggestedPartsList, { SuggestedPart } from '@/components/tickets/SuggestedPartsList';
+import SuggestedPartsList from '@/components/tickets/SuggestedPartsList';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { createBatchTickets } from '@/lib/actions';
