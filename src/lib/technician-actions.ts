@@ -1,8 +1,6 @@
 'use server';
 
-import { z } from 'zod';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreateUnavailabilitySchema } from '@/lib/schemas';
 import { revalidatePath } from 'next/cache';
