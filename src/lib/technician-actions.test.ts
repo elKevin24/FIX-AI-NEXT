@@ -115,15 +115,18 @@ describe('Technician Availability Actions', () => {
   });
 
   it('should delete unavailability and restore status', async () => {
-      const today = new Date();
+      const now = new Date();
+      const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+      const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+
       const formData = new FormData();
       formData.append('id', 'abs-1');
 
       mockTenantDb.technicianUnavailability.findUnique.mockResolvedValue({
           id: 'abs-1',
           userId: '123e4567-e89b-12d3-a456-426614174002',
-          startDate: today,
-          endDate: today
+          startDate: yesterday,
+          endDate: tomorrow
       });
 
       await deleteUnavailability(null, formData);
