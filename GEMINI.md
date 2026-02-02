@@ -62,6 +62,7 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
     *   Gestor de partes por defecto en plantillas.
 
 ### 🚧 En Progreso / Pendiente
+5.  **Optimización UI/UX (Lighthouse):** Corregir contraste de colores y errores de consola detectados en PR #24.
 1.  **Notificaciones:** Sistema automatizado (Email/In-app) para cambios de estado y asignaciones.
 2.  **Pruebas (Testing):** Estrategia formal de tests (Unitarios/E2E) con Vitest/Playwright. Actualmente hay tests básicos pero se requiere cobertura completa.
 3.  **Reportes Avanzados:** Mejorar la visualización de métricas financieras y operativas.

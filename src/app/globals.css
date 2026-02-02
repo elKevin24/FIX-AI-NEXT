@@ -15,12 +15,12 @@
   --color-primary-100: hsl(220, 95%, 93%);
   --color-primary-200: hsl(220, 90%, 85%);
   --color-primary-300: hsl(220, 85%, 75%);
-  --color-primary-400: hsl(220, 80%, 60%);
-  --color-primary-500: hsl(220, 75%, 48%);
+  --color-primary-400: hsl(220, 80%, 55%);
+  --color-primary-500: hsl(220, 85%, 40%);
   /* Darkened for white text readability */
-  --color-primary-600: hsl(220, 75%, 40%);
+  --color-primary-600: hsl(220, 90%, 30%);
   /* Darkened for button backgrounds */
-  --color-primary-700: hsl(220, 75%, 30%);
+  --color-primary-700: hsl(220, 90%, 25%);
   --color-primary-800: hsl(220, 70%, 20%);
   --color-primary-900: hsl(220, 65%, 10%);
 
@@ -98,9 +98,9 @@
   /* Text Colors - High Contrast */
   --color-text-primary: var(--color-gray-900);
   /* Ratio > 15:1 */
-  --color-text-secondary: var(--color-gray-700);
+  --color-text-secondary: var(--color-gray-800);
   /* Ratio > 10:1 */
-  --color-text-tertiary: var(--color-gray-500);
+  --color-text-tertiary: var(--color-gray-600);
   /* Ratio > 4.5:1 (AA Large / AA Normal) */
   --color-text-inverse: hsl(0, 0%, 100%);
   --color-text-link: var(--color-primary-600);

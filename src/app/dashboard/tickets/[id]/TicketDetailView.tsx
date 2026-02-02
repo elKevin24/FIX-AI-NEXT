@@ -11,6 +11,7 @@ import PartsSection from './PartsSection';
 import ServicesSection from './ServicesSection';
 import AttachmentsSection from '@/components/tickets/AttachmentsSection';
 import { TimelineEvent } from '@/lib/timeline';
+import TicketWorkflowActions from '@/components/tickets/TicketWorkflowActions';
 
 interface Part {
     id: string;
@@ -167,34 +168,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 )}
             </div>
 
-            {/* Quick Status Update */}
-            <div className={styles.section}>
-                <h3 className={styles.label} style={{ marginBottom: '1rem' }}>Estado Actual</h3>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {STATUS_OPTIONS.map((status) => (
-                        <form key={status.value} action={statusAction} style={{ display: 'inline' }}>
-                            <input type="hidden" name="ticketId" value={ticket.id} />
-                            <input type="hidden" name="status" value={status.value} />
-                            <button
-                                type="submit"
-                                disabled={isUpdatingStatus || ticket.status === status.value}
-                                className={`${styles.status} ${styles[status.color]}`}
-                                style={{
-                                    cursor: ticket.status === status.value ? 'default' : 'pointer',
-                                    opacity: ticket.status === status.value ? 1 : 0.6,
-                                    border: ticket.status === status.value ? '2px solid currentColor' : '2px solid transparent',
-                                    padding: '0.5rem 1rem',
-                                }}
-                            >
-                                {status.label}
-                            </button>
-                        </form>
-                    ))}
-                </div>
-                {statusState?.message && !statusState.success && (
-                    <p className={styles.errorMessage}>{statusState.message}</p>
-                )}
-            </div>
+            {/* Workflow Actions (New) */}
+            <TicketWorkflowActions 
+                ticket={ticket}
+                availableUsers={availableUsers}
+                isAdmin={isAdmin}
+                currentUserId={currentUserId}
+            />
 
             {/* Main Content */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
@@ -581,52 +561,76 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             No hay eventos registrados.
                         </div>
                     ) : (
-                        timelineEvents.map((event) => (
-                            <div
-                                key={event.id}
-                                className={`${styles.logEntry} ${event.type === 'NOTE' ? styles.logEntryNote : styles.logEntrySystem}`}
-                            >
-                                <div className={styles.logHeader}>
-                                    <div className={styles.logMeta}>
-                                        <span className={styles.authorName}>
-                                            {event.author.name || event.author.email || 'Sistema'}
-                                        </span>
-                                        {event.type === 'LOG' && (
-                                            <span className={styles.systemTag}>
-                                                Sistema
-                                            </span>
-                                        )}
-                                        <span className={styles.logDate}>
-                                            {new Date(event.date).toLocaleString('es-ES')}
-                                        </span>
-                                    </div>
+                        timelineEvents.map((event) => {
+                            let entryClass = styles.logEntry;
+                            let Badge = null;
 
-                                    {/* Delete button - only for NOTE and author/admin */}
-                                    {event.type === 'NOTE' && (event.author.email === ticket.notes.find(n => n.id === event.id)?.author?.email || isAdmin) && (
-                                        <form action={deleteNoteAction}>
-                                            <input type="hidden" name="noteId" value={event.id} />
-                                            <button
-                                                type="submit"
-                                                disabled={isDeletingNote}
-                                                className={styles.textDanger}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    fontSize: '0.8rem',
-                                                    textDecoration: 'underline'
-                                                }}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </form>
-                                    )}
+                            switch (event.type) {
+                                case 'NOTE':
+                                    entryClass = `${styles.logEntry} ${styles.logEntryNote}`;
+                                    break;
+                                case 'STATUS_CHANGE':
+                                    entryClass = `${styles.logEntry} ${styles.logEntryStatus}`;
+                                    Badge = <span className={styles.statusTag}>Estado</span>;
+                                    break;
+                                case 'INVENTORY_MOVEMENT':
+                                    entryClass = `${styles.logEntry} ${styles.logEntryInventory}`;
+                                    Badge = <span className={styles.inventoryTag}>Inventario</span>;
+                                    break;
+                                case 'SERVICE_USAGE':
+                                    entryClass = `${styles.logEntry} ${styles.logEntryService}`;
+                                    Badge = <span className={styles.serviceTag}>Servicio</span>;
+                                    break;
+                                case 'LOG':
+                                default:
+                                    entryClass = `${styles.logEntry} ${styles.logEntrySystem}`;
+                                    Badge = <span className={styles.systemTag}>Sistema</span>;
+                                    break;
+                            }
+
+                            return (
+                                <div
+                                    key={event.id}
+                                    className={entryClass}
+                                >
+                                    <div className={styles.logHeader}>
+                                        <div className={styles.logMeta}>
+                                            <span className={styles.authorName}>
+                                                {event.author.name || event.author.email || 'Sistema'}
+                                            </span>
+                                            {Badge}
+                                            <span className={styles.logDate}>
+                                                {new Date(event.date).toLocaleString('es-ES')}
+                                            </span>
+                                        </div>
+
+                                        {/* Delete button - only for NOTE and author/admin */}
+                                        {event.type === 'NOTE' && (event.author.email === ticket.notes.find(n => n.id === event.id)?.author?.email || isAdmin) && (
+                                            <form action={deleteNoteAction}>
+                                                <input type="hidden" name="noteId" value={event.id} />
+                                                <button
+                                                    type="submit"
+                                                    disabled={isDeletingNote}
+                                                    className={styles.textDanger}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.8rem',
+                                                        textDecoration: 'underline'
+                                                    }}
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        )}
+                                    </div>
+                                    <p className={styles.logContent}>
+                                        {event.content}
+                                    </p>
                                 </div>
-                                <p className={styles.logContent}>
-                                    {event.content}
-                                </p>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
 
