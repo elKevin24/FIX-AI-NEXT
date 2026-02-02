@@ -562,7 +562,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                         </div>
                     ) : (
                         timelineEvents.map((event) => {
-                            let entryClass = styles.logEntry;
+                            let entryClass;
                             let Badge = null;
 
                             switch (event.type) {
