@@ -7,8 +7,8 @@ import { Decimal } from '@prisma/client/runtime/library';
 export function serializeDecimal<T>(data: T): any {
   if (data === null || data === undefined) return data;
 
-  if (data instanceof Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
-    return (data as Decimal).toNumber();
+  if ((data as any) instanceof Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
+    return (data as unknown as Decimal).toNumber();
   }
 
   if (Array.isArray(data)) {
