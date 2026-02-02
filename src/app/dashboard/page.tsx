@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma"; // Keep for count/groupBy if needed, or use tenantPrisma
 import { getTenantPrisma } from "@/lib/tenant-prisma";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
