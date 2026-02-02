@@ -4,6 +4,44 @@ Registro de cambios y nuevas funcionalidades implementadas en el proyecto.
 
 ---
 
+## [Sprint 2026-02-01] - Flujo de Trabajo Avanzado y Disponibilidad de Técnicos
+
+### ✨ Nuevas Funcionalidades
+
+#### 1. Sistema de Flujo de Trabajo de Tickets (Fase 2) 🔄
+**Descripción**: Reemplazo de los controles básicos de estado por un flujo de trabajo guiado y seguro.
+
+**Implementación**:
+- Panel de acciones contextual (`TicketWorkflowActions`): Los botones cambian dinámicamente según el estado del ticket.
+- Diálogos de confirmación para acciones críticas:
+  - **Cancelar Ticket**: Requiere motivo obligatorio y advierte sobre restauración de inventario.
+  - **Resolver Ticket**: Exige informe final de trabajo.
+  - **Pausar por Repuestos**: Permite detener el SLA indicando qué falta.
+  - **Asignar Técnico**: Interfaz mejorada para administradores.
+- Auditoría mejorada: Las notas ingresadas en los diálogos se guardan automáticamente en la bitácora.
+
+#### 2. Gestión de Disponibilidad de Técnicos 📅
+**Descripción**: Control de ausencias y bloqueo automático de asignaciones.
+
+**Implementación**:
+- **Nueva Ruta**: `/dashboard/technicians/[id]/availability`
+- **Funcionalidades**:
+  - Registro de ausencias (Vacaciones, Enfermedad, Permiso, Capacitación).
+  - Visualización de historial con indicadores de estado (Activo/Pasado).
+  - **Lógica de Bloqueo**: El sistema impide asignar tickets a técnicos con ausencias activas.
+  - **Actualización Automática**: El estado del usuario cambia en tiempo real si la ausencia inicia hoy.
+
+#### 3. Componentes UI Reutilizables 🎨
+- **Modal**: Nuevo componente de diálogo accesible con animaciones y backdrop blur.
+- **Button**: Nueva variante `warning` para acciones de pausa/espera.
+
+### 🛠 Mejoras Técnicas
+- **Validación Zod**: Esquemas estrictos para rangos de fechas (`endDate >= startDate`).
+- **Tests Unitarios**: Cobertura completa para lógica de creación y validación de ausencias (`src/lib/technician-actions.test.ts`).
+- **Seguridad**: Validación de roles (solo Admin puede gestionar disponibilidad de otros).
+
+---
+
 ## [Sprint 2025-12-10] - Sistema de Inventario y Migración a Neon
 
 ### ✨ Nuevas Funcionalidades
