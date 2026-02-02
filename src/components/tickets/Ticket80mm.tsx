@@ -118,7 +118,12 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
         const totalCost = partsCost + servicesCost;
 
         useEffect(() => {
-            setGeneratedDate(formatDate(new Date()));
+            // Set date after mount to avoid hydration mismatch
+            const now = new Date();
+            const timer = setTimeout(() => {
+                setGeneratedDate(formatDate(now));
+            }, 0);
+            return () => clearTimeout(timer);
         }, []);
 
         // Generar QR Code
