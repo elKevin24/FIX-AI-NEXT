@@ -3,7 +3,6 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
-import { Button } from '@/components/ui';
 import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 import Link from 'next/link';
 
