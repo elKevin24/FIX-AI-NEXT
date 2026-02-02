@@ -1,5 +1,5 @@
 
-import { PrismaClient, PaymentMethod } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 // We won't import the server action directly due to next-auth dependency issues in CLI
 // We will mimic the transaction logic to verify the DB flow is correct
 
@@ -19,7 +19,6 @@ async function testPOSFlow() {
   }
 
   const initialStock = part.quantity;
-  const saleAmount = Number(part.price);
 
   console.log(`📦 Part: ${part.name} (Stock: ${initialStock}, Price: ${part.price})`);
   console.log(`💰 Register: ${register.name} (Balance: ${register.expectedBalance})`);

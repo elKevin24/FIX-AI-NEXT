@@ -25,7 +25,7 @@ interface Props {
 export default function NotificationList({ initialNotifications, totalPages, currentPage }: Props) {
     const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
     const router = useRouter();
-    const [isPending, startTransition] = useTransition();
+    const [isPending] = useTransition();
 
     const handleMarkAsRead = async (id: string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
