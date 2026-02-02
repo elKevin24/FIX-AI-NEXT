@@ -2,6 +2,10 @@
   "name": "workshop-app",
   "version": "1.1.0",
   "private": true,
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "type": "module",
   "scripts": {
     "dev": "next dev",
