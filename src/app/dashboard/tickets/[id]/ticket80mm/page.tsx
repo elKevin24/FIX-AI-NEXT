@@ -49,6 +49,7 @@ export default async function Ticket80mmPage({ params }: Props) {
     // Mapear datos del ticket al formato Ticket80mmData
     const ticketData: Ticket80mmData = {
         id: ticket.id,
+        ticketNumber: ticket.ticketNumber,
         title: ticket.title,
         description: ticket.description,
         status: ticket.status,
@@ -79,7 +80,7 @@ export default async function Ticket80mmPage({ params }: Props) {
             name: ticket.assignedTo.name,
             email: ticket.assignedTo.email,
         } : null,
-        partsUsed: ticket.partsUsed.map((pu: any) => ({
+        partsUsed: ticket.partsUsed.map((pu) => ({
             id: pu.id,
             quantity: pu.quantity,
             part: {
@@ -91,7 +92,7 @@ export default async function Ticket80mmPage({ params }: Props) {
                 category: pu.part.category,
             },
         })),
-        services: ticket.services.map((s: any) => ({
+        services: ticket.services.map((s) => ({
             id: s.id,
             name: s.name,
             laborCost: s.laborCost.toString(),
