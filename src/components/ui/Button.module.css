@@ -93,6 +93,18 @@
   box-shadow: var(--shadow-md);
 }
 
+.warning {
+  background: var(--color-warning-500);
+  color: var(--color-warning-900);
+  border-color: transparent;
+}
+
+.warning:hover:not(:disabled) {
+  background: var(--color-warning-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
 .danger {
   background: var(--color-error-600);
   color: white;
