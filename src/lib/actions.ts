@@ -1300,33 +1300,6 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
     }
 }
 
-// Helper to share logic inside transaction
-async function handleStatusUpdate(txTenantDb: any, ticketId: string, status: string, existingTicket: any, userId: string) {
-    // RESTORE STOCK LOGIC
-    if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-        if (existingTicket.partsUsed.length > 0) {
-            for (const usage of existingTicket.partsUsed) {
-                await txTenantDb.part.update({
-                    where: { id: usage.partId },
-                    data: { quantity: { increment: usage.quantity } }
-                });
-                await txTenantDb.partUsage.delete({
-                    where: { id: usage.id }
-                });
-            }
-        }
-    }
-
-    // Update status
-    await txTenantDb.ticket.update({
-        where: { id: ticketId },
-        data: {
-            status: status,
-            updatedById: userId,
-        },
-    });
-}
-
 /**
  * Delete a ticket (Server Action)
  *

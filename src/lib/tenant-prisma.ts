@@ -46,8 +46,8 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                 },
                 async findUnique({ args, query, model }: any) {
                     if (MODELS_WITH_TENANT.includes(model)) {
-                        const { where } = args;
-                        // findUnique doesn't support additional filters in 'where' easily without 
+                        const { where, ...rest } = args;
+                        // findUnique doesn't support additional filters in 'where' easily without
                         // unique constraints, so we convert to findFirst.
                         return (prisma as any)[model].findFirst({
                             where: { ...where, tenantId },

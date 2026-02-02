@@ -106,8 +106,6 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
     } else {
         // BÚSQUEDA ESTÁNDAR
-        const db = isSuperAdmin ? prisma : getTenantPrisma(tenantId!);
-        
         // 1. Conteo
         // Si no es superadmin, getTenantPrisma ya filtra, pero findMany necesita where explicito si usamos el cliente raw, 
         // pero aquí usamos la abstracción
