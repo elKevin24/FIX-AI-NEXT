@@ -8,7 +8,7 @@ export function serializeDecimal<T>(data: T): any {
   if (data === null || data === undefined) return data;
 
   if ((data as any) instanceof Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
-    return (data as Decimal).toNumber();
+    return (data as unknown as Decimal).toNumber();
   }
 
   if (Array.isArray(data)) {
