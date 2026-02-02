@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { updateTicket, deleteTicket, updateTicketStatus, addTicketNote, deleteTicketNote } from '@/lib/actions';
+import { updateTicket, deleteTicket, addTicketNote, deleteTicketNote } from '@/lib/actions';
 import { generateInvoiceFromTicket } from '@/lib/invoice-actions';
 import styles from '../tickets.module.css';
 import Link from 'next/link';
@@ -125,7 +125,6 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
     const router = useRouter();
     const [updateState, updateAction, isUpdating] = useActionState(updateTicket, null);
     const [deleteState, deleteAction, isDeleting] = useActionState(deleteTicket, null);
-    const [statusState, statusAction, isUpdatingStatus] = useActionState(updateTicketStatus, null);
     const [noteState, noteAction, isAddingNote] = useActionState(addTicketNote, null);
     const [deleteNoteState, deleteNoteAction, isDeletingNote] = useActionState(deleteTicketNote, null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
