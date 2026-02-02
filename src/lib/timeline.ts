@@ -99,7 +99,7 @@ export function parseLogMessage(action: string, detailsStr: string | null): { co
         details = detailsStr ? JSON.parse(detailsStr) : {};
     } catch (e) {}
 
-    let content = action;
+    let content: string;
     let type: TimelineEvent['type'] = 'LOG';
 
     switch (action) {

@@ -39,10 +39,10 @@ export default function TicketWorkflowActions({ ticket, availableUsers, isAdmin,
     const [showAssignDialog, setShowAssignDialog] = useState(false);
 
     // Direct Actions (Start, Resume, Reopen, Close)
-    const [startState, startAction, isStarting] = useActionState(updateTicketStatus, null);
-    const [resumeState, resumeAction, isResuming] = useActionState(updateTicketStatus, null);
-    const [reopenState, reopenAction, isReopening] = useActionState(updateTicketStatus, null);
-    const [closeState, closeAction, isClosing] = useActionState(updateTicketStatus, null);
+    const [, startAction, isStarting] = useActionState(updateTicketStatus, null);
+    const [, resumeAction, isResuming] = useActionState(updateTicketStatus, null);
+    const [, reopenAction, isReopening] = useActionState(updateTicketStatus, null);
+    const [, closeAction, isClosing] = useActionState(updateTicketStatus, null);
 
     const isAssignedToMe = ticket.assignedTo?.id === currentUserId;
     const canAct = isAdmin || isAssignedToMe || ticket.status === 'OPEN'; // Open tickets can be grabbed
