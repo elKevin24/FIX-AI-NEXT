@@ -1,7 +1,6 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Prisma } from '@prisma/client';
 
 export type SearchResult = {
   type: 'CUSTOMER' | 'TICKET' | 'PART';
