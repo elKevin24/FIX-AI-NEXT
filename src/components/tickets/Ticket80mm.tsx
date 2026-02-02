@@ -162,7 +162,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                 <div className={styles.header}>
                     <h1 className={styles.companyName}>{ticket.tenant.name}</h1>
                     <p className={styles.documentTitle}>ORDEN DE SERVICIO</p>
-                    <p className={styles.ticketId}>#{ticket.id.slice(0, 8).toUpperCase()}</p>
+                    <p className={styles.ticketId}>#{ticket.ticketNumber || ticket.id.slice(0, 8).toUpperCase()}</p>
 
                     <div className={styles.metaRow}>
                         <span className={styles.metaLabel}>Ingreso:</span>

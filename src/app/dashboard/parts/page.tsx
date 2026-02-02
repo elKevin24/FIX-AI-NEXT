@@ -6,7 +6,6 @@ import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
 import styles from './parts.module.css';
 import PartsClient from './PartsClient';
-import { Prisma } from '@prisma/client';
 import PartSearchFilters from './PartSearchFilters';
 
 import PaginationControls from '@/components/ui/PaginationControls';
@@ -83,19 +82,6 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     // Nota: Mantenemos la lógica de estadísticas sobre todo el inventario para que los widgets sean útiles
     // Para optimizar, podríamos cachear esto o hacerlo en una query separada ligera.
     const allPartsCount = await db.part.count(); 
-    // Si queremos el valor total del inventario, necesitamos sumar todo. 
-    // Para no traer todos los registros a memoria, usamos aggregate.
-    const aggregate = await db.part.aggregate({
-        _count: {
-            _all: true
-        },
-        _sum: {
-            // Prisma Decimal summation returns Decimal
-            // We can't multiply in _sum directly in Prisma standard.
-            // We have to iterate or use queryRaw for weighted sum.
-        }
-    });
-    
     // Fallback optimizado para stock bajo y valor total usando queryRaw para velocidad
     const stats = await db.$queryRaw<any[]>`
         SELECT 
