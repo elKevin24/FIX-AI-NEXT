@@ -10,7 +10,7 @@
     align-items: center;
     justify-content: center;
     padding: 4rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); /* Slate 900 -> Indigo 950 */
     color: white;
     text-align: center;
 }
@@ -24,22 +24,23 @@
     font-weight: 800;
     margin-bottom: 1.5rem;
     line-height: 1.2;
+    color: white;
 }
 
 .gradient {
-    background: linear-gradient(-90deg, #ffd89b, #b19cd9, #19547b, #ffd89b);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: animateGradient 10s ease infinite;
+    /* Removed gradient text for strict accessibility compliance */
+    color: #fbbf24; /* Amber 400 - High contrast against dark bg */
+    background: none;
+    -webkit-text-fill-color: initial;
+    animation: none;
 }
 
 .subtitle {
     font-size: 1.25rem;
     line-height: 1.6;
     margin-bottom: 2.5rem;
-    opacity: 0.95;
+    opacity: 1; /* Removed opacity for maximum contrast */
+    color: #e2e8f0; /* Slate 200 - High contrast */
 }
 
 .ctaGroup {
@@ -50,25 +51,26 @@
 }
 
 .primaryBtn {
-    background: white;
-    color: #667eea;
+    background: #4f46e5; /* Indigo 600 - Standard accessible button */
+    color: white;
     padding: 1rem 2.5rem;
     border-radius: 50px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .primaryBtn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background: #4338ca; /* Indigo 700 */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
     text-decoration: none;
 }
 
 .secondaryBtn {
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent;
     color: white;
     padding: 1rem 2.5rem;
     border-radius: 50px;
@@ -77,11 +79,11 @@
     font-size: 1.1rem;
     transition: all 0.3s ease;
     border: 2px solid white;
-    backdrop-filter: blur(10px);
 }
 
 .secondaryBtn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: white;
+    color: #1e1b4b;
     transform: translateY(-2px);
     text-decoration: none;
 }
