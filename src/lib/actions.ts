@@ -656,9 +656,6 @@ export async function updateUser(prevState: any, formData: FormData) {
 
     const { userId, name, email, password, role } = validatedFields.data;
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 

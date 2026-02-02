@@ -3,7 +3,6 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { createNotification } from '@/lib/notifications';
 
 // ============================================================================
 // PURCHASE ORDER ACTIONS
@@ -78,20 +77,7 @@ export async function addPurchaseItem(orderId: string, partId: string, quantity:
              }
          });
 
-         // Update total cost of order
-         // We can do this with an aggregation or just increment
-         // Aggregate is safer
-         const aggregate = await db.purchaseItem.aggregate({
-             where: { purchaseOrderId: orderId },
-             _sum: {
-                 unitCost: true, // Wait, unitCost * quantity. Aggregate doesn't support multiplication directly easily in simple query without raw.
-                 // We better separate this logic or just update updatedAt.
-                 // Let's compute total in application for now or accept that 'totalCost' field in Order might be stale until finalized.
-                 // Actually, let's not store calculated totalCost in DB if we can avoid it, or update it carefully.
-             }
-         });
-         
-         // Let's just update updatedAt for now.
+         // Update updatedAt timestamp
          await db.purchaseOrder.update({
              where: { id: orderId },
              data: { updatedById: session.user.id }
