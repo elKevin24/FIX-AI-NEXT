@@ -11,7 +11,7 @@ interface CashRegisterClientProps {
 
 export default function CashRegisterClient({ initialOpenRegister }: CashRegisterClientProps) {
   const router = useRouter();
-  const [openRegister, setOpenRegister] = useState(initialOpenRegister);
+  const [openRegister] = useState(initialOpenRegister);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

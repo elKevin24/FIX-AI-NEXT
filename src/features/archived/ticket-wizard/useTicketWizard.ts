@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { CreateTicketSchema } from '@/lib/schemas';
 import { z } from 'zod';
-import { createBatchTickets } from '@/lib/actions'; // Importaremos la acción, aunque la llamada final suele ser en el form
 
 // Tipo inferido del schema de Zod para un ticket individual
 // Extendemos el tipo para incluir campos locales de UI como password
@@ -36,7 +35,7 @@ export function useTicketWizard() {
     const [currentStep, setCurrentStep] = useState(1);
     const [customer, setCustomer] = useState<CustomerData | null>(null);
     const [tickets, setTickets] = useState<TicketDraft[]>([{ ...INITIAL_TICKET }]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // --- ACCIONES DE NAVEGACIÓN ---
