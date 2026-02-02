@@ -128,7 +128,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                 },
                 async update({ args, query, model }: any) {
                     if (MODELS_WITH_TENANT.includes(model)) {
-                        const { where, ...rest } = args;
+                        const { where } = args;
                         
                         // 1. Verify ownership
                         const record = await (prisma as any)[model].findFirst({
