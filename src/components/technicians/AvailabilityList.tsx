@@ -23,14 +23,6 @@ const STATUS_COLORS: Record<string, string> = {
     UNAVAILABLE: '#f1f5f9', // slate-100
 };
 
-const STATUS_TEXT: Record<string, string> = {
-    ON_VACATION: 'text-blue-800', 
-    SICK_LEAVE: 'text-red-800', 
-    ON_LEAVE: 'text-amber-800', 
-    IN_TRAINING: 'text-purple-800', 
-    UNAVAILABLE: 'text-slate-800', 
-};
-
 interface AvailabilityListProps {
     absences: Array<{
         id: string;
@@ -45,7 +37,7 @@ interface AvailabilityListProps {
 export default function AvailabilityList({ absences, canEdit }: AvailabilityListProps) {
     // We create a small component for the delete button to manage its own pending state
     const DeleteButton = ({ id }: { id: string }) => {
-        const [state, action, isPending] = useActionState(deleteUnavailability, null);
+        const [, action, isPending] = useActionState(deleteUnavailability, null);
         
         return (
             <form action={action}>
