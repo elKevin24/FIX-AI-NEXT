@@ -1,5 +1,4 @@
 import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import { ServiceTemplateForm } from '../ServiceTemplateForm';
 import styles from './create.module.css';
 
