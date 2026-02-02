@@ -57,7 +57,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
     const { addToast } = useToast();
 
     // State
-    const [creditNotes, setCreditNotes] = useState(initialCreditNotes);
+    const [creditNotes] = useState(initialCreditNotes);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<CreditNoteStatus | ''>('');
     const [loading, setLoading] = useState(false);
