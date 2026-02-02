@@ -12,6 +12,7 @@ import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { Prisma } from '@prisma/client';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -45,6 +46,10 @@ export default async function Ticket80mmPage({ params }: Props) {
     if (!ticket) {
         notFound();
     }
+
+    // Workaround: Inferencia explícita para evitar errores con Prisma Client Extensions en arrays anidados
+    type TicketPartUsage = (typeof ticket)['partsUsed'][number];
+    type TicketService = (typeof ticket)['services'][number];
 
     // Mapear datos del ticket al formato Ticket80mmData
     const ticketData: Ticket80mmData = {
@@ -80,7 +85,7 @@ export default async function Ticket80mmPage({ params }: Props) {
             name: ticket.assignedTo.name,
             email: ticket.assignedTo.email,
         } : null,
-        partsUsed: ticket.partsUsed.map((pu) => ({
+        partsUsed: ticket.partsUsed.map((pu: TicketPartUsage) => ({
             id: pu.id,
             quantity: pu.quantity,
             part: {
@@ -92,7 +97,7 @@ export default async function Ticket80mmPage({ params }: Props) {
                 category: pu.part.category,
             },
         })),
-        services: ticket.services.map((s) => ({
+        services: ticket.services.map((s: TicketService) => ({
             id: s.id,
             name: s.name,
             laborCost: s.laborCost.toString(),
