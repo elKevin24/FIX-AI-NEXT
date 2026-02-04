@@ -7,11 +7,12 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [pg_trgm]
+  directUrl  = env("DIRECT_DATABASE_URL")
+  extensions = [pg_trgm, pgcrypto]
 }
 
 model Tenant {
-  id               String            @id @default(uuid())
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   slug             String            @unique
   createdAt        DateTime          @default(now())
@@ -31,18 +32,29 @@ model Tenant {
   serviceTemplates ServiceTemplate[]
   settings         TenantSettings?
   tickets          Ticket[]
+  ticketSequences  TicketSequence[]
   users            User[]
 
   @@map("tenants")
 }
 
+model TicketSequence {
+  tenantId  String @db.Uuid
+  year      Int
+  lastValue Int    @default(0)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([tenantId, year])
+  @@map("ticket_sequences")
+}
+
 model User {
-  id                   String                     @id @default(uuid())
+  id                   String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email                String                     @unique
   password             String
   name                 String?
   role                 UserRole                   @default(TECHNICIAN)
-  tenantId             String
+  tenantId             String                     @db.Uuid
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt
   status               TechnicianStatus           @default(AVAILABLE)
@@ -82,16 +94,16 @@ model User {
 }
 
 model Customer {
-  id            String         @id @default(uuid())
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   email         String?
   phone         String?
   address       String?
-  tenantId      String
+  tenantId      String         @db.Uuid
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  createdById   String?
-  updatedById   String?
+  createdById   String?        @db.Uuid
+  updatedById   String?        @db.Uuid
   dpi           String?
   nit           String?
   createdBy     User?          @relation("CustomerCreatedBy", fields: [createdById], references: [id])
@@ -112,14 +124,14 @@ model Customer {
 }
 
 model Ticket {
-  id                      String             @id @default(uuid())
-  ticketNumber            String?
+  id                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketKey               String             @unique @db.VarChar(20)
   title                   String
   description             String
-  status                  TicketStatus       @default(OPEN)
-  tenantId                String
-  customerId              String
-  assignedToId            String?
+  status                  TicketStatus       @default(ABIERTO)
+  tenantId                String             @db.Uuid
+  customerId              String             @db.Uuid
+  assignedToId            String?            @db.Uuid
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
   accessories             String?
@@ -128,9 +140,9 @@ model Ticket {
   deviceModel             String?
   deviceType              String?            @default("PC")
   serialNumber            String?
-  createdById             String?
-  serviceTemplateId       String?
-  updatedById             String?
+  createdById             String?            @db.Uuid
+  serviceTemplateId       String?            @db.Uuid
+  updatedById             String?            @db.Uuid
   priority                TicketPriority     @default(MEDIUM)
   dueDate                 DateTime?
   estimatedCompletionDate DateTime?
@@ -146,24 +158,24 @@ model Ticket {
   tenant                  Tenant             @relation(fields: [tenantId], references: [id])
   updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
 
-  @@unique([ticketNumber, tenantId])
   @@index([status, priority])
   @@index([assignedToId, status])
   @@index([serviceTemplateId])
   @@index([createdById])
   @@index([updatedById])
+  @@index([tenantId])
   @@map("tickets")
 }
 
 model TicketAttachment {
-  id           String   @id @default(uuid())
-  ticketId     String
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId     String   @db.Uuid
   filename     String
   originalName String
   mimeType     String
   size         Int
   url          String
-  uploadedById String
+  uploadedById String   @db.Uuid
   createdAt    DateTime @default(now())
 
   ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
@@ -174,17 +186,17 @@ model TicketAttachment {
 }
 
 model Part {
-  id                   String                @id @default(uuid())
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                 String
   sku                  String?
   quantity             Int                   @default(0)
   cost                 Decimal               @db.Decimal(10, 2)
   price                Decimal               @db.Decimal(10, 2)
-  tenantId             String
+  tenantId             String                @db.Uuid
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
-  createdById          String?
-  updatedById          String?
+  createdById          String?               @db.Uuid
+  updatedById          String?               @db.Uuid
   category             String?
   location             String?
   minStock             Int                   @default(1)
@@ -206,15 +218,15 @@ model Part {
 }
 
 model PurchaseOrder {
-  id           String         @id @default(uuid())
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   supplier     String
   status       PurchaseStatus @default(PENDING)
   orderDate    DateTime       @default(now())
   receivedDate DateTime?
   totalCost    Decimal        @default(0) @db.Decimal(10, 2)
-  tenantId     String
-  createdById  String?
-  updatedById  String?
+  tenantId     String         @db.Uuid
+  createdById  String?        @db.Uuid
+  updatedById  String?        @db.Uuid
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   items        PurchaseItem[]
@@ -225,11 +237,11 @@ model PurchaseOrder {
 }
 
 model PurchaseItem {
-  id              String        @id @default(uuid())
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quantity        Int
   unitCost        Decimal       @db.Decimal(10, 2)
-  partId          String
-  purchaseOrderId String
+  partId          String        @db.Uuid
+  purchaseOrderId String        @db.Uuid
   part            Part          @relation(fields: [partId], references: [id])
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
 
@@ -237,10 +249,10 @@ model PurchaseItem {
 }
 
 model PartUsage {
-  id        String   @id @default(uuid())
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quantity  Int
-  ticketId  String
-  partId    String
+  ticketId  String   @db.Uuid
+  partId    String   @db.Uuid
   createdAt DateTime @default(now())
   part      Part     @relation(fields: [partId], references: [id])
   ticket    Ticket   @relation(fields: [ticketId], references: [id])
@@ -249,11 +261,11 @@ model PartUsage {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   action    String
   details   String?
-  userId    String?
-  tenantId  String
+  userId    String?  @db.Uuid
+  tenantId  String   @db.Uuid
   createdAt DateTime @default(now())
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   user      User?    @relation(fields: [userId], references: [id])
@@ -263,11 +275,11 @@ model AuditLog {
 }
 
 model TicketNote {
-  id         String   @id @default(uuid())
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content    String
   isInternal Boolean  @default(true)
-  ticketId   String
-  authorId   String
+  ticketId   String   @db.Uuid
+  authorId   String   @db.Uuid
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   author     User     @relation(fields: [authorId], references: [id])
@@ -277,7 +289,7 @@ model TicketNote {
 }
 
 model ServiceTemplate {
-  id                 String                @id @default(uuid())
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name               String
   category           ServiceCategory
   defaultTitle       String
@@ -288,9 +300,9 @@ model ServiceTemplate {
   isActive           Boolean               @default(true)
   color              String?               @default("#3B82F6")
   icon               String?               @default("🔧")
-  tenantId           String
-  createdById        String?
-  updatedById        String?
+  tenantId           String                @db.Uuid
+  createdById        String?               @db.Uuid
+  updatedById        String?               @db.Uuid
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
   createdBy          User?                 @relation("TemplateCreatedBy", fields: [createdById], references: [id])
@@ -309,11 +321,11 @@ model ServiceTemplate {
 }
 
 model TemplateDefaultPart {
-  id         String          @id @default(uuid())
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quantity   Int             @default(1)
   required   Boolean         @default(false)
-  templateId String
-  partId     String
+  templateId String          @db.Uuid
+  partId     String          @db.Uuid
   createdAt  DateTime        @default(now())
   part       Part            @relation(fields: [partId], references: [id])
   template   ServiceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
@@ -324,9 +336,9 @@ model TemplateDefaultPart {
 }
 
 model TicketService {
-  id        String          @id @default(uuid())
-  ticketId  String
-  serviceId String
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId  String          @db.Uuid
+  serviceId String          @db.Uuid
   name      String
   laborCost Decimal         @db.Decimal(10, 2)
   createdAt DateTime        @default(now())
@@ -339,8 +351,8 @@ model TicketService {
 }
 
 model TechnicianSpecialization {
-  id             String         @id @default(uuid())
-  userId         String
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String         @db.Uuid
   specialization Specialization
   createdAt      DateTime       @default(now())
   user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -351,10 +363,10 @@ model TechnicianSpecialization {
 }
 
 model TechnicianUnavailability {
-  id        String           @id @default(uuid())
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   reason    TechnicianStatus @default(UNAVAILABLE)
   notes     String?
-  userId    String
+  userId    String           @db.Uuid
   startDate DateTime
   endDate   DateTime
   isActive  Boolean          @default(true)
@@ -369,14 +381,14 @@ model TechnicianUnavailability {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
   type      String
   title     String
   message   String
   link      String?
   isRead    Boolean  @default(false)
-  tenantId  String
+  tenantId  String   @db.Uuid
   createdAt DateTime @default(now())
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
@@ -387,11 +399,11 @@ model Notification {
 }
 
 model Invoice {
-  id              String           @id @default(uuid())
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   invoiceNumber   String
   status          InvoiceStatus    @default(PENDING)
-  ticketId        String           @unique
-  customerId      String
+  ticketId        String           @unique @db.Uuid
+  customerId      String           @db.Uuid
   laborCost       Decimal          @default(0) @db.Decimal(10, 2)
   partsCost       Decimal          @default(0) @db.Decimal(10, 2)
   partsMarkup     Decimal          @default(0) @db.Decimal(10, 2)
@@ -409,9 +421,9 @@ model Invoice {
   issuedAt        DateTime         @default(now())
   dueAt           DateTime?
   paidAt          DateTime?
-  tenantId        String
-  createdById     String
-  updatedById     String
+  tenantId        String           @db.Uuid
+  createdById     String           @db.Uuid
+  updatedById     String           @db.Uuid
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   createdBy       User             @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
@@ -432,16 +444,16 @@ model Invoice {
 }
 
 model Payment {
-  id             String        @id @default(uuid())
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   paymentNumber  String
-  invoiceId      String
+  invoiceId      String        @db.Uuid
   amount         Decimal       @db.Decimal(10, 2)
   paymentMethod  PaymentMethod
   transactionRef String?
   notes          String?
   paidAt         DateTime      @default(now())
-  tenantId       String
-  receivedById   String
+  tenantId       String        @db.Uuid
+  receivedById   String        @db.Uuid
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   invoice        Invoice       @relation(fields: [invoiceId], references: [id])
@@ -456,7 +468,7 @@ model Payment {
 }
 
 model CashRegister {
-  id              String            @id @default(uuid())
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String
   isOpen          Boolean           @default(false)
   openedAt        DateTime?
@@ -466,9 +478,9 @@ model CashRegister {
   expectedBalance Decimal           @default(0) @db.Decimal(10, 2)
   difference      Decimal           @default(0) @db.Decimal(10, 2)
   closingNotes    String?
-  tenantId        String
-  openedById      String?
-  closedById      String?
+  tenantId        String            @db.Uuid
+  openedById      String?           @db.Uuid
+  closedById      String?           @db.Uuid
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   closedBy        User?             @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
@@ -484,14 +496,14 @@ model CashRegister {
 }
 
 model CashTransaction {
-  id             String       @id @default(uuid())
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type           String
   amount         Decimal      @db.Decimal(10, 2)
   description    String
   reference      String?
-  cashRegisterId String
-  tenantId       String
-  createdById    String
+  cashRegisterId String       @db.Uuid
+  tenantId       String       @db.Uuid
+  createdById    String       @db.Uuid
   createdAt      DateTime     @default(now())
   cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
   createdBy      User         @relation(fields: [createdById], references: [id])
@@ -510,12 +522,12 @@ enum UserRole {
 }
 
 enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  WAITING_FOR_PARTS
-  RESOLVED
-  CLOSED
-  CANCELLED
+  ABIERTO
+  EN_PROCESO
+  ESPERANDO_REPUESTOS
+  RESUELTO
+  CERRADO
+  CANCELADO
 }
 
 enum ServiceCategory {
@@ -580,8 +592,8 @@ enum InvoiceStatus {
 // ==================== POS MODELS ====================
 
 model TenantSettings {
-  id                  String   @id @default(uuid())
-  tenantId            String   @unique
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @unique @db.Uuid
   businessName        String?
   businessNIT         String?
   businessAddress     String?
@@ -605,13 +617,13 @@ model TenantSettings {
 }
 
 model InvoiceHistory {
-  id        String   @id @default(uuid())
-  invoiceId String
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId String   @db.Uuid
   action    String
   oldValue  String?
   newValue  String?
   notes     String?
-  userId    String
+  userId    String   @db.Uuid
   createdAt DateTime @default(now())
   invoice   Invoice  @relation(fields: [invoiceId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
@@ -621,9 +633,9 @@ model InvoiceHistory {
 }
 
 model POSSale {
-  id             String           @id @default(uuid())
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   saleNumber     String
-  customerId     String?
+  customerId     String?          @db.Uuid
   customerName   String           @default("Consumidor Final")
   customerPhone  String?
   customerEmail  String?
@@ -636,10 +648,10 @@ model POSSale {
   changeGiven    Decimal          @default(0) @db.Decimal(10, 2)
   status         POSSaleStatus    @default(COMPLETED)
   notes          String?
-  tenantId       String
-  cashRegisterId String?
-  createdById    String
-  quotationId    String?          @unique
+  tenantId       String           @db.Uuid
+  cashRegisterId String?          @db.Uuid
+  createdById    String           @db.Uuid
+  quotationId    String?          @unique @db.Uuid
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   cashRegister   CashRegister?    @relation(fields: [cashRegisterId], references: [id])
@@ -658,9 +670,9 @@ model POSSale {
 }
 
 model POSSaleItem {
-  id        String  @id @default(uuid())
-  saleId    String
-  partId    String
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId    String  @db.Uuid
+  partId    String  @db.Uuid
   quantity  Int
   unitPrice Decimal @db.Decimal(10, 2)
   discount  Decimal @default(0) @db.Decimal(5, 2)
@@ -671,8 +683,8 @@ model POSSaleItem {
 }
 
 model POSSalePayment {
-  id        String        @id @default(uuid())
-  saleId    String
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId    String        @db.Uuid
   amount    Decimal       @db.Decimal(10, 2)
   method    PaymentMethod
   reference String?
@@ -683,9 +695,9 @@ model POSSalePayment {
 }
 
 model POSQuotation {
-  id              String             @id @default(uuid())
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quotationNumber String
-  customerId      String?
+  customerId      String?            @db.Uuid
   customerName    String             @default("Consumidor Final")
   customerPhone   String?
   customerEmail   String?
@@ -697,8 +709,8 @@ model POSQuotation {
   status          QuotationStatus    @default(DRAFT)
   validUntil      DateTime?
   notes           String?
-  tenantId        String
-  createdById     String
+  tenantId        String             @db.Uuid
+  createdById     String             @db.Uuid
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   createdBy       User               @relation(fields: [createdById], references: [id])
@@ -714,9 +726,9 @@ model POSQuotation {
 }
 
 model POSQuotationItem {
-  id          String       @id @default(uuid())
-  quotationId String
-  partId      String
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationId String       @db.Uuid
+  partId      String       @db.Uuid
   quantity    Int
   unitPrice   Decimal      @db.Decimal(10, 2)
   discount    Decimal      @default(0) @db.Decimal(5, 2)
@@ -727,10 +739,10 @@ model POSQuotationItem {
 }
 
 model CreditNote {
-  id               String           @id @default(uuid())
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   creditNoteNumber String
-  posSaleId        String
-  customerId       String?
+  posSaleId        String           @db.Uuid
+  customerId       String?          @db.Uuid
   reason           String
   subtotal         Decimal          @default(0) @db.Decimal(10, 2)
   taxRate          Decimal          @default(12) @db.Decimal(5, 2)
@@ -741,9 +753,9 @@ model CreditNote {
   refundReference  String?
   notes            String?
   processedAt      DateTime?
-  processedById    String?
-  tenantId         String
-  createdById      String
+  processedById    String?          @db.Uuid
+  tenantId         String           @db.Uuid
+  createdById      String           @db.Uuid
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   createdBy        User             @relation("CreditNoteCreatedBy", fields: [createdById], references: [id])
@@ -760,9 +772,9 @@ model CreditNote {
 }
 
 model CreditNoteItem {
-  id           String     @id @default(uuid())
-  creditNoteId String
-  partId       String
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creditNoteId String     @db.Uuid
+  partId       String     @db.Uuid
   quantity     Int
   unitPrice    Decimal    @db.Decimal(10, 2)
   reason       String?
