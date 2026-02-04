@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, TicketStatus, ServiceCategory } from '@prisma/client';
+import { PrismaClient, UserRole, TicketStatus, ServiceCategory, AuditModule } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 
 console.log('[SEED] Initializing...');
@@ -14,6 +14,10 @@ async function main() {
 
     // Limpiar datos existentes
     console.log('[SEED] Cleaning existing data...');
+    // Break circular dependencies
+    await prisma.tenant.updateMany({ data: { adminUserId: null } });
+    await prisma.user.updateMany({ data: { createdById: null, updatedById: null } });
+
     await prisma.partUsage.deleteMany();
     await prisma.ticket.deleteMany();
     await prisma.customer.deleteMany();
@@ -205,7 +209,7 @@ async function main() {
                 title: 'Reparación de TV Samsung 55"',
                 description: 'TV no enciende, luz indicadora parpadea.',
                 status: TicketStatus.IN_PROGRESS,
-                priority: 'High',
+                priority: 'HIGH',
                 tenantId: tenant1.id,
                 customerId: t1Customers[0].id,
                 assignedToId: t1Agent1.id,
@@ -216,7 +220,7 @@ async function main() {
                 title: 'Microondas sin calentar',
                 description: 'El microondas enciende y gira pero no calienta.',
                 status: TicketStatus.WAITING_FOR_PARTS,
-                priority: 'Medium',
+                priority: 'MEDIUM',
                 tenantId: tenant1.id,
                 customerId: t1Customers[1].id,
                 assignedToId: t1Agent2.id,
@@ -227,7 +231,7 @@ async function main() {
                 title: 'Laptop HP - No carga batería',
                 description: 'La laptop solo funciona conectada a la corriente.',
                 status: TicketStatus.OPEN,
-                priority: 'High',
+                priority: 'HIGH',
                 tenantId: tenant1.id,
                 customerId: t1Customers[2].id,
             },
@@ -389,7 +393,7 @@ async function main() {
                 title: 'Servidor no responde',
                 description: 'Servidor principal de la empresa no arranca.',
                 status: TicketStatus.IN_PROGRESS,
-                priority: 'Critical',
+                priority: 'URGENT',
                 tenantId: tenant2.id,
                 customerId: t2Customers[0].id,
                 assignedToId: t2Agent1.id,
@@ -400,7 +404,7 @@ async function main() {
                 title: 'Actualización sistema punto de venta',
                 description: 'Requiere actualización del software POS.',
                 status: TicketStatus.OPEN,
-                priority: 'Medium',
+                priority: 'MEDIUM',
                 tenantId: tenant2.id,
                 customerId: t2Customers[1].id,
             },
@@ -478,16 +482,18 @@ async function main() {
     await Promise.all([
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_SEEDED',
-                details: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
+                action: 'TENANT_CONFIG_CHANGED',
+                module: AuditModule.SETTINGS,
+                metadata: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
                 userId: t1Admin.id,
                 tenantId: tenant1.id,
             },
         }),
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_SEEDED',
-                details: JSON.stringify({ tenantName: 'TechRepair Pro' }),
+                action: 'TENANT_CONFIG_CHANGED',
+                module: AuditModule.SETTINGS,
+                metadata: JSON.stringify({ tenantName: 'TechRepair Pro' }),
                 userId: t2Admin.id,
                 tenantId: tenant2.id,
             },

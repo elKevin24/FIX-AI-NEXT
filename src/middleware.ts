@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/auth';
+import { updateSessionActivity } from '@/lib/audit-actions';
 
 // Rate limiting storage (in-memory, resets on deploy)
 // For production, use Redis or similar
@@ -46,11 +47,11 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
  */
 function cleanupRateLimits() {
   const now = Date.now();
-  for (const [ip, record] of loginAttempts.entries()) {
+  loginAttempts.forEach((record, ip) => {
     if (now > record.resetAt) {
       loginAttempts.delete(ip);
     }
-  }
+  });
 }
 
 // Run cleanup every 5 minutes
@@ -95,6 +96,12 @@ export async function middleware(request: NextRequest) {
     }
 
     const session = await auth();
+
+    // Update session log activity
+    if (session?.user) {
+      // Note: This is an async call but we don't necessarily need to await it to block the request
+      updateSessionActivity();
+    }
 
     // Redirect to login if not authenticated
     if (!session?.user) {
