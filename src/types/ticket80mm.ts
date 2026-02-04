@@ -47,6 +47,7 @@ export interface Ticket80mmService {
 
 export interface Ticket80mmData {
     id: string;
+    ticketNumber?: string | null;
     title: string;
     description: string;
     status: string;

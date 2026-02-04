@@ -8,6 +8,7 @@
 
 # next.js
 /.next/
+/.next_old*/
 /out/
 
 # production
@@ -47,3 +48,4 @@ dev.log
 .gemini/
 gha-creds-*.json
 /generated/
+*.txt
