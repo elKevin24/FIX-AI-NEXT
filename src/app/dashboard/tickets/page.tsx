@@ -65,7 +65,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticketNumber" % ${search} OR 
+                t."ticket_key" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
@@ -88,7 +88,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticketNumber" % ${search} OR 
+                t."ticket_key" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
