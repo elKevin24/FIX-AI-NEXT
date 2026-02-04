@@ -77,7 +77,7 @@ export function QuotationsClient({
     const { addToast } = useToast();
 
     // State
-    const [quotations, setQuotations] = useState(initialQuotations);
+    const [quotations] = useState(initialQuotations);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<QuotationStatus | ''>('');
     const [loading, setLoading] = useState(false);

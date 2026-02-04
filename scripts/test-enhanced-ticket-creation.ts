@@ -1,8 +1,3 @@
-
-import { prisma } from '../src/lib/prisma';
-import { createTicket, CreateTicketSchema } from '../src/lib/actions';
-import { getTenantPrisma } from '../src/lib/tenant-prisma';
-
 // Mock auth function since we can't easily mock next-auth in a script
 // We'll bypass auth check in actions.ts by mocking or assuming we are running as a valid user context
 // Since we are running a script directly, we might need to adjust actions.ts or use a test-specific approach.
