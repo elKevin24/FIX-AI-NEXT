@@ -55,6 +55,7 @@ export async function generateInvoiceFromTicket(data: InvoiceData) {
         },
       },
       serviceTemplate: true,
+      services: true,
       invoice: true, // Check if already has invoice
     },
   });
@@ -79,10 +80,13 @@ export async function generateInvoiceFromTicket(data: InvoiceData) {
   // CALCULAR COSTOS
   // ========================================================================
 
-  // 1. Mano de obra (de la plantilla si existe)
-  const laborCost = ticket.serviceTemplate?.laborCost
-    ? Number(ticket.serviceTemplate.laborCost)
-    : 0;
+  // 1. Mano de obra (suma de servicios individuales o fallback a plantilla)
+  let laborCost = 0;
+  if (ticket.services && ticket.services.length > 0) {
+    laborCost = ticket.services.reduce((sum: number, service: any) => sum + Number(service.laborCost), 0);
+  } else if (ticket.serviceTemplate?.laborCost) {
+    laborCost = Number(ticket.serviceTemplate.laborCost);
+  }
 
   // 2. Costo de partes (precio de venta)
   let partsCost = 0;

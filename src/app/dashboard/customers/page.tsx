@@ -5,7 +5,6 @@ import { Button } from '@/components/ui';
 import Link from 'next/link';
 import styles from './customers.module.css';
 import CustomersClient from './CustomersClient';
-import { Prisma } from '@prisma/client';
 import CustomerSearchFilters from './CustomerSearchFilters';
 
 import PaginationControls from '@/components/ui/PaginationControls';

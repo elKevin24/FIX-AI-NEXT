@@ -197,7 +197,7 @@ async function main() {
         },
     });
 
-    const ticket2 = await prisma.ticket.create({
+    await prisma.ticket.create({
         data: {
             title: 'Microondas sin calentar',
             description: 'El microondas enciende y gira pero no calienta los alimentos.',
@@ -209,7 +209,7 @@ async function main() {
         },
     });
 
-    const ticket3 = await prisma.ticket.create({
+    await prisma.ticket.create({
         data: {
             id: '5f8320f6-0000-0000-0000-000000000000', // Fixed ID for Demo Laptop
             title: 'Laptop HP - No carga batería',

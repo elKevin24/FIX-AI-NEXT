@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { getTemplateAnalytics, TemplateAnalytics } from '@/lib/service-template-actions';
-import { Button } from '@/components/ui';
 import {
   XAxis,
   YAxis,
