@@ -14,6 +14,7 @@ model Tenant {
   id               String            @id @default(uuid())
   name             String
   slug             String            @unique
+  adminUserId      String?           // FK to the primary admin user
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   auditLogs        AuditLog[]
@@ -33,16 +34,26 @@ model Tenant {
   tickets          Ticket[]
   users            User[]
 
+  @@index([adminUserId])
   @@map("tenants")
 }
 
 model User {
   id                   String                     @id @default(uuid())
-  email                String                     @unique
+  email                String
   password             String
-  name                 String?
-  role                 UserRole                   @default(TECHNICIAN)
+  firstName            String?
+  lastName             String?
+  name                 String?                    // Computed/legacy: firstName + lastName
+  role                 UserRole                   @default(AGENT)
   tenantId             String
+  isActive             Boolean                    @default(true)
+  passwordMustChange   Boolean                    @default(false)
+  lastLoginAt          DateTime?
+  failedLoginAttempts  Int                        @default(0)
+  lockedUntil          DateTime?
+  createdById          String?
+  updatedById          String?
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt
   status               TechnicianStatus           @default(AVAILABLE)
@@ -50,6 +61,14 @@ model User {
   statusReason         String?
   availableFrom        DateTime?
   availableUntil       DateTime?
+
+  // Self-referential relations for audit trail
+  createdBy            User?                      @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedBy            User?                      @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  usersCreated         User[]                     @relation("UserCreatedBy")
+  usersUpdated         User[]                     @relation("UserUpdatedBy")
+
+  // Other relations
   auditLogs            AuditLog[]
   closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
   openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
@@ -78,6 +97,11 @@ model User {
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
 
+  @@unique([tenantId, email], name: "unique_email_per_tenant")
+  @@index([tenantId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([isActive])
   @@map("users")
 }
 
@@ -504,9 +528,13 @@ model CashTransaction {
 }
 
 enum UserRole {
-  ADMIN
-  TECHNICIAN
-  RECEPTIONIST
+  ADMIN        // Control total del tenant
+  MANAGER      // Gestiona tickets y usuarios (no config del tenant)
+  AGENT        // Crea y responde tickets asignados
+  VIEWER       // Solo lectura
+  // Legacy roles (kept for backward compatibility during migration)
+  TECHNICIAN   // Maps to AGENT
+  RECEPTIONIST // Maps to VIEWER
 }
 
 enum TicketStatus {
