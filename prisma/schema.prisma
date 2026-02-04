@@ -18,6 +18,8 @@ model Tenant {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   auditLogs        AuditLog[]
+  sessionLogs      SessionLog[]
+  userPresences    UserPresence[]
   cashRegisters    CashRegister[]
   cashTransactions CashTransaction[]
   creditNotes      CreditNote[]
@@ -40,7 +42,7 @@ model Tenant {
 
 model User {
   id                   String                     @id @default(uuid())
-  email                String
+  email                String                     @unique
   password             String
   firstName            String?
   lastName             String?
@@ -70,6 +72,8 @@ model User {
 
   // Other relations
   auditLogs            AuditLog[]
+  sessionLogs          SessionLog[]
+  presence             UserPresence?
   closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
   openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
   cashTransactions     CashTransaction[]
@@ -96,8 +100,8 @@ model User {
   updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
+  viewedTickets        Ticket[]                   @relation("TicketViewers")
 
-  @@unique([tenantId, email], name: "unique_email_per_tenant")
   @@index([tenantId])
   @@index([createdById])
   @@index([updatedById])
@@ -138,6 +142,7 @@ model Customer {
 model Ticket {
   id                      String             @id @default(uuid())
   ticketNumber            String?
+  ticketKey               String?            // Some places use ticketKey as alias or extra field
   title                   String
   description             String
   status                  TicketStatus       @default(OPEN)
@@ -169,6 +174,8 @@ model Ticket {
   serviceTemplate         ServiceTemplate?   @relation(fields: [serviceTemplateId], references: [id])
   tenant                  Tenant             @relation(fields: [tenantId], references: [id])
   updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
+  viewedByUsers           UserPresence[]
+  viewers                 User[]             @relation("TicketViewers")
 
   @@unique([ticketNumber, tenantId])
   @@index([status, priority])
@@ -273,17 +280,70 @@ model PartUsage {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String
-  details   String?
-  userId    String?
-  tenantId  String
-  createdAt DateTime @default(now())
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  user      User?    @relation(fields: [userId], references: [id])
+  id         String       @id @default(uuid())
+  action     AuditAction
+  module     AuditModule
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  success    Boolean      @default(true)
+  userId     String?
+  tenantId   String?
+  createdAt  DateTime     @default(now())
+  tenant     Tenant?      @relation(fields: [tenantId], references: [id])
+  user       User?        @relation(fields: [userId], references: [id])
 
-  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([module, createdAt])
+  @@index([entityType, entityId])
+  @@index([tenantId, success])
   @@map("audit_logs")
+}
+
+model SessionLog {
+  id             String        @id @default(uuid())
+  tenantId       String
+  userId         String
+  sessionToken   String        @unique
+  ipAddress      String?
+  userAgent      String?
+  loginAt        DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  logoutAt       DateTime?
+  status         SessionStatus @default(ACTIVE)
+  metadata       Json?
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([userId, loginAt])
+  @@index([sessionToken])
+  @@index([lastActivityAt])
+  @@map("session_logs")
+}
+
+model UserPresence {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  tenantId        String
+  status          PresenceStatus @default(ONLINE)
+  currentRoute    String?
+  currentPage     String?
+  currentTicketId String?
+  lastSeenAt      DateTime       @default(now())
+  metadata        Json?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  currentTicket   Ticket?        @relation(fields: [currentTicketId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, lastSeenAt])
+  @@index([tenantId, status])
+  @@index([currentTicketId])
+  @@map("user_presence")
 }
 
 model TicketNote {
@@ -528,13 +588,12 @@ model CashTransaction {
 }
 
 enum UserRole {
-  ADMIN        // Control total del tenant
-  MANAGER      // Gestiona tickets y usuarios (no config del tenant)
-  AGENT        // Crea y responde tickets asignados
-  VIEWER       // Solo lectura
-  // Legacy roles (kept for backward compatibility during migration)
-  TECHNICIAN   // Maps to AGENT
-  RECEPTIONIST // Maps to VIEWER
+  ADMIN
+  MANAGER
+  AGENT
+  VIEWER
+  TECHNICIAN
+  RECEPTIONIST
 }
 
 enum TicketStatus {
@@ -605,8 +664,6 @@ enum InvoiceStatus {
   OVERDUE
 }
 
-// ==================== POS MODELS ====================
-
 model TenantSettings {
   id                  String   @id @default(uuid())
   tenantId            String   @unique
@@ -620,7 +677,6 @@ model TenantSettings {
   currency            String   @default("GTQ")
   defaultPaymentTerms String?
   invoiceFooter       String?
-  // SLA Configuration
   slaWarningPercent   Int      @default(75)
   slaCriticalPercent  Int      @default(90)
   slaEmailEnabled     Boolean  @default(true)
@@ -798,6 +854,56 @@ model CreditNoteItem {
   part         Part       @relation(fields: [partId], references: [id])
 
   @@map("credit_note_items")
+}
+
+enum AuditAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  USER_CREATED
+  USER_UPDATED
+  USER_DEACTIVATED
+  USER_REACTIVATED
+  ROLE_CHANGED
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET
+  SESSION_EXPIRED
+  TICKET_CREATED
+  TICKET_UPDATED
+  TICKET_DELETED
+  TICKET_STATUS_CHANGED
+  TICKET_ASSIGNED
+  CONFIG_CHANGED
+  TENANT_CONFIG_CHANGED
+  EXPORT_DATA
+  DATA_EXPORTED
+  MODULE_ACCESSED
+}
+
+enum AuditModule {
+  AUTH
+  USERS
+  TICKETS
+  SETTINGS
+  REPORTS
+  DASHBOARD
+  INVENTORY
+  POS
+  BILLING
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  LOGGED_OUT
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
 }
 
 enum POSSaleStatus {

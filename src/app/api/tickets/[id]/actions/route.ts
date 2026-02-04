@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { TicketStatus } from '@prisma/client';
+import { TicketStatus, UserRole } from '@prisma/client';
 import {
   requireTicketActionPermission,
   TicketAction,
@@ -73,7 +73,7 @@ export async function POST(
     // RBAC: Validate user has permission to perform this action
     // ========================================================================
     try {
-      requireTicketActionPermission(session.user.role, action as TicketAction);
+      requireTicketActionPermission(session.user.role as UserRole, action as TicketAction);
     } catch (error) {
       if (error instanceof AuthorizationError) {
         return NextResponse.json(
