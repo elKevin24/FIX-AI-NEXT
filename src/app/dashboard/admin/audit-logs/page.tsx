@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { getAuditLogs } from "@/lib/audit-actions";
-import { UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
