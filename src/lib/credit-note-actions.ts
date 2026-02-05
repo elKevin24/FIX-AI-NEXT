@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { CreditNoteStatus, PaymentMethod } from '@/generated/prisma';
 import { getTenantSettingsForDocuments } from './tenant-settings-actions';
 
 // ============= SCHEMAS =============

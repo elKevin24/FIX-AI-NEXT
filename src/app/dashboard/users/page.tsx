@@ -6,7 +6,7 @@ import Link from 'next/link';
 import UsersClient from './UsersClient';
 import styles from './users.module.css';
 import { hasPermission } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 
 export default async function UsersPage() {
     const session = await auth();

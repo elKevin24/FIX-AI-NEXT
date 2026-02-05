@@ -3,8 +3,8 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { InvoiceStatus, PaymentMethod } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
+import { InvoiceStatus, PaymentMethod } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
 import { getTaxRate } from './tenant-settings-actions';
 
@@ -142,14 +142,14 @@ export async function generateInvoiceFromTicket(data: InvoiceData) {
       customerId: ticket.customerId,
 
       // Desglose financiero
-      laborCost: new Decimal(laborCost),
-      partsCost: new Decimal(partsCost),
-      partsMarkup: new Decimal(partsMarkup),
-      subtotal: new Decimal(subtotal),
-      taxRate: new Decimal(taxRate),
-      taxAmount: new Decimal(taxAmount),
-      discountAmount: new Decimal(discountAmount),
-      total: new Decimal(total),
+      laborCost: new Prisma.Decimal(laborCost),
+      partsCost: new Prisma.Decimal(partsCost),
+      partsMarkup: new Prisma.Decimal(partsMarkup),
+      subtotal: new Prisma.Decimal(subtotal),
+      taxRate: new Prisma.Decimal(taxRate),
+      taxAmount: new Prisma.Decimal(taxAmount),
+      discountAmount: new Prisma.Decimal(discountAmount),
+      total: new Prisma.Decimal(total),
 
       // Información del cliente (snapshot)
       customerName: ticket.customer.name,
@@ -380,7 +380,7 @@ export async function registerPayment(data: PaymentData) {
       data: {
         paymentNumber,
         invoiceId: data.invoiceId,
-        amount: new Decimal(data.amount),
+        amount: new Prisma.Decimal(data.amount),
         paymentMethod: data.paymentMethod,
         transactionRef: data.transactionRef,
         notes: data.notes,

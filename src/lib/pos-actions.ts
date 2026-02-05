@@ -3,8 +3,8 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { PaymentMethod, POSSaleStatus } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
+import { PaymentMethod, POSSaleStatus } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { getTaxRate } from './tenant-settings-actions';
 
 // ============================================================================
@@ -44,7 +44,7 @@ export interface POSSaleFilters {
 // HELPER FUNCTIONS
 // ============================================================================
 
-function decimalToNumber(value: Decimal | null | undefined): number {
+function decimalToNumber(value: Prisma.Decimal | null | undefined): number {
   if (value === null || value === undefined) return 0;
   return Number(value);
 }
@@ -205,13 +205,13 @@ export async function createPOSSale(data: CreatePOSSaleData) {
         customerId: data.customerId || null,
         customerName: data.customerName || 'Consumidor Final',
         customerNIT: data.customerNIT || 'C/F',
-        subtotal: new Decimal(subtotal),
-        taxRate: new Decimal(taxRate),
-        taxAmount: new Decimal(taxAmount),
-        discountAmount: new Decimal(discountAmount),
-        total: new Decimal(total),
-        amountPaid: new Decimal(totalPayments),
-        changeGiven: new Decimal(changeGiven),
+        subtotal: new Prisma.Decimal(subtotal),
+        taxRate: new Prisma.Decimal(taxRate),
+        taxAmount: new Prisma.Decimal(taxAmount),
+        discountAmount: new Prisma.Decimal(discountAmount),
+        total: new Prisma.Decimal(total),
+        amountPaid: new Prisma.Decimal(totalPayments),
+        changeGiven: new Prisma.Decimal(changeGiven),
         status: POSSaleStatus.COMPLETED,
         notes: data.notes,
         tenantId: session.user.tenantId,
@@ -227,7 +227,7 @@ export async function createPOSSale(data: CreatePOSSaleData) {
           saleId: newSale.id,
           partId: item.partId,
           quantity: item.quantity,
-          unitPrice: new Decimal(item.unitPrice),
+          unitPrice: new Prisma.Decimal(item.unitPrice),
         },
       });
 
@@ -247,7 +247,7 @@ export async function createPOSSale(data: CreatePOSSaleData) {
       await tx.pOSSalePayment.create({
         data: {
           saleId: newSale.id,
-          amount: new Decimal(payment.amount),
+          amount: new Prisma.Decimal(payment.amount),
           paymentMethod: payment.paymentMethod,
           transactionRef: payment.transactionRef,
         },
@@ -258,7 +258,7 @@ export async function createPOSSale(data: CreatePOSSaleData) {
         await tx.cashTransaction.create({
           data: {
             type: 'INCOME',
-            amount: new Decimal(payment.amount),
+            amount: new Prisma.Decimal(payment.amount),
             description: `Venta POS ${newSale.saleNumber}`,
             reference: newSale.id,
             cashRegisterId: openCashRegister.id,
@@ -374,7 +374,7 @@ export async function voidPOSSale(saleId: string, reason: string) {
         await tx.cashTransaction.create({
           data: {
             type: 'EXPENSE',
-            amount: new Decimal(totalCash),
+            amount: new Prisma.Decimal(totalCash),
             description: `Anulación venta ${sale.saleNumber}: ${reason}`,
             reference: saleId,
             cashRegisterId: openCashRegister.id,
