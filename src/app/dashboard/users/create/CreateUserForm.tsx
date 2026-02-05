@@ -122,7 +122,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
       <Select
         label="Rol"
         name="role"
-        defaultValue="AGENT"
+        defaultValue="TECHNICIAN"
         options={roleOptions}
         helper="Define los permisos del usuario"
       />
