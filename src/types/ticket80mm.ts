@@ -47,6 +47,8 @@ export interface Ticket80mmService {
 
 export interface Ticket80mmData {
     id: string;
+    ticketKey?: string | null;
+    ticketNumber?: string | null; // legacy fallback
     title: string;
     description: string;
     status: string;

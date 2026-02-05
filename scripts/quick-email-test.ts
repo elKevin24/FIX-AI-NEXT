@@ -1,6 +1,4 @@
-
 import { Resend } from 'resend';
-import * as dotenv from 'zod'; // No, use something simpler or just read env
 
 async function testResend() {
     const key = 're_i1KWhFmH_GQB65vkyrtye3XNcSWmx4LML';
