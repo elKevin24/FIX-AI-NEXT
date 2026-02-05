@@ -1,5 +1,4 @@
 import React from 'react';
-import { TechnicianStatus } from '@prisma/client';
 
 // Map TechnicianStatus to colors for the indicator
 const statusColors: Record<string, string> = {
