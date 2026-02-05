@@ -18,7 +18,7 @@ async function testFuzzy() {
   }
 
   // Insertar un Repuesto y un Ticket con nombres correctos
-  const part = await prisma.part.upsert({
+  await prisma.part.upsert({
     where: { unique_sku_per_tenant: { sku: 'SAM-S23', tenantId: tenant.id } },
     update: {},
     create: {

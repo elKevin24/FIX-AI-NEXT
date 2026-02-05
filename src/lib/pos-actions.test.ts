@@ -3,14 +3,10 @@ import { createPOSSale, voidPOSSale } from './pos-actions';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 vi.mock('@/auth');
 vi.mock('@/lib/tenant-prisma');
 vi.mock('next/cache');
-vi.mock('next/navigation', () => ({
-    redirect: vi.fn(),
-}));
 vi.mock('./tenant-settings-actions', () => ({
   getTaxRate: vi.fn().mockResolvedValue(12),
 }));

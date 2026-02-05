@@ -12,7 +12,8 @@ import {
 import * as React from "react";
 
 interface SLABreachEmailProps {
-  ticketNumber: string;
+  ticketKey?: string;
+  ticketNumber?: string;
   title: string;
   status: 'WARNING' | 'CRITICAL';
   timeRemaining: string;
@@ -20,6 +21,7 @@ interface SLABreachEmailProps {
 }
 
 export const SLABreachEmail = ({
+  ticketKey = undefined,
   ticketNumber = "T-123456",
   title = "Laptop Repair",
   status = "WARNING",
@@ -28,14 +30,14 @@ export const SLABreachEmail = ({
 }: SLABreachEmailProps) => (
   <Html>
     <Head />
-    <Preview>SLA Alert: Ticket #{ticketNumber}</Preview>
+    <Preview>SLA Alert: Ticket #{ticketKey || ticketNumber}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={status === 'CRITICAL' ? criticalHeading : warningHeading}>
           SLA {status} Alert
         </Heading>
         <Text style={text}>
-          Ticket <strong>#{ticketNumber}</strong> is approaching its SLA deadline.
+          Ticket <strong>#{ticketKey || ticketNumber}</strong> is approaching its SLA deadline.
         </Text>
         <Text style={text}>
           <strong>Title:</strong> {title}

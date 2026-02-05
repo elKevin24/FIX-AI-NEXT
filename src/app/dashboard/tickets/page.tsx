@@ -65,7 +65,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticketNumber" % ${search} OR 
+                t."ticket_key" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
@@ -88,7 +88,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticketNumber" % ${search} OR 
+                t."ticket_key" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
@@ -106,8 +106,6 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
     } else {
         // BÚSQUEDA ESTÁNDAR
-        const db = isSuperAdmin ? prisma : getTenantPrisma(tenantId!);
-        
         // 1. Conteo
         // Si no es superadmin, getTenantPrisma ya filtra, pero findMany necesita where explicito si usamos el cliente raw, 
         // pero aquí usamos la abstracción
