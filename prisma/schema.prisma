@@ -7,15 +7,15 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_DATABASE_URL")
-  extensions = [pg_trgm, pgcrypto]
+  directUrl  = env("DATABASE_URL_UNPOOLED")
+  extensions = [pgcrypto, pg_trgm]
 }
 
 model Tenant {
   id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   slug             String            @unique
-  adminUserId      String?           // FK to the primary admin user
+  adminUserId      String? // FK to the primary admin user
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   auditLogs        AuditLog[]
@@ -35,43 +35,41 @@ model Tenant {
   serviceTemplates ServiceTemplate[]
   settings         TenantSettings?
   tickets          Ticket[]
-  ticketSequences  TicketSequence[]
   users            User[]
 
   @@index([adminUserId])
   @@map("tenants")
 }
 
-model TicketSequence {
-  tenantId  String @db.Uuid
-  year      Int
-  lastValue Int    @default(0)
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@id([tenantId, year])
-  @@map("ticket_sequences")
-}
-
 model User {
-  id                   String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email                String                     @unique
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String
   password             String
-  name                 String?
-  role                 UserRole                   @default(TECHNICIAN)
-  tenantId             String                     @db.Uuid
-  createdAt            DateTime                   @default(now())
-  updatedAt            DateTime                   @updatedAt
-  status               TechnicianStatus           @default(AVAILABLE)
-  maxConcurrentTickets Int                        @default(5)
+  firstName            String?
+  lastName             String?
+  name                 String? // Computed/legacy: firstName + lastName
+  role                 UserRole         @default(TECHNICIAN)
+  tenantId             String           @db.Uuid
+  isActive             Boolean          @default(true)
+  passwordMustChange   Boolean          @default(false)
+  lastLoginAt          DateTime?
+  failedLoginAttempts  Int              @default(0)
+  lockedUntil          DateTime?
+  createdById          String?          @db.Uuid
+  updatedById          String?          @db.Uuid
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  status               TechnicianStatus @default(AVAILABLE)
+  maxConcurrentTickets Int              @default(5)
   statusReason         String?
   availableFrom        DateTime?
   availableUntil       DateTime?
 
   // Self-referential relations for audit trail
-  createdBy            User?                      @relation("UserCreatedBy", fields: [createdById], references: [id])
-  updatedBy            User?                      @relation("UserUpdatedBy", fields: [updatedById], references: [id])
-  usersCreated         User[]                     @relation("UserCreatedBy")
-  usersUpdated         User[]                     @relation("UserUpdatedBy")
+  createdBy    User?  @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?  @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  usersCreated User[] @relation("UserCreatedBy")
+  usersUpdated User[] @relation("UserUpdatedBy")
 
   // Other relations
   auditLogs            AuditLog[]
@@ -103,8 +101,8 @@ model User {
   updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
-  viewedTickets        Ticket[]                   @relation("TicketViewers")
 
+  @@unique([tenantId, email], name: "unique_email_per_tenant")
   @@index([tenantId])
   @@index([createdById])
   @@index([updatedById])
@@ -144,10 +142,10 @@ model Customer {
 
 model Ticket {
   id                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ticketKey               String             @unique @db.VarChar(20)
+  ticketNumber            String?
   title                   String
   description             String
-  status                  TicketStatus       @default(ABIERTO)
+  status                  TicketStatus       @default(OPEN)
   tenantId                String             @db.Uuid
   customerId              String             @db.Uuid
   assignedToId            String?            @db.Uuid
@@ -177,14 +175,13 @@ model Ticket {
   tenant                  Tenant             @relation(fields: [tenantId], references: [id])
   updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
   viewedByUsers           UserPresence[]
-  viewers                 User[]             @relation("TicketViewers")
 
+  @@unique([ticketNumber, tenantId])
   @@index([status, priority])
   @@index([assignedToId, status])
   @@index([serviceTemplateId])
   @@index([createdById])
   @@index([updatedById])
-  @@index([tenantId])
   @@map("tickets")
 }
 
@@ -282,22 +279,21 @@ model PartUsage {
 }
 
 model AuditLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  details   String?
-  userId    String?  @db.Uuid
-  tenantId  String   @db.Uuid
-  createdAt DateTime @default(now())
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  user      User?    @relation(fields: [userId], references: [id])
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  details    String?
+  userId     String?     @db.Uuid
+  tenantId   String      @db.Uuid
+  createdAt  DateTime    @default(now())
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
   action     AuditAction
   module     AuditModule
   entityType String?
-  entityId   String?
+  entityId   String?     @db.Uuid
   metadata   Json?
   ipAddress  String?
   userAgent  String?
-  success    Boolean      @default(true)
-  createdAt  DateTime     @default(now())
+  success    Boolean     @default(true)
 
   @@index([tenantId, createdAt])
   @@index([userId, createdAt])
@@ -306,48 +302,6 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([tenantId, success])
   @@map("audit_logs")
-}
-
-model SessionLog {
-  id             String        @id @default(uuid())
-  tenantId       String
-  userId         String
-  sessionToken   String        @unique
-  ipAddress      String?
-  userAgent      String?
-  loginAt        DateTime      @default(now())
-  lastActivityAt DateTime      @default(now())
-  logoutAt       DateTime?
-  status         SessionStatus @default(ACTIVE)
-  metadata       Json?
-  tenant         Tenant        @relation(fields: [tenantId], references: [id])
-  user           User          @relation(fields: [userId], references: [id])
-
-  @@index([tenantId, status])
-  @@index([userId, loginAt])
-  @@index([sessionToken])
-  @@index([lastActivityAt])
-  @@map("session_logs")
-}
-
-model UserPresence {
-  id              String         @id @default(uuid())
-  userId          String         @unique
-  tenantId        String
-  status          PresenceStatus @default(ONLINE)
-  currentRoute    String?
-  currentPage     String?
-  currentTicketId String?
-  lastSeenAt      DateTime       @default(now())
-  metadata        Json?
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenant          Tenant         @relation(fields: [tenantId], references: [id])
-  currentTicket   Ticket?        @relation(fields: [currentTicketId], references: [id], onDelete: SetNull)
-
-  @@index([tenantId, lastSeenAt])
-  @@index([tenantId, status])
-  @@index([currentTicketId])
-  @@map("user_presence")
 }
 
 model TicketNote {
@@ -594,19 +548,17 @@ model CashTransaction {
 enum UserRole {
   ADMIN
   MANAGER
-  AGENT
   VIEWER
   TECHNICIAN
-  RECEPTIONIST
 }
 
 enum TicketStatus {
-  ABIERTO
-  EN_PROCESO
-  ESPERANDO_REPUESTOS
-  RESUELTO
-  CERRADO
-  CANCELADO
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_PARTS
+  RESOLVED
+  CLOSED
+  CANCELLED
 }
 
 enum ServiceCategory {
@@ -668,6 +620,8 @@ enum InvoiceStatus {
   OVERDUE
 }
 
+// ==================== POS MODELS ====================
+
 model TenantSettings {
   id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId            String   @unique @db.Uuid
@@ -681,6 +635,7 @@ model TenantSettings {
   currency            String   @default("GTQ")
   defaultPaymentTerms String?
   invoiceFooter       String?
+  // SLA Configuration
   slaWarningPercent   Int      @default(75)
   slaCriticalPercent  Int      @default(90)
   slaEmailEnabled     Boolean  @default(true)
@@ -860,6 +815,29 @@ model CreditNoteItem {
   @@map("credit_note_items")
 }
 
+enum POSSaleStatus {
+  COMPLETED
+  VOIDED
+  PARTIALLY_REFUNDED
+  FULLY_REFUNDED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+  CANCELLED
+}
+
+enum CreditNoteStatus {
+  PENDING
+  PROCESSED
+  CANCELLED
+}
+
 enum AuditAction {
   LOGIN_SUCCESS
   LOGIN_FAILED
@@ -910,25 +888,44 @@ enum PresenceStatus {
   OFFLINE
 }
 
-enum POSSaleStatus {
-  COMPLETED
-  VOIDED
-  PARTIALLY_REFUNDED
-  FULLY_REFUNDED
+model SessionLog {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String        @db.Uuid
+  userId         String        @db.Uuid
+  sessionToken   String        @unique
+  ipAddress      String?
+  userAgent      String?
+  loginAt        DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  logoutAt       DateTime?
+  status         SessionStatus @default(ACTIVE)
+  metadata       Json?
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([userId, loginAt])
+  @@index([sessionToken])
+  @@index([lastActivityAt])
+  @@map("session_logs")
 }
 
-enum QuotationStatus {
-  DRAFT
-  SENT
-  ACCEPTED
-  REJECTED
-  EXPIRED
-  CONVERTED
-  CANCELLED
-}
+model UserPresence {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String         @unique @db.Uuid
+  tenantId        String         @db.Uuid
+  status          PresenceStatus @default(ONLINE)
+  currentRoute    String?
+  currentPage     String?
+  currentTicketId String?        @db.Uuid
+  lastSeenAt      DateTime       @default(now())
+  metadata        Json?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  currentTicket   Ticket?        @relation(fields: [currentTicketId], references: [id], onDelete: SetNull)
 
-enum CreditNoteStatus {
-  PENDING
-  PROCESSED
-  CANCELLED
+  @@index([tenantId, lastSeenAt])
+  @@index([tenantId, status])
+  @@index([currentTicketId])
+  @@map("user_presence")
 }

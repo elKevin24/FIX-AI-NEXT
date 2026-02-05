@@ -10,7 +10,7 @@ interface User {
     id: string;
     name: string | null;
     email: string;
-    role: 'ADMIN' | 'MANAGER' | 'AGENT' | 'VIEWER' | 'TECHNICIAN' | 'RECEPTIONIST';
+    role: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
     tenantId: string;
     tenant: {
         name: string;
@@ -102,10 +102,8 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                         >
                             <option value="ADMIN">Administrador</option>
                             <option value="MANAGER">Gerente</option>
-                            <option value="AGENT">Agente</option>
-                            <option value="VIEWER">Solo Lectura</option>
-                            <option value="TECHNICIAN">Técnico (Legacy)</option>
-                            <option value="RECEPTIONIST">Recepcionista (Legacy)</option>
+                            <option value="TECHNICIAN">Técnico</option>
+                            <option value="VIEWER">Visualizador</option>
                         </select>
                         {isCurrentUser && (
                             <span style={{ color: 'var(--color-warning-600)', fontSize: '0.875rem' }}>

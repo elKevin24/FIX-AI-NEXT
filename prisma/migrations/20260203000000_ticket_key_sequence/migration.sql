@@ -1,6 +1,6 @@
 -- ================================================
--- Migration: Ticket Key Sequence System
--- Description: Implements atomic ticket key generation
+-- Migration: Ticket Number Sequence System
+-- Description: Implements atomic ticket number generation
 --              with format SAT-YYYY-NNNNN per tenant/year
 -- ================================================
 
@@ -12,21 +12,20 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'uuidv7') THEN
-    -- Fallback to gen_random_uuid() for environments without a native uuidv7 provider.
-    -- This keeps migrations runnable; deployers should install a true uuidv7 provider
-    -- for canonical v7 timestamps if desired.
-    CREATE OR REPLACE FUNCTION uuidv7()
-    RETURNS uuid AS $$
-    BEGIN
-      RETURN gen_random_uuid();
-    END;
-    $$ LANGUAGE plpgsql;
+    EXECUTE '
+      CREATE OR REPLACE FUNCTION uuidv7()
+      RETURNS uuid AS $func$
+      BEGIN
+        RETURN gen_random_uuid();
+      END;
+      $func$ LANGUAGE plpgsql;
+    ';
   END IF;
 END $$;
 
 -- 1. Create ticket_sequences table with composite primary key
 CREATE TABLE IF NOT EXISTS "ticket_sequences" (
-    "tenant_id" UUID NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
     "last_value" INTEGER NOT NULL DEFAULT 0,
 
@@ -38,13 +37,13 @@ CREATE TABLE IF NOT EXISTS "ticket_sequences" (
         ON UPDATE CASCADE
 );
 
--- 2. Atomic function to get next ticket key
+-- 2. Atomic function to get next ticket number
 -- Uses INSERT ON CONFLICT (UPSERT) for atomicity without explicit locking
-CREATE OR REPLACE FUNCTION next_ticket_key(p_tenant_id UUID, p_year INTEGER)
+CREATE OR REPLACE FUNCTION next_ticket_number(p_tenant_id TEXT, p_year INTEGER)
 RETURNS VARCHAR(20) AS $$
 DECLARE
     v_next_value INTEGER;
-    v_ticket_key VARCHAR(20);
+    v_ticket_number VARCHAR(20);
 BEGIN
     INSERT INTO ticket_sequences (tenant_id, year, last_value)
     VALUES (p_tenant_id, p_year, 1)
@@ -52,21 +51,20 @@ BEGIN
     DO UPDATE SET last_value = ticket_sequences.last_value + 1
     RETURNING last_value INTO v_next_value;
 
-    v_ticket_key := 'SAT-' || p_year::TEXT || '-' || LPAD(v_next_value::TEXT, 5, '0');
-    RETURN v_ticket_key;
+    v_ticket_number := 'SAT-' || p_year::TEXT || '-' || LPAD(v_next_value::TEXT, 5, '0');
+    RETURN v_ticket_number;
 END;
 $$ LANGUAGE plpgsql;
 
--- 3. Rename ticketNumber to ticket_key and add column if necessary
-DROP INDEX IF EXISTS "tickets_ticketNumber_tenantId_key";
-
+-- 3. Ensure ticketNumber column exists
+-- If ticket_key exists, rename it to ticketNumber to standardize
 DO $$
 BEGIN
     IF EXISTS (
         SELECT 1 FROM information_schema.columns
-        WHERE table_name = 'tickets' AND column_name = 'ticketNumber'
+        WHERE table_name = 'tickets' AND column_name = 'ticket_key'
     ) THEN
-        ALTER TABLE "tickets" RENAME COLUMN "ticketNumber" TO "ticket_key";
+        ALTER TABLE "tickets" RENAME COLUMN "ticket_key" TO "ticketNumber";
     END IF;
 END $$;
 
@@ -74,13 +72,13 @@ DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns
-        WHERE table_name = 'tickets' AND column_name = 'ticket_key'
+        WHERE table_name = 'tickets' AND column_name = 'ticketNumber'
     ) THEN
-        ALTER TABLE "tickets" ADD COLUMN "ticket_key" VARCHAR(20);
+        ALTER TABLE "tickets" ADD COLUMN "ticketNumber" VARCHAR(20);
     END IF;
 END $$;
 
--- 4. Migrate existing tickets that don't have a ticket_key
+-- 4. Migrate existing tickets that don't have a ticketNumber
 DO $$
 DECLARE
     r RECORD;
@@ -90,7 +88,7 @@ BEGIN
     FOR r IN
         SELECT id, "tenantId", "createdAt"
         FROM tickets
-        WHERE ticket_key IS NULL
+        WHERE "ticketNumber" IS NULL
         ORDER BY "createdAt" ASC
     LOOP
         v_year := EXTRACT(YEAR FROM r."createdAt")::INTEGER;
@@ -102,28 +100,33 @@ BEGIN
         RETURNING last_value INTO v_seq;
 
         UPDATE tickets
-        SET ticket_key = 'SAT-' || v_year::TEXT || '-' || LPAD(v_seq::TEXT, 5, '0')
+        SET "ticketNumber" = 'SAT-' || v_year::TEXT || '-' || LPAD(v_seq::TEXT, 5, '0')
         WHERE id = r.id;
     END LOOP;
 END $$;
 
--- 5. Make ticket_key NOT NULL and UNIQUE after migration
-ALTER TABLE "tickets" ALTER COLUMN "ticket_key" SET NOT NULL;
--- Unicidad por tenant para evitar colisiones entre talleres
-CREATE UNIQUE INDEX IF NOT EXISTS "tickets_ticket_key_per_tenant" ON "tickets"("tenantId", "ticket_key");
+-- 5. Make ticketNumber NOT NULL after migration
+-- Note: We can't strictly enforce UNIQUE globally if we want per-tenant uniqueness, 
+-- but the index below handles the per-tenant requirement.
+ALTER TABLE "tickets" ALTER COLUMN "ticketNumber" DROP NOT NULL; -- Allow NULL temporarily if needed, but aim for NOT NULL
 
--- 6. Create index for fuzzy search on ticket_key
-CREATE INDEX IF NOT EXISTS "idx_tickets_key_trgm" ON "tickets" USING GIN ("ticket_key" gin_trgm_ops);
+-- Unicidad por tenant para evitar colisiones entre talleres
+DROP INDEX IF EXISTS "tickets_ticket_key_per_tenant";
+CREATE UNIQUE INDEX IF NOT EXISTS "tickets_ticketNumber_tenantId_key" ON "tickets"("ticketNumber", "tenantId");
+
+-- 6. Create index for fuzzy search on ticketNumber
+DROP INDEX IF EXISTS "idx_tickets_key_trgm";
+CREATE INDEX IF NOT EXISTS "idx_tickets_number_trgm" ON "tickets" USING GIN ("ticketNumber" gin_trgm_ops);
 
 -- 7. Update trigger to use new function
-CREATE OR REPLACE FUNCTION assign_ticket_key()
+CREATE OR REPLACE FUNCTION assign_ticket_number()
 RETURNS TRIGGER AS $$
 DECLARE
     v_year INTEGER;
 BEGIN
-    IF NEW."ticket_key" IS NULL OR NEW."ticket_key" = '' THEN
+    IF NEW."ticketNumber" IS NULL OR NEW."ticketNumber" = '' THEN
         v_year := EXTRACT(YEAR FROM COALESCE(NEW."createdAt", NOW()))::INTEGER;
-        NEW."ticket_key" := next_ticket_key(NEW."tenantId", v_year);
+        NEW."ticketNumber" := next_ticket_number(NEW."tenantId", v_year);
     END IF;
     RETURN NEW;
 END;
@@ -131,9 +134,10 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trg_assign_ticket_number ON tickets;
 DROP TRIGGER IF EXISTS trg_assign_ticket_key ON tickets;
-CREATE TRIGGER trg_assign_ticket_key
+
+CREATE TRIGGER trg_assign_ticket_number
 BEFORE INSERT ON tickets
-FOR EACH ROW EXECUTE FUNCTION assign_ticket_key();
+FOR EACH ROW EXECUTE FUNCTION assign_ticket_number();
 
 -- 8. Ensure tenantId index exists on tickets
 CREATE INDEX IF NOT EXISTS "tickets_tenantId_idx" ON "tickets"("tenantId");

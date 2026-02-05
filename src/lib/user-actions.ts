@@ -28,15 +28,7 @@ import {
   getAssignableRoles,
 } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
-import { logAction } from './audit-actions';
-
-// Logic moved to src/lib/password-utils.ts
-import {
-  PASSWORD_POLICY,
-  passwordSchema,
-  validatePassword,
-  generateTemporaryPassword,
-} from '@/lib/password-utils';
+import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
 // ZOD SCHEMAS
@@ -46,8 +38,8 @@ const CreateUserSchema = z.object({
   email: z.string().email('Email inválido'),
   firstName: z.string().min(1, 'Nombre requerido').max(100),
   lastName: z.string().min(1, 'Apellido requerido').max(100),
-  role: z.enum(['ADMIN', 'MANAGER', 'AGENT', 'VIEWER', 'TECHNICIAN', 'RECEPTIONIST']),
-  password: z.string().optional(),
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']),
+  password: z.string().optional(), // Si no se provee, se genera uno temporal
 });
 
 const UpdateUserSchema = z.object({
@@ -55,12 +47,12 @@ const UpdateUserSchema = z.object({
   email: z.string().email('Email inválido').optional(),
   firstName: z.string().min(1).max(100).optional(),
   lastName: z.string().min(1).max(100).optional(),
-  role: z.enum(['ADMIN', 'MANAGER', 'AGENT', 'VIEWER', 'TECHNICIAN', 'RECEPTIONIST']).optional(),
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
 });
 
 const ResetPasswordSchema = z.object({
   userId: z.string().uuid('ID de usuario inválido'),
-  newPassword: z.string().optional(),
+  newPassword: z.string().optional(), // Si no se provee, se genera uno temporal
 });
 
 const ChangePasswordSchema = z.object({
@@ -88,6 +80,7 @@ export async function createUser(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -95,8 +88,10 @@ export async function createUser(
 
     const { id: creatorId, tenantId, role: creatorRole } = session.user;
 
+    // 2. Verificar permisos
     requireAdminOrManager(creatorRole as UserRole);
 
+    // 3. Validar datos
     const rawData = {
       email: formData.get('email'),
       firstName: formData.get('firstName'),
@@ -116,6 +111,7 @@ export async function createUser(
 
     const { email, firstName, lastName, role, password } = validatedFields.data;
 
+    // 4. Verificar que el creador puede asignar este rol
     const assignableRoles = getAssignableRoles(creatorRole as UserRole);
     if (!isAdmin(creatorRole as UserRole) && !assignableRoles.includes(role as UserRole)) {
       return {
@@ -124,6 +120,7 @@ export async function createUser(
       };
     }
 
+    // 5. Verificar email único dentro del tenant
     const existingUser = await prisma.user.findFirst({
       where: { email, tenantId },
     });
@@ -136,6 +133,7 @@ export async function createUser(
       };
     }
 
+    // 6. Generar o validar contraseña
     let finalPassword = password;
     let passwordMustChange = true;
 
@@ -153,8 +151,10 @@ export async function createUser(
       finalPassword = generateTemporaryPassword();
     }
 
+    // 7. Hashear contraseña
     const hashedPassword = await bcryptjs.hash(finalPassword!, 12);
 
+    // 8. Crear usuario
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -171,16 +171,20 @@ export async function createUser(
       },
     });
 
-    await logAction('USER_CREATED', 'USERS', {
-      entityType: 'User',
-      entityId: newUser.id,
-      metadata: {
-        email: newUser.email,
-        role: newUser.role,
-        createdBy: creatorId,
+    // 9. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_CREATED',
+        module: 'USERS',
+        details: JSON.stringify({
+          newUserId: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          createdBy: creatorId,
+        }),
+        userId: creatorId,
+        tenantId,
       },
-      tenantId,
-      userId: creatorId,
     });
 
     revalidatePath('/dashboard/users');
@@ -214,6 +218,7 @@ export async function updateUser(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -221,6 +226,7 @@ export async function updateUser(
 
     const { id: actorId, tenantId, role: actorRole } = session.user;
 
+    // 2. Validar datos
     const rawData = {
       userId: formData.get('userId'),
       email: formData.get('email') || undefined,
@@ -240,6 +246,7 @@ export async function updateUser(
 
     const { userId, email, firstName, lastName, role } = validatedFields.data;
 
+    // 3. Obtener usuario objetivo
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -248,10 +255,12 @@ export async function updateUser(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
+    // 4. Verificar acceso al tenant
     validateTenantAccess(tenantId, targetUser.tenantId);
 
     const isSelf = actorId === userId;
 
+    // 5. Verificar permisos
     if (!isSelf) {
       requirePermission(actorRole as UserRole, 'canEditUsers');
 
@@ -263,6 +272,7 @@ export async function updateUser(
       }
     }
 
+    // 6. Solo ADMIN puede cambiar roles
     if (role && role !== targetUser.role) {
       if (!isAdmin(actorRole as UserRole)) {
         return {
@@ -271,6 +281,7 @@ export async function updateUser(
         };
       }
 
+      // No permitir degradar al último admin
       if (targetUser.role === 'ADMIN' && role !== 'ADMIN') {
         const adminCount = await prisma.user.count({
           where: { tenantId, role: 'ADMIN', isActive: true },
@@ -284,6 +295,7 @@ export async function updateUser(
       }
     }
 
+    // 7. Verificar email único si se está cambiando
     if (email && email !== targetUser.email) {
       const existingUser = await prisma.user.findFirst({
         where: { email, tenantId, NOT: { id: userId } },
@@ -297,7 +309,8 @@ export async function updateUser(
       }
     }
 
-    const updateData: any = {
+    // 8. Preparar datos de actualización
+    const updateData: Record<string, unknown> = {
       updatedById: actorId,
     };
 
@@ -307,22 +320,27 @@ export async function updateUser(
     if (firstName || lastName) {
       updateData.name = `${firstName || targetUser.firstName || ''} ${lastName || targetUser.lastName || ''}`.trim();
     }
-    if (role) updateData.role = role as UserRole;
+    if (role) updateData.role = role;
 
+    // 9. Actualizar usuario
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
 
-    await logAction('USER_UPDATED', 'USERS', {
-      entityType: 'User',
-      entityId: userId,
-      metadata: {
-        changes: updateData,
-        updatedBy: actorId,
+    // 10. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_UPDATED',
+        module: 'USERS',
+        details: JSON.stringify({
+          userId,
+          changes: updateData,
+          updatedBy: actorId,
+        }),
+        userId: actorId,
+        tenantId,
       },
-      tenantId,
-      userId: actorId,
     });
 
     revalidatePath('/dashboard/users');
@@ -351,6 +369,7 @@ export async function deactivateUser(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -358,17 +377,21 @@ export async function deactivateUser(
 
     const { id: actorId, tenantId, role: actorRole } = session.user;
 
+    // 2. Verificar permisos
     requirePermission(actorRole as UserRole, 'canDeactivateUsers');
 
+    // 3. Obtener userId
     const userId = formData.get('userId') as string;
     if (!userId) {
       return { success: false, message: 'ID de usuario requerido' };
     }
 
+    // 4. No permitir auto-desactivación
     if (userId === actorId) {
       return { success: false, message: 'No puedes desactivar tu propia cuenta' };
     }
 
+    // 5. Obtener usuario objetivo
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -377,8 +400,10 @@ export async function deactivateUser(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
+    // 6. Verificar acceso al tenant
     validateTenantAccess(tenantId, targetUser.tenantId);
 
+    // 7. Verificar jerarquía
     if (!canModifyUser(actorRole as UserRole, targetUser.role as UserRole, false)) {
       return {
         success: false,
@@ -386,6 +411,7 @@ export async function deactivateUser(
       };
     }
 
+    // 8. No permitir desactivar al último ADMIN
     if (targetUser.role === 'ADMIN') {
       const adminCount = await prisma.user.count({
         where: { tenantId, role: 'ADMIN', isActive: true },
@@ -398,6 +424,7 @@ export async function deactivateUser(
       }
     }
 
+    // 9. Desactivar usuario
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -406,15 +433,19 @@ export async function deactivateUser(
       },
     });
 
-    await logAction('USER_DEACTIVATED', 'USERS', {
-      entityType: 'User',
-      entityId: userId,
-      metadata: {
-        email: targetUser.email,
-        deactivatedBy: actorId,
+    // 10. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_DEACTIVATED',
+        module: 'USERS',
+        details: JSON.stringify({
+          userId,
+          email: targetUser.email,
+          deactivatedBy: actorId,
+        }),
+        userId: actorId,
+        tenantId,
       },
-      tenantId,
-      userId: actorId,
     });
 
     revalidatePath('/dashboard/users');
@@ -441,6 +472,7 @@ export async function reactivateUser(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -448,13 +480,16 @@ export async function reactivateUser(
 
     const { id: actorId, tenantId, role: actorRole } = session.user;
 
+    // 2. Verificar permisos (mismo permiso que desactivar)
     requirePermission(actorRole as UserRole, 'canDeactivateUsers');
 
+    // 3. Obtener userId
     const userId = formData.get('userId') as string;
     if (!userId) {
       return { success: false, message: 'ID de usuario requerido' };
     }
 
+    // 4. Obtener usuario objetivo
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -463,31 +498,39 @@ export async function reactivateUser(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
+    // 5. Verificar acceso al tenant
     validateTenantAccess(tenantId, targetUser.tenantId);
 
+    // 6. Verificar que está desactivado
     if (targetUser.isActive) {
       return { success: false, message: 'El usuario ya está activo' };
     }
 
+    // 7. Reactivar usuario
     await prisma.user.update({
       where: { id: userId },
       data: {
         isActive: true,
         updatedById: actorId,
+        // Resetear intentos de login fallidos
         failedLoginAttempts: 0,
         lockedUntil: null,
       },
     });
 
-    await logAction('USER_REACTIVATED', 'USERS', {
-      entityType: 'User',
-      entityId: userId,
-      metadata: {
-        email: targetUser.email,
-        reactivatedBy: actorId,
+    // 8. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_REACTIVATED',
+        module: 'USERS',
+        details: JSON.stringify({
+          userId,
+          email: targetUser.email,
+          reactivatedBy: actorId,
+        }),
+        userId: actorId,
+        tenantId,
       },
-      tenantId,
-      userId: actorId,
     });
 
     revalidatePath('/dashboard/users');
@@ -514,6 +557,7 @@ export async function resetPassword(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -521,6 +565,7 @@ export async function resetPassword(
 
     const { id: actorId, tenantId, role: actorRole } = session.user;
 
+    // 2. Solo ADMIN puede resetear contraseñas de otros
     const userId = formData.get('userId') as string;
     const isSelf = userId === actorId;
 
@@ -528,6 +573,7 @@ export async function resetPassword(
       requireAdminOrManager(actorRole as UserRole);
     }
 
+    // 3. Validar datos
     const rawData = {
       userId,
       newPassword: formData.get('newPassword') || undefined,
@@ -544,6 +590,7 @@ export async function resetPassword(
 
     const { newPassword } = validatedFields.data;
 
+    // 4. Obtener usuario objetivo
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -552,8 +599,10 @@ export async function resetPassword(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
+    // 5. Verificar acceso al tenant
     validateTenantAccess(tenantId, targetUser.tenantId);
 
+    // 6. Generar o validar contraseña
     let finalPassword = newPassword;
     let passwordMustChange = true;
 
@@ -566,8 +615,9 @@ export async function resetPassword(
           errors: { newPassword: passwordValidation.errors },
         };
       }
+      // Si el admin provee una contraseña específica, no forzar cambio
       if (!isSelf) {
-        passwordMustChange = true;
+        passwordMustChange = true; // Siempre forzar cambio si es reset por admin
       } else {
         passwordMustChange = false;
       }
@@ -575,6 +625,7 @@ export async function resetPassword(
       finalPassword = generateTemporaryPassword();
     }
 
+    // 7. Hashear y actualizar
     const hashedPassword = await bcryptjs.hash(finalPassword!, 12);
 
     await prisma.user.update({
@@ -588,16 +639,20 @@ export async function resetPassword(
       },
     });
 
-    await logAction('PASSWORD_RESET', 'USERS', {
-      entityType: 'User',
-      entityId: userId,
-      metadata: {
-        resetBy: actorId,
-        isSelf,
-        passwordMustChange,
+    // 8. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'PASSWORD_RESET',
+        module: 'USERS',
+        details: JSON.stringify({
+          userId,
+          resetBy: actorId,
+          isSelf,
+          passwordMustChange,
+        }),
+        userId: actorId,
+        tenantId,
       },
-      tenantId,
-      userId: actorId,
     });
 
     return {
@@ -627,6 +682,7 @@ export async function changePassword(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    // 1. Verificar sesión
     const session = await auth();
     if (!session?.user?.id || !session.user.tenantId) {
       return { success: false, message: 'No autorizado' };
@@ -634,6 +690,7 @@ export async function changePassword(
 
     const { id: userId, tenantId } = session.user;
 
+    // 2. Validar datos
     const rawData = {
       currentPassword: formData.get('currentPassword'),
       newPassword: formData.get('newPassword'),
@@ -650,6 +707,7 @@ export async function changePassword(
 
     const { currentPassword, newPassword } = validatedFields.data;
 
+    // 3. Obtener usuario
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -658,6 +716,7 @@ export async function changePassword(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
+    // 4. Verificar contraseña actual
     const isValidPassword = await bcryptjs.compare(currentPassword, user.password);
     if (!isValidPassword) {
       return {
@@ -667,6 +726,7 @@ export async function changePassword(
       };
     }
 
+    // 5. No permitir misma contraseña
     const isSamePassword = await bcryptjs.compare(newPassword, user.password);
     if (isSamePassword) {
       return {
@@ -676,6 +736,7 @@ export async function changePassword(
       };
     }
 
+    // 6. Hashear y actualizar
     const hashedPassword = await bcryptjs.hash(newPassword, 12);
 
     await prisma.user.update({
@@ -687,14 +748,18 @@ export async function changePassword(
       },
     });
 
-    await logAction('PASSWORD_CHANGED', 'USERS', {
-      entityType: 'User',
-      entityId: userId,
-      metadata: {
-        changedBySelf: true,
+    // 7. Registrar en audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'PASSWORD_CHANGED',
+        module: 'USERS',
+        details: JSON.stringify({
+          userId,
+          changedBySelf: true,
+        }),
+        userId,
+        tenantId,
       },
-      tenantId,
-      userId,
     });
 
     return {
@@ -738,12 +803,13 @@ export async function getUsers(options?: {
 
     const { tenantId, role: actorRole } = session.user;
 
+    // Verificar permiso para ver usuarios
     if (!hasPermission(actorRole as UserRole, 'canEditUsers') &&
         !hasPermission(actorRole as UserRole, 'canCreateUsers')) {
       return { success: false, message: 'Sin permiso para ver usuarios' };
     }
 
-    const whereClause: any = {
+    const whereClause: Record<string, unknown> = {
       tenantId,
     };
 
@@ -780,7 +846,7 @@ export async function getUsers(options?: {
       orderBy: { createdAt: 'desc' },
     });
 
-    return { success: true, data: users as any };
+    return { success: true, data: users };
   } catch (error) {
     console.error('Error getting users:', error);
     return { success: false, message: 'Error al obtener usuarios' };
