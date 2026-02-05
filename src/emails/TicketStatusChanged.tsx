@@ -4,7 +4,8 @@ import { EmailLayout } from './components/EmailLayout';
 
 interface TicketStatusChangedEmailProps {
   customerName: string;
-  ticketNumber: string;
+  ticketKey?: string;
+  ticketNumber?: string;
   ticketTitle: string;
   oldStatus: string;
   newStatus: string;
@@ -39,6 +40,7 @@ const getStatusColor = (status: string) => {
 
 export const TicketStatusChangedEmail = ({
   customerName = 'Cliente',
+  ticketKey = undefined,
   ticketNumber = 'TICK-0000',
   ticketTitle = 'Reparación General',
   oldStatus = 'Abierto',
@@ -51,14 +53,14 @@ export const TicketStatusChangedEmail = ({
 
   return (
     <EmailLayout
-      previewText={`Actualización ticket #${ticketNumber}: ${statusLabel}`}
+      previewText={`Actualización ticket #${ticketKey || ticketNumber}: ${statusLabel}`}
       heading="Actualización de Servicio"
     >
       <Text style={paragraph}>
         Hola <strong>{customerName}</strong>,
       </Text>
-      <Text style={paragraph}>
-        El estado de tu orden de servicio <strong>#{ticketNumber}</strong> ha cambiado.
+        <Text style={paragraph}>
+        El estado de tu orden de servicio <strong>#{ticketKey || ticketNumber}</strong> ha cambiado.
       </Text>
 
       <Section style={{ ...statusContainer, borderColor: statusColor }}>
