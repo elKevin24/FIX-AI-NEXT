@@ -12,10 +12,9 @@ import type { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
 // --- CONFIGURATION ---
-const PUBLIC_ROUTES = new Set(['/login', '/auth/error', '/auth/verify-request']);
-const PUBLIC_API_PREFIXES = ['/api/auth'];
-const DASHBOARD_PREFIX = '/dashboard';
-const API_PREFIX = '/api';
+const DASHBOARD_PATH = '/dashboard';
+const LOGIN_PATH = '/login';
+const CHANGE_PASSWORD_PATH = '/dashboard/profile/change-password';
 
 // Rate limiting storage
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
@@ -48,13 +47,17 @@ if (typeof setInterval !== 'undefined') {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const url = request.nextUrl.clone();
+  const { pathname } = url;
   
-  // 1. Normalize and check for public routes first
-  const normalizedPathname = pathname.toLowerCase().replace(/\/$/, "") || "/";
-  
-  // Rate limiting for login attempts
-  if (normalizedPathname === '/api/auth/callback/credentials' && request.method === 'POST') {
+  // Normalización estricta para comparaciones
+  const lowerPathname = pathname.toLowerCase();
+  const cleanPathname = lowerPathname.endsWith('/') && lowerPathname.length > 1 
+    ? lowerPathname.slice(0, -1) 
+    : lowerPathname;
+
+  // 1. Rate limiting (Solo para el endpoint de autenticación)
+  if (cleanPathname === '/api/auth/callback/credentials' && request.method === 'POST') {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
     const rateLimit = checkRateLimit(ip);
     if (!rateLimit.allowed) {
@@ -65,55 +68,54 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Auth Session
+  // 2. Obtener sesión de forma segura
   const session = await auth();
-  const isAuthenticated = !!session?.user;
+  const user = session?.user;
 
-  // 3. Handle Login Page (Redirect if already authenticated)
-  if (normalizedPathname === '/login') {
-    if (isAuthenticated) {
-      const target = session.user.passwordMustChange 
-        ? '/dashboard/profile/change-password' 
-        : '/dashboard';
-      return NextResponse.redirect(new URL(target, request.url));
+  // 3. Lógica de Redirección para Usuarios Autenticados en /login
+  if (cleanPathname === LOGIN_PATH) {
+    if (user) {
+      const redirectUrl = user.passwordMustChange 
+        ? new URL(CHANGE_PASSWORD_PATH, request.url)
+        : new URL(DASHBOARD_PATH, request.url);
+      return NextResponse.redirect(redirectUrl);
     }
     return NextResponse.next();
   }
 
-  // 4. Determine if route is protected
-  const isPublicApi = PUBLIC_API_PREFIXES.some(prefix => normalizedPathname.startsWith(prefix));
-  const isDashboardRoute = normalizedPathname.startsWith(DASHBOARD_PREFIX);
-  const isApiRoute = normalizedPathname.startsWith(API_PREFIX);
-  const isProtected = (isDashboardRoute || isApiRoute) && !isPublicApi;
+  // 4. Protección de Rutas (Dashboard y API interna)
+  const isApi = cleanPathname.startsWith('/api');
+  const isPublicApi = cleanPathname.startsWith('/api/auth');
+  const isDashboard = cleanPathname.startsWith(DASHBOARD_PATH);
 
-  if (isProtected) {
-    // GUARD: Redirect or error if not authenticated
-    if (!isAuthenticated) {
-      if (isApiRoute) {
+  // Si la ruta requiere protección
+  if ((isDashboard || isApi) && !isPublicApi) {
+    // Si NO está autenticado
+    if (!user) {
+      if (isApi) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
+      const loginRedirect = new URL(LOGIN_PATH, request.url);
+      loginRedirect.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginRedirect);
     }
 
-    // GUARD: Force password change if required
-    if (session.user.passwordMustChange) {
-      const changePasswordPath = '/dashboard/profile/change-password';
-      const isChangePasswordAction = normalizedPathname === '/api/users/change-password' || 
-                                    normalizedPathname === changePasswordPath;
-
-      if (!isChangePasswordAction) {
-        if (isApiRoute) {
+    // Si requiere cambio de contraseña
+    if (user.passwordMustChange) {
+      const isChangingPassword = cleanPathname === CHANGE_PASSWORD_PATH || 
+                                 cleanPathname === '/api/users/change-password';
+      
+      if (!isChangingPassword) {
+        if (isApi) {
           return new NextResponse(JSON.stringify({ error: 'Password change required', code: 'PASSWORD_MUST_CHANGE' }), {
             status: 403,
             headers: { 'Content-Type': 'application/json' },
           });
         }
-        return NextResponse.redirect(new URL(changePasswordPath, request.url));
+        return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, request.url));
       }
     }
   }
