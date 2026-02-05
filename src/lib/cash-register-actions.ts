@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
 
 // ============================================================================
 // TYPES
@@ -63,7 +63,7 @@ export async function openCashRegister(data: CashRegisterData) {
       name: data.name,
       isOpen: true,
       openedAt: new Date(),
-      openingBalance: new Decimal(data.openingBalance),
+      openingBalance: new Prisma.Decimal(data.openingBalance),
       tenantId: session.user.tenantId,
       openedById: session.user.id,
     },
@@ -190,7 +190,7 @@ export async function registerCashTransaction(data: CashTransactionData) {
   const transaction = await db.cashTransaction.create({
     data: {
       type: data.type,
-      amount: new Decimal(data.amount),
+      amount: new Prisma.Decimal(data.amount),
       description: data.description,
       reference: data.reference,
       cashRegisterId: data.cashRegisterId,
@@ -251,9 +251,9 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
     data: {
       isOpen: false,
       closedAt: new Date(),
-      closingBalance: new Decimal(data.closingBalance),
-      expectedBalance: new Decimal(expectedBalance),
-      difference: new Decimal(difference),
+      closingBalance: new Prisma.Decimal(data.closingBalance),
+      expectedBalance: new Prisma.Decimal(expectedBalance),
+      difference: new Prisma.Decimal(difference),
       closingNotes: data.notes,
       closedById: session.user.id,
     },
@@ -383,7 +383,7 @@ export async function registerInvoicePaymentInCash(
   const transaction = await db.cashTransaction.create({
     data: {
       type: 'INCOME',
-      amount: new Decimal(amount),
+      amount: new Prisma.Decimal(amount),
       description: `Pago de factura ${invoice.invoiceNumber} - ${invoice.customer.name}`,
       reference: `Factura: ${invoice.invoiceNumber}, Ticket: ${invoice.ticket.ticketNumber}`,
       cashRegisterId: cashRegister.id,

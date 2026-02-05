@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '@prisma/client';
+import { PrismaClient, UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '../src/generated/prisma';
 import bcryptjs from 'bcryptjs';
 
 console.log('[SEED] Initializing...');
