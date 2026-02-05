@@ -1,0 +1,930 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pgcrypto, pg_trgm]
+}
+
+model Tenant {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  slug             String            @unique
+  adminUserId      String? // FK to the primary admin user
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  auditLogs        AuditLog[]
+  sessionLogs      SessionLog[]
+  userPresences    UserPresence[]
+  cashRegisters    CashRegister[]
+  cashTransactions CashTransaction[]
+  creditNotes      CreditNote[]
+  customers        Customer[]
+  invoices         Invoice[]
+  notifications    Notification[]
+  parts            Part[]
+  payments         Payment[]
+  posSales         POSSale[]
+  posQuotations    POSQuotation[]
+  purchaseOrders   PurchaseOrder[]
+  serviceTemplates ServiceTemplate[]
+  settings         TenantSettings?
+  tickets          Ticket[]
+  users            User[]
+
+  @@index([adminUserId])
+  @@map("tenants")
+}
+
+model User {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String
+  password             String
+  firstName            String?
+  lastName             String?
+  name                 String? // Computed/legacy: firstName + lastName
+  role                 UserRole         @default(TECHNICIAN)
+  tenantId             String           @db.Uuid
+  isActive             Boolean          @default(true)
+  passwordMustChange   Boolean          @default(false)
+  lastLoginAt          DateTime?
+  failedLoginAttempts  Int              @default(0)
+  lockedUntil          DateTime?
+  createdById          String?          @db.Uuid
+  updatedById          String?          @db.Uuid
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  status               TechnicianStatus @default(AVAILABLE)
+  maxConcurrentTickets Int              @default(5)
+  statusReason         String?
+  availableFrom        DateTime?
+  availableUntil       DateTime?
+
+  // Self-referential relations for audit trail
+  createdBy    User?  @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?  @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  usersCreated User[] @relation("UserCreatedBy")
+  usersUpdated User[] @relation("UserUpdatedBy")
+
+  // Other relations
+  auditLogs            AuditLog[]
+  sessionLogs          SessionLog[]
+  presence             UserPresence?
+  closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
+  openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
+  cashTransactions     CashTransaction[]
+  creditNotesCreated   CreditNote[]               @relation("CreditNoteCreatedBy")
+  creditNotesProcessed CreditNote[]               @relation("CreditNoteProcessedBy")
+  createdCustomers     Customer[]                 @relation("CustomerCreatedBy")
+  updatedCustomers     Customer[]                 @relation("CustomerUpdatedBy")
+  createdInvoices      Invoice[]                  @relation("InvoiceCreatedBy")
+  updatedInvoices      Invoice[]                  @relation("InvoiceUpdatedBy")
+  invoiceHistory       InvoiceHistory[]
+  notifications        Notification[]
+  createdParts         Part[]                     @relation("PartCreatedBy")
+  updatedParts         Part[]                     @relation("PartUpdatedBy")
+  posSales             POSSale[]
+  posQuotations        POSQuotation[]
+  receivedPayments     Payment[]
+  createdTemplates     ServiceTemplate[]          @relation("TemplateCreatedBy")
+  updatedTemplates     ServiceTemplate[]          @relation("TemplateUpdatedBy")
+  specializations      TechnicianSpecialization[]
+  unavailabilities     TechnicianUnavailability[]
+  ticketNotes          TicketNote[]
+  assignedTickets      Ticket[]
+  createdTickets       Ticket[]                   @relation("TicketCreatedBy")
+  updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
+  uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email], name: "unique_email_per_tenant")
+  @@index([tenantId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([isActive])
+  @@map("users")
+}
+
+model Customer {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  tenantId      String         @db.Uuid
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  createdById   String?        @db.Uuid
+  updatedById   String?        @db.Uuid
+  dpi           String?
+  nit           String?
+  createdBy     User?          @relation("CustomerCreatedBy", fields: [createdById], references: [id])
+  creditNotes   CreditNote[]
+  invoices      Invoice[]
+  posSales      POSSale[]
+  posQuotations POSQuotation[]
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  tickets       Ticket[]
+  updatedBy     User?          @relation("CustomerUpdatedBy", fields: [updatedById], references: [id])
+
+  @@unique([dpi, tenantId], name: "unique_dpi_per_tenant")
+  @@unique([nit, tenantId], name: "unique_nit_per_tenant")
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([tenantId])
+  @@map("customers")
+}
+
+model Ticket {
+  id                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketNumber            String?
+  title                   String
+  description             String
+  status                  TicketStatus       @default(OPEN)
+  tenantId                String             @db.Uuid
+  customerId              String             @db.Uuid
+  assignedToId            String?            @db.Uuid
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  accessories             String?
+  cancellationReason      String?
+  checkInNotes            String?
+  deviceModel             String?
+  deviceType              String?            @default("PC")
+  serialNumber            String?
+  createdById             String?            @db.Uuid
+  serviceTemplateId       String?            @db.Uuid
+  updatedById             String?            @db.Uuid
+  priority                TicketPriority     @default(MEDIUM)
+  dueDate                 DateTime?
+  estimatedCompletionDate DateTime?
+  attachments             TicketAttachment[]
+  invoice                 Invoice?
+  partsUsed               PartUsage[]
+  notes                   TicketNote[]
+  services                TicketService[]
+  assignedTo              User?              @relation(fields: [assignedToId], references: [id])
+  createdBy               User?              @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  customer                Customer           @relation(fields: [customerId], references: [id])
+  serviceTemplate         ServiceTemplate?   @relation(fields: [serviceTemplateId], references: [id])
+  tenant                  Tenant             @relation(fields: [tenantId], references: [id])
+  updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
+  viewedByUsers           UserPresence[]
+
+  @@unique([ticketNumber, tenantId])
+  @@index([status, priority])
+  @@index([assignedToId, status])
+  @@index([serviceTemplateId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("tickets")
+}
+
+model TicketAttachment {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId     String   @db.Uuid
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  uploadedById String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedBy User   @relation("UploadedAttachments", fields: [uploadedById], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+model Part {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  sku                  String?
+  quantity             Int                   @default(0)
+  cost                 Decimal               @db.Decimal(10, 2)
+  price                Decimal               @db.Decimal(10, 2)
+  tenantId             String                @db.Uuid
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  createdById          String?               @db.Uuid
+  updatedById          String?               @db.Uuid
+  category             String?
+  location             String?
+  minStock             Int                   @default(1)
+  creditNoteItems      CreditNoteItem[]
+  createdBy            User?                 @relation("PartCreatedBy", fields: [createdById], references: [id])
+  posQuotationItems    POSQuotationItem[]
+  posSaleItems         POSSaleItem[]
+  purchaseItems        PurchaseItem[]
+  templateDefaultParts TemplateDefaultPart[]
+  tenant               Tenant                @relation(fields: [tenantId], references: [id])
+  updatedBy            User?                 @relation("PartUpdatedBy", fields: [updatedById], references: [id])
+  usages               PartUsage[]
+
+  @@unique([sku, tenantId], name: "unique_sku_per_tenant")
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([tenantId])
+  @@map("parts")
+}
+
+model PurchaseOrder {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  supplier     String
+  status       PurchaseStatus @default(PENDING)
+  orderDate    DateTime       @default(now())
+  receivedDate DateTime?
+  totalCost    Decimal        @default(0) @db.Decimal(10, 2)
+  tenantId     String         @db.Uuid
+  createdById  String?        @db.Uuid
+  updatedById  String?        @db.Uuid
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  items        PurchaseItem[]
+  tenant       Tenant         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("purchase_orders")
+}
+
+model PurchaseItem {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quantity        Int
+  unitCost        Decimal       @db.Decimal(10, 2)
+  partId          String        @db.Uuid
+  purchaseOrderId String        @db.Uuid
+  part            Part          @relation(fields: [partId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  @@map("purchase_items")
+}
+
+model PartUsage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quantity  Int
+  ticketId  String   @db.Uuid
+  partId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  part      Part     @relation(fields: [partId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@map("part_usages")
+}
+
+model AuditLog {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  details    String?
+  userId     String?     @db.Uuid
+  tenantId   String      @db.Uuid
+  createdAt  DateTime    @default(now())
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
+  action     AuditAction
+  module     AuditModule
+  entityType String?
+  entityId   String?     @db.Uuid
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  success    Boolean     @default(true)
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([module, createdAt])
+  @@index([entityType, entityId])
+  @@index([tenantId, success])
+  @@map("audit_logs")
+}
+
+model TicketNote {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content    String
+  isInternal Boolean  @default(true)
+  ticketId   String   @db.Uuid
+  authorId   String   @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_notes")
+}
+
+model ServiceTemplate {
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String
+  category           ServiceCategory
+  defaultTitle       String
+  defaultDescription String
+  defaultPriority    String                @default("Medium")
+  estimatedDuration  Int?
+  laborCost          Decimal?              @db.Decimal(10, 2)
+  isActive           Boolean               @default(true)
+  color              String?               @default("#3B82F6")
+  icon               String?               @default("🔧")
+  tenantId           String                @db.Uuid
+  createdById        String?               @db.Uuid
+  updatedById        String?               @db.Uuid
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  createdBy          User?                 @relation("TemplateCreatedBy", fields: [createdById], references: [id])
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy          User?                 @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
+  defaultParts       TemplateDefaultPart[]
+  usages             TicketService[]
+  tickets            Ticket[]
+
+  @@index([tenantId])
+  @@index([tenantId, category])
+  @@index([tenantId, isActive])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("service_templates")
+}
+
+model TemplateDefaultPart {
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quantity   Int             @default(1)
+  required   Boolean         @default(false)
+  templateId String          @db.Uuid
+  partId     String          @db.Uuid
+  createdAt  DateTime        @default(now())
+  part       Part            @relation(fields: [partId], references: [id])
+  template   ServiceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([partId])
+  @@map("template_default_parts")
+}
+
+model TicketService {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId  String          @db.Uuid
+  serviceId String          @db.Uuid
+  name      String
+  laborCost Decimal         @db.Decimal(10, 2)
+  createdAt DateTime        @default(now())
+  service   ServiceTemplate @relation(fields: [serviceId], references: [id])
+  ticket    Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([serviceId])
+  @@map("ticket_services")
+}
+
+model TechnicianSpecialization {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String         @db.Uuid
+  specialization Specialization
+  createdAt      DateTime       @default(now())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, specialization])
+  @@index([userId])
+  @@map("technician_specializations")
+}
+
+model TechnicianUnavailability {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reason    TechnicianStatus @default(UNAVAILABLE)
+  notes     String?
+  userId    String           @db.Uuid
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([startDate, endDate])
+  @@map("technician_unavailabilities")
+}
+
+model Notification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  tenantId  String   @db.Uuid
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@map("notifications")
+}
+
+model Invoice {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceNumber   String
+  status          InvoiceStatus    @default(PENDING)
+  ticketId        String           @unique @db.Uuid
+  customerId      String           @db.Uuid
+  laborCost       Decimal          @default(0) @db.Decimal(10, 2)
+  partsCost       Decimal          @default(0) @db.Decimal(10, 2)
+  partsMarkup     Decimal          @default(0) @db.Decimal(10, 2)
+  subtotal        Decimal          @default(0) @db.Decimal(10, 2)
+  taxRate         Decimal          @default(0) @db.Decimal(5, 2)
+  taxAmount       Decimal          @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal          @default(0) @db.Decimal(10, 2)
+  total           Decimal          @default(0) @db.Decimal(10, 2)
+  customerName    String
+  customerNIT     String?
+  customerDPI     String?
+  customerAddress String?
+  notes           String?
+  paymentTerms    String?
+  issuedAt        DateTime         @default(now())
+  dueAt           DateTime?
+  paidAt          DateTime?
+  tenantId        String           @db.Uuid
+  createdById     String           @db.Uuid
+  updatedById     String           @db.Uuid
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User             @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  history         InvoiceHistory[]
+  payments        Payment[]
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  ticket          Ticket           @relation(fields: [ticketId], references: [id])
+  updatedBy       User             @relation("InvoiceUpdatedBy", fields: [updatedById], references: [id])
+
+  @@unique([invoiceNumber, tenantId], name: "unique_invoice_number_per_tenant")
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([ticketId])
+  @@index([status])
+  @@index([issuedAt])
+  @@map("invoices")
+}
+
+model Payment {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paymentNumber  String
+  invoiceId      String        @db.Uuid
+  amount         Decimal       @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod
+  transactionRef String?
+  notes          String?
+  paidAt         DateTime      @default(now())
+  tenantId       String        @db.Uuid
+  receivedById   String        @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id])
+  receivedBy     User          @relation(fields: [receivedById], references: [id])
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@unique([paymentNumber, tenantId], name: "unique_payment_number_per_tenant")
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@index([paidAt])
+  @@map("payments")
+}
+
+model CashRegister {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  isOpen          Boolean           @default(false)
+  openedAt        DateTime?
+  closedAt        DateTime?
+  openingBalance  Decimal           @default(0) @db.Decimal(10, 2)
+  closingBalance  Decimal           @default(0) @db.Decimal(10, 2)
+  expectedBalance Decimal           @default(0) @db.Decimal(10, 2)
+  difference      Decimal           @default(0) @db.Decimal(10, 2)
+  closingNotes    String?
+  tenantId        String            @db.Uuid
+  openedById      String?           @db.Uuid
+  closedById      String?           @db.Uuid
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  closedBy        User?             @relation("CashRegisterClosedBy", fields: [closedById], references: [id])
+  openedBy        User?             @relation("CashRegisterOpenedBy", fields: [openedById], references: [id])
+  posSales        POSSale[]
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  transactions    CashTransaction[]
+
+  @@index([tenantId])
+  @@index([isOpen])
+  @@index([openedAt])
+  @@map("cash_registers")
+}
+
+model CashTransaction {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type           String
+  amount         Decimal      @db.Decimal(10, 2)
+  description    String
+  reference      String?
+  cashRegisterId String       @db.Uuid
+  tenantId       String       @db.Uuid
+  createdById    String       @db.Uuid
+  createdAt      DateTime     @default(now())
+  cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([cashRegisterId])
+  @@index([createdAt])
+  @@map("cash_transactions")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  VIEWER
+  TECHNICIAN
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_PARTS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum ServiceCategory {
+  MAINTENANCE
+  REPAIR
+  UPGRADE
+  DIAGNOSTIC
+  INSTALLATION
+  CONSULTATION
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TechnicianStatus {
+  AVAILABLE
+  UNAVAILABLE
+  ON_VACATION
+  ON_LEAVE
+  IN_TRAINING
+  SICK_LEAVE
+}
+
+enum Specialization {
+  LAPTOPS
+  DESKTOPS
+  PRINTERS
+  NETWORKING
+  MOBILE_DEVICES
+  SERVERS
+  PERIPHERALS
+  SOFTWARE
+  GENERAL
+}
+
+enum PurchaseStatus {
+  PENDING
+  RECEIVED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  CHECK
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
+// ==================== POS MODELS ====================
+
+model TenantSettings {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @unique @db.Uuid
+  businessName        String?
+  businessNIT         String?
+  businessAddress     String?
+  businessPhone       String?
+  businessEmail       String?
+  taxRate             Decimal  @default(12) @db.Decimal(5, 2)
+  taxName             String   @default("IVA")
+  currency            String   @default("GTQ")
+  defaultPaymentTerms String?
+  invoiceFooter       String?
+  // SLA Configuration
+  slaWarningPercent   Int      @default(75)
+  slaCriticalPercent  Int      @default(90)
+  slaEmailEnabled     Boolean  @default(true)
+  slaInAppEnabled     Boolean  @default(true)
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("tenant_settings")
+}
+
+model InvoiceHistory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId String   @db.Uuid
+  action    String
+  oldValue  String?
+  newValue  String?
+  notes     String?
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([invoiceId])
+  @@map("invoice_history")
+}
+
+model POSSale {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleNumber     String
+  customerId     String?          @db.Uuid
+  customerName   String           @default("Consumidor Final")
+  customerPhone  String?
+  customerEmail  String?
+  subtotal       Decimal          @default(0) @db.Decimal(10, 2)
+  taxRate        Decimal          @default(12) @db.Decimal(5, 2)
+  taxAmount      Decimal          @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal          @default(0) @db.Decimal(10, 2)
+  total          Decimal          @default(0) @db.Decimal(10, 2)
+  amountPaid     Decimal          @default(0) @db.Decimal(10, 2)
+  changeGiven    Decimal          @default(0) @db.Decimal(10, 2)
+  status         POSSaleStatus    @default(COMPLETED)
+  notes          String?
+  tenantId       String           @db.Uuid
+  cashRegisterId String?          @db.Uuid
+  createdById    String           @db.Uuid
+  quotationId    String?          @unique @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  cashRegister   CashRegister?    @relation(fields: [cashRegisterId], references: [id])
+  createdBy      User             @relation(fields: [createdById], references: [id])
+  creditNotes    CreditNote[]
+  customer       Customer?        @relation(fields: [customerId], references: [id])
+  items          POSSaleItem[]
+  payments       POSSalePayment[]
+  quotation      POSQuotation?    @relation("QuotationToSale", fields: [quotationId], references: [id])
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@unique([saleNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("pos_sales")
+}
+
+model POSSaleItem {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId    String  @db.Uuid
+  partId    String  @db.Uuid
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  discount  Decimal @default(0) @db.Decimal(5, 2)
+  part      Part    @relation(fields: [partId], references: [id])
+  sale      POSSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("pos_sale_items")
+}
+
+model POSSalePayment {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId    String        @db.Uuid
+  amount    Decimal       @db.Decimal(10, 2)
+  method    PaymentMethod
+  reference String?
+  createdAt DateTime      @default(now())
+  sale      POSSale       @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("pos_sale_payments")
+}
+
+model POSQuotation {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationNumber String
+  customerId      String?            @db.Uuid
+  customerName    String             @default("Consumidor Final")
+  customerPhone   String?
+  customerEmail   String?
+  subtotal        Decimal            @default(0) @db.Decimal(10, 2)
+  taxRate         Decimal            @default(12) @db.Decimal(5, 2)
+  taxAmount       Decimal            @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal            @default(0) @db.Decimal(10, 2)
+  total           Decimal            @default(0) @db.Decimal(10, 2)
+  status          QuotationStatus    @default(DRAFT)
+  validUntil      DateTime?
+  notes           String?
+  tenantId        String             @db.Uuid
+  createdById     String             @db.Uuid
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  createdBy       User               @relation(fields: [createdById], references: [id])
+  customer        Customer?          @relation(fields: [customerId], references: [id])
+  items           POSQuotationItem[]
+  convertedToSale POSSale?           @relation("QuotationToSale")
+  tenant          Tenant             @relation(fields: [tenantId], references: [id])
+
+  @@unique([quotationNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("pos_quotations")
+}
+
+model POSQuotationItem {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationId String       @db.Uuid
+  partId      String       @db.Uuid
+  quantity    Int
+  unitPrice   Decimal      @db.Decimal(10, 2)
+  discount    Decimal      @default(0) @db.Decimal(5, 2)
+  part        Part         @relation(fields: [partId], references: [id])
+  quotation   POSQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@map("pos_quotation_items")
+}
+
+model CreditNote {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creditNoteNumber String
+  posSaleId        String           @db.Uuid
+  customerId       String?          @db.Uuid
+  reason           String
+  subtotal         Decimal          @default(0) @db.Decimal(10, 2)
+  taxRate          Decimal          @default(12) @db.Decimal(5, 2)
+  taxAmount        Decimal          @default(0) @db.Decimal(10, 2)
+  total            Decimal          @default(0) @db.Decimal(10, 2)
+  status           CreditNoteStatus @default(PENDING)
+  refundMethod     PaymentMethod?
+  refundReference  String?
+  notes            String?
+  processedAt      DateTime?
+  processedById    String?          @db.Uuid
+  tenantId         String           @db.Uuid
+  createdById      String           @db.Uuid
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  createdBy        User             @relation("CreditNoteCreatedBy", fields: [createdById], references: [id])
+  processedBy      User?            @relation("CreditNoteProcessedBy", fields: [processedById], references: [id])
+  customer         Customer?        @relation(fields: [customerId], references: [id])
+  items            CreditNoteItem[]
+  posSale          POSSale          @relation(fields: [posSaleId], references: [id])
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@unique([creditNoteNumber, tenantId])
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@map("credit_notes")
+}
+
+model CreditNoteItem {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creditNoteId String     @db.Uuid
+  partId       String     @db.Uuid
+  quantity     Int
+  unitPrice    Decimal    @db.Decimal(10, 2)
+  reason       String?
+  creditNote   CreditNote @relation(fields: [creditNoteId], references: [id], onDelete: Cascade)
+  part         Part       @relation(fields: [partId], references: [id])
+
+  @@map("credit_note_items")
+}
+
+enum POSSaleStatus {
+  COMPLETED
+  VOIDED
+  PARTIALLY_REFUNDED
+  FULLY_REFUNDED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+  CANCELLED
+}
+
+enum CreditNoteStatus {
+  PENDING
+  PROCESSED
+  CANCELLED
+}
+
+enum AuditAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  USER_CREATED
+  USER_UPDATED
+  USER_DEACTIVATED
+  USER_REACTIVATED
+  ROLE_CHANGED
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET
+  SESSION_EXPIRED
+  TICKET_CREATED
+  TICKET_UPDATED
+  TICKET_DELETED
+  TICKET_STATUS_CHANGED
+  TICKET_ASSIGNED
+  CONFIG_CHANGED
+  TENANT_CONFIG_CHANGED
+  EXPORT_DATA
+  DATA_EXPORTED
+  MODULE_ACCESSED
+}
+
+enum AuditModule {
+  AUTH
+  USERS
+  TICKETS
+  SETTINGS
+  REPORTS
+  DASHBOARD
+  INVENTORY
+  POS
+  BILLING
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  LOGGED_OUT
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
+}
+
+model SessionLog {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String        @db.Uuid
+  userId         String        @db.Uuid
+  sessionToken   String        @unique
+  ipAddress      String?
+  userAgent      String?
+  loginAt        DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  logoutAt       DateTime?
+  status         SessionStatus @default(ACTIVE)
+  metadata       Json?
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([userId, loginAt])
+  @@index([sessionToken])
+  @@index([lastActivityAt])
+  @@map("session_logs")
+}
+
+model UserPresence {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String         @unique @db.Uuid
+  tenantId        String         @db.Uuid
+  status          PresenceStatus @default(ONLINE)
+  currentRoute    String?
+  currentPage     String?
+  currentTicketId String?        @db.Uuid
+  lastSeenAt      DateTime       @default(now())
+  metadata        Json?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  currentTicket   Ticket?        @relation(fields: [currentTicketId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, lastSeenAt])
+  @@index([tenantId, status])
+  @@index([currentTicketId])
+  @@map("user_presence")
+}

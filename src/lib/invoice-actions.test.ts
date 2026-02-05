@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { registerPayment } from './invoice-actions';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { InvoiceStatus, PaymentMethod } from '@prisma/client';
+import { InvoiceStatus, PaymentMethod } from '@/generated/prisma';
 import { revalidatePath } from 'next/cache';
 
 // Mock dependencies

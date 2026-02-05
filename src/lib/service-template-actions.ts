@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { ServiceCategory, TicketPriority } from '@prisma/client';
+import { ServiceCategory, TicketPriority } from '@/generated/prisma';
 import { notifyLowStock } from './ticket-notifications';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ServiceCategory } from '@prisma/client';
+import { ServiceCategory } from '@/generated/prisma';
 import { toggleTemplateActiveStatus, deleteServiceTemplate, duplicateServiceTemplate } from '@/lib/service-template-actions';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';

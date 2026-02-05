@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { POSSaleStatus, PaymentMethod } from '@prisma/client';
+import { POSSaleStatus, PaymentMethod } from '@/generated/prisma';
 import { voidPOSSale, getPOSSales } from '@/lib/pos-actions';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';

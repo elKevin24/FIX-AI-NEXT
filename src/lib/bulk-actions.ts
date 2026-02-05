@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { TicketStatus } from '@prisma/client';
+import { TicketStatus } from '@/generated/prisma';
 
 export async function bulkUpdateTicketStatus(ticketIds: string[], status: TicketStatus) {
     const session = await auth();

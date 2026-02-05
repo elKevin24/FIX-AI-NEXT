@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { logAction } from '@/lib/audit-actions';
-import { AuditModule, TechnicianStatus } from '@prisma/client';
+import { AuditModule, TechnicianStatus } from '@/generated/prisma';
 
 export async function GET(
   req: NextRequest,

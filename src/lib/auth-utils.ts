@@ -11,7 +11,7 @@
  * - VIEWER: Solo lectura (Visualizador)
  */
 
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/generated/prisma';
 
 export { UserRole };
 

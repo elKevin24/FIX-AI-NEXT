@@ -8,7 +8,7 @@ import styles from '@/components/ui/Form.module.css';
 import { createUser } from '@/lib/user-actions';
 import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { ROLE_LABELS, ROLE_DESCRIPTIONS, getSelectableRoles } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 
 interface CreateUserFormProps {
   currentUserRole?: UserRole;

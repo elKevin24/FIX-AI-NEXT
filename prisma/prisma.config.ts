@@ -1,11 +1,15 @@
 // prisma/prisma.config.ts
-import { defineConfig } from '@prisma/cli';
+import 'dotenv/config';
+import { defineConfig, env } from 'prisma/config';
 
 export default defineConfig({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL!, // Ensure DATABASE_URL is available in environment
-    },
+  // This file lives in /prisma, so keep paths relative to it
+  schema: './schema.prisma',
+  migrations: {
+    path: './migrations',
   },
-  // We can add the migrate connection here if needed, but datasources.db.url should be enough for deploy
+  datasource: {
+    // Prisma 7 expects datasource.url to live in prisma.config.ts (not schema.prisma)
+    url: env('DATABASE_URL'),
+  },
 });
