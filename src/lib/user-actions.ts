@@ -28,6 +28,7 @@ import {
   getAssignableRoles,
 } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
+import crypto from 'crypto';
 
 // ============================================================================
 // PASSWORD VALIDATION
@@ -100,22 +101,28 @@ export function generateTemporaryPassword(): string {
   const allChars = chars.upper + chars.lower + chars.numbers + chars.special;
   let password = '';
 
+  // Helper para generar enteros aleatorios seguros
+  const secureRandomInt = (max: number) => crypto.randomInt(0, max);
+
   // Garantizar al menos uno de cada tipo
-  password += chars.upper[Math.floor(Math.random() * chars.upper.length)];
-  password += chars.lower[Math.floor(Math.random() * chars.lower.length)];
-  password += chars.numbers[Math.floor(Math.random() * chars.numbers.length)];
-  password += chars.special[Math.floor(Math.random() * chars.special.length)];
+  password += chars.upper[secureRandomInt(chars.upper.length)];
+  password += chars.lower[secureRandomInt(chars.lower.length)];
+  password += chars.numbers[secureRandomInt(chars.numbers.length)];
+  password += chars.special[secureRandomInt(chars.special.length)];
 
   // Completar hasta 12 caracteres
   for (let i = 4; i < 12; i++) {
-    password += allChars[Math.floor(Math.random() * allChars.length)];
+    password += allChars[secureRandomInt(allChars.length)];
   }
 
-  // Mezclar
-  return password
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  // Mezclar usando Fisher-Yates seguro
+  const passwordChars = password.split('');
+  for (let i = passwordChars.length - 1; i > 0; i--) {
+    const j = secureRandomInt(i + 1);
+    [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
+  }
+  
+  return passwordChars.join('');
 }
 
 // ============================================================================

@@ -38,7 +38,6 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
 
     const canEdit = hasPermission(currentUserRole, 'canEditUsers');
     const canDelete = hasPermission(currentUserRole, 'canDeleteUsers');
-    const canDeactivate = hasPermission(currentUserRole, 'canDeactivateUsers');
 
     const getDisplayName = (user: UserData): string => {
         if (user.firstName || user.lastName) {
