@@ -89,22 +89,32 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
 }
 
 export function parseLogMessage(action: AuditAction | string, metadata: any): { content: string, type: TimelineEvent['type'] } {
-    const details = metadata || {};
+    let details = metadata || {};
+    
+    // Defensive JSON parsing for tests or manual calls
+    if (typeof details === 'string') {
+        try {
+            details = JSON.parse(details);
+        } catch (e) {
+            details = {};
+        }
+    }
+
     let content: string;
     let type: TimelineEvent['type'] = 'LOG';
 
     switch (action) {
         case 'TICKET_CREATED':
+        case 'CREATE_TICKET':
             content = 'Ticket creado';
             type = 'LOG';
             break;
             
         case 'TICKET_UPDATED':
+        case 'UPDATE_TICKET':
             const changes = details.changes || {};
             const parts = [];
             
-            // Handle raw JSON diff from postgres trigger
-            // e.g. { "status": "IN_PROGRESS" }
             if (changes.status) {
                 parts.push(`Estado cambiado a ${changes.status}`);
                 type = 'STATUS_CHANGE';
@@ -117,6 +127,7 @@ export function parseLogMessage(action: AuditAction | string, metadata: any): { 
             break;
             
         case 'TICKET_DELETED':
+        case 'DELETE_TICKET':
             content = 'Ticket eliminado';
             type = 'LOG';
             break;
@@ -128,6 +139,33 @@ export function parseLogMessage(action: AuditAction | string, metadata: any): { 
              }
              type = 'STATUS_CHANGE';
              break;
+
+        case 'CREATE_PARTUSAGE':
+        case 'INVENTORY_USED':
+            content = 'Movimiento de inventario';
+            if (details.data?.quantity) {
+                content += ` (Cant: ${details.data.quantity})`;
+            }
+            type = 'INVENTORY_MOVEMENT';
+            break;
+
+        case 'CREATE_TICKETSERVICE':
+        case 'SERVICE_ADDED':
+            content = 'Servicio/Mano de obra agregado';
+            if (details.data?.name) {
+                content += `: ${details.data.name}`;
+            }
+            type = 'SERVICE_USAGE';
+            break;
+
+        case 'CREATE_TICKETATTACHMENT':
+        case 'ATTACHMENT_UPLOADED':
+            content = 'Archivo adjunto subido';
+            if (details.data?.filename) {
+                content += `: ${details.data.filename}`;
+            }
+            type = 'LOG';
+            break;
 
         // Fallback for other actions
         default:
