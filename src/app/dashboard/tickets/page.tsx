@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/generated/prisma';
 import TicketSearchFilters from './TicketSearchFilters';
 import { Button } from '@/components/ui';
 import styles from './tickets.module.css';

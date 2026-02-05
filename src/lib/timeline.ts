@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { AuditAction } from '@prisma/client';
+import { AuditAction } from '@/generated/prisma';
 
 export interface TimelineEvent {
     id: string;

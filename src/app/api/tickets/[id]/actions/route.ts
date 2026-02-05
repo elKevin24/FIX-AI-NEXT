@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { TicketStatus, UserRole } from '@prisma/client';
+import { TicketStatus, UserRole } from '@/generated/prisma';
 import {
   requireTicketActionPermission,
   TicketAction,

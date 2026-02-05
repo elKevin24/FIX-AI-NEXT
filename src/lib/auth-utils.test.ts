@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { hasPermission } from './auth-utils';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/generated/prisma';
 
 describe('auth-utils permissions', () => {
   it('ADMIN should have canManageTemplates permission', () => {

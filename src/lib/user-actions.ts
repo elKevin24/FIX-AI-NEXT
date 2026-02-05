@@ -27,7 +27,7 @@ import {
   AuthorizationError,
   getAssignableRoles,
 } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
