@@ -4,7 +4,8 @@ import { EmailLayout } from './components/EmailLayout';
 
 interface TechnicianAssignedEmailProps {
   technicianName: string;
-  ticketNumber: string;
+  ticketKey?: string;
+  ticketNumber?: string;
   ticketTitle: string;
   assignedBy: string;
   ticketLink: string;
@@ -12,6 +13,7 @@ interface TechnicianAssignedEmailProps {
 
 export const TechnicianAssignedEmail = ({
   technicianName = 'Técnico',
+  ticketKey = undefined,
   ticketNumber = 'TICK-0000',
   ticketTitle = 'Servicio',
   assignedBy = 'Admin',
@@ -19,7 +21,7 @@ export const TechnicianAssignedEmail = ({
 }: TechnicianAssignedEmailProps) => {
   return (
     <EmailLayout
-      previewText={`Nuevo ticket asignado: #${ticketNumber}`}
+      previewText={`Nuevo ticket asignado: #${ticketKey || ticketNumber}`}
       heading="Tienes un nuevo ticket asignado"
     >
       <Text style={paragraph}>
@@ -33,7 +35,7 @@ export const TechnicianAssignedEmail = ({
         <Row>
           <Column>
             <Text style={label}>Ticket No.</Text>
-            <Text style={value}>#{ticketNumber}</Text>
+            <Text style={value}>#{ticketKey || ticketNumber}</Text>
           </Column>
         </Row>
         <Row style={{ marginTop: '16px' }}>

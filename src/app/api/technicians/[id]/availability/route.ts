@@ -1,32 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { logAction } from '@/lib/audit-actions';
+import { AuditModule, TechnicianStatus } from '@prisma/client';
 
-// Define TechnicianStatus locally since it may not be exported yet
-type TechnicianStatus =
-  | 'AVAILABLE'
-  | 'UNAVAILABLE'
-  | 'ON_VACATION'
-  | 'ON_LEAVE'
-  | 'IN_TRAINING'
-  | 'SICK_LEAVE';
-
-/**
- * @swagger
- * /api/technicians/{id}/availability:
- *   get:
- *     summary: Get technician availability and unavailability periods
- *     tags: [Technicians]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Technician availability retrieved successfully
- */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -99,36 +76,6 @@ export async function GET(
   }
 }
 
-/**
- * @swagger
- * /api/technicians/{id}/availability:
- *   patch:
- *     summary: Update technician availability status
- *     tags: [Technicians]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [AVAILABLE, UNAVAILABLE, ON_VACATION, ON_LEAVE, IN_TRAINING, SICK_LEAVE]
- *               statusReason:
- *                 type: string
- *               maxConcurrentTickets:
- *                 type: number
- *     responses:
- *       200:
- *         description: Availability updated successfully
- */
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -143,7 +90,6 @@ export async function PATCH(
     const body = await req.json();
     const { status, statusReason, maxConcurrentTickets } = body;
 
-    // Verify technician exists and belongs to tenant
     const technician = await prisma.user.findFirst({
       where: {
         id,
@@ -158,7 +104,6 @@ export async function PATCH(
       );
     }
 
-    // Update availability
     const updated = await prisma.user.update({
       where: { id },
       data: {
@@ -177,14 +122,17 @@ export async function PATCH(
       },
     });
 
-    // Create audit log
-    await prisma.auditLog.create({
-      data: {
-        action: 'UPDATE_TECHNICIAN_AVAILABILITY',
-        details: `Updated availability for ${technician.name}: ${status}`,
-        userId: session.user.id,
+    await logAction('USER_UPDATED', 'USERS', {
+        entityType: 'User',
+        entityId: id,
+        metadata: {
+            action: 'UPDATE_AVAILABILITY',
+            status,
+            statusReason,
+            maxConcurrentTickets
+        },
         tenantId: session.user.tenantId,
-      },
+        userId: session.user.id
     });
 
     return NextResponse.json(updated);
@@ -197,41 +145,6 @@ export async function PATCH(
   }
 }
 
-/**
- * @swagger
- * /api/technicians/{id}/availability:
- *   post:
- *     summary: Add unavailability period for technician
- *     tags: [Technicians]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [startDate, endDate, reason]
- *             properties:
- *               startDate:
- *                 type: string
- *                 format: date-time
- *               endDate:
- *                 type: string
- *                 format: date-time
- *               reason:
- *                 type: string
- *                 enum: [UNAVAILABLE, ON_VACATION, ON_LEAVE, IN_TRAINING, SICK_LEAVE]
- *               notes:
- *                 type: string
- *     responses:
- *       201:
- *         description: Unavailability period created successfully
- */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -253,7 +166,6 @@ export async function POST(
       );
     }
 
-    // Verify technician exists and belongs to tenant
     const technician = await prisma.user.findFirst({
       where: {
         id,
@@ -268,7 +180,6 @@ export async function POST(
       );
     }
 
-    // Create unavailability period
     const unavailability = await prisma.technicianUnavailability.create({
       data: {
         userId: id,
@@ -279,7 +190,6 @@ export async function POST(
       },
     });
 
-    // Update technician status if period starts now
     const now = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -295,14 +205,18 @@ export async function POST(
       });
     }
 
-    // Create audit log
-    await prisma.auditLog.create({
-      data: {
-        action: 'CREATE_TECHNICIAN_UNAVAILABILITY',
-        details: `Created unavailability period for ${technician.name}: ${reason} from ${startDate} to ${endDate}`,
-        userId: session.user.id,
+    await logAction('USER_UPDATED', 'USERS', {
+        entityType: 'User',
+        entityId: id,
+        metadata: {
+            action: 'CREATE_UNAVAILABILITY',
+            startDate,
+            endDate,
+            reason,
+            notes
+        },
         tenantId: session.user.tenantId,
-      },
+        userId: session.user.id
     });
 
     return NextResponse.json(unavailability, { status: 201 });
