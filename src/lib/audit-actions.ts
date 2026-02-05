@@ -17,7 +17,7 @@ function getIp(headersList: Headers): string {
 
 export async function logAction(
   action: AuditAction,
-  module: AuditModule,
+  auditModule: AuditModule,
   details: {
     entityType?: string;
     entityId?: string;
@@ -54,7 +54,7 @@ export async function logAction(
     await prisma.auditLog.create({
       data: {
         action,
-        module,
+        module: auditModule,
         entityType: details.entityType,
         entityId: details.entityId,
         metadata: details.metadata ?? {},
@@ -149,16 +149,16 @@ export async function updateSessionActivity(sessionToken?: string) {
 
 export async function logPageAccess(pathname: string) {
   // Determine module from pathname
-  let module: AuditModule = 'DASHBOARD';
-  if (pathname.includes('/tickets')) module = 'TICKETS';
-  else if (pathname.includes('/users') || pathname.includes('/technicians')) module = 'USERS';
-  else if (pathname.includes('/settings')) module = 'SETTINGS';
-  else if (pathname.includes('/reports')) module = 'REPORTS';
-  else if (pathname.includes('/inventory') || pathname.includes('/parts')) module = 'INVENTORY';
-  else if (pathname.includes('/pos') || pathname.includes('/sales')) module = 'POS';
-  else if (pathname.includes('/billing') || pathname.includes('/invoices')) module = 'BILLING';
+  let auditModule: AuditModule = 'DASHBOARD';
+  if (pathname.includes('/tickets')) auditModule = 'TICKETS';
+  else if (pathname.includes('/users') || pathname.includes('/technicians')) auditModule = 'USERS';
+  else if (pathname.includes('/settings')) auditModule = 'SETTINGS';
+  else if (pathname.includes('/reports')) auditModule = 'REPORTS';
+  else if (pathname.includes('/inventory') || pathname.includes('/parts')) auditModule = 'INVENTORY';
+  else if (pathname.includes('/pos') || pathname.includes('/sales')) auditModule = 'POS';
+  else if (pathname.includes('/billing') || pathname.includes('/invoices')) auditModule = 'BILLING';
 
-  await logAction('MODULE_ACCESSED', module, {
+  await logAction('MODULE_ACCESSED', auditModule, {
     metadata: { path: pathname }
   });
 }
