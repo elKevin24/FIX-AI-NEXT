@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, TicketStatus, ServiceCategory, AuditModule } from '@prisma/client';
+import { PrismaClient, UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 
 console.log('[SEED] Initializing...');
@@ -14,10 +14,6 @@ async function main() {
 
     // Limpiar datos existentes
     console.log('[SEED] Cleaning existing data...');
-    // Break circular dependencies
-    await prisma.tenant.updateMany({ data: { adminUserId: null } });
-    await prisma.user.updateMany({ data: { createdById: null, updatedById: null } });
-
     await prisma.partUsage.deleteMany();
     await prisma.ticket.deleteMany();
     await prisma.customer.deleteMany();
@@ -88,7 +84,7 @@ async function main() {
             firstName: 'Miguel',
             lastName: 'Torres',
             name: 'Miguel Torres',
-            role: UserRole.AGENT,
+            role: UserRole.TECHNICIAN,
             tenantId: tenant1.id,
             isActive: true,
             passwordMustChange: false,
@@ -103,7 +99,7 @@ async function main() {
             firstName: 'Lucia',
             lastName: 'Fernandez',
             name: 'Lucia Fernandez',
-            role: UserRole.AGENT,
+            role: UserRole.TECHNICIAN,
             tenantId: tenant1.id,
             isActive: true,
             passwordMustChange: false,
@@ -168,7 +164,7 @@ async function main() {
 
     // Parts for Tenant 1
     console.log('[SEED] Creating parts for Tenant 1...');
-    const t1Parts = await Promise.all([
+    await Promise.all([
         prisma.part.create({
             data: {
                 name: 'Capacitor 1000µF 25V',
@@ -209,7 +205,7 @@ async function main() {
                 title: 'Reparación de TV Samsung 55"',
                 description: 'TV no enciende, luz indicadora parpadea.',
                 status: TicketStatus.IN_PROGRESS,
-                priority: 'HIGH',
+                priority: TicketPriority.HIGH,
                 tenantId: tenant1.id,
                 customerId: t1Customers[0].id,
                 assignedToId: t1Agent1.id,
@@ -220,7 +216,7 @@ async function main() {
                 title: 'Microondas sin calentar',
                 description: 'El microondas enciende y gira pero no calienta.',
                 status: TicketStatus.WAITING_FOR_PARTS,
-                priority: 'MEDIUM',
+                priority: TicketPriority.MEDIUM,
                 tenantId: tenant1.id,
                 customerId: t1Customers[1].id,
                 assignedToId: t1Agent2.id,
@@ -231,7 +227,7 @@ async function main() {
                 title: 'Laptop HP - No carga batería',
                 description: 'La laptop solo funciona conectada a la corriente.',
                 status: TicketStatus.OPEN,
-                priority: 'HIGH',
+                priority: TicketPriority.HIGH,
                 tenantId: tenant1.id,
                 customerId: t1Customers[2].id,
             },
@@ -292,7 +288,7 @@ async function main() {
             firstName: 'Pedro',
             lastName: 'Morales',
             name: 'Pedro Morales',
-            role: UserRole.AGENT,
+            role: UserRole.TECHNICIAN,
             tenantId: tenant2.id,
             isActive: true,
             passwordMustChange: false,
@@ -300,14 +296,14 @@ async function main() {
         },
     });
 
-    const t2Agent2 = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'carmen@techrepair.com',
             password: defaultPassword,
             firstName: 'Carmen',
             lastName: 'Ruiz',
             name: 'Carmen Ruiz',
-            role: UserRole.AGENT,
+            role: UserRole.TECHNICIAN,
             tenantId: tenant2.id,
             isActive: true,
             passwordMustChange: false,
@@ -323,7 +319,7 @@ async function main() {
             firstName: 'Juan',
             lastName: 'Anterior',
             name: 'Juan Anterior',
-            role: UserRole.AGENT,
+            role: UserRole.TECHNICIAN,
             tenantId: tenant2.id,
             isActive: false,
             passwordMustChange: false,
@@ -393,7 +389,7 @@ async function main() {
                 title: 'Servidor no responde',
                 description: 'Servidor principal de la empresa no arranca.',
                 status: TicketStatus.IN_PROGRESS,
-                priority: 'URGENT',
+                priority: TicketPriority.URGENT,
                 tenantId: tenant2.id,
                 customerId: t2Customers[0].id,
                 assignedToId: t2Agent1.id,
@@ -404,7 +400,7 @@ async function main() {
                 title: 'Actualización sistema punto de venta',
                 description: 'Requiere actualización del software POS.',
                 status: TicketStatus.OPEN,
-                priority: 'MEDIUM',
+                priority: TicketPriority.MEDIUM,
                 tenantId: tenant2.id,
                 customerId: t2Customers[1].id,
             },
@@ -423,7 +419,7 @@ async function main() {
                 category: ServiceCategory.MAINTENANCE,
                 defaultTitle: 'Mantenimiento preventivo de PC',
                 defaultDescription: 'Limpieza interna, revisión de ventiladores, actualización de drivers.',
-                defaultPriority: 'Low',
+                defaultPriority: 'LOW',
                 estimatedDuration: 120,
                 laborCost: 350.00,
                 color: '#10B981',
@@ -436,7 +432,7 @@ async function main() {
                 category: ServiceCategory.REPAIR,
                 defaultTitle: 'Reparación de fuente de alimentación',
                 defaultDescription: 'Diagnóstico con multímetro, reemplazo de componentes.',
-                defaultPriority: 'High',
+                defaultPriority: 'HIGH',
                 estimatedDuration: 180,
                 laborCost: 450.00,
                 color: '#EF4444',
@@ -453,7 +449,7 @@ async function main() {
                 category: ServiceCategory.DIAGNOSTIC,
                 defaultTitle: 'Diagnóstico completo de servidor',
                 defaultDescription: 'Verificación de hardware, logs, rendimiento.',
-                defaultPriority: 'High',
+                defaultPriority: 'HIGH',
                 estimatedDuration: 240,
                 laborCost: 800.00,
                 color: '#F59E0B',
@@ -466,7 +462,7 @@ async function main() {
                 category: ServiceCategory.UPGRADE,
                 defaultTitle: 'Actualización de componentes',
                 defaultDescription: 'Instalación de nuevos componentes, migración de datos.',
-                defaultPriority: 'Medium',
+                defaultPriority: 'MEDIUM',
                 estimatedDuration: 180,
                 laborCost: 500.00,
                 color: '#3B82F6',
@@ -482,18 +478,16 @@ async function main() {
     await Promise.all([
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_CONFIG_CHANGED',
-                module: AuditModule.SETTINGS,
-                metadata: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
+                action: 'TENANT_SEEDED',
+                details: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
                 userId: t1Admin.id,
                 tenantId: tenant1.id,
             },
         }),
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_CONFIG_CHANGED',
-                module: AuditModule.SETTINGS,
-                metadata: JSON.stringify({ tenantName: 'TechRepair Pro' }),
+                action: 'TENANT_SEEDED',
+                details: JSON.stringify({ tenantName: 'TechRepair Pro' }),
                 userId: t2Admin.id,
                 tenantId: tenant2.id,
             },

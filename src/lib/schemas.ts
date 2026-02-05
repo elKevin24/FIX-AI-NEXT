@@ -68,7 +68,7 @@ export const CreateUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Formato de email inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  role: z.enum(['ADMIN', 'TECHNICIAN', 'RECEPTIONIST'], {
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
 });
@@ -78,7 +78,7 @@ export const UpdateUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Formato de email inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
-  role: z.enum(['ADMIN', 'TECHNICIAN', 'RECEPTIONIST'], {
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
 });
