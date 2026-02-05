@@ -19,7 +19,8 @@ interface InvoicePDFProps {
             name: string;
         };
         ticket: {
-            ticketNumber: string;
+                ticketKey?: string;
+                ticketNumber?: string;
             title: string;
             partsUsed: Array<{
                 quantity: number;
@@ -73,7 +74,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                     </View>
                     <View style={{ textAlign: 'right' }}>
                         <Text>Fecha: {new Date(invoice.issuedAt).toLocaleDateString()}</Text>
-                        <Text>Ticket Ref: #{invoice.ticket.ticketNumber}</Text>
+                        <Text>Ticket Ref: #{invoice.ticket.ticketKey || invoice.ticket.ticketNumber}</Text>
                     </View>
                 </View>
 
