@@ -2,68 +2,111 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { deactivateUser, reactivateUser } from '@/lib/user-actions';
 import styles from './users.module.css';
 
 interface DeleteUserButtonProps {
   userId: string;
   userName: string;
+  isActive?: boolean;
   className?: string;
 }
 
-export default function DeleteUserButton({ userId, userName, className }: DeleteUserButtonProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export default function DeleteUserButton({
+  userId,
+  userName,
+  isActive = true,
+  className
+}: DeleteUserButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleDelete = async () => {
-    if (!confirm(`¿Estás seguro de eliminar a ${userName}? Esta acción no se puede deshacer.`)) {
+  const handleToggleActive = async () => {
+    const action = isActive ? 'desactivar' : 'reactivar';
+    const confirmMessage = isActive
+      ? `¿Estás seguro de desactivar a ${userName}? El usuario no podrá iniciar sesión.`
+      : `¿Estás seguro de reactivar a ${userName}? El usuario podrá volver a iniciar sesión.`;
+
+    if (!confirm(confirmMessage)) {
       return;
     }
 
-    setIsDeleting(true);
+    setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-      });
+      const formData = new FormData();
+      formData.append('userId', userId);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Error al eliminar usuario');
+      const result = isActive
+        ? await deactivateUser({ success: false, message: '' }, formData)
+        : await reactivateUser({ success: false, message: '' }, formData);
+
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
       router.refresh();
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert(error instanceof Error ? error.message : 'Error al eliminar usuario');
+      console.error(`Error ${action} user:`, error);
+      alert(error instanceof Error ? error.message : `Error al ${action} usuario`);
     } finally {
-      setIsDeleting(false);
+      setIsLoading(false);
     }
   };
 
+  if (isActive) {
+    return (
+      <button
+        onClick={handleToggleActive}
+        disabled={isLoading}
+        className={`${className || ''} ${styles.btnDelete}`}
+        title={isLoading ? 'Procesando...' : 'Desactivar Usuario'}
+      >
+        {isLoading ? (
+          <span className={styles.spinner} />
+        ) : (
+          <>
+            <BanIcon />
+            Desactivar
+          </>
+        )}
+      </button>
+    );
+  }
+
   return (
     <button
-      onClick={handleDelete}
-      disabled={isDeleting}
-      className={`${className} ${styles.btnDelete}`}
-      title={isDeleting ? 'Eliminando...' : 'Eliminar Usuario'}
+      onClick={handleToggleActive}
+      disabled={isLoading}
+      className={`${className || ''} ${styles.btnReactivate}`}
+      title={isLoading ? 'Procesando...' : 'Reactivar Usuario'}
     >
-      {isDeleting ? (
+      {isLoading ? (
         <span className={styles.spinner} />
       ) : (
         <>
-          <TrashIcon />
-          Borrar
+          <CheckIcon />
+          Reactivar
         </>
       )}
     </button>
   );
 }
 
-function TrashIcon() {
+function BanIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 6h18"></path>
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M4.93 4.93l14.14 14.14"></path>
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
   );
 }
