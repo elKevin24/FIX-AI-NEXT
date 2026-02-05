@@ -9,18 +9,21 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- Create uuidv7() fallback if not provided by the DB
+-- (We use CREATE OR REPLACE to ensure it exists; if a native one exists, this might overwrite it
+-- unless we check, but PL/pgSQL doesn't support conditional CREATE FUNCTION easily without dynamic SQL)
+-- For this migration, we will use a simple check using dynamic SQL inside the DO block.
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'uuidv7') THEN
-    -- Fallback to gen_random_uuid() for environments without a native uuidv7 provider.
-    -- This keeps migrations runnable; deployers should install a true uuidv7 provider
-    -- for canonical v7 timestamps if desired.
-    CREATE OR REPLACE FUNCTION uuidv7()
-    RETURNS uuid AS $$
-    BEGIN
-      RETURN gen_random_uuid();
-    END;
-    $$ LANGUAGE plpgsql;
+    EXECUTE '
+      CREATE OR REPLACE FUNCTION uuidv7()
+      RETURNS uuid AS $func$
+      BEGIN
+        RETURN gen_random_uuid();
+      END;
+      $func$ LANGUAGE plpgsql;
+    ';
   END IF;
 END $$;
 
