@@ -10,17 +10,11 @@ type PresenceStatus = 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
 export function usePresence() {
   const pathname = usePathname();
   const [status, setLocalStatus] = useState<PresenceStatus>('ONLINE');
-  const [ticketId, setTicketId] = useState<string | null>(null);
 
-  // Extract ticket ID from pathname if possible
-  useEffect(() => {
-    // Example: /dashboard/tickets/UUID
+  // Declarative ticket ID extraction (satisfies React 19)
+  const ticketId = useMemo(() => {
     const match = pathname?.match(/\/tickets\/([0-9a-fA-F-]{36})/);
-    if (match) {
-      setTicketId(match[1]);
-    } else {
-      setTicketId(null);
-    }
+    return match ? match[1] : null;
   }, [pathname]);
 
   const sendPresenceUpdate = useCallback(async () => {
