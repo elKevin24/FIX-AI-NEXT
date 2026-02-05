@@ -46,7 +46,7 @@ if (typeof setInterval !== 'undefined') {
   setInterval(cleanupRateLimits, 5 * 60 * 1000);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const { pathname } = url;
   
