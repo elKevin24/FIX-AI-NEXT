@@ -414,12 +414,13 @@ export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleS
     });
 
     // Update stock
-    for (const item of quotation.items) {
-        await db.part.update({
-            where: { id: item.partId },
-            data: { quantity: { decrement: item.quantity } },
-        });
-    }
+    // REMOVED: Handled by DB trigger trg_update_stock_on_pos_item
+    // for (const item of quotation.items) {
+    //     await db.part.update({
+    //         where: { id: item.partId },
+    //         data: { quantity: { decrement: item.quantity } },
+    //     });
+    // }
 
     // Update quotation status
     await db.pOSQuotation.update({
