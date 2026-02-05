@@ -12,7 +12,6 @@ import type { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
 // Rate limiting storage (in-memory, resets on deploy)
-// For production, use Redis or similar
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
@@ -60,9 +59,12 @@ if (typeof setInterval !== 'undefined') {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Normalize pathname: lowercase and remove trailing slash for consistent security checks
+  const normalizedPathname = pathname.toLowerCase().replace(/\/$/, "") || "/";
 
-  // Rate limiting for login API
-  if (pathname === '/api/auth/callback/credentials' && request.method === 'POST') {
+  // 1. Rate limiting for login API
+  if (normalizedPathname === '/api/auth/callback/credentials' && request.method === 'POST') {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
                request.headers.get('x-real-ip') ||
                'unknown';
@@ -86,19 +88,30 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Authentication check for protected routes
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/')) {
-    // Skip auth check for public API routes
-    const publicApiRoutes = ['/api/auth'];
-    if (publicApiRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.next();
+  // 2. Authentication and Authorization
+  const session = await auth();
+  const user = session?.user;
+
+  // Redirect authenticated users away from login page
+  if (normalizedPathname === '/login') {
+    if (user) {
+      if (user.passwordMustChange) {
+        return NextResponse.redirect(new URL('/dashboard/profile/change-password', request.url));
+      }
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+    return NextResponse.next();
+  }
 
-    const session = await auth();
+  // Protected routes check (Dashboard and API)
+  const isDashboardRoute = normalizedPathname.startsWith('/dashboard');
+  const isApiRoute = normalizedPathname.startsWith('/api');
+  const isPublicApiRoute = normalizedPathname.startsWith('/api/auth');
 
+  if ((isDashboardRoute || isApiRoute) && !isPublicApiRoute) {
     // Redirect to login if not authenticated
-    if (!session?.user) {
-      if (pathname.startsWith('/api/')) {
+    if (!user) {
+      if (isApiRoute) {
         return new NextResponse(
           JSON.stringify({ error: 'Unauthorized' }),
           {
@@ -113,16 +126,12 @@ export async function middleware(request: NextRequest) {
     }
 
     // Force password change redirect
-    if (session.user.passwordMustChange) {
+    if (user.passwordMustChange) {
       const changePasswordPath = '/dashboard/profile/change-password';
+      const isChangePasswordApi = normalizedPathname === '/api/users/change-password';
 
-      // Don't redirect if already on change password page or logging out
-      if (pathname !== changePasswordPath &&
-          !pathname.startsWith('/api/auth') &&
-          pathname !== '/api/users/change-password') {
-
-        // For API routes, return error
-        if (pathname.startsWith('/api/')) {
+      if (normalizedPathname !== changePasswordPath && !isChangePasswordApi) {
+        if (isApiRoute) {
           return new NextResponse(
             JSON.stringify({
               error: 'Password change required',
@@ -135,24 +144,8 @@ export async function middleware(request: NextRequest) {
             }
           );
         }
-
-        // Redirect to password change page
         return NextResponse.redirect(new URL(changePasswordPath, request.url));
       }
-    }
-  }
-
-  // Redirect authenticated users away from login page
-  if (pathname === '/login') {
-    const session = await auth();
-    if (session?.user) {
-      // If password must change, redirect to change password
-      if (session.user.passwordMustChange) {
-        return NextResponse.redirect(
-          new URL('/dashboard/profile/change-password', request.url)
-        );
-      }
-      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
