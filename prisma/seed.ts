@@ -164,7 +164,7 @@ async function main() {
 
     // Parts for Tenant 1
     console.log('[SEED] Creating parts for Tenant 1...');
-    const t1Parts = await Promise.all([
+    await Promise.all([
         prisma.part.create({
             data: {
                 name: 'Capacitor 1000µF 25V',
@@ -296,7 +296,7 @@ async function main() {
         },
     });
 
-    const t2Agent2 = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'carmen@techrepair.com',
             password: defaultPassword,
