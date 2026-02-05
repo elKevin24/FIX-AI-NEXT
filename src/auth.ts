@@ -162,7 +162,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.id = token.sub;
             }
             if (token.role && session.user) {
-                session.user.role = token.role as "ADMIN" | "MANAGER" | "AGENT" | "VIEWER" | "TECHNICIAN" | "RECEPTIONIST";
+                session.user.role = token.role as "ADMIN" | "MANAGER" | "TECHNICIAN" | "VIEWER";
             }
             if (token.tenantId && session.user) {
                 session.user.tenantId = token.tenantId as string;

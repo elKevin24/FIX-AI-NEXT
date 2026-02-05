@@ -46,11 +46,11 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
  */
 function cleanupRateLimits() {
   const now = Date.now();
-  for (const [ip, record] of loginAttempts.entries()) {
+  Array.from(loginAttempts.entries()).forEach(([ip, record]) => {
     if (now > record.resetAt) {
       loginAttempts.delete(ip);
     }
-  }
+  });
 }
 
 // Run cleanup every 5 minutes

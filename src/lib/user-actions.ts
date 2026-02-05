@@ -133,7 +133,7 @@ const CreateUserSchema = z.object({
   email: z.string().email('Email inválido'),
   firstName: z.string().min(1, 'Nombre requerido').max(100),
   lastName: z.string().min(1, 'Apellido requerido').max(100),
-  role: z.enum(['ADMIN', 'MANAGER', 'AGENT', 'VIEWER']),
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']),
   password: z.string().optional(), // Si no se provee, se genera uno temporal
 });
 
@@ -142,7 +142,7 @@ const UpdateUserSchema = z.object({
   email: z.string().email('Email inválido').optional(),
   firstName: z.string().min(1).max(100).optional(),
   lastName: z.string().min(1).max(100).optional(),
-  role: z.enum(['ADMIN', 'MANAGER', 'AGENT', 'VIEWER']).optional(),
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
 });
 
 const ResetPasswordSchema = z.object({
