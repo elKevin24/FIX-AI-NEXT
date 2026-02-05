@@ -15,9 +15,12 @@ model Tenant {
   id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   slug             String            @unique
+  adminUserId      String?           // FK to the primary admin user
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   auditLogs        AuditLog[]
+  sessionLogs      SessionLog[]
+  userPresences    UserPresence[]
   cashRegisters    CashRegister[]
   cashTransactions CashTransaction[]
   creditNotes      CreditNote[]
@@ -35,6 +38,7 @@ model Tenant {
   ticketSequences  TicketSequence[]
   users            User[]
 
+  @@index([adminUserId])
   @@map("tenants")
 }
 
@@ -62,7 +66,17 @@ model User {
   statusReason         String?
   availableFrom        DateTime?
   availableUntil       DateTime?
+
+  // Self-referential relations for audit trail
+  createdBy            User?                      @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedBy            User?                      @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  usersCreated         User[]                     @relation("UserCreatedBy")
+  usersUpdated         User[]                     @relation("UserUpdatedBy")
+
+  // Other relations
   auditLogs            AuditLog[]
+  sessionLogs          SessionLog[]
+  presence             UserPresence?
   closedCashRegisters  CashRegister[]             @relation("CashRegisterClosedBy")
   openedCashRegisters  CashRegister[]             @relation("CashRegisterOpenedBy")
   cashTransactions     CashTransaction[]
@@ -89,7 +103,12 @@ model User {
   updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
+  viewedTickets        Ticket[]                   @relation("TicketViewers")
 
+  @@index([tenantId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([isActive])
   @@map("users")
 }
 
@@ -157,6 +176,8 @@ model Ticket {
   serviceTemplate         ServiceTemplate?   @relation(fields: [serviceTemplateId], references: [id])
   tenant                  Tenant             @relation(fields: [tenantId], references: [id])
   updatedBy               User?              @relation("TicketUpdatedBy", fields: [updatedById], references: [id])
+  viewedByUsers           UserPresence[]
+  viewers                 User[]             @relation("TicketViewers")
 
   @@index([status, priority])
   @@index([assignedToId, status])
@@ -262,16 +283,71 @@ model PartUsage {
 
 model AuditLog {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  action    String
   details   String?
   userId    String?  @db.Uuid
   tenantId  String   @db.Uuid
   createdAt DateTime @default(now())
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   user      User?    @relation(fields: [userId], references: [id])
+  action     AuditAction
+  module     AuditModule
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  success    Boolean      @default(true)
+  createdAt  DateTime     @default(now())
 
-  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([module, createdAt])
+  @@index([entityType, entityId])
+  @@index([tenantId, success])
   @@map("audit_logs")
+}
+
+model SessionLog {
+  id             String        @id @default(uuid())
+  tenantId       String
+  userId         String
+  sessionToken   String        @unique
+  ipAddress      String?
+  userAgent      String?
+  loginAt        DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  logoutAt       DateTime?
+  status         SessionStatus @default(ACTIVE)
+  metadata       Json?
+  tenant         Tenant        @relation(fields: [tenantId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([userId, loginAt])
+  @@index([sessionToken])
+  @@index([lastActivityAt])
+  @@map("session_logs")
+}
+
+model UserPresence {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  tenantId        String
+  status          PresenceStatus @default(ONLINE)
+  currentRoute    String?
+  currentPage     String?
+  currentTicketId String?
+  lastSeenAt      DateTime       @default(now())
+  metadata        Json?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  currentTicket   Ticket?        @relation(fields: [currentTicketId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, lastSeenAt])
+  @@index([tenantId, status])
+  @@index([currentTicketId])
+  @@map("user_presence")
 }
 
 model TicketNote {
@@ -517,6 +593,9 @@ model CashTransaction {
 
 enum UserRole {
   ADMIN
+  MANAGER
+  AGENT
+  VIEWER
   TECHNICIAN
   RECEPTIONIST
 }
@@ -589,8 +668,6 @@ enum InvoiceStatus {
   OVERDUE
 }
 
-// ==================== POS MODELS ====================
-
 model TenantSettings {
   id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId            String   @unique @db.Uuid
@@ -604,7 +681,6 @@ model TenantSettings {
   currency            String   @default("GTQ")
   defaultPaymentTerms String?
   invoiceFooter       String?
-  // SLA Configuration
   slaWarningPercent   Int      @default(75)
   slaCriticalPercent  Int      @default(90)
   slaEmailEnabled     Boolean  @default(true)
@@ -782,6 +858,56 @@ model CreditNoteItem {
   part         Part       @relation(fields: [partId], references: [id])
 
   @@map("credit_note_items")
+}
+
+enum AuditAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  USER_CREATED
+  USER_UPDATED
+  USER_DEACTIVATED
+  USER_REACTIVATED
+  ROLE_CHANGED
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET
+  SESSION_EXPIRED
+  TICKET_CREATED
+  TICKET_UPDATED
+  TICKET_DELETED
+  TICKET_STATUS_CHANGED
+  TICKET_ASSIGNED
+  CONFIG_CHANGED
+  TENANT_CONFIG_CHANGED
+  EXPORT_DATA
+  DATA_EXPORTED
+  MODULE_ACCESSED
+}
+
+enum AuditModule {
+  AUTH
+  USERS
+  TICKETS
+  SETTINGS
+  REPORTS
+  DASHBOARD
+  INVENTORY
+  POS
+  BILLING
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  LOGGED_OUT
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
 }
 
 enum POSSaleStatus {
