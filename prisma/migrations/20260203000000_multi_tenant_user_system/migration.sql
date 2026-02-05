@@ -79,10 +79,6 @@ BEGIN
     ALTER TYPE "UserRole" ADD VALUE 'MANAGER';
   END IF;
 
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'AGENT' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'UserRole')) THEN
-    ALTER TYPE "UserRole" ADD VALUE 'AGENT';
-  END IF;
-
   IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'VIEWER' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'UserRole')) THEN
     ALTER TYPE "UserRole" ADD VALUE 'VIEWER';
   END IF;
