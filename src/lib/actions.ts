@@ -40,24 +40,23 @@ import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTe
  * - Safe for customer self-service status checks
  */
 export async function getTicketById(rawId: string) {
-    const id = rawId.trim().toLowerCase();
+    const id = rawId.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     // Try to find by exact ID first (full UUID)
-    let ticket = await prisma.ticket.findUnique({
+    let ticket = isUuid ? await prisma.ticket.findUnique({
         where: { id },
         include: {
             tenant: true,
             assignedTo: true,
         },
-    });
+    }) : null;
 
-    // If not found and ID looks like a short ID, try partial match
-    if (!ticket && id.length >= 8) {
+    // If not found, try by ticketNumber
+    if (!ticket) {
         ticket = await prisma.ticket.findFirst({
             where: {
-                id: {
-                    startsWith: id,
-                },
+                ticketNumber: id,
             },
             include: {
                 tenant: true,
@@ -80,25 +79,24 @@ export async function getTicketById(rawId: string) {
  * instead of triggering a 404 page redirect.
  */
 export async function searchTicket(rawId: string) {
-    const id = rawId.trim().toLowerCase();
+    const id = rawId.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     try {
         // Try to find by exact ID first (full UUID)
-        let ticket = await prisma.ticket.findUnique({
+        let ticket = isUuid ? await prisma.ticket.findUnique({
             where: { id },
             include: {
                 tenant: true,
                 assignedTo: true,
             },
-        });
+        }) : null;
 
-        // If not found and ID looks like a short ID, try partial match
-        if (!ticket && id.length >= 8) {
+        // If not found, try by ticketNumber
+        if (!ticket) {
             ticket = await prisma.ticket.findFirst({
                 where: {
-                    id: {
-                        startsWith: id,
-                    },
+                    ticketNumber: id,
                 },
                 include: {
                     tenant: true,
