@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Input, Select, Button, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
 import styles from '@/components/ui/Form.module.css';
-import { createUser, PASSWORD_POLICY } from '@/lib/user-actions';
+import { createUser } from '@/lib/user-actions';
+import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { ROLE_LABELS, ROLE_DESCRIPTIONS, getSelectableRoles } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 
