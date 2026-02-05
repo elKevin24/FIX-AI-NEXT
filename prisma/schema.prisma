@@ -14,7 +14,7 @@ model Tenant {
   id               String            @id @default(uuid())
   name             String
   slug             String            @unique
-  adminUserId      String?           // FK to the primary admin user
+  adminUserId      String? // FK to the primary admin user
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   auditLogs        AuditLog[]
@@ -39,34 +39,34 @@ model Tenant {
 }
 
 model User {
-  id                   String                     @id @default(uuid())
+  id                   String           @id @default(uuid())
   email                String
   password             String
   firstName            String?
   lastName             String?
-  name                 String?                    // Computed/legacy: firstName + lastName
-  role                 UserRole                   @default(TECHNICIAN)
+  name                 String? // Computed/legacy: firstName + lastName
+  role                 UserRole         @default(TECHNICIAN)
   tenantId             String
-  isActive             Boolean                    @default(true)
-  passwordMustChange   Boolean                    @default(false)
+  isActive             Boolean          @default(true)
+  passwordMustChange   Boolean          @default(false)
   lastLoginAt          DateTime?
-  failedLoginAttempts  Int                        @default(0)
+  failedLoginAttempts  Int              @default(0)
   lockedUntil          DateTime?
   createdById          String?
   updatedById          String?
-  createdAt            DateTime                   @default(now())
-  updatedAt            DateTime                   @updatedAt
-  status               TechnicianStatus           @default(AVAILABLE)
-  maxConcurrentTickets Int                        @default(5)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  status               TechnicianStatus @default(AVAILABLE)
+  maxConcurrentTickets Int              @default(5)
   statusReason         String?
   availableFrom        DateTime?
   availableUntil       DateTime?
 
   // Self-referential relations for audit trail
-  createdBy            User?                      @relation("UserCreatedBy", fields: [createdById], references: [id])
-  updatedBy            User?                      @relation("UserUpdatedBy", fields: [updatedById], references: [id])
-  usersCreated         User[]                     @relation("UserCreatedBy")
-  usersUpdated         User[]                     @relation("UserUpdatedBy")
+  createdBy    User?  @relation("UserCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?  @relation("UserUpdatedBy", fields: [updatedById], references: [id])
+  usersCreated User[] @relation("UserCreatedBy")
+  usersUpdated User[] @relation("UserUpdatedBy")
 
   // Other relations
   auditLogs            AuditLog[]
