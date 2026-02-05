@@ -1,112 +1,143 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Button, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
 import styles from '@/components/ui/Form.module.css';
+import { createUser } from '@/lib/user-actions';
+import { PASSWORD_POLICY } from '@/lib/password-utils';
+import { ROLE_LABELS, ROLE_DESCRIPTIONS, getSelectableRoles } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
-const roleOptions: SelectOption[] = [
-  { value: 'ADMIN', label: 'Admin' },
-  { value: 'TECHNICIAN', label: 'Technician' },
-  { value: 'RECEPTIONIST', label: 'Receptionist' },
-];
+interface CreateUserFormProps {
+  currentUserRole?: UserRole;
+}
 
-export default function CreateUserForm() {
+export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUserFormProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'TECHNICIAN',
+  const [state, formAction, isPending] = useActionState(createUser, {
+    success: false,
+    message: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const [generatePassword, setGeneratePassword] = useState(true);
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  // Build role options based on current user's role
+  const roleOptions: SelectOption[] = getSelectableRoles().map((role) => ({
+    value: role,
+    label: ROLE_LABELS[role],
+  }));
 
-    try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create user');
+  useEffect(() => {
+    if (state.success) {
+      // Show temporary password if generated
+      if (state.data?.temporaryPassword) {
+        alert(`Usuario creado exitosamente!\n\nContraseña temporal: ${state.data.temporaryPassword}\n\nEl usuario deberá cambiarla en su primer inicio de sesión.`);
       }
-
       router.push('/dashboard/users');
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  }, [state.success, state.data, router]);
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && (
+    <form action={formAction}>
+      {state.message && !state.success && (
         <Alert variant="error">
-          {error}
+          {state.message}
         </Alert>
       )}
 
-      <Input
-        label="Full Name"
-        name="name"
-        type="text"
-        value={formData.name}
-        onChange={handleChange}
-        placeholder="John Doe"
-        required
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          label="Nombre"
+          name="firstName"
+          type="text"
+          placeholder="Juan"
+          required
+          error={state.errors?.firstName?.[0]}
+        />
+
+        <Input
+          label="Apellido"
+          name="lastName"
+          type="text"
+          placeholder="Pérez"
+          required
+          error={state.errors?.lastName?.[0]}
+        />
+      </div>
 
       <Input
-        label="Email Address"
+        label="Correo Electrónico"
         name="email"
         type="email"
-        value={formData.email}
-        onChange={handleChange}
-        placeholder="john@example.com"
-        helper="User will use this email to log in"
+        placeholder="juan.perez@ejemplo.com"
+        helper="El usuario iniciará sesión con este correo"
         required
+        error={state.errors?.email?.[0]}
       />
 
-      <Input
-        label="Password"
-        name="password"
-        type="password"
-        value={formData.password}
-        onChange={handleChange}
-        placeholder="Min. 8 characters"
-        helper="Must be at least 8 characters long"
-        required
-      />
+      <div className="my-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={generatePassword}
+            onChange={(e) => setGeneratePassword(e.target.checked)}
+            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+          <span className="text-sm text-gray-700">
+            Generar contraseña temporal automáticamente
+          </span>
+        </label>
+        <p className="text-xs text-gray-500 mt-1 ml-6">
+          El usuario deberá cambiar la contraseña en su primer inicio de sesión
+        </p>
+      </div>
+
+      {!generatePassword && (
+        <div>
+          <Input
+            label="Contraseña"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mínimo 8 caracteres"
+            error={state.errors?.password?.[0]}
+          />
+          <div className="mt-2 text-xs text-gray-500 space-y-1">
+            <p className="font-medium">Requisitos de contraseña:</p>
+            <ul className="list-disc list-inside space-y-0.5">
+              <li>Mínimo {PASSWORD_POLICY.minLength} caracteres</li>
+              <li>Al menos una mayúscula</li>
+              <li>Al menos una minúscula</li>
+              <li>Al menos un número</li>
+              <li>Al menos un carácter especial (!@#$%^&*...)</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       <Select
-        label="Role"
+        label="Rol"
         name="role"
-        value={formData.role}
-        onChange={handleChange}
+        defaultValue="AGENT"
         options={roleOptions}
-        helper="Choose the user's access level"
+        helper="Define los permisos del usuario"
       />
+
+      <div className="mt-2 mb-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+        <p className="font-medium mb-2">Descripción de roles:</p>
+        <ul className="space-y-1">
+          {getSelectableRoles().map((role) => (
+            <li key={role}>
+              <strong>{ROLE_LABELS[role]}:</strong> {ROLE_DESCRIPTIONS[role]}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className={styles.actions}>
         <Button
@@ -114,15 +145,15 @@ export default function CreateUserForm() {
           variant="secondary"
           onClick={() => router.back()}
         >
-          Cancel
+          Cancelar
         </Button>
         <Button
           type="submit"
           variant="primary"
-          disabled={isSubmitting}
-          isLoading={isSubmitting}
+          disabled={isPending}
+          isLoading={isPending}
         >
-          Create User
+          Crear Usuario
         </Button>
       </div>
     </form>

@@ -12,10 +12,9 @@ const themes: { value: Theme; label: string; icon: string }[] = [
 ];
 
 export default function ThemeSwitcher() {
-    const { theme, setTheme, resolvedTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
-    const [announcement, setAnnouncement] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -47,13 +46,8 @@ export default function ThemeSwitcher() {
     }, [focusedIndex, isOpen]);
 
     const handleThemeChange = (newTheme: Theme) => {
-        const themeLabel = themes.find(t => t.value === newTheme)?.label;
         setTheme(newTheme);
-        setAnnouncement(`Tema cambiado a ${themeLabel}`);
         setIsOpen(false);
-
-        // Clear announcement after 3 seconds
-        setTimeout(() => setAnnouncement(''), 3000);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
