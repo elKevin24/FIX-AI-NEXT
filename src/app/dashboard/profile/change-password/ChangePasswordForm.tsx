@@ -2,7 +2,8 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { changePassword, PASSWORD_POLICY } from '@/lib/user-actions';
+import { changePassword } from '@/lib/user-actions';
+import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { Button } from '@/components/ui';
 import { useEffect, useState } from 'react';
 

@@ -28,102 +28,7 @@ import {
   getAssignableRoles,
 } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
-import crypto from 'crypto';
-
-// ============================================================================
-// PASSWORD VALIDATION
-// ============================================================================
-
-/**
- * Política de contraseñas:
- * - Mínimo 8 caracteres
- * - Al menos una mayúscula
- * - Al menos una minúscula
- * - Al menos un número
- * - Al menos un carácter especial
- */
-export const PASSWORD_POLICY = {
-  minLength: 8,
-  requireUppercase: true,
-  requireLowercase: true,
-  requireNumber: true,
-  requireSpecial: true,
-};
-
-const passwordSchema = z
-  .string()
-  .min(PASSWORD_POLICY.minLength, `Mínimo ${PASSWORD_POLICY.minLength} caracteres`)
-  .refine(
-    (val) => !PASSWORD_POLICY.requireUppercase || /[A-Z]/.test(val),
-    'Debe contener al menos una mayúscula'
-  )
-  .refine(
-    (val) => !PASSWORD_POLICY.requireLowercase || /[a-z]/.test(val),
-    'Debe contener al menos una minúscula'
-  )
-  .refine(
-    (val) => !PASSWORD_POLICY.requireNumber || /\d/.test(val),
-    'Debe contener al menos un número'
-  )
-  .refine(
-    (val) => !PASSWORD_POLICY.requireSpecial || /[!@#$%^&*(),.?":{}|<>]/.test(val),
-    'Debe contener al menos un carácter especial (!@#$%^&*...)'
-  );
-
-/**
- * Valida una contraseña contra la política
- */
-export function validatePassword(password: string): {
-  valid: boolean;
-  errors: string[];
-} {
-  const result = passwordSchema.safeParse(password);
-  if (result.success) {
-    return { valid: true, errors: [] };
-  }
-  return {
-    valid: false,
-    errors: result.error.errors.map((e) => e.message),
-  };
-}
-
-/**
- * Genera una contraseña temporal segura
- */
-export function generateTemporaryPassword(): string {
-  const chars = {
-    upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    lower: 'abcdefghijklmnopqrstuvwxyz',
-    numbers: '0123456789',
-    special: '!@#$%&*',
-  };
-
-  const allChars = chars.upper + chars.lower + chars.numbers + chars.special;
-  let password = '';
-
-  // Helper para generar enteros aleatorios seguros
-  const secureRandomInt = (max: number) => crypto.randomInt(0, max);
-
-  // Garantizar al menos uno de cada tipo
-  password += chars.upper[secureRandomInt(chars.upper.length)];
-  password += chars.lower[secureRandomInt(chars.lower.length)];
-  password += chars.numbers[secureRandomInt(chars.numbers.length)];
-  password += chars.special[secureRandomInt(chars.special.length)];
-
-  // Completar hasta 12 caracteres
-  for (let i = 4; i < 12; i++) {
-    password += allChars[secureRandomInt(allChars.length)];
-  }
-
-  // Mezclar usando Fisher-Yates seguro
-  const passwordChars = password.split('');
-  for (let i = passwordChars.length - 1; i > 0; i--) {
-    const j = secureRandomInt(i + 1);
-    [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
-  }
-  
-  return passwordChars.join('');
-}
+import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
 // ZOD SCHEMAS
@@ -270,6 +175,7 @@ export async function createUser(
     await prisma.auditLog.create({
       data: {
         action: 'USER_CREATED',
+        module: 'USERS',
         details: JSON.stringify({
           newUserId: newUser.id,
           email: newUser.email,
@@ -426,6 +332,7 @@ export async function updateUser(
     await prisma.auditLog.create({
       data: {
         action: 'USER_UPDATED',
+        module: 'USERS',
         details: JSON.stringify({
           userId,
           changes: updateData,
@@ -530,6 +437,7 @@ export async function deactivateUser(
     await prisma.auditLog.create({
       data: {
         action: 'USER_DEACTIVATED',
+        module: 'USERS',
         details: JSON.stringify({
           userId,
           email: targetUser.email,
@@ -614,6 +522,7 @@ export async function reactivateUser(
     await prisma.auditLog.create({
       data: {
         action: 'USER_REACTIVATED',
+        module: 'USERS',
         details: JSON.stringify({
           userId,
           email: targetUser.email,
@@ -734,6 +643,7 @@ export async function resetPassword(
     await prisma.auditLog.create({
       data: {
         action: 'PASSWORD_RESET',
+        module: 'USERS',
         details: JSON.stringify({
           userId,
           resetBy: actorId,
@@ -842,6 +752,7 @@ export async function changePassword(
     await prisma.auditLog.create({
       data: {
         action: 'PASSWORD_CHANGED',
+        module: 'USERS',
         details: JSON.stringify({
           userId,
           changedBySelf: true,
