@@ -28,7 +28,7 @@ async function createSuperAdmin() {
     const password = await bcryptjs.hash('password123', 12);
 
     // 3. Crear o actualizar usuario
-    const admin = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email: 'adminkev@example.com' },
         update: {
             role: 'ADMIN',

@@ -1,7 +1,6 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Prisma } from '@prisma/client';
 
 export type SearchResult = {
   type: 'CUSTOMER' | 'TICKET' | 'PART';
@@ -65,20 +64,20 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
 
   // Consulta a TICKETS
   // Buscamos por título, número, descripción o serial
-  const ticketsPromise = db.$queryRaw<{ id: string; ticketNumber: string | null; title: string; status: string; deviceModel: string | null; score: number }[]>`
+  const ticketsPromise = db.$queryRaw<{ id: string; ticketKey: string | null; title: string; status: string; deviceModel: string | null; score: number }[]>`
     SELECT 
       id, 
-      "ticketNumber", 
+      "ticket_key" as "ticketKey", 
       title, 
       status,
       "deviceModel",
       (
         CASE 
           WHEN title ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
-          WHEN "ticketNumber" ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
+          WHEN "ticket_key" ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
           ELSE GREATEST(
             similarity(title, ${sanitizedQuery}), 
-            similarity(COALESCE("ticketNumber", ''), ${sanitizedQuery}),
+            similarity(COALESCE("ticket_key", ''), ${sanitizedQuery}),
             similarity(COALESCE("deviceModel", ''), ${sanitizedQuery})
           )
         END
@@ -88,7 +87,7 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
       AND (
         title % ${sanitizedQuery} OR 
         title ILIKE ${'%' + sanitizedQuery + '%'} OR
-        "ticketNumber" ILIKE ${'%' + sanitizedQuery + '%'} OR 
+        "ticket_key" ILIKE ${'%' + sanitizedQuery + '%'} OR 
         description ILIKE ${'%' + sanitizedQuery + '%'} OR
         "serialNumber" ILIKE ${'%' + sanitizedQuery + '%'}
       )
@@ -149,7 +148,7 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
     results.push({
       type: 'TICKET',
       id: t.id,
-      title: `Ticket ${t.ticketNumber || 'N/A'}: ${t.title}`,
+      title: `Ticket ${t.ticketKey || 'N/A'}: ${t.title}`,
       subtitle: `${t.deviceModel || 'Dispositivo'} - ${t.status}`,
       status: t.status,
       score: t.score,

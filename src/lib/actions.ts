@@ -656,9 +656,6 @@ export async function updateUser(prevState: any, formData: FormData) {
 
     const { userId, name, email, password, role } = validatedFields.data;
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -1301,33 +1298,6 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
         console.error('Failed to update ticket status:', error);
         return { success: false, message: 'Error al actualizar el estado.' };
     }
-}
-
-// Helper to share logic inside transaction
-async function handleStatusUpdate(txTenantDb: any, ticketId: string, status: string, existingTicket: any, userId: string) {
-    // RESTORE STOCK LOGIC
-    if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-        if (existingTicket.partsUsed.length > 0) {
-            for (const usage of existingTicket.partsUsed) {
-                await txTenantDb.part.update({
-                    where: { id: usage.partId },
-                    data: { quantity: { increment: usage.quantity } }
-                });
-                await txTenantDb.partUsage.delete({
-                    where: { id: usage.id }
-                });
-            }
-        }
-    }
-
-    // Update status
-    await txTenantDb.ticket.update({
-        where: { id: ticketId },
-        data: {
-            status: status,
-            updatedById: userId,
-        },
-    });
 }
 
 /**

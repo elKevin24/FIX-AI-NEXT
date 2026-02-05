@@ -1,14 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
-    createUser, updateUser, deleteUser,
+import {
+    createUser,
     createCustomer, updateCustomer, deleteCustomer,
-    createTicket, updateTicket, updateTicketStatus, deleteTicket,
-    createPart, updatePart, deletePart, addTicketNote
+    createTicket, updateTicketStatus,
+    createPart, updatePart
 } from './actions';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 // Mock dependencies

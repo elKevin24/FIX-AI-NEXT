@@ -52,6 +52,14 @@ const formatCurrency = (amount: number | string): string => {
  */
 const getStatusBadgeClass = (status: string): string => {
     const statusMap: Record<string, string> = {
+        // Spanish enum values
+        ABIERTO: styles.statusOpen,
+        EN_PROCESO: styles.statusInProgress,
+        ESPERANDO_REPUESTOS: styles.statusWaitingForParts,
+        RESUELTO: styles.statusResolved,
+        CERRADO: styles.statusClosed,
+        CANCELADO: styles.statusCancelled,
+        // Legacy English values (compat)
         OPEN: styles.statusOpen,
         IN_PROGRESS: styles.statusInProgress,
         WAITING_FOR_PARTS: styles.statusWaitingForParts,
@@ -111,10 +119,20 @@ const calculateServicesCost = (ticket: Ticket80mmData): number => {
 const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
     ({ ticket, showParts = true, showServices = true, showCostSummary = true, showQR = true, baseUrl }, ref) => {
         const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+        const [generatedDate, setGeneratedDate] = useState<string>('');
 
         const partsCost = calculatePartsCost(ticket);
         const servicesCost = calculateServicesCost(ticket);
         const totalCost = partsCost + servicesCost;
+
+        useEffect(() => {
+            // Set date after mount to avoid hydration mismatch
+            const now = new Date();
+            const timer = setTimeout(() => {
+                setGeneratedDate(formatDate(now));
+            }, 0);
+            return () => clearTimeout(timer);
+        }, []);
 
         // Generar QR Code
         useEffect(() => {
@@ -152,7 +170,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                 <div className={styles.header}>
                     <h1 className={styles.companyName}>{ticket.tenant.name}</h1>
                     <p className={styles.documentTitle}>ORDEN DE SERVICIO</p>
-                    <p className={styles.ticketId}>#{ticket.id.slice(0, 8).toUpperCase()}</p>
+                    <p className={styles.ticketId}>#{ticket.ticketKey || ticket.ticketNumber || ticket.id.slice(0, 8).toUpperCase()}</p>
 
                     <div className={styles.metaRow}>
                         <span className={styles.metaLabel}>Ingreso:</span>
@@ -365,6 +383,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                 {showQR && qrCodeDataUrl && (
                     <div className={styles.qrSection}>
                         <div className={styles.qrContainer}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={qrCodeDataUrl}
                                 alt={`QR Code - Ticket ${ticket.id}`}
@@ -377,9 +396,9 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* Footer */}
                 <div className={styles.footer}>
-                    <p className={styles.footerLine}>Generado: {formatDate(new Date())}</p>
+                    <p className={styles.footerLine}>Generado: {generatedDate}</p>
                     <p className={styles.footerLine}>FIX-AI - Sistema de Gestión de Talleres</p>
-                    {ticket.status === 'RESOLVED' || ticket.status === 'CLOSED' ? (
+                    {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED' || ticket.status === 'RESUELTO' || ticket.status === 'CERRADO') ? (
                         <p className={styles.footerLine} style={{ fontWeight: 600, marginTop: '4px' }}>
                             Garantía: 30 días sobre trabajo realizado
                         </p>

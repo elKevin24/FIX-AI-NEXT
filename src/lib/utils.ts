@@ -7,15 +7,15 @@ import { Decimal } from '@prisma/client/runtime/library';
 export function serializeDecimal<T>(data: T): any {
   if (data === null || data === undefined) return data;
 
-  if (data instanceof Decimal) {
-    return data.toNumber();
+  if ((data as any) instanceof Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
+    return (data as unknown as Decimal).toNumber();
   }
 
   if (Array.isArray(data)) {
     return data.map(item => serializeDecimal(item));
   }
 
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === 'object') {
     const serialized: any = {};
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {

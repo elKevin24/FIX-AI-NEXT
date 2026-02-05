@@ -9,7 +9,7 @@ export default async function NotificationsPage({
 }) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const { notifications, total, totalPages } = await getAllMyNotifications(page);
+  const { notifications, totalPages } = await getAllMyNotifications(page);
 
   return (
     <div className="p-6">
