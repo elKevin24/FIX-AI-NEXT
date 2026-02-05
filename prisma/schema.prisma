@@ -45,7 +45,7 @@ model User {
   firstName            String?
   lastName             String?
   name                 String?                    // Computed/legacy: firstName + lastName
-  role                 UserRole                   @default(AGENT)
+  role                 UserRole                   @default(TECHNICIAN)
   tenantId             String
   isActive             Boolean                    @default(true)
   passwordMustChange   Boolean                    @default(false)
@@ -528,13 +528,10 @@ model CashTransaction {
 }
 
 enum UserRole {
-  ADMIN        // Control total del tenant
-  MANAGER      // Gestiona tickets y usuarios (no config del tenant)
-  AGENT        // Crea y responde tickets asignados
-  VIEWER       // Solo lectura
-  // Legacy roles (kept for backward compatibility during migration)
-  TECHNICIAN   // Maps to AGENT
-  RECEPTIONIST // Maps to VIEWER
+  ADMIN
+  MANAGER
+  VIEWER
+  TECHNICIAN
 }
 
 enum TicketStatus {
