@@ -47,7 +47,7 @@ jobs:
 
       - name: Format Lighthouse Score
         id: format_score
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -80,7 +80,7 @@ jobs:
             core.setOutput('comment', comment);
 
       - name: Comment PR with Lighthouse results
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const comment = `${{ steps.format_score.outputs.comment }}`;

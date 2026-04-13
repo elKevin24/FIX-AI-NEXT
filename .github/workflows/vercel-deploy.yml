@@ -89,7 +89,7 @@ jobs:
       - name: Find associated PR
         id: find-pr
         if: github.event.workflow_run.event == 'pull_request'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const response = await github.rest.pulls.list({
@@ -105,7 +105,7 @@ jobs:
 
       - name: Comment PR with deployment URL
         if: steps.find-pr.outputs.result != 'null'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           ISSUE_NUMBER: ${{ steps.find-pr.outputs.result }}
           DEPLOY_URL: ${{ steps.deploy.outputs.url }}
