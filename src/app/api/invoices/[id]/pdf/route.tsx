@@ -46,7 +46,7 @@ export async function GET(
             return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
         }
 
-        // Transformar datos para el componente PDF (Decimal -> number)
+        // Transformar datos para el componente PDF (Prisma.Decimal -> number)
         const serializedInvoice = {
             ...invoice,
             laborCost: Number(invoice.laborCost),

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { AuditAction } from '@/generated/prisma';
 
 export interface TimelineEvent {
     id: string;
@@ -33,18 +34,12 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
     });
 
     // 2. Fetch Audit Logs related to this ticket
+    // New schema uses entityId for the relation
     const logs = await prisma.auditLog.findMany({
         where: {
             tenantId: tenantId,
-            details: {
-                contains: ticketId,
-            },
-            // Filter out redundant note logs since we fetch notes separately
-            NOT: {
-              action: {
-                in: ['CREATE_TICKETNOTE', 'UPDATE_TICKETNOTE', 'DELETE_TICKETNOTE']
-              }
-            }
+            entityId: ticketId,
+            module: 'TICKETS'
         },
         include: {
             user: {
@@ -72,7 +67,7 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
     }));
 
     const normalizedLogs: TimelineEvent[] = logs.map(log => {
-        const { content, type } = parseLogMessage(log.action, log.details);
+        const { content, type } = parseLogMessage(log.action, log.metadata);
         return {
             id: log.id,
             type: type,
@@ -82,7 +77,7 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
                 email: log.user?.email || 'system@fixai.com',
             },
             content: content,
-            details: log.details ? JSON.parse(log.details) : null,
+            details: log.metadata,
         };
     });
 
@@ -93,21 +88,29 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
     return timeline;
 }
 
-export function parseLogMessage(action: string, detailsStr: string | null): { content: string, type: TimelineEvent['type'] } {
-    let details: any = {};
-    try {
-        details = detailsStr ? JSON.parse(detailsStr) : {};
-    } catch (e) {}
+export function parseLogMessage(action: AuditAction | string, metadata: any): { content: string, type: TimelineEvent['type'] } {
+    let details = metadata || {};
+    
+    // Defensive JSON parsing for tests or manual calls
+    if (typeof details === 'string') {
+        try {
+            details = JSON.parse(details);
+        } catch (e) {
+            details = {};
+        }
+    }
 
     let content: string;
     let type: TimelineEvent['type'] = 'LOG';
 
     switch (action) {
+        case 'TICKET_CREATED':
         case 'CREATE_TICKET':
             content = 'Ticket creado';
             type = 'LOG';
             break;
             
+        case 'TICKET_UPDATED':
         case 'UPDATE_TICKET':
             const changes = details.changes || {};
             const parts = [];
@@ -123,54 +126,50 @@ export function parseLogMessage(action: string, detailsStr: string | null): { co
             content = parts.length > 0 ? parts.join(', ') : 'Ticket actualizado';
             break;
             
+        case 'TICKET_DELETED':
         case 'DELETE_TICKET':
             content = 'Ticket eliminado';
             type = 'LOG';
             break;
 
+        case 'TICKET_STATUS_CHANGED':
+             content = `Estado cambiado`;
+             if (details.old && details.new) {
+                 content += ` de ${details.old} a ${details.new}`;
+             }
+             type = 'STATUS_CHANGE';
+             break;
+
         case 'CREATE_PARTUSAGE':
-            content = `Movimiento de inventario: Agregado repuesto/item`;
-            if (details.data && details.data.quantity) {
+        case 'INVENTORY_USED':
+            content = 'Movimiento de inventario';
+            if (details.data?.quantity) {
                 content += ` (Cant: ${details.data.quantity})`;
             }
             type = 'INVENTORY_MOVEMENT';
             break;
-            
-        case 'DELETE_PARTUSAGE':
-             content = `Movimiento de inventario: Removido repuesto/item`;
-             type = 'INVENTORY_MOVEMENT';
-             break;
 
         case 'CREATE_TICKETSERVICE':
-            content = `Servicio/Mano de obra agregado`;
-            if (details.data && details.data.name) {
+        case 'SERVICE_ADDED':
+            content = 'Servicio/Mano de obra agregado';
+            if (details.data?.name) {
                 content += `: ${details.data.name}`;
             }
             type = 'SERVICE_USAGE';
             break;
 
-        case 'DELETE_TICKETSERVICE':
-            content = `Servicio removido`;
-            type = 'SERVICE_USAGE';
-            break;
-
         case 'CREATE_TICKETATTACHMENT':
-            content = `Archivo adjunto subido`;
-            if (details.data && details.data.filename) {
+        case 'ATTACHMENT_UPLOADED':
+            content = 'Archivo adjunto subido';
+            if (details.data?.filename) {
                 content += `: ${details.data.filename}`;
             }
             type = 'LOG';
-            // Could be distinct 'ATTACHMENT' type if desired
             break;
 
-        case 'DELETE_TICKETATTACHMENT':
-            content = `Archivo adjunto eliminado`;
-            type = 'LOG';
-            break;
-
+        // Fallback for other actions
         default:
-            // Improve formatting for generic logs
-            content = action.replace(/_/g, ' ')
+            content = String(action).replace(/_/g, ' ')
                             .replace('CREATE', 'Crear')
                             .replace('UPDATE', 'Actualizar')
                             .replace('DELETE', 'Eliminar');

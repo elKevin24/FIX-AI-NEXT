@@ -20,6 +20,9 @@ export default async function SearchPage({ searchParams }: Props) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const tenantFilter = isSuperAdmin ? {} : { tenantId: session.user.tenantId };
 
+    // Check if query is a valid UUID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
+
     // Search tickets
     const tickets = query.length >= 2 ? await prisma.ticket.findMany({
         where: {
@@ -27,8 +30,9 @@ export default async function SearchPage({ searchParams }: Props) {
             OR: [
                 { title: { contains: query, mode: 'insensitive' } },
                 { description: { contains: query, mode: 'insensitive' } },
-                { id: { contains: query, mode: 'insensitive' } },
+                { ticketNumber: { contains: query, mode: 'insensitive' } },
                 { customer: { name: { contains: query, mode: 'insensitive' } } },
+                ...(isUuid ? [{ id: query }] : []),
             ],
         },
         include: {
