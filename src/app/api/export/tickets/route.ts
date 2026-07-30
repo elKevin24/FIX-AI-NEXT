@@ -10,7 +10,7 @@ async function* makeIterator(tenantId: string, userId: string) {
   let cursorId: string | undefined = undefined;
 
   // 1. Cabecera del CSV
-  yield 'ID,Ticket Number,Title,Status,Priority,Created At\n';
+  yield 'ID,Ticket Key,Title,Status,Priority,Created At\n';
 
   while (true) {
     // 2. Buscar lote pequeño (Cursor Pagination para eficiencia máxima)
@@ -21,7 +21,7 @@ async function* makeIterator(tenantId: string, userId: string) {
       orderBy: { id: 'asc' }, // Crucial para cursor estable
       select: {
         id: true,
-        ticketNumber: true,
+        ticketKey: true,
         title: true,
         status: true,
         priority: true,
@@ -33,10 +33,10 @@ async function* makeIterator(tenantId: string, userId: string) {
 
     // 3. Convertir lote a string CSV y hacer "yield" (Stream)
     let chunk = '';
-    for (const ticket of batch) {
+      for (const ticket of batch) {
       // Limpiar campos para CSV (escapar comillas, saltos de línea)
       const cleanTitle = ticket.title.replace(/"/g, '""').replace(/\n/g, ' ');
-      chunk += `"${ticket.id}","${ticket.ticketNumber || ''}","${cleanTitle}","${ticket.status}","${ticket.priority}","${ticket.createdAt.toISOString()}"\n`;
+      chunk += `"${ticket.id}","${ticket.ticketKey || ''}","${cleanTitle}","${ticket.status}","${ticket.priority}","${ticket.createdAt.toISOString()}"\n`;
     }
 
     yield chunk;

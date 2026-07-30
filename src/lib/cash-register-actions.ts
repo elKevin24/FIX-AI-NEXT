@@ -3,7 +3,12 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+import {
+  OpenCashRegisterSchema,
+  CashTransactionSchema,
+  CloseCashRegisterSchema,
+} from '@/lib/schemas';
 
 // ============================================================================
 // TYPES
@@ -40,6 +45,15 @@ export async function openCashRegister(data: CashRegisterData) {
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden abrir cajas');
+  }
+
+  const validatedFields = OpenCashRegisterSchema.safeParse(data);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+  }
+  const validData = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -47,23 +61,23 @@ export async function openCashRegister(data: CashRegisterData) {
   const existingOpen = await db.cashRegister.findFirst({
     where: {
       tenantId: session.user.tenantId,
-      name: data.name,
+      name: validData.name,
       isOpen: true,
     },
   });
 
   if (existingOpen) {
     throw new Error(
-      `Ya existe una caja abierta con el nombre "${data.name}". Cierra la anterior primero.`
+      `Ya existe una caja abierta con el nombre "${validData.name}". Cierra la anterior primero.`
     );
   }
 
   const cashRegister = await db.cashRegister.create({
     data: {
-      name: data.name,
+      name: validData.name,
       isOpen: true,
       openedAt: new Date(),
-      openingBalance: new Decimal(data.openingBalance),
+      openingBalance: new Prisma.Decimal(validData.openingBalance),
       tenantId: session.user.tenantId,
       openedById: session.user.id,
     },
@@ -171,12 +185,21 @@ export async function registerCashTransaction(data: CashTransactionData) {
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden registrar transacciones');
+  }
+
+  const validatedFields = CashTransactionSchema.safeParse(data);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+  }
+  const validData = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
   // Verificar que la caja existe y está abierta
   const cashRegister = await db.cashRegister.findUnique({
-    where: { id: data.cashRegisterId },
+    where: { id: validData.cashRegisterId },
   });
 
   if (!cashRegister || cashRegister.tenantId !== session.user.tenantId) {
@@ -189,11 +212,11 @@ export async function registerCashTransaction(data: CashTransactionData) {
 
   const transaction = await db.cashTransaction.create({
     data: {
-      type: data.type,
-      amount: new Decimal(data.amount),
-      description: data.description,
-      reference: data.reference,
-      cashRegisterId: data.cashRegisterId,
+      type: validData.type,
+      amount: new Prisma.Decimal(validData.amount),
+      description: validData.description,
+      reference: validData.reference,
+      cashRegisterId: validData.cashRegisterId,
       tenantId: session.user.tenantId,
       createdById: session.user.id,
     },
@@ -212,12 +235,21 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden cerrar cajas');
+  }
+
+  const validatedFields = CloseCashRegisterSchema.safeParse(data);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+  }
+  const validData = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
   // Obtener caja con transacciones
   const cashRegister = await db.cashRegister.findUnique({
-    where: { id: data.cashRegisterId },
+    where: { id: validData.cashRegisterId },
     include: {
       transactions: true,
     },
@@ -243,18 +275,18 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
     .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
   const expectedBalance = openingBalance + totalIncome - totalExpenses;
-  const difference = data.closingBalance - expectedBalance;
+  const difference = validData.closingBalance - expectedBalance;
 
   // Cerrar caja
   const updated = await db.cashRegister.update({
-    where: { id: data.cashRegisterId },
+    where: { id: validData.cashRegisterId },
     data: {
       isOpen: false,
       closedAt: new Date(),
-      closingBalance: new Decimal(data.closingBalance),
-      expectedBalance: new Decimal(expectedBalance),
-      difference: new Decimal(difference),
-      closingNotes: data.notes,
+      closingBalance: new Prisma.Decimal(validData.closingBalance),
+      expectedBalance: new Prisma.Decimal(expectedBalance),
+      difference: new Prisma.Decimal(difference),
+      closingNotes: validData.notes,
       closedById: session.user.id,
     },
     include: {
@@ -349,6 +381,9 @@ export async function registerInvoicePaymentInCash(
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden registrar pagos');
+  }
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -383,7 +418,7 @@ export async function registerInvoicePaymentInCash(
   const transaction = await db.cashTransaction.create({
     data: {
       type: 'INCOME',
-      amount: new Decimal(amount),
+      amount: new Prisma.Decimal(amount),
       description: `Pago de factura ${invoice.invoiceNumber} - ${invoice.customer.name}`,
       reference: `Factura: ${invoice.invoiceNumber}, Ticket: ${invoice.ticket.ticketNumber}`,
       cashRegisterId: cashRegister.id,

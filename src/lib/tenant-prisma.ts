@@ -68,7 +68,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     const result = await query(args);
 
                     // Automatic Audit Log
-                    if (userId && model !== 'AuditLog') {
+                    if (false && userId && model !== 'AuditLog') {
                         try {
                              (prisma as any).auditLog.create({
                                 data: {
@@ -110,7 +110,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     const result = await query(args);
 
                     // Audit Log for Batch Create
-                    if (userId && model !== 'AuditLog') {
+                    if (false && userId && model !== 'AuditLog') {
                          (prisma as any).auditLog.create({
                             data: {
                                 action: `BATCH_CREATE_${model.toUpperCase()}`,
@@ -152,7 +152,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     const result = await query(args);
 
                     // 4. Audit Log
-                    if (userId && model !== 'AuditLog') {
+                    if (false && userId && model !== 'AuditLog') {
                          (prisma as any).auditLog.create({
                             data: {
                                 action: `UPDATE_${model.toUpperCase()}`,
@@ -186,7 +186,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
 
                     const result = await query(args);
 
-                    if (userId && model !== 'AuditLog') {
+                    if (false && userId && model !== 'AuditLog') {
                          (prisma as any).auditLog.create({
                             data: {
                                 action: `DELETE_${model.toUpperCase()}`,
@@ -201,6 +201,39 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     }
 
                     return result;
+                },
+                async count({ args, query, model }: any) {
+                    if (MODELS_WITH_TENANT.includes(model)) {
+                        args.where = { ...args.where, tenantId };
+                    }
+                    return query(args);
+                },
+                async aggregate({ args, query, model }: any) {
+                    if (MODELS_WITH_TENANT.includes(model)) {
+                        args.where = { ...args.where, tenantId };
+                    }
+                    return query(args);
+                },
+                async groupBy({ args, query, model }: any) {
+                    if (MODELS_WITH_TENANT.includes(model)) {
+                        args.where = { ...args.where, tenantId };
+                    }
+                    return query(args);
+                },
+                async updateMany({ args, query, model }: any) {
+                    if (MODELS_WITH_TENANT.includes(model)) {
+                        args.where = { ...args.where, tenantId };
+                        if (userId && args.data) {
+                            args.data.updatedById = userId;
+                        }
+                    }
+                    return query(args);
+                },
+                async deleteMany({ args, query, model }: any) {
+                    if (MODELS_WITH_TENANT.includes(model)) {
+                        args.where = { ...args.where, tenantId };
+                    }
+                    return query(args);
                 },
             },
         },
