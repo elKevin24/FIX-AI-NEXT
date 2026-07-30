@@ -1,0 +1,69 @@
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { getTenantPrisma } from './tenant-prisma';
+
+const mockPrisma = vi.hoisted(() => ({
+  $extends: vi.fn((ext: any) => ext),
+}));
+
+vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
+
+describe('Tenant Isolation', () => {
+  const models = [
+    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
+    'AuditLog', 'ServiceTemplate', 'Notification', 'Invoice',
+    'Payment', 'CashRegister', 'CashTransaction', 'TenantSettings',
+    'POSSale', 'POSQuotation', 'CreditNote',
+  ];
+
+  it('getTenantPrisma returns an extended client', () => {
+    const db = getTenantPrisma('tenant-1', 'user-1');
+    expect(db).toBeDefined();
+    expect(db.query).toBeDefined();
+  });
+
+  it('injects tenantId into findMany where clause', async () => {
+    const db = getTenantPrisma('tenant-abc', 'user-1');
+    const queryFn = db.query.$allModels.findMany;
+
+    const fakeQuery = vi.fn().mockResolvedValue([]);
+    await queryFn({ model: 'Ticket', args: { where: {} }, query: fakeQuery });
+
+    expect(fakeQuery).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-abc' },
+    });
+  });
+
+  it('injects tenantId into findFirst where clause', async () => {
+    const db = getTenantPrisma('tenant-xyz', 'user-1');
+    const queryFn = db.query.$allModels.findFirst;
+
+    const fakeQuery = vi.fn().mockResolvedValue(null);
+    await queryFn({ model: 'Customer', args: { where: { id: '123' } }, query: fakeQuery });
+
+    expect(fakeQuery).toHaveBeenCalledWith({
+      where: { id: '123', tenantId: 'tenant-xyz' },
+    });
+  });
+
+  it('does NOT inject tenantId for non-tenant models', async () => {
+    const db = getTenantPrisma('tenant-1', 'user-1');
+    const queryFn = db.query.$allModels.findMany;
+
+    const fakeQuery = vi.fn().mockResolvedValue([]);
+    await queryFn({ model: 'SomeOtherModel', args: { where: {} }, query: fakeQuery });
+
+    expect(fakeQuery).toHaveBeenCalledWith({ where: {} });
+  });
+
+  it('preserves existing where fields when injecting tenantId', async () => {
+    const db = getTenantPrisma('t-1', 'user-1');
+    const queryFn = db.query.$allModels.findMany;
+
+    const fakeQuery = vi.fn().mockResolvedValue([]);
+    await queryFn({ model: 'Ticket', args: { where: { status: 'OPEN' } }, query: fakeQuery });
+
+    expect(fakeQuery).toHaveBeenCalledWith({
+      where: { status: 'OPEN', tenantId: 't-1' },
+    });
+  });
+});
