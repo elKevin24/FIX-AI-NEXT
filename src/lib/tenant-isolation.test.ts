@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { getTenantPrisma } from './tenant-prisma';
 
 const mockPrisma = vi.hoisted(() => ({
-  $extends: vi.fn((ext: any) => ext),
+  $extends: vi.fn((ext: any) => {
+    return {
+      __isExtended: true,
+      query: ext.query,
+    };
+  }),
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
@@ -15,10 +20,19 @@ describe('Tenant Isolation', () => {
     'POSSale', 'POSQuotation', 'CreditNote',
   ];
 
+  it('debería lanzar un error si no se provee tenantId', () => {
+      expect(() => getTenantPrisma('', 'user-1')).toThrow('tenantId es requerido para aislar la base de datos');
+  });
+
+  it('debería lanzar un error si no se provee userId', () => {
+      expect(() => getTenantPrisma('tenant-1', '')).toThrow('userId es requerido para la auditoría');
+  });
+
   it('getTenantPrisma returns an extended client', () => {
     const db = getTenantPrisma('tenant-1', 'user-1');
     expect(db).toBeDefined();
     expect(db.query).toBeDefined();
+    expect((db as any).__isExtended).toBe(true);
   });
 
   it('injects tenantId into findMany where clause', async () => {

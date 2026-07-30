@@ -187,3 +187,71 @@ export const TechnicianUnavailabilitySchema = z.object({
 });
 
 export const CreateUnavailabilitySchema = TechnicianUnavailabilitySchema;
+
+// ============================================================================
+// CASH REGISTER SCHEMAS
+// ============================================================================
+
+export const OpenCashRegisterSchema = z.object({
+  name: z.string().min(1, 'El nombre de la caja es requerido').max(100),
+  openingBalance: z.number().nonnegative('El saldo inicial no puede ser negativo'),
+});
+
+export const CashTransactionSchema = z.object({
+  cashRegisterId: z.string().uuid('ID de caja inválido'),
+  type: z.enum(['INCOME', 'EXPENSE', 'WITHDRAWAL'], { errorMap: () => ({ message: 'Tipo de transacción inválido' }) }),
+  amount: z.number().positive('El monto debe ser positivo'),
+  description: z.string().min(1, 'La descripción es requerida').max(255),
+  reference: z.string().max(100).optional().nullable(),
+});
+
+export const CloseCashRegisterSchema = z.object({
+  cashRegisterId: z.string().uuid('ID de caja inválido'),
+  closingBalance: z.number().nonnegative('El saldo final no puede ser negativo'),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+// ============================================================================
+// POS SCHEMAS
+// ============================================================================
+
+export const POSCartItemSchema = z.object({
+  partId: z.string().uuid('ID de producto inválido'),
+  quantity: z.number().int().positive('La cantidad debe ser positiva'),
+});
+
+export const POSPaymentItemSchema = z.object({
+  amount: z.number().positive('El monto debe ser positivo'),
+  paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
+  transactionRef: z.string().max(100).optional().nullable(),
+});
+
+export const CreatePOSSaleSchema = z.object({
+  items: z.array(POSCartItemSchema).min(1, 'Debe agregar al menos un producto'),
+  payments: z.array(POSPaymentItemSchema).min(1, 'Debe agregar al menos un método de pago'),
+  customerId: z.string().uuid('ID de cliente inválido').optional().nullable(),
+  customerName: z.string().max(100).optional().nullable(),
+  customerNIT: z.string().max(20).optional().nullable(),
+  discountAmount: z.number().nonnegative('El descuento no puede ser negativo').optional(),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+// ============================================================================
+// INVOICE & PAYMENT SCHEMAS
+// ============================================================================
+
+export const GenerateInvoiceSchema = z.object({
+  ticketId: z.string().uuid('ID de ticket inválido'),
+  taxRate: z.number().nonnegative().optional(),
+  discountAmount: z.number().nonnegative('El descuento no puede ser negativo').optional(),
+  notes: z.string().max(500).optional().nullable(),
+  paymentTerms: z.string().max(255).optional().nullable(),
+});
+
+export const RegisterPaymentSchema = z.object({
+  invoiceId: z.string().uuid('ID de factura inválido'),
+  amount: z.number().positive('El monto debe ser positivo'),
+  paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
+  transactionRef: z.string().max(100).optional().nullable(),
+  notes: z.string().max(500).optional().nullable(),
+});
