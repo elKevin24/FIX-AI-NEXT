@@ -23,12 +23,36 @@ const MODELS_WITH_TENANT = [
 ];
 
 /**
+ * Models that have a `createdById` field usable for audit trail.
+ */
+const MODELS_WITH_CREATED_BY = [
+    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
+    'ServiceTemplate', 'Invoice', 'CashTransaction',
+    'POSSale', 'POSQuotation', 'CreditNote'
+];
+
+/**
+ * Models that have an `updatedById` field usable for audit trail.
+ */
+const MODELS_WITH_UPDATED_BY = [
+    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
+    'ServiceTemplate', 'Invoice'
+];
+
+/**
  * Returns a Prisma client extension that enforces tenant isolation.
  * 
  * @param tenantId The ID of the tenant to scope queries to.
  * @returns A tenant-scoped Prisma client.
  */
 export function getTenantPrisma(tenantId: string, userId?: string, clientArg: any = prisma) {
+    if (!tenantId) {
+        throw new Error('tenantId es requerido para aislar la base de datos');
+    }
+    if (userId !== undefined && !userId) {
+        throw new Error('userId es requerido para la auditoría');
+    }
+
     return clientArg.$extends({
         query: {
             $allModels: {
@@ -60,8 +84,12 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     if (MODELS_WITH_TENANT.includes(model)) {
                         (args.data as any).tenantId = tenantId;
                         if (userId) {
-                            (args.data as any).createdById = userId;
-                            (args.data as any).updatedById = userId;
+                            if (MODELS_WITH_CREATED_BY.includes(model)) {
+                                (args.data as any).createdById = userId;
+                            }
+                            if (MODELS_WITH_UPDATED_BY.includes(model)) {
+                                (args.data as any).updatedById = userId;
+                            }
                         }
                     }
                     
@@ -92,17 +120,27 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                 async createMany({ args, query, model }: any) {
                     if (MODELS_WITH_TENANT.includes(model)) {
                         if (Array.isArray(args.data)) {
-                            args.data = args.data.map((item: any) => ({ 
-                                ...item, 
-                                tenantId,
-                                createdById: userId,
-                                updatedById: userId
-                            }));
+                            args.data = args.data.map((item: any) => {
+                                const enriched: any = { ...item, tenantId };
+                                if (userId) {
+                                    if (MODELS_WITH_CREATED_BY.includes(model)) {
+                                        enriched.createdById = userId;
+                                    }
+                                    if (MODELS_WITH_UPDATED_BY.includes(model)) {
+                                        enriched.updatedById = userId;
+                                    }
+                                }
+                                return enriched;
+                            });
                         } else {
                             (args.data as any).tenantId = tenantId;
                             if (userId) {
-                                (args.data as any).createdById = userId;
-                                (args.data as any).updatedById = userId;
+                                if (MODELS_WITH_CREATED_BY.includes(model)) {
+                                    (args.data as any).createdById = userId;
+                                }
+                                if (MODELS_WITH_UPDATED_BY.includes(model)) {
+                                    (args.data as any).updatedById = userId;
+                                }
                             }
                         }
                     }
@@ -143,7 +181,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                         }
 
                         // 2. Add metadata
-                        if (userId && args.data) {
+                        if (userId && args.data && MODELS_WITH_UPDATED_BY.includes(model)) {
                             args.data.updatedById = userId;
                         }
                     }
@@ -223,7 +261,7 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                 async updateMany({ args, query, model }: any) {
                     if (MODELS_WITH_TENANT.includes(model)) {
                         args.where = { ...args.where, tenantId };
-                        if (userId && args.data) {
+                        if (userId && args.data && MODELS_WITH_UPDATED_BY.includes(model)) {
                             args.data.updatedById = userId;
                         }
                     }

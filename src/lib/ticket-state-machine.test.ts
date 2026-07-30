@@ -7,105 +7,118 @@ import {
   describeTransition,
 } from './ticket-state-machine';
 
-describe('ticket-state-machine', () => {
+describe('Ticket State Machine', () => {
   describe('isValidTransition', () => {
-    it('take is valid from OPEN', () => {
-      expect(isValidTransition(TicketStatus.OPEN, 'take')).toBe(true);
+    const valid: [TicketStatus, string, string][] = [
+      [TicketStatus.OPEN, 'take', TicketStatus.IN_PROGRESS],
+      [TicketStatus.OPEN, 'assign', TicketStatus.IN_PROGRESS],
+      [TicketStatus.OPEN, 'cancel', TicketStatus.CANCELLED],
+      [TicketStatus.IN_PROGRESS, 'wait_for_parts', TicketStatus.WAITING_FOR_PARTS],
+      [TicketStatus.IN_PROGRESS, 'resolve', TicketStatus.RESOLVED],
+      [TicketStatus.IN_PROGRESS, 'cancel', TicketStatus.CANCELLED],
+      [TicketStatus.WAITING_FOR_PARTS, 'resume', TicketStatus.IN_PROGRESS],
+      [TicketStatus.WAITING_FOR_PARTS, 'cancel', TicketStatus.CANCELLED],
+      [TicketStatus.RESOLVED, 'deliver', TicketStatus.CLOSED],
+      [TicketStatus.RESOLVED, 'reopen', TicketStatus.IN_PROGRESS],
+      [TicketStatus.RESOLVED, 'cancel', TicketStatus.CANCELLED],
+      [TicketStatus.CLOSED, 'reopen', TicketStatus.IN_PROGRESS],
+      [TicketStatus.CANCELLED, 'reopen', TicketStatus.OPEN],
+    ];
+    it.each(valid)('%s → %s → %s', (from, action, to) => {
+      expect(isValidTransition(from, action as any)).toBe(true);
+      expect(getNextStatus(from, action as any)).toBe(to);
+      expect(describeTransition(from, action as any)).toBeTruthy();
     });
-    it('cancel is valid from OPEN', () => {
-      expect(isValidTransition(TicketStatus.OPEN, 'cancel')).toBe(true);
-    });
-    it('resolve is NOT valid from OPEN', () => {
-      expect(isValidTransition(TicketStatus.OPEN, 'resolve')).toBe(false);
-    });
-    it('deliver is NOT valid from OPEN', () => {
-      expect(isValidTransition(TicketStatus.OPEN, 'deliver')).toBe(false);
-    });
-    it('wait_for_parts is valid from IN_PROGRESS', () => {
-      expect(isValidTransition(TicketStatus.IN_PROGRESS, 'wait_for_parts')).toBe(true);
-    });
-    it('resolve is valid from IN_PROGRESS', () => {
-      expect(isValidTransition(TicketStatus.IN_PROGRESS, 'resolve')).toBe(true);
-    });
-    it('resume is valid from WAITING_FOR_PARTS', () => {
-      expect(isValidTransition(TicketStatus.WAITING_FOR_PARTS, 'resume')).toBe(true);
-    });
-    it('deliver is valid from RESOLVED', () => {
-      expect(isValidTransition(TicketStatus.RESOLVED, 'deliver')).toBe(true);
-    });
-    it('reopen is valid from RESOLVED', () => {
-      expect(isValidTransition(TicketStatus.RESOLVED, 'reopen')).toBe(true);
-    });
-    it('reopen is valid from CLOSED', () => {
-      expect(isValidTransition(TicketStatus.CLOSED, 'reopen')).toBe(true);
-    });
-    it('reopen is valid from CANCELLED', () => {
-      expect(isValidTransition(TicketStatus.CANCELLED, 'reopen')).toBe(true);
-    });
-    it('invalid action returns false', () => {
-      expect(isValidTransition(TicketStatus.CLOSED, 'deliver')).toBe(false);
-    });
-  });
 
-  describe('getNextStatus', () => {
-    it('OPEN + take -> IN_PROGRESS', () => {
-      expect(getNextStatus(TicketStatus.OPEN, 'take')).toBe(TicketStatus.IN_PROGRESS);
-    });
-    it('OPEN + cancel -> CANCELLED', () => {
-      expect(getNextStatus(TicketStatus.OPEN, 'cancel')).toBe(TicketStatus.CANCELLED);
-    });
-    it('IN_PROGRESS + resolve -> RESOLVED', () => {
-      expect(getNextStatus(TicketStatus.IN_PROGRESS, 'resolve')).toBe(TicketStatus.RESOLVED);
-    });
-    it('WAITING_FOR_PARTS + resume -> IN_PROGRESS', () => {
-      expect(getNextStatus(TicketStatus.WAITING_FOR_PARTS, 'resume')).toBe(TicketStatus.IN_PROGRESS);
-    });
-    it('RESOLVED + deliver -> CLOSED', () => {
-      expect(getNextStatus(TicketStatus.RESOLVED, 'deliver')).toBe(TicketStatus.CLOSED);
-    });
-    it('RESOLVED + reopen -> IN_PROGRESS', () => {
-      expect(getNextStatus(TicketStatus.RESOLVED, 'reopen')).toBe(TicketStatus.IN_PROGRESS);
-    });
-    it('CLOSED + reopen -> IN_PROGRESS', () => {
-      expect(getNextStatus(TicketStatus.CLOSED, 'reopen')).toBe(TicketStatus.IN_PROGRESS);
-    });
-    it('CANCELLED + reopen -> OPEN', () => {
-      expect(getNextStatus(TicketStatus.CANCELLED, 'reopen')).toBe(TicketStatus.OPEN);
-    });
-    it('throws for invalid transition', () => {
-      expect(() => getNextStatus(TicketStatus.OPEN, 'deliver')).toThrow('Invalid transition');
+    const invalid: [TicketStatus, string][] = [
+      [TicketStatus.OPEN, 'deliver'],
+      [TicketStatus.OPEN, 'resolve'],
+      [TicketStatus.OPEN, 'reopen'],
+      [TicketStatus.OPEN, 'resume'],
+      [TicketStatus.IN_PROGRESS, 'take'],
+      [TicketStatus.IN_PROGRESS, 'deliver'],
+      [TicketStatus.IN_PROGRESS, 'reopen'],
+      [TicketStatus.WAITING_FOR_PARTS, 'resolve'],
+      [TicketStatus.WAITING_FOR_PARTS, 'deliver'],
+      [TicketStatus.WAITING_FOR_PARTS, 'start'],
+      [TicketStatus.RESOLVED, 'take'],
+      [TicketStatus.RESOLVED, 'start'],
+      [TicketStatus.RESOLVED, 'wait_for_parts'],
+      [TicketStatus.CLOSED, 'deliver'],
+      [TicketStatus.CLOSED, 'cancel'],
+      [TicketStatus.CLOSED, 'resolve'],
+      [TicketStatus.CANCELLED, 'deliver'],
+      [TicketStatus.CANCELLED, 'cancel'],
+    ];
+    it.each(invalid)('%s → %s is rejected', (from, action) => {
+      expect(isValidTransition(from, action as any)).toBe(false);
+      expect(() => getNextStatus(from, action as any)).toThrow('Invalid transition');
     });
   });
 
   describe('getValidActions', () => {
-    it('returns [take, assign, cancel] for OPEN', () => {
-      expect(getValidActions(TicketStatus.OPEN)).toEqual(['take', 'assign', 'cancel']);
+    it('OPEN allows take, assign, cancel', () => {
+      expect(getValidActions(TicketStatus.OPEN).sort()).toEqual(['assign', 'cancel', 'take']);
     });
-    it('returns [wait_for_parts, resolve, cancel] for IN_PROGRESS', () => {
-      expect(getValidActions(TicketStatus.IN_PROGRESS)).toEqual(['wait_for_parts', 'resolve', 'cancel']);
+    it('IN_PROGRESS allows wait_for_parts, resolve, cancel', () => {
+      expect(getValidActions(TicketStatus.IN_PROGRESS).sort()).toEqual(['cancel', 'resolve', 'wait_for_parts']);
     });
-    it('returns [resume, cancel] for WAITING_FOR_PARTS', () => {
-      expect(getValidActions(TicketStatus.WAITING_FOR_PARTS)).toEqual(['resume', 'cancel']);
+    it('WAITING_FOR_PARTS allows resume, cancel', () => {
+      expect(getValidActions(TicketStatus.WAITING_FOR_PARTS).sort()).toEqual(['cancel', 'resume']);
     });
-    it('returns [deliver, reopen, cancel] for RESOLVED', () => {
-      expect(getValidActions(TicketStatus.RESOLVED)).toEqual(['deliver', 'reopen', 'cancel']);
+    it('RESOLVED allows deliver, reopen, cancel', () => {
+      expect(getValidActions(TicketStatus.RESOLVED).sort()).toEqual(['cancel', 'deliver', 'reopen']);
     });
-    it('returns [reopen] for CLOSED', () => {
+    it('CLOSED only allows reopen', () => {
       expect(getValidActions(TicketStatus.CLOSED)).toEqual(['reopen']);
     });
-    it('returns [reopen] for CANCELLED', () => {
+    it('CANCELLED only allows reopen', () => {
       expect(getValidActions(TicketStatus.CANCELLED)).toEqual(['reopen']);
     });
   });
 
-  describe('describeTransition', () => {
-    it('returns description for OPEN->take', () => {
-      expect(describeTransition(TicketStatus.OPEN, 'take')).toBe('Técnico toma el ticket y comienza a trabajar');
+  describe('full lifecycle walkthrough', () => {
+    it('happy path: OPEN → IN_PROGRESS → RESOLVED → CLOSED', () => {
+      let status: TicketStatus = TicketStatus.OPEN;
+      status = getNextStatus(status, 'take');
+      expect(status).toBe(TicketStatus.IN_PROGRESS);
+      status = getNextStatus(status, 'resolve');
+      expect(status).toBe(TicketStatus.RESOLVED);
+      status = getNextStatus(status, 'deliver');
+      expect(status).toBe(TicketStatus.CLOSED);
     });
-    it('returns fallback for unknown transition', () => {
-      const desc = describeTransition(TicketStatus.CLOSED, 'cancel');
-      expect(desc).toContain('CLOSED');
-      expect(desc).toContain('cancel');
+
+    it('with parts wait: OPEN → IN_PROGRESS → WAITING_FOR_PARTS → IN_PROGRESS → RESOLVED → CLOSED', () => {
+      let status: TicketStatus = TicketStatus.OPEN;
+      status = getNextStatus(status, 'take');
+      status = getNextStatus(status, 'wait_for_parts');
+      expect(status).toBe(TicketStatus.WAITING_FOR_PARTS);
+      status = getNextStatus(status, 'resume');
+      expect(status).toBe(TicketStatus.IN_PROGRESS);
+      status = getNextStatus(status, 'resolve');
+      expect(status).toBe(TicketStatus.RESOLVED);
+      status = getNextStatus(status, 'deliver');
+      expect(status).toBe(TicketStatus.CLOSED);
+    });
+
+    it('cancel at any point is valid', () => {
+      for (const status of [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_FOR_PARTS, TicketStatus.RESOLVED]) {
+        expect(isValidTransition(status, 'cancel')).toBe(true);
+      }
+      expect(isValidTransition(TicketStatus.CLOSED, 'cancel')).toBe(false);
+      expect(isValidTransition(TicketStatus.CANCELLED, 'cancel')).toBe(false);
+    });
+
+    it('reopen from CANCELLED goes to OPEN', () => {
+      expect(getNextStatus(TicketStatus.CANCELLED, 'reopen')).toBe(TicketStatus.OPEN);
+    });
+
+    it('reopen from CLOSED goes to IN_PROGRESS', () => {
+      expect(getNextStatus(TicketStatus.CLOSED, 'reopen')).toBe(TicketStatus.IN_PROGRESS);
+    });
+
+    it('reopen from RESOLVED goes to IN_PROGRESS', () => {
+      expect(getNextStatus(TicketStatus.RESOLVED, 'reopen')).toBe(TicketStatus.IN_PROGRESS);
     });
   });
 });

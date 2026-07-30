@@ -1,8 +1,9 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
+import { NotificationFilterSchema, NotificationIdSchema } from '@/lib/schemas';
 
 export type NotificationType = 'INFO' | 'WARNING' | 'SUCCESS' | 'ERROR';
 
@@ -29,25 +30,27 @@ export async function getAllMyNotifications(page = 1, limit = 20) {
         return { notifications: [], total: 0, totalPages: 0 };
     }
     
-    const skip = (page - 1) * limit;
+    // Zod validation
+    const parsed = NotificationFilterSchema.parse({ page, limit });
+    
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+    const skip = (parsed.page - 1) * parsed.limit;
     
     try {
         const [notifications, total] = await Promise.all([
-            prisma.notification.findMany({
+            db.notification.findMany({
                 where: {
                     userId: session.user.id,
-                    tenantId: session.user.tenantId,
                 },
                 orderBy: {
                     createdAt: 'desc',
                 },
-                take: limit,
+                take: parsed.limit,
                 skip: skip,
             }),
-            prisma.notification.count({
+            db.notification.count({
                 where: {
                     userId: session.user.id,
-                    tenantId: session.user.tenantId,
                 }
             })
         ]);
@@ -55,7 +58,7 @@ export async function getAllMyNotifications(page = 1, limit = 20) {
         return { 
             notifications, 
             total, 
-            totalPages: Math.ceil(total / limit) 
+            totalPages: Math.ceil(total / parsed.limit) 
         };
     } catch (error) {
         console.error('Failed to get all notifications', error);
@@ -65,8 +68,10 @@ export async function getAllMyNotifications(page = 1, limit = 20) {
 
 export async function markMyNotificationAsRead(id: string) {
      const session = await auth();
-     if (!session?.user?.id) return;
-     await markNotificationAsRead(id, session.user.id);
+     if (!session?.user?.id || !session?.user?.tenantId) return;
+     
+     const parsed = NotificationIdSchema.parse({ id });
+     await markNotificationAsRead(parsed.id, session.user.id, session.user.tenantId);
 }
 
 export async function markAllMyNotificationsAsRead() {
@@ -77,13 +82,16 @@ export async function markAllMyNotificationsAsRead() {
 
 export async function deleteMyNotification(id: string) {
      const session = await auth();
-     if (!session?.user?.id) return;
+     if (!session?.user?.id || !session?.user?.tenantId) return;
+     
+     const parsed = NotificationIdSchema.parse({ id });
+     const db = getTenantPrisma(session.user.tenantId, session.user.id);
      
      try {
-        await prisma.notification.delete({
+        await db.notification.delete({
             where: {
-                id: id,
-                userId: session.user.id,
+                id: parsed.id,
+                userId: session.user.id, // Ensure ownership
             }
         });
         revalidatePath('/dashboard');
@@ -95,7 +103,9 @@ export async function deleteMyNotification(id: string) {
 
 export async function createNotification(params: CreateNotificationParams) {
     try {
-        await prisma.notification.create({
+        // Internal server call, assuming params are trusted or pre-validated by callers
+        const db = getTenantPrisma(params.tenantId, params.userId);
+        await db.notification.create({
             data: {
                 userId: params.userId,
                 tenantId: params.tenantId,
@@ -105,8 +115,6 @@ export async function createNotification(params: CreateNotificationParams) {
                 link: params.link,
             }
         });
-        // Note: We don't revalidatePath here as it's often triggered from background actions
-        // and specific user revalidation is tricky.
     } catch (error) {
         console.error('Failed to create notification', error);
     }
@@ -114,10 +122,10 @@ export async function createNotification(params: CreateNotificationParams) {
 
 export async function getUnreadNotifications(userId: string, tenantId: string) {
     try {
-        return await prisma.notification.findMany({
+        const db = getTenantPrisma(tenantId, userId);
+        return await db.notification.findMany({
             where: {
                 userId,
-                tenantId,
                 isRead: false,
             },
             orderBy: {
@@ -131,9 +139,10 @@ export async function getUnreadNotifications(userId: string, tenantId: string) {
     }
 }
 
-export async function markNotificationAsRead(notificationId: string, userId: string) {
+export async function markNotificationAsRead(notificationId: string, userId: string, tenantId: string) {
     try {
-        await prisma.notification.update({
+        const db = getTenantPrisma(tenantId, userId);
+        await db.notification.update({
             where: {
                 id: notificationId,
                 userId: userId, // Ensure ownership
@@ -151,10 +160,10 @@ export async function markNotificationAsRead(notificationId: string, userId: str
 
 export async function markAllNotificationsAsRead(userId: string, tenantId: string) {
     try {
-        await prisma.notification.updateMany({
+        const db = getTenantPrisma(tenantId, userId);
+        await db.notification.updateMany({
             where: {
                 userId,
-                tenantId,
                 isRead: false,
             },
             data: {

@@ -1,8 +1,8 @@
-import { PrismaClient, UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '../src/generated/prisma';
+import { UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '../src/generated/prisma';
 import bcryptjs from 'bcryptjs';
+import { prisma } from '../src/lib/prisma';
 
 console.log('[SEED] Initializing...');
-const prisma = new PrismaClient();
 console.log('[SEED] Prisma Client instantiated.');
 
 /**
@@ -478,7 +478,8 @@ async function main() {
     await Promise.all([
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_SEEDED',
+                action: AuditAction.TENANT_CREATED,
+                module: AuditModule.SYSTEM,
                 details: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
                 userId: t1Admin.id,
                 tenantId: tenant1.id,
@@ -486,7 +487,8 @@ async function main() {
         }),
         prisma.auditLog.create({
             data: {
-                action: 'TENANT_SEEDED',
+                action: AuditAction.TENANT_CREATED,
+                module: AuditModule.SYSTEM,
                 details: JSON.stringify({ tenantName: 'TechRepair Pro' }),
                 userId: t2Admin.id,
                 tenantId: tenant2.id,

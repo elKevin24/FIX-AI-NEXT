@@ -50,7 +50,7 @@ describe('invoice-actions.ts', () => {
 
   describe('registerPayment', () => {
     it('should register a payment and update invoice status', async () => {
-      const invoiceId = 'inv-1';
+      const invoiceId = '550e8400-e29b-41d4-a716-446655440002';
       const paymentData = {
         invoiceId,
         amount: 100,
@@ -83,7 +83,7 @@ describe('invoice-actions.ts', () => {
     });
 
     it('should throw error if amount exceeds remaining balance', async () => {
-        const invoiceId = 'inv-1';
+        const invoiceId = '550e8400-e29b-41d4-a716-446655440002';
         const paymentData = {
           invoiceId,
           amount: 150, // Exceeds 100
