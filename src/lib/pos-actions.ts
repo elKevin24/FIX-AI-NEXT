@@ -652,22 +652,25 @@ export async function getPOSSalesStats(from?: Date, to?: Date) {
   });
 
   // 2. Payment Method Aggregation (DB Side)
-  // We query the payment table filtering by the parent sale criteria
-  const paymentsByMethod = await db.pOSSalePayment.groupBy({
-    by: ['paymentMethod'],
-    _sum: {
-      amount: true,
-    },
+  // Prisma groupBy doesn't fully support filtering by relation in all versions cleanly,
+  // and the field name is 'method', not 'paymentMethod'. 
+  // We'll use findMany and aggregate in JS for simplicity since payments are tied to sales.
+  const payments = await db.pOSSalePayment.findMany({
     where: {
       sale: where,
+    },
+    select: {
+      method: true,
+      amount: true,
     },
   });
 
   // Transform Data
   const byPaymentMethod: Record<string, number> = {};
-  paymentsByMethod.forEach((p: any) => {
-    if (p.paymentMethod) {
-      byPaymentMethod[p.paymentMethod] = decimalToNumber(p._sum.amount);
+  payments.forEach((p: any) => {
+    if (p.method) {
+      if (!byPaymentMethod[p.method]) byPaymentMethod[p.method] = 0;
+      byPaymentMethod[p.method] += decimalToNumber(p.amount);
     }
   });
 

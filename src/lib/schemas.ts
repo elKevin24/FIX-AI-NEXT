@@ -255,3 +255,41 @@ export const RegisterPaymentSchema = z.object({
   transactionRef: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
 });
+
+// ============================================================================
+// REPORTS SCHEMAS
+// ============================================================================
+
+export const DateRangeSchema = z.object({
+  startDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+  endDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: "La fecha de fin debe ser posterior a la fecha de inicio",
+  path: ["endDate"],
+});
+
+// ============================================================================
+// NOTIFICATIONS SCHEMAS
+// ============================================================================
+
+export const NotificationFilterSchema = z.object({
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(20),
+});
+
+export const NotificationIdSchema = z.object({
+  id: z.string().uuid('ID de notificación inválido'),
+});
+
+// ============================================================================
+// SLA SCHEMAS
+// ============================================================================
+
+export const SLACheckSchema = z.object({
+  tenantId: z.string().uuid('ID de tenant inválido').optional(), // Opcional para correr el SLA limitadamente
+});

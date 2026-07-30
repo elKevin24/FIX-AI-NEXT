@@ -5,6 +5,7 @@ import { AuthError } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod'; // Import Zod
 import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema, CreateUserSchema, UpdateUserSchema, CreateCustomerSchema, UpdateCustomerSchema, CreatePartSchema, UpdatePartSchema } from './schemas';
@@ -508,20 +509,18 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
             });
         }
 
-        const currentCustomerId = customer.id;
-
+        console.log('[DEBUG] currentCustomerId:', customer.id);
+        
         // Use interactive transaction for batch creation
-        const createdTicketIds = await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(tenantId, session.user.id, tx);
-            
+        const createdTicketIds = await tenantDb.$transaction(async (tx: any) => {
             // We map the validated data
             const tickets = await Promise.all(
                 ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
-                    txTenantDb.ticket.create({
+                    tx.ticket.create({
                         data: {
                             title: ticket.title,
                             description: ticket.description,
-                            customerId: currentCustomerId,
+                            customerId: customer.id,
                             status: 'OPEN',
                             tenantId: tenantId,
                             deviceType: ticket.deviceType,
@@ -538,6 +537,8 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
             );
             return tickets.map((t: any) => t.id);
         });
+
+        console.log('[DEBUG] createdTicketIds:', createdTicketIds);
 
         // Notify customer for each ticket created in the batch (Background)
         (async () => {
@@ -570,12 +571,13 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
             }
         })();
 
-        return { success: true, message: 'Tickets creados exitosamente' };
-
+        revalidatePath('/dashboard/tickets');
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
         return { success: false, message: 'Error de base de datos: No se pudieron crear los tickets.' };
     }
+
+    redirect('/dashboard/tickets');
 }
 
 // ==================== USER ACTIONS ====================
@@ -1176,27 +1178,25 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
         }
 
         // 2. Transaction for Update (and Stock Restore if Cancelled)
-        await prisma.$transaction(async (tx: any) => {
-             const txTenantDb = getTenantPrisma(existingTicket.tenantId, user.id, tx);
-             
+        await tenantDb.$transaction(async (tx: any) => {
              if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.partUsage.delete({
+                         await tx.partUsage.delete({
                              where: { id: usage.id }
                          });
                      }
                  }
              }
 
-             await txTenantDb.ticket.update({
+             await tx.ticket.update({
                  where: { id: ticketId },
                  data: { status: status as any, updatedById: user.id }
              });
 
              // Add system note if note provided
              if (note) {
-                await txTenantDb.ticketNote.create({
+                await tx.ticketNote.create({
                     data: {
                         ticketId,
                         content: `Cambio de estado a ${status}: ${note}`,
