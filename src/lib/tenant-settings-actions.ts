@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
 
 // ==================== Types ====================
 
@@ -39,7 +39,7 @@ export interface TenantSettings {
 
 // ==================== Helper Functions ====================
 
-function decimalToNumber(value: Decimal | null | undefined): number {
+function decimalToNumber(value: Prisma.Decimal | null | undefined): number {
   if (value === null || value === undefined) return 0;
   return Number(value);
 }
@@ -52,7 +52,7 @@ function transformSettings(settings: {
   businessAddress: string | null;
   businessPhone: string | null;
   businessEmail: string | null;
-  taxRate: Decimal;
+  taxRate: Prisma.Decimal;
   taxName: string;
   currency: string;
   defaultPaymentTerms: string | null;

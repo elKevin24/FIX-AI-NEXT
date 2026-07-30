@@ -4,7 +4,8 @@ import { EmailLayout } from './components/EmailLayout';
 
 interface TicketCreatedEmailProps {
   customerName: string;
-  ticketNumber: string;
+  ticketKey?: string;
+  ticketNumber?: string;
   ticketTitle: string;
   deviceType?: string | null;
   deviceModel?: string | null;
@@ -13,6 +14,7 @@ interface TicketCreatedEmailProps {
 
 export const TicketCreatedEmail = ({
   customerName = 'Cliente',
+  ticketKey = undefined,
   ticketNumber = 'TICK-0000',
   ticketTitle = 'Reparación General',
   deviceType = 'Dispositivo',
@@ -21,7 +23,7 @@ export const TicketCreatedEmail = ({
 }: TicketCreatedEmailProps) => {
   return (
     <EmailLayout
-      previewText={`Orden de servicio #${ticketNumber} recibida`}
+      previewText={`Orden de servicio #${ticketKey || ticketNumber} recibida`}
       heading="¡Hemos recibido tu equipo!"
     >
       <Text style={paragraph}>
@@ -36,7 +38,7 @@ export const TicketCreatedEmail = ({
         <Row>
           <Column>
             <Text style={label}>Ticket No.</Text>
-            <Text style={value}>#{ticketNumber}</Text>
+            <Text style={value}>#{ticketKey || ticketNumber}</Text>
           </Column>
           <Column>
             <Text style={label}>Servicio</Text>

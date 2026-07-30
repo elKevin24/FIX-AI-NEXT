@@ -94,7 +94,7 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     const lowStockCount = stats[0]?.lowStockCount || 0;
     const totalValue = Number(stats[0]?.totalValue || 0);
 
-    // Convert Decimal to number for client component
+    // Convert Prisma.Decimal to number for client component
     const serializedParts = parts.map((part: any) => ({
         ...part,
         cost: Number(part.cost),

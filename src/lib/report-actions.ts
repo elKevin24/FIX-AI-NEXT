@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { InvoiceStatus, POSSaleStatus } from '@prisma/client';
+import { InvoiceStatus, POSSaleStatus } from '@/generated/prisma';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {
   const session = await auth();

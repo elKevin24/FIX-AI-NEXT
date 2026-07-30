@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { ServiceCategory, TicketPriority } from '@prisma/client';
+import { ServiceCategory, TicketPriority, Prisma } from '@/generated/prisma';
 import { notifyLowStock } from './ticket-notifications';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import {
@@ -560,10 +560,11 @@ export async function createTicketFromTemplate(formData: FormData) {
            }
            
            // Decrementar stock
-           await tx.part.update({
-             where: { id: optionalPart.partId },
-             data: { quantity: { decrement: optionalPart.quantity } }
-           });
+           // REMOVED: Handled by DB trigger trg_update_stock_on_usage when partUsage is created below
+           // await tx.part.update({
+           //   where: { id: optionalPart.partId },
+           //   data: { quantity: { decrement: optionalPart.quantity } }
+           // });
 
            // Registrar uso
            await tx.partUsage.create({
@@ -578,6 +579,8 @@ export async function createTicketFromTemplate(formData: FormData) {
     }
 
     return newTicket;
+  }, {
+    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   });
 
   // Fetch the created ticket with customer data for notifications
