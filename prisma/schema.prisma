@@ -6,9 +6,9 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
   extensions = [pg_trgm]
 }
+
 
 model Tenant {
   id               String            @id @default(uuid())
