@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { InvoiceStatus, POSSaleStatus } from '@/generated/prisma';
+import { DateRangeSchema } from '@/lib/schemas';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {
   const session = await auth();
@@ -10,12 +11,20 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     throw new Error('No autorizado');
   }
 
+  // RBAC: Solo ADMIN puede ver reportes financieros y de rendimiento
+  if (session.user.role !== 'ADMIN') {
+    throw new Error('Solo los administradores pueden generar reportes');
+  }
+
+  // Validación Zod de fechas
+  const validatedDates = DateRangeSchema.parse({ startDate, endDate });
+
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const tenantId = session.user.tenantId;
 
   // Default to last 30 days if not provided
-  const end = endDate || new Date();
-  const start = startDate || new Date(new Date().setDate(end.getDate() - 30));
+  const end = validatedDates.endDate || new Date();
+  const start = validatedDates.startDate || new Date(new Date().setDate(end.getDate() - 30));
 
   const dateFilter = {
     gte: start,

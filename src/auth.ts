@@ -105,42 +105,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!parsedCredentials.success) {
                     // Mensaje genérico para no revelar info
-                    console.log("Invalid credentials format");
+                    console.log("Invalid credentials format:", parsedCredentials.error);
                     return null;
                 }
 
                 const { email, password } = parsedCredentials.data;
-                const user = await getUser(email);
+                console.log(`[NextAuth] Authorize attempt for email: ${email}`);
+                
+                let user;
+                try {
+                  user = await getUser(email);
+                  console.log(`[NextAuth] getUser returned:`, !!user);
+                } catch (err) {
+                  console.error(`[NextAuth] Error in getUser:`, err);
+                  return null;
+                }
 
                 // Mensaje genérico: no revelar si el email existe o no
                 if (!user) {
-                    console.log("Authentication failed");
+                    console.log("[NextAuth] Authentication failed: user not found");
                     return null;
                 }
 
                 // Verificar si la cuenta está activa
                 if (!user.isActive) {
-                    console.log("Account deactivated");
+                    console.log("[NextAuth] Account deactivated");
                     return null;
                 }
 
                 // Verificar si la cuenta está bloqueada
                 if (isAccountLocked(user.lockedUntil)) {
-                    console.log("Account temporarily locked");
+                    console.log("[NextAuth] Account temporarily locked");
                     return null;
                 }
 
                 // Verificar contraseña
+                console.log(`[NextAuth] Comparing passwords...`);
                 const passwordsMatch = await compare(password, user.password);
+                console.log(`[NextAuth] Passwords match:`, passwordsMatch);
 
                 if (!passwordsMatch) {
                     // Registrar intento fallido (no revelar detalles al usuario)
                     await recordFailedLogin(user.id);
-                    console.log("Authentication failed");
+                    console.log("[NextAuth] Authentication failed: invalid password");
                     return null;
                 }
 
                 // Login exitoso - resetear contadores
+                console.log(`[NextAuth] Login successful for user: ${user.id}`);
                 await recordSuccessfulLogin(user.id);
 
                 // Retornar usuario con campos adicionales para la sesión
