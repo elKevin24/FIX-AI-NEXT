@@ -151,6 +151,7 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
                             <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤔</div>
                             <p className={styles.notFoundText}>No encontramos a &ldquo;{query}&rdquo;</p>
                             <Button 
+                                type="button"
                                 variant="outline" 
                                 size="sm" 
                                 onClick={handleCreateNew}

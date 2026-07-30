@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useActionState } from 'react';
+import { useState, useActionState } from 'react';
 import { createBatchTickets } from '@/lib/actions';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
