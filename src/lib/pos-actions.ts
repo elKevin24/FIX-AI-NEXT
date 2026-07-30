@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { PaymentMethod, POSSaleStatus } from '@/generated/prisma';
 import { Prisma } from '@/generated/prisma';
 import { getTaxRate } from './tenant-settings-actions';
+import { CreatePOSSaleSchema } from '@/lib/schemas';
 
 // ============================================================================
 // TYPES
@@ -98,19 +99,20 @@ export async function getPartsForPOS(search?: string) {
 /**
  * Create a POS sale with mixed payments support
  */
-export async function createPOSSale(data: CreatePOSSaleData) {
+export async function createPOSSale(rawData: CreatePOSSaleData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
-
-  if (!data.items || data.items.length === 0) {
-    throw new Error('Debe agregar al menos un producto');
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden realizar ventas');
   }
 
-  if (!data.payments || data.payments.length === 0) {
-    throw new Error('Debe agregar al menos un método de pago');
+  const validatedFields = CreatePOSSaleSchema.safeParse(rawData);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
   }
+  const data = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -270,6 +272,8 @@ export async function createPOSSale(data: CreatePOSSaleData) {
     }
 
     return newSale;
+  }, {
+    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   });
 
   revalidatePath('/dashboard/pos');
@@ -286,6 +290,9 @@ export async function voidPOSSale(saleId: string, reason: string) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
+  }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden anular ventas');
   }
 
   if (!reason || reason.trim().length === 0) {
@@ -384,6 +391,8 @@ export async function voidPOSSale(saleId: string, reason: string) {
         });
       }
     }
+  }, {
+    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   });
 
   revalidatePath('/dashboard/pos');

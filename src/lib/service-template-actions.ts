@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { ServiceCategory, TicketPriority } from '@/generated/prisma';
+import { ServiceCategory, TicketPriority, Prisma } from '@/generated/prisma';
 import { notifyLowStock } from './ticket-notifications';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import {
@@ -579,6 +579,8 @@ export async function createTicketFromTemplate(formData: FormData) {
     }
 
     return newTicket;
+  }, {
+    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   });
 
   // Fetch the created ticket with customer data for notifications
