@@ -10,6 +10,7 @@ export default defineConfig({
     setupFiles: [],
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@prisma/client/runtime/library': path.resolve(__dirname, 'node_modules/@prisma/client/runtime/client'),
     },
     server: {
       deps: {
@@ -18,6 +19,7 @@ export default defineConfig({
     },
     env: {
       RESEND_API_KEY: 're_dummy_123',
+      DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy?sslmode=require',
     },
   },
 })

@@ -1513,6 +1513,10 @@ export async function createPart(prevState: any, formData: FormData) {
         return { success: false, message: 'No autorizado' };
     }
 
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden crear repuestos' };
+    }
+
     const data = {
         name: formData.get('name'),
         sku: formData.get('sku'),
