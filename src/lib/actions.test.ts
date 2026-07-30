@@ -205,26 +205,25 @@ describe('Core Actions CRUD', () => {
             expect(mockDb.partUsage.create).toHaveBeenCalled();
         });
 
-                        it('createTicket should fail when stock is insufficient', async () => {
-                            const validPartId = '123e4567-e89b-12d3-a456-426614174000';
-                            mockDb.customer.findFirst.mockResolvedValue(null); // Customer not found
-                            mockDb.customer.create.mockResolvedValue({ id: 'cust-new', name: 'New Cust' });
-                            
-                            // Simulate insufficient stock check
-                            // quantity 0 < 1 required
-                            mockDb.part.findUnique = vi.fn().mockResolvedValue({ id: validPartId, name: 'Part A', quantity: 0, minStock: 2, tenantId: 'tenant-1' });
-                
-                            const formData = new FormData();
-                            formData.append('title', 'Fix PC');
-                            formData.append('description', 'Broken');
-                            formData.append('customerName', 'New Cust');
-                            formData.append('initialParts', JSON.stringify([{ partId: validPartId, quantity: 1 }]));
-                
-                            const result = await createTicket(null, formData);
-                
-                            expect(result).toEqual(expect.objectContaining({ success: false }));
-                            expect(result.message).toMatch(/Stock insuficiente/);
-                        });        it('updateTicketStatus should update status', async () => {
+        it('createTicket should fail when stock is insufficient', async () => {
+            const validPartId = '123e4567-e89b-12d3-a456-426614174000';
+            mockDb.customer.findFirst.mockResolvedValue(null);
+            mockDb.customer.create.mockResolvedValue({ id: 'cust-new', name: 'New Cust' });
+            mockDb.part.findUnique = vi.fn().mockResolvedValue({ id: validPartId, name: 'Part A', quantity: 0, minStock: 2, tenantId: 'tenant-1' });
+
+            const formData = new FormData();
+            formData.append('title', 'Fix PC');
+            formData.append('description', 'Broken');
+            formData.append('customerName', 'New Cust');
+            formData.append('initialParts', JSON.stringify([{ partId: validPartId, quantity: 1 }]));
+
+            const result = await createTicket(null, formData);
+
+            expect(result).toEqual(expect.objectContaining({ success: false }));
+            expect(result.message).toMatch(/Stock insuficiente/);
+        });
+
+        it('updateTicketStatus should update status', async () => {
             const validTicketId = '123e4567-e89b-12d3-a456-426614174001';
             mockDb.ticket.findUnique.mockResolvedValue({ 
                 id: validTicketId, 
@@ -287,6 +286,38 @@ describe('Core Actions CRUD', () => {
 
              expect(mockDb.part.update).toHaveBeenCalled();
              expect(redirect).toHaveBeenCalledWith('/dashboard/parts');
+        });
+
+        it('createPart should return error if user is VIEWER', async () => {
+            (auth as any).mockResolvedValueOnce({
+                user: { id: 'viewer-1', tenantId: 'tenant-1', role: 'VIEWER' }
+            });
+
+            const formData = new FormData();
+            formData.append('name', 'RAM');
+            formData.append('quantity', '10');
+            formData.append('cost', '50');
+            formData.append('price', '80');
+
+            const result = await createPart(null, formData);
+            expect(result.success).toBe(false);
+            expect(result.message).toBe('Los observadores no pueden crear repuestos');
+        });
+
+        it('createUser should return error if user is VIEWER', async () => {
+            (auth as any).mockResolvedValueOnce({
+                user: { id: 'viewer-1', tenantId: 'tenant-1', role: 'VIEWER' }
+            });
+
+            const formData = new FormData();
+            formData.append('name', 'Test');
+            formData.append('email', 'test@test.com');
+            formData.append('password', '123456');
+            formData.append('role', 'TECHNICIAN');
+
+            const result = await createUser(null, formData);
+            expect(result.success).toBe(false);
+            expect(result.message).toBe('Solo los administradores pueden crear usuarios');
         });
     });
 });
