@@ -646,6 +646,28 @@ a:hover {
   text-decoration: none;
 }
 
+/* Pattern para todos los glass elements */
+.glassCard {
+    background: var(--color-surface);
+    
+    /* Fallback para navegadores sin backdrop-filter */
+    @supports not (backdrop-filter: blur(8px)) {
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+}
+
+/* Para dark theme */
+[data-theme="dark"] .glassCard {
+    @supports not (backdrop-filter: blur(8px)) {
+        background: rgba(30, 30, 35, 0.95);
+    }
+}
+
 /* Button Sizes */
 .btn-sm {
   padding: var(--spacing-2) var(--spacing-4);
