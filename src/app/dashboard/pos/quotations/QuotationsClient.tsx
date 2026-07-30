@@ -14,7 +14,7 @@ import {
     deleteQuotation,
     getQuotationById,
 } from '@/lib/quotation-actions';
-import { QuotationStatus, PaymentMethod } from '@prisma/client';
+import { QuotationStatus, PaymentMethod } from '@/generated/prisma';
 import styles from './quotations.module.css';
 
 // Types

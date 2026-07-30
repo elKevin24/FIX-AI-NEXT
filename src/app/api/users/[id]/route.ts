@@ -9,7 +9,7 @@ const updateUserSchema = z.object({
   email: z.string().email('Invalid email address').optional(),
   password: z.string().min(8, 'Password must be at least 8 characters').optional(),
   name: z.string().min(1, 'Name is required').optional(),
-  role: z.enum(['ADMIN', 'TECHNICIAN', 'RECEPTIONIST']).optional(),
+  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
 });
 
 // GET /api/users/[id] - Get single user

@@ -1,11 +1,17 @@
 /**
  * Authentication & Authorization Utilities
  *
- * Centraliza la validación de roles y permisos para evitar
- * código duplicado y garantizar consistencia.
+ * Sistema de RBAC (Role-Based Access Control) para gestión multi-tenant.
+ * Define permisos para cada rol y funciones de validación.
+ *
+ * Roles:
+ * - ADMIN: Control total del tenant
+ * - MANAGER: Gestiona tickets y usuarios (no puede cambiar config del tenant)
+ * - TECHNICIAN: Crea y responde tickets asignados
+ * - VIEWER: Solo lectura (Visualizador)
  */
 
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/generated/prisma';
 
 export { UserRole };
 
@@ -18,6 +24,11 @@ export const ROLE_PERMISSIONS = {
     canCreateUsers: true,
     canDeleteUsers: true,
     canEditUsers: true,
+    canChangeRoles: true,
+    canDeactivateUsers: true,
+
+    // Tenant Management
+    canManageTenantSettings: true,
 
     // Ticket Viewing
     canViewAllTickets: true,
@@ -40,30 +51,78 @@ export const ROLE_PERMISSIONS = {
     canAddPartsToTicket: true,
 
     // Customer Management
+    canCreateCustomers: true,
     canEditCustomers: true,
     canDeleteCustomers: true,
 
     // Advanced Features
     canViewReports: true,
     canManageTemplates: true,
+    canExportData: true,
+  },
+  MANAGER: {
+    // User Management
+    canCreateUsers: true,
+    canDeleteUsers: false,
+    canEditUsers: true,
+    canChangeRoles: false,
+    canDeactivateUsers: true,
+
+    // Tenant Management
+    canManageTenantSettings: false,
+
+    // Ticket Viewing
+    canViewAllTickets: true,
+
+    // Ticket Actions
+    canTakeTicket: true,
+    canAssignTickets: true,
+    canStartTicket: true,
+    canResolveTicket: true,
+    canDeliverTicket: true,
+    canCancelTickets: true,
+    canReopenTickets: true,
+    canWaitForParts: true,
+    canResumeFromWaiting: true,
+    canDeleteTickets: false,
+
+    // Inventory
+    canEditParts: true,
+    canDeleteParts: false,
+    canAddPartsToTicket: true,
+
+    // Customer Management
+    canCreateCustomers: true,
+    canEditCustomers: true,
+    canDeleteCustomers: false,
+
+    // Advanced Features
+    canViewReports: true,
+    canManageTemplates: true,
+    canExportData: true,
   },
   TECHNICIAN: {
     // User Management
     canCreateUsers: false,
     canDeleteUsers: false,
     canEditUsers: false,
+    canChangeRoles: false,
+    canDeactivateUsers: false,
+
+    // Tenant Management
+    canManageTenantSettings: false,
 
     // Ticket Viewing
-    canViewAllTickets: false, // Solo ve tickets asignados y pool
+    canViewAllTickets: false,
 
     // Ticket Actions
-    canTakeTicket: true, // Puede auto-asignarse desde el pool
-    canAssignTickets: false, // No puede asignar a otros
+    canTakeTicket: true,
+    canAssignTickets: false,
     canStartTicket: true,
     canResolveTicket: true,
-    canDeliverTicket: false, // Solo admin puede cerrar definitivamente
-    canCancelTickets: false, // Solo admin puede cancelar
-    canReopenTickets: false, // Solo admin puede reabrir
+    canDeliverTicket: false,
+    canCancelTickets: false,
+    canReopenTickets: false,
     canWaitForParts: true,
     canResumeFromWaiting: true,
     canDeleteTickets: false,
@@ -71,21 +130,28 @@ export const ROLE_PERMISSIONS = {
     // Inventory
     canEditParts: false,
     canDeleteParts: false,
-    canAddPartsToTicket: true, // Puede agregar partes mientras trabaja
+    canAddPartsToTicket: true,
 
     // Customer Management
+    canCreateCustomers: true,
     canEditCustomers: false,
     canDeleteCustomers: false,
 
     // Advanced Features
     canViewReports: false,
     canManageTemplates: false,
+    canExportData: false,
   },
-  RECEPTIONIST: {
+  VIEWER: {
     // User Management
     canCreateUsers: false,
     canDeleteUsers: false,
     canEditUsers: false,
+    canChangeRoles: false,
+    canDeactivateUsers: false,
+
+    // Tenant Management
+    canManageTenantSettings: false,
 
     // Ticket Viewing
     canViewAllTickets: true,
@@ -108,22 +174,23 @@ export const ROLE_PERMISSIONS = {
     canAddPartsToTicket: false,
 
     // Customer Management
-    canEditCustomers: true, // Puede editar clientes
+    canCreateCustomers: false,
+    canEditCustomers: false,
     canDeleteCustomers: false,
 
     // Advanced Features
-    canViewReports: false,
+    canViewReports: true,
     canManageTemplates: false,
+    canExportData: false,
   },
 } as const;
+
+export type Permission = keyof typeof ROLE_PERMISSIONS.ADMIN;
 
 /**
  * Verifica si un rol tiene un permiso específico
  */
-export function hasPermission(
-  role: UserRole,
-  permission: keyof typeof ROLE_PERMISSIONS.ADMIN
-): boolean {
+export function hasPermission(role: UserRole, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role]?.[permission] ?? false;
 }
 
@@ -131,28 +198,79 @@ export function hasPermission(
  * Verifica si el usuario es administrador
  */
 export function isAdmin(role: UserRole): boolean {
-  return role === UserRole.ADMIN;
+  return role === 'ADMIN';
+}
+
+/**
+ * Verifica si el usuario es manager
+ */
+export function isManager(role: UserRole): boolean {
+  return role === 'MANAGER';
 }
 
 /**
  * Verifica si el usuario es técnico
  */
 export function isTechnician(role: UserRole): boolean {
-  return role === UserRole.TECHNICIAN;
+  return role === 'TECHNICIAN';
 }
 
 /**
- * Verifica si el usuario es recepcionista
+ * Verifica si el usuario es visualizador
  */
-export function isReceptionist(role: UserRole): boolean {
-  return role === UserRole.RECEPTIONIST;
+export function isViewer(role: UserRole): boolean {
+  return role === 'VIEWER';
+}
+
+/**
+ * Verifica si el usuario puede gestionar otros usuarios
+ */
+export function canManageUsers(role: UserRole): boolean {
+  return hasPermission(role, 'canCreateUsers') || hasPermission(role, 'canEditUsers');
+}
+
+/**
+ * Obtiene el nivel de jerarquía del rol (para comparaciones)
+ * Mayor número = más permisos
+ */
+export function getRoleHierarchyLevel(role: UserRole): number {
+  switch (role) {
+    case 'ADMIN':
+      return 4;
+    case 'MANAGER':
+      return 3;
+    case 'TECHNICIAN':
+      return 2;
+    case 'VIEWER':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Verifica si un rol puede modificar a otro
+ * (no puede modificar usuarios de igual o mayor jerarquía, excepto a sí mismo)
+ */
+export function canModifyUser(
+  actorRole: UserRole,
+  targetRole: UserRole,
+  isSelf: boolean
+): boolean {
+  if (isSelf) return true;
+  const actorLevel = getRoleHierarchyLevel(actorRole);
+  const targetLevel = getRoleHierarchyLevel(targetRole);
+  return actorLevel > targetLevel;
 }
 
 /**
  * Tipos de error de autorización
  */
 export class AuthorizationError extends Error {
-  constructor(message: string, public code: string = 'FORBIDDEN') {
+  constructor(
+    message: string,
+    public code: string = 'FORBIDDEN'
+  ) {
     super(message);
     this.name = 'AuthorizationError';
   }
@@ -160,11 +278,10 @@ export class AuthorizationError extends Error {
 
 /**
  * Valida que el usuario tenga el permiso requerido
- * @throws AuthorizationError si no tiene permiso
  */
 export function requirePermission(
   role: UserRole,
-  permission: keyof typeof ROLE_PERMISSIONS.ADMIN,
+  permission: Permission,
   customMessage?: string
 ): void {
   if (!hasPermission(role, permission)) {
@@ -178,7 +295,6 @@ export function requirePermission(
 
 /**
  * Valida que el usuario sea admin
- * @throws AuthorizationError si no es admin
  */
 export function requireAdmin(role: UserRole): void {
   if (!isAdmin(role)) {
@@ -190,7 +306,19 @@ export function requireAdmin(role: UserRole): void {
 }
 
 /**
- * Valida tenant isolation - verifica que el recurso pertenezca al tenant del usuario
+ * Valida que el usuario sea admin o manager
+ */
+export function requireAdminOrManager(role: UserRole): void {
+  if (!isAdmin(role) && !isManager(role)) {
+    throw new AuthorizationError(
+      'Solo administradores y managers pueden realizar esta acción',
+      'ADMIN_OR_MANAGER_REQUIRED'
+    );
+  }
+}
+
+/**
+ * Valida tenant isolation
  */
 export function validateTenantAccess(
   userTenantId: string,
@@ -211,33 +339,10 @@ export function validateTenantAccess(
   }
 }
 
-/**
- * Helper para verificar múltiples permisos (requiere al menos uno)
- */
-export function hasAnyPermission(
-  role: UserRole,
-  permissions: Array<keyof typeof ROLE_PERMISSIONS.ADMIN>
-): boolean {
-  return permissions.some((permission) => hasPermission(role, permission));
-}
-
-/**
- * Helper para verificar múltiples permisos (requiere todos)
- */
-export function hasAllPermissions(
-  role: UserRole,
-  permissions: Array<keyof typeof ROLE_PERMISSIONS.ADMIN>
-): boolean {
-  return permissions.every((permission) => hasPermission(role, permission));
-}
-
 // ============================================================================
 // TICKET ACTION VALIDATORS
 // ============================================================================
 
-/**
- * Mapeo de acciones de ticket a permisos requeridos
- */
 export const TICKET_ACTION_PERMISSIONS = {
   take: 'canTakeTicket',
   assign: 'canAssignTickets',
@@ -252,15 +357,11 @@ export const TICKET_ACTION_PERMISSIONS = {
 
 export type TicketAction = keyof typeof TICKET_ACTION_PERMISSIONS;
 
-/**
- * Valida si un usuario puede realizar una acción específica en un ticket
- * @throws AuthorizationError si no tiene permiso
- */
 export function requireTicketActionPermission(
   role: UserRole,
   action: TicketAction
 ): void {
-  const permission = TICKET_ACTION_PERMISSIONS[action] as keyof typeof ROLE_PERMISSIONS.ADMIN;
+  const permission = TICKET_ACTION_PERMISSIONS[action] as Permission;
 
   if (!hasPermission(role, permission)) {
     const actionLabels: Record<TicketAction, string> = {
@@ -282,22 +383,46 @@ export function requireTicketActionPermission(
   }
 }
 
-/**
- * Verifica si un usuario puede realizar una acción de ticket (sin throw)
- */
 export function canPerformTicketAction(
   role: UserRole,
   action: TicketAction
 ): boolean {
-  const permission = TICKET_ACTION_PERMISSIONS[action] as keyof typeof ROLE_PERMISSIONS.ADMIN;
+  const permission = TICKET_ACTION_PERMISSIONS[action] as Permission;
   return hasPermission(role, permission);
 }
 
-/**
- * Obtiene todas las acciones que un rol puede realizar
- */
-export function getAvailableTicketActions(role: UserRole): TicketAction[] {
-  return (Object.keys(TICKET_ACTION_PERMISSIONS) as TicketAction[]).filter(
-    (action) => canPerformTicketAction(role, action)
+// ============================================================================
+// ROLE LABELS AND DISPLAY
+// ============================================================================
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: 'Administrador',
+  MANAGER: 'Gerente',
+  TECHNICIAN: 'Técnico',
+  VIEWER: 'Visualizador',
+};
+
+export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  ADMIN: 'Control total del tenant: gestión de usuarios, configuración y todas las operaciones',
+  MANAGER: 'Gestiona tickets y usuarios, pero no puede cambiar la configuración del tenant',
+  TECHNICIAN: 'Crea y responde tickets asignados, puede agregar partes a tickets',
+  VIEWER: 'Solo puede ver información, sin capacidad de realizar cambios',
+};
+
+export const ROLE_COLORS: Record<UserRole, { bg: string; text: string }> = {
+  ADMIN: { bg: 'bg-red-100', text: 'text-red-800' },
+  MANAGER: { bg: 'bg-purple-100', text: 'text-purple-800' },
+  TECHNICIAN: { bg: 'bg-blue-100', text: 'text-blue-800' },
+  VIEWER: { bg: 'bg-gray-100', text: 'text-gray-800' },
+};
+
+export function getSelectableRoles(): UserRole[] {
+  return ['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'];
+}
+
+export function getAssignableRoles(actorRole: UserRole): UserRole[] {
+  const actorLevel = getRoleHierarchyLevel(actorRole);
+  return getSelectableRoles().filter(
+    (role) => getRoleHierarchyLevel(role) < actorLevel
   );
 }

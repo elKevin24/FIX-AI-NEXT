@@ -3,10 +3,11 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { InvoiceStatus, PaymentMethod } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
+import { InvoiceStatus, PaymentMethod } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
 import { getTaxRate } from './tenant-settings-actions';
+import { GenerateInvoiceSchema, RegisterPaymentSchema } from '@/lib/schemas';
 
 // ============================================================================
 // TYPES
@@ -36,11 +37,20 @@ export interface PaymentData {
  * Genera una factura automática para un ticket cerrado
  * Calcula automáticamente los costos de partes y mano de obra
  */
-export async function generateInvoiceFromTicket(data: InvoiceData) {
+export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden generar facturas');
+  }
+
+  const validatedFields = GenerateInvoiceSchema.safeParse(rawData);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+  }
+  const data = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -142,14 +152,14 @@ export async function generateInvoiceFromTicket(data: InvoiceData) {
       customerId: ticket.customerId,
 
       // Desglose financiero
-      laborCost: new Decimal(laborCost),
-      partsCost: new Decimal(partsCost),
-      partsMarkup: new Decimal(partsMarkup),
-      subtotal: new Decimal(subtotal),
-      taxRate: new Decimal(taxRate),
-      taxAmount: new Decimal(taxAmount),
-      discountAmount: new Decimal(discountAmount),
-      total: new Decimal(total),
+      laborCost: new Prisma.Decimal(laborCost),
+      partsCost: new Prisma.Decimal(partsCost),
+      partsMarkup: new Prisma.Decimal(partsMarkup),
+      subtotal: new Prisma.Decimal(subtotal),
+      taxRate: new Prisma.Decimal(taxRate),
+      taxAmount: new Prisma.Decimal(taxAmount),
+      discountAmount: new Prisma.Decimal(discountAmount),
+      total: new Prisma.Decimal(total),
 
       // Información del cliente (snapshot)
       customerName: ticket.customer.name,
@@ -318,11 +328,20 @@ export async function getInvoiceById(id: string) {
 /**
  * Registra un pago para una factura
  */
-export async function registerPayment(data: PaymentData) {
+export async function registerPayment(rawData: PaymentData) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
   }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden registrar pagos');
+  }
+
+  const validatedFields = RegisterPaymentSchema.safeParse(rawData);
+  if (!validatedFields.success) {
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+  }
+  const data = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -380,7 +399,7 @@ export async function registerPayment(data: PaymentData) {
       data: {
         paymentNumber,
         invoiceId: data.invoiceId,
-        amount: new Decimal(data.amount),
+        amount: new Prisma.Decimal(data.amount),
         paymentMethod: data.paymentMethod,
         transactionRef: data.transactionRef,
         notes: data.notes,
@@ -435,6 +454,9 @@ export async function cancelInvoice(invoiceId: string, reason: string) {
   const session = await auth();
   if (!session?.user?.tenantId) {
     throw new Error('No autorizado');
+  }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden cancelar facturas');
   }
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);

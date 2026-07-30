@@ -40,24 +40,23 @@ import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTe
  * - Safe for customer self-service status checks
  */
 export async function getTicketById(rawId: string) {
-    const id = rawId.trim().toLowerCase();
+    const id = rawId.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     // Try to find by exact ID first (full UUID)
-    let ticket = await prisma.ticket.findUnique({
+    let ticket = isUuid ? await prisma.ticket.findUnique({
         where: { id },
         include: {
             tenant: true,
             assignedTo: true,
         },
-    });
+    }) : null;
 
-    // If not found and ID looks like a short ID, try partial match
-    if (!ticket && id.length >= 8) {
+    // If not found, try by ticketNumber
+    if (!ticket) {
         ticket = await prisma.ticket.findFirst({
             where: {
-                id: {
-                    startsWith: id,
-                },
+                ticketNumber: id,
             },
             include: {
                 tenant: true,
@@ -80,25 +79,24 @@ export async function getTicketById(rawId: string) {
  * instead of triggering a 404 page redirect.
  */
 export async function searchTicket(rawId: string) {
-    const id = rawId.trim().toLowerCase();
+    const id = rawId.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     try {
         // Try to find by exact ID first (full UUID)
-        let ticket = await prisma.ticket.findUnique({
+        let ticket = isUuid ? await prisma.ticket.findUnique({
             where: { id },
             include: {
                 tenant: true,
                 assignedTo: true,
             },
-        });
+        }) : null;
 
-        // If not found and ID looks like a short ID, try partial match
-        if (!ticket && id.length >= 8) {
+        // If not found, try by ticketNumber
+        if (!ticket) {
             ticket = await prisma.ticket.findFirst({
                 where: {
-                    id: {
-                        startsWith: id,
-                    },
+                    ticketNumber: id,
                 },
                 include: {
                     tenant: true,
@@ -195,6 +193,9 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
+    }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden crear tickets' };
     }
 
     const tenantId = session.user.tenantId;
@@ -433,6 +434,9 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'Unauthorized' };
+    }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden crear tickets' };
     }
 
     const customerName = formData.get('customerName') as string;
@@ -779,6 +783,9 @@ export async function createCustomer(prevState: any, formData: FormData) {
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden crear clientes' };
+    }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = CreateCustomerSchema.safeParse(formDataObj);
@@ -829,6 +836,9 @@ export async function updateCustomer(prevState: any, formData: FormData) {
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden editar clientes' };
+    }
 
     const formDataObj = Object.fromEntries(formData);
     const validatedFields = UpdateCustomerSchema.safeParse(formDataObj);
@@ -839,23 +849,16 @@ export async function updateCustomer(prevState: any, formData: FormData) {
 
     const { customerId, name, email, phone, address, dpi, nit } = validatedFields.data;
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 
-        // Verify customer exists and belongs to same tenant (unless super admin)
+        // Verify customer exists and belongs to same tenant
         const existingCustomer = await tenantDb.customer.findUnique({
             where: { id: customerId }
         });
 
         if (!existingCustomer) {
             return { success: false, message: 'Cliente no encontrado' };
-        }
-
-        if (!isSuperAdmin && existingCustomer.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para editar este cliente' };
         }
 
         await tenantDb.customer.update({
@@ -906,13 +909,10 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de cliente requerido' };
     }
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 
-        // Verify customer exists and belongs to same tenant (unless super admin)
+        // Verify customer exists and belongs to same tenant
         const existingCustomer = await tenantDb.customer.findUnique({
             where: { id: customerId },
             include: {
@@ -924,10 +924,6 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
 
         if (!existingCustomer) {
             return { success: false, message: 'Cliente no encontrado' };
-        }
-
-        if (!isSuperAdmin && existingCustomer.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para eliminar este cliente' };
         }
 
         // Check if customer has tickets
@@ -964,6 +960,9 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden editar tickets' };
+    }
 
     const { user } = session;
 
@@ -980,9 +979,6 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
     if (rawData.accessories === '') rawData.accessories = null;
     if (rawData.checkInNotes === '') rawData.checkInNotes = null;
     if (rawData.cancellationReason === '') rawData.cancellationReason = null;
-
-    // Temporary Super Admin Check
-    const isSuperAdmin = user.email === 'adminkev@example.com';
 
     // Validate
     const validatedFields = UpdateTicketSchema.safeParse(rawData);
@@ -1003,18 +999,10 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
     try {
         const tenantDb = getTenantPrisma(user.tenantId, user.id);
         
-        let existingTicket;
-         if (isSuperAdmin) {
-            existingTicket = await prisma.ticket.findUnique({
-                where: { id: ticketId },
-                include: { partsUsed: true, customer: true, assignedTo: true }
-            });
-        } else {
-            existingTicket = await tenantDb.ticket.findUnique({
-                where: { id: ticketId },
-                include: { partsUsed: true, customer: true, assignedTo: true }
-            });
-        }
+        const existingTicket = await tenantDb.ticket.findUnique({
+            where: { id: ticketId },
+            include: { partsUsed: true, customer: true, assignedTo: true }
+        });
 
         if (!existingTicket) {
              return { success: false, message: 'Ticket no encontrado' };
@@ -1153,6 +1141,9 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden cambiar el estado' };
+    }
 
     const ticketId = formData.get('ticketId') as string;
     const status = formData.get('status') as string; 
@@ -1169,25 +1160,16 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
         return { success: false, message: 'Estado inválido' };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const { user } = session;
 
     try {
         const tenantDb = getTenantPrisma(user.tenantId, user.id);
         
         // 1. Fetch Existing
-        let existingTicket;
-        if (isSuperAdmin) {
-            existingTicket = await prisma.ticket.findUnique({
-                 where: { id: ticketId },
-                 include: { partsUsed: true, customer: true, assignedTo: true }
-            });
-        } else {
-             existingTicket = await tenantDb.ticket.findUnique({
-                where: { id: ticketId },
-                include: { partsUsed: true, customer: true, assignedTo: true }
-            });
-        }
+        const existingTicket = await tenantDb.ticket.findUnique({
+            where: { id: ticketId },
+            include: { partsUsed: true, customer: true, assignedTo: true }
+        });
 
         if (!existingTicket) {
              return { success: false, message: 'Ticket no encontrado' };
@@ -1326,9 +1308,6 @@ export async function deleteTicket(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de ticket requerido' };
     }
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -1338,10 +1317,6 @@ export async function deleteTicket(prevState: any, formData: FormData) {
 
         if (!existingTicket) {
             return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        if (!isSuperAdmin && existingTicket.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para eliminar este ticket' };
         }
 
         // Automatic audit logging handles the log creation
@@ -1374,6 +1349,9 @@ export async function addTicketNote(prevState: any, formData: FormData) {
     if (!session?.user?.tenantId || !session?.user?.id) {
         return { success: false, message: 'No autorizado' };
     }
+    if (session.user.role === 'VIEWER') {
+        return { success: false, message: 'Los observadores no pueden agregar notas' };
+    }
 
     const ticketId = formData.get('ticketId') as string;
     const content = formData.get('content') as string;
@@ -1383,23 +1361,16 @@ export async function addTicketNote(prevState: any, formData: FormData) {
         return { success: false, message: 'El contenido de la nota es requerido' };
     }
 
-    // TODO: REMOVE THIS SUPER ADMIN CHECK ONCE MULTI-TENANCY IS FULLY STABILIZED
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
         const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
 
-        // Verify ticket exists and belongs to same tenant (unless super admin)
+        // Verify ticket exists and belongs to same tenant
         const ticket = await tenantDb.ticket.findUnique({
             where: { id: ticketId }
         });
 
         if (!ticket) {
             return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        if (!isSuperAdmin && ticket.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para agregar notas a este ticket' };
         }
 
         await tenantDb.ticketNote.create({

@@ -14,7 +14,7 @@ import {
     searchSalesForReturn,
     getPOSSaleForReturn,
 } from '@/lib/credit-note-actions';
-import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { CreditNoteStatus, PaymentMethod } from '@/generated/prisma';
 import styles from './returns.module.css';
 
 // Types

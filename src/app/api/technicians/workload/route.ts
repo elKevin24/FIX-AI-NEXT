@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { UserRole, TicketStatus } from '@prisma/client';
+import { UserRole, TicketStatus } from '@/generated/prisma';
 
 /**
  * @swagger

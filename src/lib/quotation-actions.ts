@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { QuotationStatus, PaymentMethod } from '@prisma/client';
+import { QuotationStatus, PaymentMethod } from '@/generated/prisma';
 import { getTaxRate, getTenantSettingsForDocuments } from './tenant-settings-actions';
 
 // ============= SCHEMAS =============
@@ -414,12 +414,13 @@ export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleS
     });
 
     // Update stock
-    for (const item of quotation.items) {
-        await db.part.update({
-            where: { id: item.partId },
-            data: { quantity: { decrement: item.quantity } },
-        });
-    }
+    // REMOVED: Handled by DB trigger trg_update_stock_on_pos_item
+    // for (const item of quotation.items) {
+    //     await db.part.update({
+    //         where: { id: item.partId },
+    //         data: { quantity: { decrement: item.quantity } },
+    //     });
+    // }
 
     // Update quotation status
     await db.pOSQuotation.update({
