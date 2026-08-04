@@ -39,8 +39,8 @@ describe('Concurrency & Inventory', () => {
         (getTenantPrisma as any).mockReturnValue(mockDb);
 
         const formData = new FormData();
-        formData.append('templateId', 'template-1');
-        formData.append('customerId', 'customer-1');
+        formData.append('templateId', '123e4567-e89b-12d3-a456-426614174001');
+        formData.append('customerId', '123e4567-e89b-12d3-a456-426614174002');
 
         await createTicketFromTemplate(formData);
 
