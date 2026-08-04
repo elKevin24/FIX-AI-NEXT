@@ -29,6 +29,12 @@ const MODELS_WITH_TENANT = [
  * @returns A tenant-scoped Prisma client.
  */
 export function getTenantPrisma(tenantId: string, userId?: string, clientArg: any = prisma) {
+    if (!tenantId) {
+        throw new Error('tenantId es requerido para aislar la base de datos');
+    }
+    if (!userId) {
+        throw new Error('userId es requerido para la auditoría');
+    }
     return clientArg.$extends({
         query: {
             $allModels: {
