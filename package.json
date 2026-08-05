@@ -91,7 +91,6 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "@tootallnate/once": "^3.0.1",
-    "ajv": "^8.20.0",
     "esbuild": "^0.28.1",
     "fast-xml-parser": "^5.10.1",
     "js-yaml": "^5.2.3",
