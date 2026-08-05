@@ -108,9 +108,7 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     }),
 
     // 8. Top Selling Parts
-    db.pOSSaleItem.groupBy({
-        by: ['partName'],
-        _sum: { quantity: true, total: true },
+    db.pOSSaleItem.findMany({
         where: {
             sale: {
                 tenantId,
@@ -118,10 +116,7 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
                 createdAt: dateFilter
             }
         },
-        orderBy: {
-            _sum: { total: 'desc' }
-        },
-        take: 5
+        include: { part: true }
     })
   ]);
 
@@ -185,11 +180,23 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
         totalQuantity: inventoryStats._sum.quantity || 0,
         lowStockParts: 0, // Removed detailed low stock count for performance, use aggregate if needed
         totalStockValue: 0, // Need cost aggregation if we want this, skipped for perf optimization
-        topSelling: topParts.map((p: any) => ({
-            name: p.partName,
-            quantity: p._sum.quantity,
-            total: Number(p._sum.total)
-        }))
+        topSelling: (() => {
+            const map = new Map<string, { name: string, quantity: number, total: number }>();
+            topParts.forEach((item: any) => {
+                const name = item.part?.name || 'Producto Desconocido';
+                const qty = item.quantity;
+                const total = (Number(item.quantity) * Number(item.unitPrice)) - Number(item.discount);
+                if (!map.has(name)) {
+                    map.set(name, { name, quantity: 0, total: 0 });
+                }
+                const entry = map.get(name)!;
+                entry.quantity += qty;
+                entry.total += total;
+            });
+            return Array.from(map.values())
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5);
+        })()
     }
   };
 }
