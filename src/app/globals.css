@@ -3,8 +3,6 @@
    Professional Multi-Tenant Workshop Management
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 :root {
   /* ========== COLOR PALETTE ========== */
   /* Optimized for WCAG AA/AAA Contrast */
@@ -29,6 +27,7 @@
   --color-secondary-100: hsl(280, 95%, 93%);
   --color-secondary-500: hsl(280, 70%, 50%);
   --color-secondary-600: hsl(280, 75%, 40%);
+  --color-secondary-700: hsl(280, 75%, 30%);
 
   /* Accent Colors - Vibrant Orange */
   --color-accent-50: hsl(30, 100%, 97%);
@@ -36,12 +35,16 @@
   --color-accent-500: hsl(25, 95%, 50%);
   /* Shifted slightly redder/darker for visibility */
   --color-accent-600: hsl(25, 100%, 40%);
+  --color-accent-700: hsl(25, 100%, 32%);
 
   /* Semantic Colors - Adjusted for Contrast */
 
   /* Success (Green) - Needs to be dark enough for white text */
   --color-success-50: hsl(145, 85%, 97%);
   --color-success-100: hsl(145, 80%, 92%);
+  --color-success-200: hsl(145, 80%, 85%);
+  --color-success-300: hsl(145, 75%, 75%);
+  --color-success-400: hsl(145, 70%, 55%);
   --color-success-500: hsl(145, 70%, 40%);
   /* Darkened */
   --color-success-600: hsl(145, 80%, 30%);
@@ -51,14 +54,22 @@
   /* Warning (Yellow/Amber) - Difficult to use with white text, usually use black text on yellow bg */
   --color-warning-50: hsl(40, 100%, 97%);
   --color-warning-100: hsl(40, 90%, 92%);
+  --color-warning-200: hsl(40, 88%, 85%);
+  --color-warning-400: hsl(35, 90%, 55%);
   --color-warning-500: hsl(35, 90%, 45%);
   /* Darkened to Amber */
   --color-warning-600: hsl(30, 95%, 35%);
+  --color-warning-700: hsl(30, 95%, 28%);
   --color-warning-800: hsl(30, 100%, 20%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(30, 100%, 12%);
 
   /* Error (Red) */
   --color-error-50: hsl(0, 100%, 97%);
   --color-error-100: hsl(0, 90%, 93%);
+  --color-error-200: hsl(0, 88%, 88%);
+  --color-error-300: hsl(355, 85%, 80%);
+  --color-error-400: hsl(355, 82%, 60%);
   --color-error-500: hsl(355, 80%, 50%);
   --color-error-600: hsl(355, 85%, 40%);
   --color-error-700: hsl(355, 90%, 30%);
@@ -67,6 +78,8 @@
   /* Info (Blue/Cyan) */
   --color-info-50: hsl(205, 100%, 97%);
   --color-info-100: hsl(205, 90%, 92%);
+  --color-info-200: hsl(205, 88%, 88%);
+  --color-info-400: hsl(205, 80%, 55%);
   --color-info-500: hsl(205, 75%, 45%);
   --color-info-600: hsl(205, 85%, 35%);
   --color-info-700: hsl(205, 90%, 25%);
@@ -115,7 +128,8 @@
   /* Active states - Moderado */
 
   /* ========== TYPOGRAPHY ========== */
-  --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* --font-inter is injected by next/font (see src/app/layout.tsx) */
+  --font-family-base: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
 
   /* Font Weights */
@@ -214,6 +228,30 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* ========== LEGACY COMPATIBILITY ALIASES ========== */
+  /* Old token names still referenced by legacy module CSS (POS, cash register,
+     technician cards, ticket pool). Resolved against the current design system
+     so they stay theme-aware. */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
@@ -252,6 +290,9 @@
   /* Success - Brighter green */
   --color-success-50: hsl(145, 70%, 15%);
   --color-success-100: hsl(145, 65%, 20%);
+  --color-success-200: hsl(145, 65%, 25%);
+  --color-success-300: hsl(145, 65%, 32%);
+  --color-success-400: hsl(145, 62%, 42%);
   --color-success-500: hsl(145, 60%, 50%);
   --color-success-600: hsl(145, 60%, 55%);
   --color-success-700: hsl(145, 65%, 60%);
@@ -260,13 +301,21 @@
   /* Warning - Brighter amber */
   --color-warning-50: hsl(35, 80%, 18%);
   --color-warning-100: hsl(35, 75%, 25%);
+  --color-warning-200: hsl(35, 80%, 30%);
+  --color-warning-400: hsl(35, 85%, 50%);
   --color-warning-500: hsl(35, 90%, 60%);
   --color-warning-600: hsl(35, 90%, 65%);
+  --color-warning-700: hsl(35, 90%, 68%);
   --color-warning-800: hsl(35, 95%, 70%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(35, 100%, 15%);
 
   /* Error - Brighter red */
   --color-error-50: hsl(355, 75%, 18%);
   --color-error-100: hsl(355, 70%, 25%);
+  --color-error-200: hsl(355, 75%, 30%);
+  --color-error-300: hsl(355, 75%, 38%);
+  --color-error-400: hsl(355, 80%, 50%);
   --color-error-500: hsl(355, 80%, 60%);
   --color-error-600: hsl(355, 85%, 65%);
   --color-error-700: hsl(355, 90%, 70%);
@@ -275,10 +324,26 @@
   /* Info - Brighter cyan */
   --color-info-50: hsl(205, 80%, 18%);
   --color-info-100: hsl(205, 75%, 25%);
+  --color-info-200: hsl(205, 80%, 30%);
+  --color-info-400: hsl(205, 85%, 50%);
   --color-info-500: hsl(205, 85%, 60%);
   --color-info-600: hsl(205, 90%, 65%);
   --color-info-700: hsl(205, 95%, 70%);
   --color-info-800: hsl(205, 95%, 75%);
+
+  /* Secondary - Brighter purple */
+  --color-secondary-50: hsl(280, 75%, 15%);
+  --color-secondary-100: hsl(280, 70%, 22%);
+  --color-secondary-500: hsl(280, 80%, 65%);
+  --color-secondary-600: hsl(280, 85%, 70%);
+  --color-secondary-700: hsl(280, 88%, 75%);
+
+  /* Accent - Brighter orange */
+  --color-accent-50: hsl(25, 80%, 15%);
+  --color-accent-100: hsl(25, 75%, 22%);
+  --color-accent-500: hsl(25, 90%, 65%);
+  --color-accent-600: hsl(25, 92%, 70%);
+  --color-accent-700: hsl(25, 95%, 75%);
 
   /* Grays - Adjusted for dark theme */
   --color-gray-50: hsl(210, 20%, 20%);
@@ -299,6 +364,27 @@
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.7);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+
+  /* Legacy compatibility aliases (theme-aware) */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
@@ -339,6 +425,9 @@
   /* Success - BLUE (#3FB950 GitHub green → Blue equivalent) */
   --color-success-50: hsl(212, 75%, 18%);
   --color-success-100: hsl(212, 70%, 24%);
+  --color-success-200: hsl(212, 75%, 30%);
+  --color-success-300: hsl(212, 75%, 38%);
+  --color-success-400: hsl(212, 80%, 50%);
   --color-success-500: hsl(212, 88%, 61%);
   --color-success-600: hsl(212, 88%, 66%);
   --color-success-700: hsl(212, 90%, 71%);
@@ -347,13 +436,21 @@
   /* Warning - Golden Yellow (high visibility) */
   --color-warning-50: hsl(40, 70%, 18%);
   --color-warning-100: hsl(40, 68%, 24%);
+  --color-warning-200: hsl(40, 72%, 30%);
+  --color-warning-400: hsl(40, 85%, 55%);
   --color-warning-500: hsl(40, 96%, 65%);
   --color-warning-600: hsl(40, 96%, 70%);
+  --color-warning-700: hsl(40, 95%, 73%);
   --color-warning-800: hsl(40, 98%, 75%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(40, 100%, 14%);
 
   /* Error - CORAL/ORANGE (#F85149 GitHub red → Orange) */
   --color-error-50: hsl(6, 75%, 20%);
   --color-error-100: hsl(6, 72%, 26%);
+  --color-error-200: hsl(6, 75%, 32%);
+  --color-error-300: hsl(6, 75%, 40%);
+  --color-error-400: hsl(6, 85%, 52%);
   --color-error-500: hsl(6, 93%, 64%);
   --color-error-600: hsl(6, 93%, 69%);
   --color-error-700: hsl(6, 95%, 74%);
@@ -362,6 +459,8 @@
   /* Info - Purple/Magenta (distinctive) */
   --color-info-50: hsl(275, 75%, 20%);
   --color-info-100: hsl(275, 70%, 26%);
+  --color-info-200: hsl(275, 75%, 32%);
+  --color-info-400: hsl(275, 80%, 52%);
   --color-info-500: hsl(275, 80%, 62%);
   --color-info-600: hsl(275, 82%, 67%);
   --color-info-700: hsl(275, 85%, 72%);
@@ -372,12 +471,14 @@
   --color-secondary-100: hsl(340, 70%, 26%);
   --color-secondary-500: hsl(340, 82%, 62%);
   --color-secondary-600: hsl(340, 84%, 67%);
+  --color-secondary-700: hsl(340, 85%, 72%);
 
   /* Accent - Bright Orange */
   --color-accent-50: hsl(25, 75%, 20%);
   --color-accent-100: hsl(25, 72%, 26%);
   --color-accent-500: hsl(25, 90%, 62%);
   --color-accent-600: hsl(25, 92%, 67%);
+  --color-accent-700: hsl(25, 92%, 72%);
 
   /* Grays - Cool toned */
   --color-gray-50: hsl(220, 12%, 22%);
@@ -398,6 +499,27 @@
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -4px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.9), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.95);
+
+  /* Legacy compatibility aliases (theme-aware) */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
