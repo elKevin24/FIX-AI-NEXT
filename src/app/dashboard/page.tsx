@@ -37,7 +37,7 @@ export default async function DashboardPage() {
 
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const tenantId = session.user.tenantId;
-    const tenantPrisma = getTenantPrisma(tenantId);
+    const tenantPrisma = getTenantPrisma(tenantId, session.user.id);
 
     // Fetch all statistics in parallel
     const [

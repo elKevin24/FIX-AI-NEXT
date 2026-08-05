@@ -32,9 +32,10 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
     if (!tenantId) {
         throw new Error('tenantId es requerido para aislar la base de datos');
     }
-    if (!userId) {
+    if (userId === '') {
         throw new Error('userId es requerido para la auditoría');
     }
+    const auditUserId = userId || 'system';
     return clientArg.$extends({
         query: {
             $allModels: {
