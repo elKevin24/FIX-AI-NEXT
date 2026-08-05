@@ -46,7 +46,7 @@ export async function logAction(
     // If still no tenantId, we might fail or log to a system tenant if exists. 
     // For now, we require tenantId.
     if (!tenantId) {
-      console.warn("AuditLog: No tenantId provided for action", action);
+      console.warn("AuditLog: No tenantId provided for action %s", String(action).replace(/[\r\n]/g, ''));
       return; 
     }
 
