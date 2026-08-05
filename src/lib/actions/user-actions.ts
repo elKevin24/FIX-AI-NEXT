@@ -1,11 +1,10 @@
 'use server';
 
 import { auth } from '@/auth';
-import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect } from 'next/navigation';
-import bcrypt from 'bcryptjs';
 import { CreateUserSchema, UpdateUserSchema } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
+import { CreateUserUseCase, UpdateUserUseCase, DeleteUserUseCase } from '@/use-cases/users/UserUseCases';
 
 /**
  * Create a new user (Server Action)
@@ -31,35 +30,12 @@ export async function createUser(prevState: any, formData: FormData): Promise<Ac
         };
     }
 
-    const { name, email, password, role } = validatedFields.data;
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-        
-        const existingUser = await tenantDb.user.findUnique({
-            where: { email }
-        });
-
-        if (existingUser) {
-            return { success: false, message: 'El usuario ya existe' };
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        await tenantDb.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role,
-                tenantId: session.user.tenantId,
-            }
-        });
-
+        await CreateUserUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
         return { success: true, message: 'Usuario creado exitosamente' };
     } catch (error) {
         console.error('Failed to create user:', error);
-        return { success: false, message: 'Error al crear usuario' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error al crear usuario' };
     }
 }
 
@@ -83,49 +59,11 @@ export async function updateUser(prevState: any, formData: FormData) {
         return { success: false, message: validatedFields.error.errors[0].message };
     }
 
-    const { userId, name, email, password, role } = validatedFields.data;
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const existingUser = await tenantDb.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!existingUser) {
-            return { success: false, message: 'Usuario no encontrado' };
-        }
-
-        if (email !== existingUser.email) {
-             const emailTaken = await tenantDb.user.findFirst({
-                 where: { email }
-             });
-             if (emailTaken) {
-                 return { success: false, message: 'Ya existe un usuario con este email' };
-             }
-        }
-
-        const updateData: any = {
-            name,
-            email,
-            role,
-        };
-
-        if (password && password.length > 0) {
-            if (password.length < 6) {
-                return { success: false, message: 'La contraseña debe tener al menos 6 caracteres' };
-            }
-            updateData.password = await bcrypt.hash(password, 10);
-        }
-
-        await tenantDb.user.update({
-            where: { id: userId },
-            data: updateData,
-        });
-
+        await UpdateUserUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to update user:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo actualizar el usuario.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el usuario.' };
     }
 
     redirect('/dashboard/users');
@@ -150,28 +88,11 @@ export async function deleteUser(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de usuario requerido' };
     }
 
-    if (userId === session.user.id) {
-        return { success: false, message: 'No puedes eliminar tu propia cuenta' };
-    }
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const existingUser = await tenantDb.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!existingUser) {
-            return { success: false, message: 'Usuario no encontrado' };
-        }
-
-        await tenantDb.user.delete({
-            where: { id: userId },
-        });
-
+        await DeleteUserUseCase.execute(userId, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to delete user:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo eliminar el usuario.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el usuario.' };
     }
 
     redirect('/dashboard/users');

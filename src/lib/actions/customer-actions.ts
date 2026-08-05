@@ -1,9 +1,9 @@
 'use server';
 
 import { auth } from '@/auth';
-import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect } from 'next/navigation';
 import { CreateCustomerSchema, UpdateCustomerSchema } from '@/lib/schemas';
+import { CreateCustomerUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
 
 /**
  * Create a new customer (Server Action)
@@ -24,28 +24,11 @@ export async function createCustomer(prevState: any, formData: FormData) {
         return { success: false, message: validatedFields.error.errors[0].message };
     }
 
-    const { name, email, phone, address, dpi, nit } = validatedFields.data;
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        await tenantDb.customer.create({
-            data: {
-                name,
-                email: email || null,
-                phone: phone || null,
-                address: address || null,
-                dpi: dpi || null,
-                nit: nit || null,
-                tenantId: session.user.tenantId,
-                createdById: session.user.id,
-                updatedById: session.user.id,
-            }
-        });
-
+        await CreateCustomerUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to create customer:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo crear el cliente.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo crear el cliente.' };
     }
 
     redirect('/dashboard/customers');
@@ -70,35 +53,11 @@ export async function updateCustomer(prevState: any, formData: FormData) {
         return { success: false, message: validatedFields.error.errors[0].message };
     }
 
-    const { customerId, name, email, phone, address, dpi, nit } = validatedFields.data;
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const existingCustomer = await tenantDb.customer.findUnique({
-            where: { id: customerId }
-        });
-
-        if (!existingCustomer) {
-            return { success: false, message: 'Cliente no encontrado' };
-        }
-
-        await tenantDb.customer.update({
-            where: { id: customerId },
-            data: {
-                name,
-                email: email || null,
-                phone: phone || null,
-                address: address || null,
-                dpi: dpi || null,
-                nit: nit || null,
-                updatedById: session.user.id,
-            },
-        });
-
+        await UpdateCustomerUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to update customer:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo actualizar el cliente.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el cliente.' };
     }
 
     redirect('/dashboard/customers');
@@ -124,32 +83,10 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
     }
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const existingCustomer = await tenantDb.customer.findUnique({
-            where: { id: customerId },
-            include: {
-                tickets: {
-                    select: { id: true }
-                }
-            }
-        });
-
-        if (!existingCustomer) {
-            return { success: false, message: 'Cliente no encontrado' };
-        }
-
-        if (existingCustomer.tickets.length > 0) {
-            return { success: false, message: `No se puede eliminar: el cliente tiene ${existingCustomer.tickets.length} ticket(s) asociado(s)` };
-        }
-
-        await tenantDb.customer.delete({
-            where: { id: customerId },
-        });
-
+        await DeleteCustomerUseCase.execute(customerId, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to delete customer:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo eliminar el cliente.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el cliente.' };
     }
 
     redirect('/dashboard/customers');
