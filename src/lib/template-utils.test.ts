@@ -1,4 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('./tenant-prisma', () => ({
+  getTenantPrisma: vi.fn(),
+}));
+
 import {
   calculateEstimatedDate,
   getPartStockStatus,
@@ -8,7 +13,6 @@ import {
   getCategoryConfig,
   validateTemplateStock,
 } from './template-utils';
-
 import { getTenantPrisma } from './tenant-prisma';
 
 describe('template-utils', () => {
