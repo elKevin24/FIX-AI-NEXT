@@ -1,8 +1,8 @@
-import { PrismaClient, UserRole, TicketStatus, ServiceCategory, TicketPriority } from '../src/generated/prisma';
+import { UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction } from '../src/generated/prisma';
+import { prisma } from '../src/lib/prisma';
 import bcryptjs from 'bcryptjs';
 
 console.log('[SEED] Initializing...');
-const prisma = new PrismaClient();
 console.log('[SEED] Prisma Client instantiated.');
 
 /**
@@ -14,14 +14,12 @@ async function main() {
 
     // Limpiar datos existentes
     console.log('[SEED] Cleaning existing data...');
-    await prisma.partUsage.deleteMany();
-    await prisma.ticket.deleteMany();
-    await prisma.customer.deleteMany();
-    await prisma.part.deleteMany();
-    await prisma.serviceTemplate.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.tenant.deleteMany();
+    await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS trigger_audit_users ON "users";`);
+    await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS trigger_audit_tickets ON "tickets";`);
+    await prisma.$executeRawUnsafe(`DROP FUNCTION IF EXISTS log_audit();`);
+    await prisma.$executeRawUnsafe(`
+      TRUNCATE TABLE "tenants", "users", "customers", "tickets", "ticket_attachments", "parts", "part_usages", "audit_logs", "ticket_notes", "service_templates", "template_default_parts", "ticket_services", "notifications", "invoices", "payments", "cash_registers", "cash_transactions", "invoice_history", "pos_sales", "pos_sale_items", "pos_sale_payments", "pos_quotations", "pos_quotation_items", "credit_notes", "credit_note_items" CASCADE;
+    `);
     console.log('[SEED] Data cleaned.');
 
     // Hash passwords
@@ -419,7 +417,7 @@ async function main() {
                 category: ServiceCategory.MAINTENANCE,
                 defaultTitle: 'Mantenimiento preventivo de PC',
                 defaultDescription: 'Limpieza interna, revisión de ventiladores, actualización de drivers.',
-                defaultPriority: 'LOW',
+                defaultPriority: TicketPriority.LOW,
                 estimatedDuration: 120,
                 laborCost: 350.00,
                 color: '#10B981',
@@ -432,7 +430,7 @@ async function main() {
                 category: ServiceCategory.REPAIR,
                 defaultTitle: 'Reparación de fuente de alimentación',
                 defaultDescription: 'Diagnóstico con multímetro, reemplazo de componentes.',
-                defaultPriority: 'HIGH',
+                defaultPriority: TicketPriority.HIGH,
                 estimatedDuration: 180,
                 laborCost: 450.00,
                 color: '#EF4444',
@@ -449,7 +447,7 @@ async function main() {
                 category: ServiceCategory.DIAGNOSTIC,
                 defaultTitle: 'Diagnóstico completo de servidor',
                 defaultDescription: 'Verificación de hardware, logs, rendimiento.',
-                defaultPriority: 'HIGH',
+                defaultPriority: TicketPriority.HIGH,
                 estimatedDuration: 240,
                 laborCost: 800.00,
                 color: '#F59E0B',
@@ -475,24 +473,12 @@ async function main() {
     // AUDIT LOGS
     // ========================================
     console.log('[SEED] Creating audit logs...');
-    await Promise.all([
-        prisma.auditLog.create({
-            data: {
-                action: 'TENANT_SEEDED',
-                details: JSON.stringify({ tenantName: 'ElectroFix Workshop' }),
-                userId: t1Admin.id,
-                tenantId: tenant1.id,
-            },
-        }),
-        prisma.auditLog.create({
-            data: {
-                action: 'TENANT_SEEDED',
-                details: JSON.stringify({ tenantName: 'TechRepair Pro' }),
-                userId: t2Admin.id,
-                tenantId: tenant2.id,
-            },
-        }),
-    ]);
+    await prisma.$executeRawUnsafe(`
+        INSERT INTO "audit_logs" ("id", "action", "module", "details", "userId", "tenantId", "createdAt")
+        VALUES 
+          (gen_random_uuid(), 'CONFIG_CHANGED'::"AuditAction", 'SETTINGS'::"AuditModule", '{"tenantName": "ElectroFix Workshop"}', '${t1Admin.id}'::uuid, '${tenant1.id}'::uuid, NOW()),
+          (gen_random_uuid(), 'CONFIG_CHANGED'::"AuditAction", 'SETTINGS'::"AuditModule", '{"tenantName": "TechRepair Pro"}', '${t2Admin.id}'::uuid, '${tenant2.id}'::uuid, NOW());
+    `);
 
     console.log('[SEED] Seed completed successfully!');
     console.log('');
