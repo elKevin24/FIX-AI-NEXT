@@ -139,7 +139,7 @@ Documentos obsoletos o de referencia histórica están en:
 | Temas | ✅ Completo | ⭐⭐⭐⭐⭐ |
 | Deployment | ✅ Completo | ⭐⭐⭐⭐ |
 | API Reference | ⚠️ Parcial | ⭐⭐⭐ |
-| Testing | ❌ Pendiente | - |
+| Testing | ⚠️ Parcial | ⭐⭐⭐ |
 
 ---
 
