@@ -136,7 +136,7 @@
 }
 
 .featureCard p {
-    color: #718096;
+    color: #5a6470; /* Gray 600 - 6:1 contrast on white (WCAG AA) */
     line-height: 1.6;
 }
 
