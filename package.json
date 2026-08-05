@@ -44,13 +44,13 @@
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "fast-xml-parser": "5.3.4",
+    "fast-xml-parser": "^5.10.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "next-swagger-doc": "^0.4.1",
-    "nodemailer": "^7.0.13",
+    "nodemailer": "^8.0.11",
     "pg": "^8.18.0",
     "pnpm": "^10.28.0",
     "qrcode": "^1.5.4",
@@ -84,16 +84,22 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vercel": "^50.4.9",
+    "vercel": "^58.5.1",
     "vitest": "^4.0.18"
   },
   "overrides": {
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "fast-xml-parser": "5.3.4",
+    "@tootallnate/once": "^3.0.1",
+    "ajv": "^8.20.0",
+    "esbuild": "^0.28.1",
+    "fast-xml-parser": "^5.10.1",
+    "js-yaml": "^5.2.3",
+    "minimatch": "^10.2.6",
     "path-to-regexp": "6.3.0",
-    "tar": "7.5.7",
-    "undici": "7.20.0"
+    "smol-toml": "^1.7.1",
+    "tar": "^7.5.22",
+    "undici": "^7.29.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
