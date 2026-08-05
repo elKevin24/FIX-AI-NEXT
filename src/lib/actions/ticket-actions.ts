@@ -10,6 +10,9 @@ import { ActionState } from '@/lib/types';
 import { createNotification } from '@/lib/notifications';
 import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTechnicianAssigned } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
+import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
+import { UpdateTicketUseCase } from '@/use-cases/tickets/UpdateTicketUseCase';
+import { UpdateTicketStatusUseCase } from '@/use-cases/tickets/UpdateTicketStatusUseCase';
 
 /**
  * Get ticket by ID for public status check
@@ -96,160 +99,24 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
 
     if ((!customerName || customerName.trim() === '') && !customerId) {
         return { success: false, message: 'El nombre del cliente o un ID válido es requerido.'};
-    }
-
+    }    
+    
     const ticketData = validatedFields.data;
 
     try {
-        const tenantDb = getTenantPrisma(tenantId, session.user.id);
-        
-        let customer = null;
-
-        if (customerId) {
-            customer = await tenantDb.customer.findUnique({
-                where: { id: customerId }
-            });
-        }
-
-        if (!customer && customerEmail) {
-            customer = await tenantDb.customer.findFirst({
-                where: { email: customerEmail }
-            });
-        }
-
-        if (!customer && customerPhone) {
-            customer = await tenantDb.customer.findFirst({
-                where: { phone: customerPhone }
-            });
-        }
-
-        if (!customer && customerName) {
-            customer = await tenantDb.customer.findFirst({
-                where: { name: customerName }
-            });
-        }
-
-        if (!customer) {
-            if (!customerName) {
-                 return { success: false, message: 'Nombre de cliente requerido para crear uno nuevo.' };
-            }
-
-            customer = await tenantDb.customer.create({
-                data: {
-                    name: customerName,
-                    email: customerEmail || null,
-                    phone: customerPhone || null,
-                    dpi: customerDpi || null,
-                    nit: customerNit || null,
-                    tenantId: tenantId,
-                    createdById: session.user.id,
-                    updatedById: session.user.id,
-                }
-            });
-        }
-
-        const transactionResult = await prisma.$transaction(async (tx: any) => {
-            const lowStockAlerts: Array<{name: string, quantity: number}> = [];
-            
-            const newTicket = await tx.ticket.create({
-                data: {
-                    title: ticketData.title,
-                    description: ticketData.description,
-                    customerId: customer!.id,
-                    status: ticketData.status || 'OPEN',
-                    priority: ticketData.priority || 'MEDIUM',
-                    tenantId: tenantId,
-                    deviceType: ticketData.deviceType,
-                    deviceModel: ticketData.deviceModel,
-                    serialNumber: ticketData.serialNumber,
-                    accessories: ticketData.accessories,
-                    checkInNotes: ticketData.checkInNotes,
-                    createdById: session.user.id,
-                    updatedById: session.user.id,
-                },
-                include: {
-                    customer: true,
-                    assignedTo: true,
-                }
-            });
-
-            await tx.auditLog.create({
-                data: {
-                    action: 'CREATE_TICKET',
-                    details: JSON.stringify({ id: newTicket.id, title: newTicket.title }),
-                    user: { connect: { id: session.user.id } },
-                    tenant: { connect: { id: tenantId } }
-                }
-            });
-
-            if (ticketData.initialParts && ticketData.initialParts.length > 0) {
-                for (const partItem of ticketData.initialParts) {
-                    const part = await tx.part.findUnique({ where: { id: partItem.partId } });
-
-                    if (!part) {
-                        throw new Error(`Repuesto no encontrado: ${partItem.partId}`);
-                    }
-                    if (part.tenantId !== tenantId) {
-                        throw new Error('No autorizado');
-                    }
-                    if (part.quantity < partItem.quantity) {
-                        throw new Error(`Stock insuficiente para '${part.name}'. Disponibles: ${part.quantity}, Solicitados: ${partItem.quantity}`);
-                    }
-
-                    await tx.partUsage.create({
-                        data: {
-                            ticketId: newTicket.id,
-                            partId: partItem.partId,
-                            quantity: partItem.quantity,
-                        },
-                    });
-
-                    if (part.quantity - partItem.quantity <= part.minStock) {
-                        lowStockAlerts.push({ name: part.name, quantity: part.quantity - partItem.quantity });
-                    }
-                }
-            }
-
-            return { ticket: newTicket, lowStockAlerts };
+        await CreateTicketUseCase.execute({
+            ticketData,
+            customerInfo: {
+                customerName,
+                customerId,
+                customerEmail,
+                customerPhone,
+                customerDpi,
+                customerNit,
+            },
+            tenantId,
+            userId: session.user.id,
         });
-
-        const { ticket: createdTicket, lowStockAlerts: alerts } = transactionResult;
-
-        if (alerts.length > 0) {
-            Promise.all(alerts.map(async (alert) => {
-                try {
-                    await notifyLowStock(alert.name, alert.quantity, tenantId);
-                } catch (e) {
-                    console.error(`Failed to notify low stock for ${alert.name}`, e);
-                }
-            })).catch(err => console.error('Error processing low stock alerts', err));
-        }
-
-        try {
-            await notifyTicketCreated({
-                id: createdTicket.id,
-                ticketNumber: createdTicket.ticketNumber || createdTicket.id.slice(0, 8),
-                title: createdTicket.title,
-                status: createdTicket.status,
-                tenantId: createdTicket.tenantId,
-                customerId: createdTicket.customerId,
-                deviceType: createdTicket.deviceType,
-                deviceModel: createdTicket.deviceModel,
-                assignedToId: createdTicket.assignedToId,
-                customer: {
-                    id: createdTicket.customer.id,
-                    name: createdTicket.customer.name,
-                    email: createdTicket.customer.email,
-                },
-                assignedTo: createdTicket.assignedTo ? {
-                    name: createdTicket.assignedTo.name,
-                    email: createdTicket.assignedTo.email
-                } : null,
-            });
-        } catch (e) {
-            console.error('Error sending ticket created notification:', e);
-        }
-
     } catch (error) {
          console.error('Failed to create ticket:', error);
          return { success: false, message: error instanceof Error ? error.message : 'Error creando el ticket' };
@@ -438,135 +305,18 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
         };
     }
 
-    const { 
-        ticketId, title, description, status, priority, assignedToId,
-        deviceType, deviceModel, serialNumber, accessories, checkInNotes, cancellationReason
-    } = validatedFields.data;
-
     try {
-        const tenantDb = getTenantPrisma(user.tenantId, user.id);
-        
-        const existingTicket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId },
-            include: { partsUsed: true, customer: true, assignedTo: true }
+        await UpdateTicketUseCase.execute({
+            validatedData: validatedFields.data,
+            tenantId: user.tenantId,
+            userId: user.id,
+            userName: user.name || 'Admin',
         });
-
-        if (!existingTicket) {
-             return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
-             const unavailableRecord = await tenantDb.technicianUnavailability.findFirst({
-                 where: {
-                     userId: assignedToId,
-                     startDate: { lte: new Date() },
-                     endDate: { gte: new Date() },
-                     isActive: true
-                 }
-             });
-
-             if (unavailableRecord) {
-                 return { 
-                     success: false, 
-                     message: `El técnico seleccionado no está disponible (Motivo: ${unavailableRecord.reason}).` 
-                 };
-             }
-        }
-
-        const updateData: any = {};
-        if (title) updateData.title = title;
-        if (description) updateData.description = description;
-        if (status) updateData.status = status;
-        if (priority !== undefined) updateData.priority = priority;
-        if (assignedToId !== undefined) updateData.assignedToId = assignedToId;
-        
-        if (deviceType !== undefined) updateData.deviceType = deviceType;
-        if (deviceModel !== undefined) updateData.deviceModel = deviceModel;
-        if (serialNumber !== undefined) updateData.serialNumber = serialNumber;
-        if (accessories !== undefined) updateData.accessories = accessories;
-        if (checkInNotes !== undefined) updateData.checkInNotes = checkInNotes;
-        if (status === 'CANCELLED' && cancellationReason) updateData.cancellationReason = cancellationReason;
-
-        updateData.updatedById = user.id;
-
-        await prisma.$transaction(async (tx: any) => {
-             const txTenantDb = getTenantPrisma(existingTicket.tenantId, user.id, tx);
-
-             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-                 if (existingTicket.partsUsed.length > 0) {
-                     for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.partUsage.delete({
-                             where: { id: usage.id }
-                         });
-                     }
-                 }
-             }
-
-             await txTenantDb.ticket.update({
-                 where: { id: ticketId },
-                 data: updateData,
-             });
-        });
-
-        if (status && status !== existingTicket.status) {
-             try {
-                 await notifyTicketStatusChange(
-                    {
-                        id: existingTicket.id,
-                        ticketNumber: existingTicket.ticketNumber,
-                        title: updateData.title || existingTicket.title,
-                        status: existingTicket.status,
-                        tenantId: existingTicket.tenantId,
-                        customerId: existingTicket.customerId,
-                        customer: existingTicket.customer,
-                        assignedToId: existingTicket.assignedToId,
-                        deviceType: existingTicket.deviceType || 'PC',
-                        deviceModel: existingTicket.deviceModel || '',
-                        assignedTo: existingTicket.assignedTo,
-                    }, 
-                    { 
-                        oldStatus: existingTicket.status, 
-                        newStatus: status,
-                        note: updateData.cancellationReason
-                    }
-                 );
-             } catch (e) {
-                 console.error('Notification error', e);
-             }
-        }
-
-        if (assignedToId && assignedToId !== existingTicket.assignedToId) {
-             try {
-                 const updatedFullTicket = await tenantDb.ticket.findUnique({
-                    where: { id: ticketId },
-                    include: { customer: true, assignedTo: true }
-                 });
-                 
-                 if (updatedFullTicket) {
-                     await notifyTechnicianAssigned({
-                         id: updatedFullTicket.id,
-                         ticketNumber: updatedFullTicket.ticketNumber,
-                         title: updatedFullTicket.title,
-                         status: updatedFullTicket.status,
-                         tenantId: updatedFullTicket.tenantId,
-                         customerId: updatedFullTicket.customerId,
-                         customer: updatedFullTicket.customer,
-                         assignedTo: updatedFullTicket.assignedTo || undefined,
-                         assignedToId: updatedFullTicket.assignedToId,
-                         deviceType: updatedFullTicket.deviceType || 'PC',
-                         deviceModel: updatedFullTicket.deviceModel || ''
-                     }, user.name || 'Admin');
-                 }
-             } catch (e) {
-                 console.error('Notification error', e);
-             }
-        }
 
         return { success: true, message: 'Ticket actualizado exitosamente' };
-
     } catch (error) {
         console.error('Failed to update ticket:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo actualizar el ticket.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el ticket.' };
     }
 }
 
@@ -599,109 +349,18 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
     const { user } = session;
 
     try {
-        const tenantDb = getTenantPrisma(user.tenantId, user.id);
-        
-        const existingTicket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId },
-            include: { partsUsed: true, customer: true, assignedTo: true }
+        await UpdateTicketStatusUseCase.execute({
+            ticketId,
+            status,
+            note,
+            tenantId: user.tenantId,
+            userId: user.id,
         });
-
-        if (!existingTicket) {
-             return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        await prisma.$transaction(async (tx: any) => {
-             const txTenantDb = getTenantPrisma(existingTicket.tenantId, user.id, tx);
-             
-             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
-                 if (existingTicket.partsUsed.length > 0) {
-                     for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.partUsage.delete({
-                             where: { id: usage.id }
-                         });
-                     }
-                 }
-             }
-
-             await txTenantDb.ticket.update({
-                 where: { id: ticketId },
-                 data: { status: status as any, updatedById: user.id }
-             });
-
-             if (note) {
-                await txTenantDb.ticketNote.create({
-                    data: {
-                        ticketId,
-                        content: `Cambio de estado a ${status}: ${note}`,
-                        isInternal: true,
-                        authorId: user.id
-                    }
-                });
-             }
-        });
-
-         if (status !== existingTicket.status) {
-             try {
-                await notifyTicketStatusChange(
-                    {
-                        id: existingTicket.id,
-                        ticketNumber: existingTicket.ticketNumber,
-                        title: existingTicket.title,
-                        status: existingTicket.status,
-                        tenantId: existingTicket.tenantId,
-                        customerId: existingTicket.customerId,
-                        customer: existingTicket.customer,
-                        assignedToId: existingTicket.assignedToId,
-                        deviceType: existingTicket.deviceType || 'PC',
-                        deviceModel: existingTicket.deviceModel || '',
-                        assignedTo: existingTicket.assignedTo,
-                    }, 
-                    { 
-                        oldStatus: existingTicket.status, 
-                        newStatus: status,
-                        note: note || "Cambio de estado"
-                    }
-                 );
-             } catch (e) {
-                 console.error('Notification error', e);
-             }
-        }
-
-        if (existingTicket.assignedToId && existingTicket.assignedToId !== session.user.id) {
-            await createNotification({
-                userId: existingTicket.assignedToId,
-                tenantId: session.user.tenantId,
-                type: 'INFO',
-                title: 'Estado del Ticket Actualizado',
-                message: `El ticket #${existingTicket.ticketNumber} cambió a estado ${status}`,
-                link: `/dashboard/tickets/${ticketId}`
-            });
-        }
-
-        try {
-            const updatedFullTicket = await tenantDb.ticket.findUnique({
-                where: { id: ticketId },
-                include: { customer: true, assignedTo: true }
-            });
-            
-            if (updatedFullTicket) {
-                await notifyTicketStatusChange({
-                    ...updatedFullTicket,
-                    ticketNumber: updatedFullTicket.ticketNumber,
-                } as any, {
-                    oldStatus: existingTicket.status as any,
-                    newStatus: status as any,
-                });
-            }
-        } catch (e) {
-            console.error('Failed to notify customer of status update:', e);
-        }
 
         return { success: true, message: 'Estado actualizado' };
-
     } catch (error) {
         console.error('Failed to update ticket status:', error);
-        return { success: false, message: 'Error al actualizar el estado.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error al actualizar el estado.' };
     }
 }
 
