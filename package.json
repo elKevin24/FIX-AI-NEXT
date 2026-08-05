@@ -50,7 +50,7 @@
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "next-swagger-doc": "^0.4.1",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.0.4",
     "pg": "^8.18.0",
     "pnpm": "^10.28.0",
     "qrcode": "^1.5.4",
@@ -60,7 +60,7 @@
     "resend": "^6.9.1",
     "swagger-ui-react": "^5.30.3",
     "ua-parser-js": "^2.0.9",
-    "xlsx": "^0.18.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -95,6 +95,7 @@
     "fast-xml-parser": "^5.10.1",
     "js-yaml": "^5.2.3",
     "minimatch": "^10.2.6",
+    "nodemailer": "^9.0.4",
     "path-to-regexp": "6.3.0",
     "smol-toml": "^1.7.1",
     "tar": "^7.5.22",
