@@ -21,5 +21,17 @@ export default defineConfig({
       RESEND_API_KEY: 're_dummy_123',
       DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy?sslmode=require',
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      all: true,
+      exclude: [
+        '**/*.test.*',
+        '**/*.spec.*',
+        '**/node_modules/**',
+        'vitest.config.ts',
+        'src/**/*.d.ts',
+      ],
+    },
   },
 })
