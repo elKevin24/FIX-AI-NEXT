@@ -72,27 +72,6 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     }
                     
                     const result = await query(args);
-
-                    // Automatic Audit Log
-                    if (false && userId && model !== 'AuditLog') {
-                        try {
-                             (prisma as any).auditLog.create({
-                                data: {
-                                    action: `CREATE_${model.toUpperCase()}`,
-                                    details: JSON.stringify({ 
-                                        id: result.id, 
-                                        model,
-                                        data: args.data 
-                                    }),
-                                    userId,
-                                    tenantId
-                                }
-                            });
-                        } catch (e) {
-                            console.error('Failed to create audit log:', e);
-                        }
-                    }
-
                     return result;
                 },
                 async createMany({ args, query, model }: any) {
@@ -114,22 +93,6 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     }
                     
                     const result = await query(args);
-
-                    // Audit Log for Batch Create
-                    if (false && userId && model !== 'AuditLog') {
-                         (prisma as any).auditLog.create({
-                            data: {
-                                action: `BATCH_CREATE_${model.toUpperCase()}`,
-                                details: JSON.stringify({ 
-                                    count: result.count, 
-                                    model 
-                                }),
-                                userId,
-                                tenantId
-                            }
-                        });
-                    }
-
                     return result;
                 },
                 async update({ args, query, model }: any) {
@@ -156,23 +119,6 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
 
                     // 3. Perform Update
                     const result = await query(args);
-
-                    // 4. Audit Log
-                    if (false && userId && model !== 'AuditLog') {
-                         (prisma as any).auditLog.create({
-                            data: {
-                                action: `UPDATE_${model.toUpperCase()}`,
-                                details: JSON.stringify({ 
-                                    id: result.id, 
-                                    model,
-                                    changes: args.data 
-                                }),
-                                userId,
-                                tenantId
-                            }
-                        });
-                    }
-
                     return result;
                 },
                 async delete({ args, query, model }: any) {
@@ -191,21 +137,6 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     }
 
                     const result = await query(args);
-
-                    if (false && userId && model !== 'AuditLog') {
-                         (prisma as any).auditLog.create({
-                            data: {
-                                action: `DELETE_${model.toUpperCase()}`,
-                                details: JSON.stringify({ 
-                                    id: (result as any).id || 'deleted', 
-                                    model 
-                                }),
-                                userId,
-                                tenantId
-                            }
-                        });
-                    }
-
                     return result;
                 },
                 async count({ args, query, model }: any) {
