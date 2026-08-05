@@ -67,20 +67,6 @@ async function main() {
   // We need the hstore extension for diffing
   const createExtension = `CREATE EXTENSION IF NOT EXISTS hstore;`;
 
-  const triggerUser = `
-    DROP TRIGGER IF EXISTS trigger_audit_users ON "users";
-    CREATE TRIGGER trigger_audit_users
-    AFTER INSERT OR UPDATE OR DELETE ON "users"
-    FOR EACH ROW EXECUTE FUNCTION log_audit();
-  `;
-
-  const triggerTicket = `
-    DROP TRIGGER IF EXISTS trigger_audit_tickets ON "tickets";
-    CREATE TRIGGER trigger_audit_tickets
-    AFTER INSERT OR UPDATE OR DELETE ON "tickets"
-    FOR EACH ROW EXECUTE FUNCTION log_audit();
-  `;
-
   try {
     await prisma.$executeRawUnsafe(createExtension);
     await prisma.$executeRawUnsafe(createFunction);
