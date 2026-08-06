@@ -27,7 +27,7 @@ async function createSuperAdmin() {
 
     // 3. Crear o actualizar usuario
     await prisma.user.upsert({
-        where: { email: 'adminkev@example.com' },
+        where: { unique_email_per_tenant: { email: 'adminkev@example.com', tenantId: tenant.id } },
         update: {
             role: 'ADMIN',
             password, // Actualizamos password para asegurar que sea el conocido

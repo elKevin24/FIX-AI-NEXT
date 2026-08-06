@@ -205,12 +205,10 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
 
         const currentCustomerId = customer.id;
 
-        const createdTicketIds = await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(tenantId, session.user.id, tx);
-            
+        const createdTicketIds = await tenantDb.$transaction(async (tx: any) => {
             const tickets = await Promise.all(
                 ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
-                    txTenantDb.ticket.create({
+                    tx.ticket.create({
                         data: {
                             title: ticket.title,
                             description: ticket.description,
@@ -545,10 +543,9 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
-        await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
-
-            const ticket = await txTenantDb.ticket.findUnique({ where: { id: ticketId } });
+        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+        await tenantDb.$transaction(async (tx: any) => {
+            const ticket = await tx.ticket.findUnique({ where: { id: ticketId } });
             if (!ticket) {
                 throw new Error('Ticket no encontrado');
             }
@@ -557,7 +554,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
                 throw new Error('No autorizado');
             }
 
-            const part = await txTenantDb.part.findUnique({ where: { id: partId } });
+            const part = await tx.part.findUnique({ where: { id: partId } });
             
             if (!part) {
                 throw new Error('Repuesto no encontrado');
@@ -571,12 +568,17 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
                  throw new Error(`Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}`);
             }
 
-            await txTenantDb.partUsage.create({
+            await tx.partUsage.create({
                 data: {
                     ticketId,
                     partId,
                     quantity,
                 }
+            });
+
+            await tx.part.update({
+                where: { id: partId },
+                data: { quantity: { decrement: quantity } }
             });
 
             const updatedPart = await tx.part.findUnique({
@@ -624,27 +626,31 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
     const isSuperAdmin = session.user.email === 'adminkev@example.com';
 
     try {
-        await prisma.$transaction(async (tx: any) => {
-            const txTenantDb = getTenantPrisma(session.user.tenantId, session.user.id, tx);
-
-            const usage = await txTenantDb.partUsage.findUnique({
+        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
+        await tenantDb.$transaction(async (tx: any) => {
+            const usage = await tx.partUsage.findUnique({
                 where: { id: usageId },
                 include: {
                     ticket: { select: { tenantId: true } },
-                    part: true,
+                    part: { select: { tenantId: true } },
                 }
             });
 
             if (!usage) {
-                throw new Error('Registro de uso no encontrado');
+                throw new Error('Uso de repuesto no encontrado');
             }
 
             if (!isSuperAdmin && usage.ticket.tenantId !== session.user.tenantId) {
                 throw new Error('No autorizado');
             }
 
-            await txTenantDb.partUsage.delete({
+            await tx.partUsage.delete({
                 where: { id: usageId }
+            });
+
+            await tx.part.update({
+                where: { id: usage.partId },
+                data: { quantity: { increment: usage.quantity } }
             });
         });
 

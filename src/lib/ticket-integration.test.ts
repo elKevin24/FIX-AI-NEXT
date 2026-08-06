@@ -210,7 +210,16 @@ function makeDb() {
     }),
     update: vi.fn(({ where, data }: any) => {
       const p = state.parts.get(where.id);
-      if (p) { Object.assign(p, data); state.parts.set(where.id, p); }
+      if (p) {
+        const next = { ...data };
+        if (next.quantity && typeof next.quantity === 'object') {
+          if (next.quantity.decrement !== undefined) p.quantity -= next.quantity.decrement;
+          if (next.quantity.increment !== undefined) p.quantity += next.quantity.increment;
+          delete next.quantity;
+        }
+        Object.assign(p, next);
+        state.parts.set(where.id, p);
+      }
       return p;
     }),
   };
@@ -227,15 +236,11 @@ function makeDb() {
       const id = nextId('pu');
       const pu = { id, ...data };
       state.partUsages.set(id, pu);
-      const part = state.parts.get(data.partId);
-      if (part) { part.quantity -= data.quantity; state.parts.set(data.partId, part); }
       return pu;
     }),
     delete: vi.fn(({ where }: any) => {
       const pu = state.partUsages.get(where.id);
       if (pu) {
-        const part = state.parts.get(pu.partId);
-        if (part) { part.quantity += pu.quantity; state.parts.set(pu.partId, part); }
         state.partUsages.delete(where.id);
       }
     }),
