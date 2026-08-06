@@ -92,7 +92,7 @@ describe('quotation-actions', () => {
 
     it('throws when unauthorized', async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
-      await expect(createQuotation({ items: [{ partId: 'p1', quantity: 1, unitPrice: 10, discount: 0 }] }))
+      await expect(createQuotation({ items: [{ partId: 'p1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 }))
         .rejects.toThrow('No autorizado');
     });
 
@@ -100,6 +100,8 @@ describe('quotation-actions', () => {
       mockDb.part.findMany.mockResolvedValue([]);
       await expect(createQuotation({
         items: [{ partId: 'nonexistent', quantity: 1, unitPrice: 10, discount: 0 }],
+        validDays: 15,
+        globalDiscount: 0,
       })).rejects.toThrow('Uno o más productos no fueron encontrados');
     });
 
@@ -110,6 +112,8 @@ describe('quotation-actions', () => {
 
       const result = await createQuotation({
         items: [{ partId: 'part-1', quantity: 1, unitPrice: 100, discount: 0 }],
+        validDays: 15,
+        globalDiscount: 0,
       });
       expect(result.success).toBe(true);
     });

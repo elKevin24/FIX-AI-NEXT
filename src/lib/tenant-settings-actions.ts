@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@/generated/prisma';
+import { UpdateTenantSettingsSchema } from '@/lib/schemas';
 
 // ==================== Types ====================
 
@@ -115,20 +116,17 @@ export async function updateTenantSettings(data: TenantSettingsData): Promise<{ 
     return { success: false, error: 'No autorizado' };
   }
 
-  // Validate tax rate
-  if (data.taxRate !== undefined) {
-    if (data.taxRate < 0 || data.taxRate > 100) {
-      return { success: false, error: 'La tasa de impuesto debe estar entre 0 y 100' };
-    }
+  const validatedFields = UpdateTenantSettingsSchema.safeParse(data);
+  if (!validatedFields.success) {
+    return { 
+      success: false, 
+      error: 'Datos inválidos', 
+      // @ts-ignore
+      errors: validatedFields.error.flatten().fieldErrors 
+    };
   }
 
-  // Validate email format if provided
-  if (data.businessEmail && data.businessEmail.length > 0) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.businessEmail)) {
-      return { success: false, error: 'El formato del email no es válido' };
-    }
-  }
+  const validData = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
@@ -144,16 +142,16 @@ export async function updateTenantSettings(data: TenantSettingsData): Promise<{ 
       settings = await db.tenantSettings.update({
         where: { tenantId: session.user.tenantId },
         data: {
-          businessName: data.businessName,
-          businessNIT: data.businessNIT,
-          businessAddress: data.businessAddress,
-          businessPhone: data.businessPhone,
-          businessEmail: data.businessEmail || null,
-          taxRate: data.taxRate,
-          taxName: data.taxName,
-          currency: data.currency,
-          defaultPaymentTerms: data.defaultPaymentTerms,
-          invoiceFooter: data.invoiceFooter,
+          businessName: validData.businessName,
+          businessNIT: validData.businessNIT,
+          businessAddress: validData.businessAddress,
+          businessPhone: validData.businessPhone,
+          businessEmail: validData.businessEmail || null,
+          taxRate: validData.taxRate,
+          taxName: validData.taxName,
+          currency: validData.currency,
+          defaultPaymentTerms: validData.defaultPaymentTerms,
+          invoiceFooter: validData.invoiceFooter,
         },
       });
     } else {
@@ -161,16 +159,16 @@ export async function updateTenantSettings(data: TenantSettingsData): Promise<{ 
       settings = await db.tenantSettings.create({
         data: {
           tenantId: session.user.tenantId,
-          businessName: data.businessName,
-          businessNIT: data.businessNIT,
-          businessAddress: data.businessAddress,
-          businessPhone: data.businessPhone,
-          businessEmail: data.businessEmail || null,
-          taxRate: data.taxRate ?? 12,
-          taxName: data.taxName ?? 'IVA',
-          currency: data.currency ?? 'GTQ',
-          defaultPaymentTerms: data.defaultPaymentTerms,
-          invoiceFooter: data.invoiceFooter,
+          businessName: validData.businessName || '',
+          businessNIT: validData.businessNIT || '',
+          businessAddress: validData.businessAddress || '',
+          businessPhone: validData.businessPhone || '',
+          businessEmail: validData.businessEmail || null,
+          taxRate: validData.taxRate || 0,
+          taxName: validData.taxName || 'IVA',
+          currency: validData.currency || 'GTQ',
+          defaultPaymentTerms: validData.defaultPaymentTerms || '',
+          invoiceFooter: validData.invoiceFooter || '',
         },
       });
     }

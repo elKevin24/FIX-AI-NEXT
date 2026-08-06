@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notifyTicketStatusChange, notifyTechnicianAssigned } from '@/lib/ticket-notifications';
 import { UpdateTicketInput } from '@/lib/schemas';
@@ -59,7 +59,7 @@ export class UpdateTicketUseCase {
 
         updateData.updatedById = userId;
 
-        await prisma.$transaction(async (tx: any) => {
+        await tenantDb.$transaction(async (tx: any) => {
              const txTenantDb = getTenantPrisma(existingTicket.tenantId, userId, tx);
 
              if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
