@@ -12,6 +12,8 @@ test.describe('Ticket Flows', () => {
 
   test('should create a new ticket, view details, post a note and change status', async ({ page }) => {
     test.setTimeout(30000); // 30s timeout
+    page.on('console', msg => console.log(`BROWSER CONSOLE: ${msg.type()} - ${msg.text()}`));
+    page.on('pageerror', error => console.log(`BROWSER ERROR: ${error.message}`));
 
     // 1. Navigate to Create Ticket page
     await page.goto('/dashboard/tickets/create');
