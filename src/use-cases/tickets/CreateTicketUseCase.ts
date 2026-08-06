@@ -123,6 +123,11 @@ export class CreateTicketUseCase {
                         },
                     });
 
+                    await tx.part.update({
+                        where: { id: partItem.partId },
+                        data: { quantity: { decrement: partItem.quantity } }
+                    });
+
                     if (part.quantity - partItem.quantity <= part.minStock) {
                         lowStockAlerts.push({ name: part.name, quantity: part.quantity - partItem.quantity });
                     }
