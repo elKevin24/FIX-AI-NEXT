@@ -242,7 +242,7 @@ describe('Core Actions CRUD', () => {
 
             expect(mockDb.ticket.update).toHaveBeenCalledWith(
                 expect.objectContaining({ 
-                    where: { id: validTicketId },
+                    where: { id: validTicketId, tenantId: 'tenant-1' },
                     data: expect.objectContaining({ status: 'IN_PROGRESS' })
                 })
             );
