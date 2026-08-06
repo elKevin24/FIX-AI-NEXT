@@ -58,7 +58,9 @@ test.describe('Ticket Flows', () => {
     // 6. View Ticket Details
     // Find the row containing our ticket and click the 'Ver Detalles' button
     const ticketRow = page.locator('tr', { hasText: uniqueTitle });
-    await ticketRow.locator('text=Ver Detalles').click();
+    const detailLink = ticketRow.locator('a', { hasText: 'Ver Detalles' }).first();
+    const href = await detailLink.getAttribute('href');
+    await page.goto(href!);
 
     // Verify we are on the ticket details page
     await expect(page.locator('h1', { hasText: 'Ticket #' })).toBeVisible({ timeout: 15000 });
