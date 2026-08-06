@@ -34,25 +34,25 @@ describe('authenticate', () => {
     vi.clearAllMocks();
   });
 
-  it('returns success when signIn succeeds', async () => {
+  it('returns undefined (no error) when signIn succeeds', async () => {
     mockSignIn.mockResolvedValue(undefined);
     const fd = formDataFrom({ email: 'a@b.com', password: '123456' });
     const result = await authenticate(undefined, fd);
-    expect(result).toEqual({ success: true, message: 'Redirecting...' });
+    expect(result).toBeUndefined();
   });
 
   it('returns invalid credentials on CredentialsSignin error', async () => {
     mockSignIn.mockRejectedValue(new mockAuthError.AuthError('CredentialsSignin'));
     const fd = formDataFrom({ email: 'bad@b.com', password: 'wrong' });
     const result = await authenticate(undefined, fd);
-    expect(result).toEqual({ success: false, message: 'Invalid credentials.' });
+    expect(result).toBe('Invalid credentials.');
   });
 
   it('returns generic error on other AuthError', async () => {
     mockSignIn.mockRejectedValue(new mockAuthError.AuthError('SomeOtherError'));
     const fd = formDataFrom({ email: 'a@b.com', password: '123456' });
     const result = await authenticate(undefined, fd);
-    expect(result).toEqual({ success: false, message: 'Something went wrong.' });
+    expect(result).toBe('Something went wrong.');
   });
 
   it('re-throws non-AuthError exceptions', async () => {
