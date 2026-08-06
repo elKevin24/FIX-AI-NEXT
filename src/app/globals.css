@@ -113,8 +113,8 @@
   /* Ratio > 15:1 */
   --color-text-secondary: var(--color-gray-800);
   /* Ratio > 10:1 */
-  --color-text-tertiary: var(--color-gray-600);
-  /* Ratio > 4.5:1 (AA Large / AA Normal) */
+  --color-text-tertiary: var(--color-gray-700);
+  /* Ratio > 7:1 (WCAG AAA) */
   --color-text-inverse: hsl(0, 0%, 100%);
   --color-text-link: var(--color-primary-600);
   /* Ratio > 4.5:1 */
@@ -269,8 +269,8 @@
 
   /* Text - Light colors with high contrast */
   --color-text-primary: hsl(210, 20%, 98%);
-  --color-text-secondary: hsl(210, 15%, 85%);
-  --color-text-tertiary: hsl(210, 10%, 65%);
+  --color-text-secondary: hsl(210, 15%, 88%);
+  --color-text-tertiary: hsl(210, 10%, 75%);
   --color-text-inverse: hsl(210, 30%, 10%);
   --color-text-link: hsl(220, 85%, 70%);
 
@@ -404,8 +404,8 @@
 
   /* Text - High contrast for readability */
   --color-text-primary: hsl(213, 12%, 92%);
-  --color-text-secondary: hsl(215, 10%, 71%);
-  --color-text-tertiary: hsl(215, 8%, 56%);
+  --color-text-secondary: hsl(215, 10%, 80%);
+  --color-text-tertiary: hsl(215, 8%, 70%);
   --color-text-inverse: hsl(220, 14%, 11%);
   --color-text-link: hsl(212, 92%, 68%);
 

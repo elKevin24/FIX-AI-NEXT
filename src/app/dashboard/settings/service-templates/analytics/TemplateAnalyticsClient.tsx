@@ -182,7 +182,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
           <h2 className={styles.cardTitle}>Tickets por Categoría</h2>
           <div className={styles.chartContainer}>
             {categoryChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%">
                 <PieChart>
                   <Pie
                     data={categoryChartData}
@@ -221,7 +221,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
           <h2 className={styles.cardTitle}>Tendencia Mensual</h2>
           <div className={styles.chartContainer}>
             {trendChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%">
                 <LineChart data={trendChartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="label" />
@@ -267,7 +267,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
           <h2 className={styles.cardTitle}>Ingresos por Categoría</h2>
           <div className={styles.chartContainer}>
             {categoryChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%">
                 <BarChart data={categoryChartData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tickFormatter={(v) => `Q${v}`} />

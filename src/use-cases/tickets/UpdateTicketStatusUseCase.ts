@@ -25,30 +25,35 @@ export class UpdateTicketStatusUseCase {
         }
 
         await prisma.$transaction(async (tx: any) => {
-             const txTenantDb = getTenantPrisma(existingTicket.tenantId, userId, tx);
+             // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
+             // We must apply the tenant constraint manually.
              
              if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.partUsage.delete({
-                             where: { id: usage.id }
-                         });
+                         await tx.partUsage.delete({
+                             where: { id: usage.id, tenantId: existingTicket.tenantId }
+                          });
+                        await tx.part.update({
+                            where: { id: usage.partId, tenantId: existingTicket.tenantId },
+                            data: { quantity: { increment: usage.quantity } }
+                        });
                      }
                  }
              }
 
-             await txTenantDb.ticket.update({
-                 where: { id: ticketId },
+             await tx.ticket.update({
+                 where: { id: ticketId, tenantId: existingTicket.tenantId },
                  data: { status: status as any, updatedById: userId }
              });
 
              if (note) {
-                await txTenantDb.ticketNote.create({
+                await tx.ticketNote.create({
                     data: {
-                        ticketId,
-                        content: `Cambio de estado a ${status}: ${note}`,
-                        isInternal: true,
-                        authorId: userId
+                        content: note,
+                        ticketId: ticketId,
+                        authorId: userId,
+                        isInternal: true
                     }
                 });
              }
