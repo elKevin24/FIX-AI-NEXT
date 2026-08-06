@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import TicketDetailView from './TicketDetailView';
 import { getTicketTimeline } from '@/lib/timeline';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { serializeDecimal } from '@/lib/utils';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -82,17 +83,17 @@ export default async function TicketDetailPage({ params }: Props) {
         });
 
         // 4. Serialize for Client Component
-        const serializedParts = availableParts.map((part: any) => ({
+        const serializedParts = serializeDecimal(availableParts.map((part: any) => ({
             id: part.id,
             name: part.name,
             sku: part.sku,
             quantity: part.quantity,
-            cost: Number(part.cost),
-            price: Number(part.price),
+            cost: part.cost,
+            price: part.price,
             category: part.category,
             location: part.location,
             minStock: part.minStock,
-        }));
+        })));
 
         const serializedServices = availableServices.map((service: any) => ({
             id: service.id,
@@ -100,20 +101,20 @@ export default async function TicketDetailPage({ params }: Props) {
             laborCost: service.laborCost ? Number(service.laborCost) : 0,
         }));
 
-        const serializedTicketServices = ticket.services?.map((s: any) => ({
+        const serializedTicketServices = serializeDecimal(ticket.services?.map((s: any) => ({
             ...s,
             laborCost: s.laborCost ? Number(s.laborCost) : 0,
-        })) || [];
+        })) || []);
 
         // 5. Get Timeline
         const timelineEvents = await getTicketTimeline(ticket.id, ticket.tenantId);
 
         return (
             <TicketDetailView
-                ticket={{
+                ticket={serializeDecimal({
                     ...ticket,
                     services: serializedTicketServices,
-                }}
+                })}
                 availableUsers={availableUsers.map((u: any) => ({...u, role: u.role as string}))} // Simple cast
                 availableParts={serializedParts}
                 availableServices={serializedServices}
