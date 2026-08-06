@@ -178,6 +178,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'Test',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 100, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     await expect(convertQuotationToSale({
       quotationId: created.data.id,
@@ -189,6 +191,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'Test',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     await expect(updateQuotationStatus(created.data.id, 'CONVERTED' as any)).rejects.toThrow(
       'No se puede cambiar el estado'
@@ -199,6 +203,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'Test',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     await updateQuotationStatus(created.data.id, 'SENT' as any);
     await expect(updateQuotationStatus(created.data.id, 'DRAFT' as any)).rejects.toThrow(
@@ -210,6 +216,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'Test',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     await updateQuotationStatus(created.data.id, 'SENT' as any);
     await updateQuotationStatus(created.data.id, 'ACCEPTED' as any);
@@ -222,6 +230,8 @@ describe('Quotation Integration — Full Workflows', () => {
     await createQuotation({
       customerName: 'Original',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 100, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     const original = Array.from(state.quotations.values())[0];
     const dup = await duplicateQuotation(original.id);
@@ -234,6 +244,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'To Delete',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
 
     const result = await deleteQuotation(created.data.id);
@@ -245,6 +257,8 @@ describe('Quotation Integration — Full Workflows', () => {
     const created = await createQuotation({
       customerName: 'Sent Quotation',
       items: [{ partId: 'part-1', quantity: 1, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     await updateQuotationStatus(created.data.id, 'SENT' as any);
     await expect(deleteQuotation(created.data.id)).rejects.toThrow(
@@ -253,9 +267,9 @@ describe('Quotation Integration — Full Workflows', () => {
   });
 
   it('COT-09: sequential numbering', async () => {
-    const q1 = await createQuotation({ customerName: 'A', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }] });
-    const q2 = await createQuotation({ customerName: 'B', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }] });
-    const q3 = await createQuotation({ customerName: 'C', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }] });
+    const q1 = await createQuotation({ customerName: 'A', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
+    const q2 = await createQuotation({ customerName: 'B', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
+    const q3 = await createQuotation({ customerName: 'C', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
 
     const num1 = parseInt(q1.data.quotationNumber.split('-')[2]);
     const num2 = parseInt(q2.data.quotationNumber.split('-')[2]);
@@ -265,8 +279,8 @@ describe('Quotation Integration — Full Workflows', () => {
   });
 
   it('COT-10: filter quotations by status and search', async () => {
-    await createQuotation({ customerName: 'Alpha', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }] });
-    const beta = await createQuotation({ customerName: 'Beta', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }] });
+    await createQuotation({ customerName: 'Alpha', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
+    const beta = await createQuotation({ customerName: 'Beta', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
     await updateQuotationStatus(beta.data.id, 'SENT' as any);
 
     const drafts = await getQuotations({ status: 'DRAFT' as any });
@@ -279,6 +293,8 @@ describe('Quotation Integration — Full Workflows', () => {
       customerName: 'Detail Test',
       customerEmail: 'test@example.com',
       items: [{ partId: 'part-1', quantity: 3, unitPrice: 50, discount: 0 }],
+      validDays: 15,
+      globalDiscount: 0,
     });
     const detail = await getQuotationById(created.data.id);
     expect(detail.customerName).toBe('Detail Test');
