@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={styles.container}>
+    <main className={styles.container}>
       {/* Elementos decorativos */}
       <div className={styles.decorativeBlobs}>
         <div className={`${styles.blob} ${styles.blob1}`} />
@@ -244,6 +244,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
