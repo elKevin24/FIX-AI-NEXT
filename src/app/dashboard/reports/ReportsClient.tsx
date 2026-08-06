@@ -107,7 +107,7 @@ export default function ReportsClient({ initialData }: Props) {
             </div>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%">
               <LineChart data={data.finances.history}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis 
@@ -131,7 +131,7 @@ export default function ReportsClient({ initialData }: Props) {
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>Estado de Tickets</h2>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%">
               <PieChart>
                 <Pie
                   data={statusData}
