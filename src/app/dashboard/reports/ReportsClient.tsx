@@ -117,7 +117,7 @@ export default function ReportsClient({ initialData }: Props) {
                 <YAxis />
                 <Tooltip 
                     formatter={(value: any) => formatCurrency(Number(value))} 
-                    labelFormatter={(date) => new Date(date).toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    labelFormatter={(date: any) => date ? new Date(date).toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="invoice" name="Facturación" stroke="var(--color-primary-500)" strokeWidth={2} dot={false} />

@@ -301,3 +301,26 @@ export const NotificationIdSchema = z.object({
 export const SLACheckSchema = z.object({
   tenantId: z.string().uuid('ID de tenant inválido').optional(), // Opcional para correr el SLA limitadamente
 });
+
+export const UpdateSLASettingsSchema = z.object({
+  slaWarningPercent: z.number().min(1, 'Debe ser al menos 1%').max(99, 'No puede superar el 99%'),
+  slaCriticalPercent: z.number().min(1, 'Debe ser al menos 1%').max(100, 'No puede superar el 100%'),
+  slaEmailEnabled: z.boolean(),
+  slaInAppEnabled: z.boolean(),
+}).refine(data => data.slaWarningPercent < data.slaCriticalPercent, {
+  message: 'El porcentaje de advertencia debe ser menor al porcentaje crítico',
+  path: ['slaWarningPercent'],
+});
+
+export const UpdateTenantSettingsSchema = z.object({
+  businessName: z.string().min(1, 'El nombre del negocio es requerido').nullable().optional(),
+  businessNIT: z.string().nullable().optional(),
+  businessAddress: z.string().nullable().optional(),
+  businessPhone: z.string().nullable().optional(),
+  businessEmail: z.string().email('Formato de email inválido').nullable().optional().or(z.literal('')),
+  taxRate: z.number().min(0, 'La tasa no puede ser negativa').max(100, 'La tasa no puede exceder 100%').optional(),
+  taxName: z.string().optional(),
+  currency: z.string().optional(),
+  defaultPaymentTerms: z.string().nullable().optional(),
+  invoiceFooter: z.string().nullable().optional(),
+});

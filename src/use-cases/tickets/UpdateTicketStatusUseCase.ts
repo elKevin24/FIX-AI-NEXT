@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from '@/lib/notifications';
 import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
@@ -24,7 +24,7 @@ export class UpdateTicketStatusUseCase {
              throw new Error('Ticket no encontrado');
         }
 
-        await prisma.$transaction(async (tx: any) => {
+        await tenantDb.$transaction(async (tx: any) => {
              // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
              // We must apply the tenant constraint manually.
              

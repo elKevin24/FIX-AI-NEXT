@@ -2,8 +2,9 @@
 'use server';
 
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
+import { UpdateSLASettingsSchema } from '@/lib/schemas';
 
 export async function updateSLASettings(prevState: any, formData: FormData) {
     const session = await auth();
@@ -11,13 +12,28 @@ export async function updateSLASettings(prevState: any, formData: FormData) {
         return { success: false, message: 'Unauthorized' };
     }
 
-    const slaWarningPercent = Number(formData.get('slaWarningPercent'));
-    const slaCriticalPercent = Number(formData.get('slaCriticalPercent'));
-    const slaEmailEnabled = formData.get('slaEmailEnabled') === 'on';
-    const slaInAppEnabled = formData.get('slaInAppEnabled') === 'on';
+    const rawData = {
+        slaWarningPercent: Number(formData.get('slaWarningPercent')),
+        slaCriticalPercent: Number(formData.get('slaCriticalPercent')),
+        slaEmailEnabled: formData.get('slaEmailEnabled') === 'on',
+        slaInAppEnabled: formData.get('slaInAppEnabled') === 'on',
+    };
+
+    const validatedFields = UpdateSLASettingsSchema.safeParse(rawData);
+
+    if (!validatedFields.success) {
+        return { 
+            success: false, 
+            message: 'Datos inválidos', 
+            errors: validatedFields.error.flatten().fieldErrors 
+        };
+    }
+
+    const { slaWarningPercent, slaCriticalPercent, slaEmailEnabled, slaInAppEnabled } = validatedFields.data;
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     try {
-        await prisma.tenantSettings.upsert({
+        await db.tenantSettings.upsert({
             where: { tenantId: session.user.tenantId },
             update: {
                 slaWarningPercent,
