@@ -1,0 +1,116 @@
+import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { createNotification } from '@/lib/notifications';
+import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
+
+export interface UpdateTicketStatusParams {
+    ticketId: string;
+    status: string;
+    note?: string | null;
+    tenantId: string;
+    userId: string;
+}
+
+export class UpdateTicketStatusUseCase {
+    static async execute({ ticketId, status, note, tenantId, userId }: UpdateTicketStatusParams) {
+        const tenantDb = getTenantPrisma(tenantId, userId);
+        
+        const existingTicket = await tenantDb.ticket.findUnique({
+            where: { id: ticketId },
+            include: { partsUsed: true, customer: true, assignedTo: true }
+        });
+
+        if (!existingTicket) {
+             throw new Error('Ticket no encontrado');
+        }
+
+        await prisma.$transaction(async (tx: any) => {
+             const txTenantDb = getTenantPrisma(existingTicket.tenantId, userId, tx);
+             
+             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
+                 if (existingTicket.partsUsed.length > 0) {
+                     for (const usage of existingTicket.partsUsed) {
+                         await txTenantDb.partUsage.delete({
+                             where: { id: usage.id }
+                         });
+                     }
+                 }
+             }
+
+             await txTenantDb.ticket.update({
+                 where: { id: ticketId },
+                 data: { status: status as any, updatedById: userId }
+             });
+
+             if (note) {
+                await txTenantDb.ticketNote.create({
+                    data: {
+                        ticketId,
+                        content: `Cambio de estado a ${status}: ${note}`,
+                        isInternal: true,
+                        authorId: userId
+                    }
+                });
+             }
+        });
+
+        if (status !== existingTicket.status) {
+             try {
+                await notifyTicketStatusChange(
+                    {
+                        id: existingTicket.id,
+                        ticketNumber: existingTicket.ticketNumber,
+                        title: existingTicket.title,
+                        status: existingTicket.status,
+                        tenantId: existingTicket.tenantId,
+                        customerId: existingTicket.customerId,
+                        customer: existingTicket.customer,
+                        assignedToId: existingTicket.assignedToId,
+                        deviceType: existingTicket.deviceType || 'PC',
+                        deviceModel: existingTicket.deviceModel || '',
+                        assignedTo: existingTicket.assignedTo,
+                    }, 
+                    { 
+                        oldStatus: existingTicket.status, 
+                        newStatus: status,
+                        note: note || "Cambio de estado"
+                    }
+                 );
+             } catch (e) {
+                 console.error('Notification error', e);
+             }
+        }
+
+        if (existingTicket.assignedToId && existingTicket.assignedToId !== userId) {
+            await createNotification({
+                userId: existingTicket.assignedToId,
+                tenantId: tenantId,
+                type: 'INFO',
+                title: 'Estado del Ticket Actualizado',
+                message: `El ticket #${existingTicket.ticketNumber} cambió a estado ${status}`,
+                link: `/dashboard/tickets/${ticketId}`
+            });
+        }
+
+        try {
+            const updatedFullTicket = await tenantDb.ticket.findUnique({
+                where: { id: ticketId },
+                include: { customer: true, assignedTo: true }
+            });
+            
+            if (updatedFullTicket) {
+                await notifyTicketStatusChange({
+                    ...updatedFullTicket,
+                    ticketNumber: updatedFullTicket.ticketNumber,
+                } as any, {
+                    oldStatus: existingTicket.status as any,
+                    newStatus: status as any,
+                });
+            }
+        } catch (e) {
+            console.error('Failed to notify customer of status update:', e);
+        }
+
+        return true;
+    }
+}

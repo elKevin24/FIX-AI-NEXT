@@ -5,7 +5,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
-import styles from './parts.module.css';
 
 interface PartData {
     id: string;

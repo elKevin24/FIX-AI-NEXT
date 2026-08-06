@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma"; // Use global prisma for logging to avoid circular deps or scoping issues
 import { AuditAction, AuditModule } from "@/generated/prisma";
 import { headers, cookies } from "next/headers";
-import { UAParser } from "ua-parser-js"; // I might need to install this or just use raw string
 
 // Helper to get client IP
 function getIp(headersList: Headers): string {
@@ -47,7 +46,7 @@ export async function logAction(
     // If still no tenantId, we might fail or log to a system tenant if exists. 
     // For now, we require tenantId.
     if (!tenantId) {
-      console.warn("AuditLog: No tenantId provided for action", action);
+      console.warn("AuditLog: No tenantId provided for action %s", String(action).replace(/[\r\n]/g, ''));
       return; 
     }
 

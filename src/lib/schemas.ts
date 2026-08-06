@@ -256,6 +256,14 @@ export const RegisterPaymentSchema = z.object({
   notes: z.string().max(500).optional().nullable(),
 });
 
+export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
+export type UpdateTicketInput = z.infer<typeof UpdateTicketSchema>;
+export type CreateCustomerInput = z.infer<typeof CreateCustomerSchema>;
+export type UpdateCustomerInput = z.infer<typeof UpdateCustomerSchema>;
+export type CreatePartInput = z.infer<typeof CreatePartSchema>;
+export type UpdatePartInput = z.infer<typeof UpdatePartSchema>;
+export type CreateUserInput = z.infer<typeof CreateUserSchema>;
+export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 // ============================================================================
 // REPORTS SCHEMAS
 // ============================================================================

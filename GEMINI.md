@@ -54,19 +54,30 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
 ### ✅ Completado
 *   **Core:** Autenticación, Multi-tenancy, CRUD básico.
 *   **Tickets V1:** Creación, edición, estados, notas.
-*   **Seguridad:** Hardening de `actions.ts`, implementación masiva de Zod.
+*   **Seguridad y Vulnerabilidades:** 
+    *   Hardening de `actions.ts` e implementación masiva de Zod.
+    *   Remediación completa de alertas de seguridad Dependabot (0 alertas críticas/altas pendientes).
+    *   Saneamiento de CodeQL (eliminación de `insecure-randomness`, `log-injection` y dead code).
 *   **Feature 2.5 (Plantillas de Servicio):**
     *   Schema `ServiceTemplate`, `TemplateDefaultPart`.
     *   CRUD de plantillas con UI dedicada.
     *   Creación de tickets desde plantillas con consumo atómico de inventario.
     *   Gestor de partes por defecto en plantillas.
+*   **Optimización UI/UX (Ley de Miller & Accesibilidad WCAG AA):**
+    *   Rediseño del Sidebar agrupando los 15 ítems en 4 bloques cognitivos (General, Operaciones, Ventas & POS, Administración) de 3 a 5 ítems cada uno.
+    *   Optimización del contraste de color en `.btn-glass` (relación >4.5:1).
+
+*   **Notificaciones Automatizadas:** Correos integrados con `@react-email` en Server Actions.
+*   **Pruebas Formales (Testing):** Cobertura con Vitest (99+ pruebas) incluyendo componentes y acciones críticas.
+*   **Reportes Avanzados:** Agrupaciones y métricas en dashboard con `recharts`.
+*   **Punto de Venta (POS):** Control de caja e inventario atómico integrado.
 
 ### 🚧 En Progreso / Pendiente
-5.  **Optimización UI/UX (Lighthouse):** Corregir contraste de colores y errores de consola detectados en PR #24.
-1.  **Notificaciones:** Sistema automatizado (Email/In-app) para cambios de estado y asignaciones.
-2.  **Pruebas (Testing):** Estrategia formal de tests (Unitarios/E2E) con Vitest/Playwright. Actualmente hay tests básicos pero se requiere cobertura completa.
-3.  **Reportes Avanzados:** Mejorar la visualización de métricas financieras y operativas.
-4.  **Facturación (POS):** Módulo de caja y facturación (Feature 3).
+1.  **Ley de Miller en Módulos Complejos (UI/UX):** Extender la heurística de agrupamiento cognitivo (7 ± 2) a los filtros de búsqueda masiva (`TicketSearchFilters`, `PartSearchFilters`) y formularios extendidos.
+2.  **Refactorización SOLID (Clean Architecture):**
+    *   **Problema:** `src/lib/actions.ts` (1,200+ líneas) actúa como "Objeto Dios" violando SRP (Single Responsibility Principle). Acoplamiento fuerte a Prisma que viola DIP (Dependency Inversion Principle).
+    *   **Estrategia:** Implementar Patrón de Repositorios (Repository Pattern) para abstraer `getTenantPrisma`. Dividir `actions.ts` en casos de uso específicos (Use Cases).
+    *   **Cuándo:** Post-lanzamiento v2.0 (No bloquear MVP actual).
 
 ## 4. Convenciones de Desarrollo
 
