@@ -388,11 +388,6 @@ describe('Ticket Integration — Full Workshops', () => {
     return mod.addServiceToTicket(null, buildFormData({ ticketId, serviceId }));
   }
 
-  async function removeServiceFromTicket(serviceUsageId: string) {
-    const mod = await loadActions();
-    return mod.removeServiceFromTicket(null, buildFormData({ serviceUsageId }));
-  }
-
   // ─── STATUS TRANSITIONS ────────────────────────────────────────
 
   describe('TK-01: Status transitions', () => {

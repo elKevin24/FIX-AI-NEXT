@@ -1,7 +1,6 @@
 'use server';
 
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
@@ -9,7 +8,7 @@ import { z } from 'zod';
 import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
 import { createNotification } from '@/lib/notifications';
-import { notifyLowStock, notifyTicketCreated, notifyTicketStatusChange, notifyTechnicianAssigned } from '@/lib/ticket-notifications';
+import { notifyLowStock, notifyTicketCreated } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
 import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
 import { UpdateTicketUseCase } from '@/use-cases/tickets/UpdateTicketUseCase';
