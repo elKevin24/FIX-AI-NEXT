@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/lib/prisma';
 import bcryptjs from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 async function createSuperAdmin() {
     console.log('🚀 Creando Super Admin (adminkev@example.com)...');

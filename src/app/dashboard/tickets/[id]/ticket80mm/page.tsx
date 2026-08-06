@@ -12,7 +12,6 @@ import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Prisma } from '@/generated/prisma';
 
 interface Props {
     params: Promise<{ id: string }>;

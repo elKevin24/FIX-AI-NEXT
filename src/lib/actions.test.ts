@@ -320,5 +320,4 @@ describe('Core Actions CRUD', () => {
             expect(result.message).toBe('Solo los administradores pueden crear usuarios');
         });
     });
-
 });
