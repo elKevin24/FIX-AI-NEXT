@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import crypto from 'crypto';
 
 /**
  * Política de contraseñas:
@@ -64,23 +65,25 @@ export function generateTemporaryPassword(): string {
     special: '!@#$%&*',
   };
 
+  const getRandomChar = (str: string) => str[crypto.randomInt(0, str.length)];
   const allChars = chars.upper + chars.lower + chars.numbers + chars.special;
-  let password = '';
 
-  // Garantizar al menos uno de cada tipo
-  password += chars.upper[Math.floor(Math.random() * chars.upper.length)];
-  password += chars.lower[Math.floor(Math.random() * chars.lower.length)];
-  password += chars.numbers[Math.floor(Math.random() * chars.numbers.length)];
-  password += chars.special[Math.floor(Math.random() * chars.special.length)];
+  const passArray = [
+    getRandomChar(chars.upper),
+    getRandomChar(chars.lower),
+    getRandomChar(chars.numbers),
+    getRandomChar(chars.special),
+  ];
 
-  // Completar hasta 12 caracteres
   for (let i = 4; i < 12; i++) {
-    password += allChars[Math.floor(Math.random() * allChars.length)];
+    passArray.push(getRandomChar(allChars));
   }
 
-  // Mezclar
-  return password
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  // Mezclar con Fisher-Yates seguro
+  for (let i = passArray.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(0, i + 1);
+    [passArray[i], passArray[j]] = [passArray[j], passArray[i]];
+  }
+
+  return passArray.join('');
 }

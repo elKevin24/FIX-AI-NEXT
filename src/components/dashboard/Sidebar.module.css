@@ -67,9 +67,25 @@
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    /* More spacing between links */
+    gap: 1.25rem;
     flex: 1;
+}
+
+.navSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.navSectionTitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.15rem;
+    user-select: none;
 }
 
 .navLink {

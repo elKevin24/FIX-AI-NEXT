@@ -35,6 +35,11 @@ jobs:
           languages: ${{ matrix.language }}
           # Use extended security queries for more thorough analysis
           queries: security-extended,security-and-quality
+          config: |
+            paths-ignore:
+              - 'prisma/seed.ts'
+              - 'src/generated/**'
+              - 'scripts/**'
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

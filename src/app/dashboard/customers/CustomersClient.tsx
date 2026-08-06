@@ -6,7 +6,6 @@ import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteCustomerButton from './DeleteCustomerButton';
-import styles from './customers.module.css';
 
 interface CustomerData {
     id: string;
