@@ -10,7 +10,6 @@ datasource db {
   extensions = [pgcrypto, pg_trgm]
 }
 
-
 model Tenant {
   id               String            @id @default(uuid()) @db.Uuid
   name             String

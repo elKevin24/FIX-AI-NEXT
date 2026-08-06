@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getTenantPrisma } from './tenant-prisma';
 
 const mockPrisma = vi.hoisted(() => ({
@@ -13,13 +13,6 @@ const mockPrisma = vi.hoisted(() => ({
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 
 describe('Tenant Isolation', () => {
-  const models = [
-    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
-    'AuditLog', 'ServiceTemplate', 'Notification', 'Invoice',
-    'Payment', 'CashRegister', 'CashTransaction', 'TenantSettings',
-    'POSSale', 'POSQuotation', 'CreditNote',
-  ];
-
   it('debería lanzar un error si no se provee tenantId', () => {
       expect(() => getTenantPrisma('', 'user-1')).toThrow('tenantId es requerido para aislar la base de datos');
   });
