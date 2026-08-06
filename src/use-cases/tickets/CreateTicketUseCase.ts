@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notifyLowStock, notifyTicketCreated } from '@/lib/ticket-notifications';
 import { CreateTicketInput } from '@/lib/schemas';
@@ -67,7 +67,7 @@ export class CreateTicketUseCase {
             });
         }
 
-        const transactionResult = await prisma.$transaction(async (tx: any) => {
+        const transactionResult = await tenantDb.$transaction(async (tx: any) => {
             const lowStockAlerts: Array<{name: string, quantity: number}> = [];
             
             const newTicket = await tx.ticket.create({
@@ -140,7 +140,7 @@ export class CreateTicketUseCase {
         const { ticket: createdTicket, lowStockAlerts: alerts } = transactionResult;
 
         if (alerts.length > 0) {
-            Promise.all(alerts.map(async (alert) => {
+            Promise.all(alerts.map(async (alert: { name: string; quantity: number }) => {
                 try {
                     await notifyLowStock(alert.name, alert.quantity, tenantId);
                 } catch (e) {

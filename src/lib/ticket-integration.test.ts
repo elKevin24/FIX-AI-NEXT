@@ -89,7 +89,7 @@ function makeDb() {
         };
       }),
       findFirst: vi.fn(({ where }: any) => {
-        for (const t of state.tickets.values()) {
+        for (const t of Array.from(state.tickets.values())) {
           if (where?.ticketNumber && t.ticketNumber === where.ticketNumber) return { ...t, tenant: { name: 'Test' } };
           if (where?.id && t.id === where.id) return { ...t, tenant: { name: 'Test' } };
         }
@@ -144,7 +144,7 @@ function makeDb() {
     return {
       findUnique: vi.fn(({ where }: any) => state.customers.get(where.id) || null),
       findFirst: vi.fn(({ where }: any) => {
-        for (const c of state.customers.values()) {
+        for (const c of Array.from(state.customers.values())) {
           if (where?.email && c.email === where.email) return c;
           if (where?.phone && c.phone === where.phone) return c;
           if (where?.name && c.name === where.name) return c;
@@ -180,7 +180,7 @@ function makeDb() {
       return arr;
     }),
     findFirst: vi.fn(({ where }: any) => {
-      for (const u of state.users.values()) {
+      for (const u of Array.from(state.users.values())) {
         if (where?.email && u.email === where.email) return u;
       }
       return null;
@@ -270,7 +270,7 @@ function makeDb() {
   };
   self.technicianUnavailability = {
     findFirst: vi.fn(({ where }: any) => {
-      for (const u of state.technicianUnavailabilities.values()) {
+      for (const u of Array.from(state.technicianUnavailabilities.values())) {
         if (u.userId === where?.userId && u.isActive) {
           if (where?.startDate?.lte && where?.endDate?.gte) {
             return u;

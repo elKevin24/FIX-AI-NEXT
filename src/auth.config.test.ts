@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { authConfig } from './auth.config';
 
 function mockAuth(user: any) {
-  return user ? { user } : null;
+  return user ? { user, expires: new Date().toISOString() } : null;
 }
 
 function mockRequest(pathname: string) {
