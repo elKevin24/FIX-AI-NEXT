@@ -99,9 +99,9 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
             id: 'actions',
             header: 'Acciones',
             cell: ({ row }) => (
-                <Link href={`/dashboard/tickets/${row.original.id}`}>
-                    <Button variant="ghost" size="sm">Ver Detalles</Button>
-                </Link>
+                <Button as={Link} href={`/dashboard/tickets/${row.original.id}`} variant="ghost" size="sm">
+                    Ver Detalles
+                </Button>
             ),
         },
     ];
