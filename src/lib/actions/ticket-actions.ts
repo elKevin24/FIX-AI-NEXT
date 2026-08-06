@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notFound, redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
@@ -261,12 +262,13 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
             }
         })();
 
-        return { success: true, message: 'Tickets creados exitosamente' };
-
+        revalidatePath('/dashboard/tickets');
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
         return { success: false, message: 'Error de base de datos: No se pudieron crear los tickets.' };
     }
+
+    redirect('/dashboard/tickets');
 }
 
 /**
