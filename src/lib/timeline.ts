@@ -1,5 +1,5 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { AuditAction } from '@/generated/prisma';
+import { AuditAction } from '@prisma/client';
 
 export interface TimelineEvent {
     id: string;

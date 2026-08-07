@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { InvoiceStatus, POSSaleStatus } from '@/generated/prisma';
+import { InvoiceStatus, POSSaleStatus } from '@prisma/client';
 import { DateRangeSchema } from '@/lib/schemas';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {

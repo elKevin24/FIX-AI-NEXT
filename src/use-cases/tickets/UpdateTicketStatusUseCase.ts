@@ -2,7 +2,8 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from '@/lib/notifications';
 import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
-import type { Prisma, TicketStatus } from '@/generated/prisma';
+import type { Prisma, TicketStatus } from '@prisma/client';
+import { NotFoundError, ValidationError, BusinessRuleError } from '@/lib/errors';
 
 export interface UpdateTicketStatusParams {
     ticketId: string;
@@ -22,12 +23,12 @@ export class UpdateTicketStatusUseCase {
         });
 
         if (!existingTicket) {
-             throw new Error('Ticket no encontrado');
+             throw new NotFoundError('Ticket', ticketId);
         }
 
         if (status === 'CANCELLED') {
             if (!note || note.trim().length < 10) {
-                throw new Error('Debes ingresar un motivo de cancelación de al menos 10 caracteres');
+                throw new ValidationError('Debes ingresar un motivo de cancelación de al menos 10 caracteres', 'note');
             }
         }
 

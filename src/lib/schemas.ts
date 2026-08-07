@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceCategory } from '@/generated/prisma';
+import { ServiceCategory } from '@prisma/client';
 
 // ============================================================================
 // TICKET SCHEMAS

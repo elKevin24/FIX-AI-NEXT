@@ -7,7 +7,7 @@ import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
 import { ROLE_LABELS, ROLE_COLORS, hasPermission, canModifyUser } from '@/lib/auth-utils';
-import type { UserRole } from '@/generated/prisma';
+import type { UserRole } from '@prisma/client';
 
 interface UserData {
     id: string;
