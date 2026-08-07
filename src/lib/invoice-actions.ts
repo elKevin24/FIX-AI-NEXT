@@ -2,8 +2,8 @@
 
 import { requireTenantSession, assertNotViewer } from '@/lib/auth-context';
 import { revalidatePath } from 'next/cache';
-import { InvoiceStatus, PaymentMethod } from '@/generated/prisma';
-import { Prisma } from '@/generated/prisma';
+import { InvoiceStatus, PaymentMethod } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
 import { getTaxRate } from './tenant-settings-actions';
 import { GenerateInvoiceSchema, RegisterPaymentSchema } from '@/lib/schemas';

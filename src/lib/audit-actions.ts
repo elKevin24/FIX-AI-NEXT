@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma"; // Use global prisma for logging to avoid circular deps or scoping issues
-import { AuditAction, AuditModule } from "@/generated/prisma";
+import { AuditAction, AuditModule } from "@prisma/client";
 import { headers, cookies } from "next/headers";
 
 // Helper to get client IP

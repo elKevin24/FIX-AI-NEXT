@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { PaymentMethod } from '@/generated/prisma';
+import { PaymentMethod } from '@prisma/client';
 import { registerPayment } from '@/lib/invoice-actions';
 import styles from './invoice-detail.module.css';
 
