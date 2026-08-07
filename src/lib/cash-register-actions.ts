@@ -51,7 +51,7 @@ export async function openCashRegister(data: CashRegisterData) {
 
   const validatedFields = OpenCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 
@@ -191,7 +191,7 @@ export async function registerCashTransaction(data: CashTransactionData) {
 
   const validatedFields = CashTransactionSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 
@@ -241,7 +241,7 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
 
   const validatedFields = CloseCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 

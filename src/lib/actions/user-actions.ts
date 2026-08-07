@@ -56,7 +56,7 @@ export async function updateUser(prevState: any, formData: FormData) {
     const validatedFields = UpdateUserSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { success: false, message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
     try {
