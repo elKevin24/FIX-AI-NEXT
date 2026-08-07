@@ -39,8 +39,7 @@ export class RemovePartFromTicketUseCase {
                     action: 'TICKET_UPDATED',
                     module: 'TICKETS',
                     details: JSON.stringify({ usageId, partId: usage.partId, quantity: usage.quantity, type: 'PART_REMOVED' }),
-                    user: { connect: { id: userId } },
-                    tenant: { connect: { id: usage.ticket.tenantId } },
+                    userId,
                     entityType: 'Ticket',
                     entityId: usage.ticketId,
                 }

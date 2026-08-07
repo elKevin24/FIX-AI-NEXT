@@ -103,17 +103,15 @@ export async function receivePurchaseOrder(orderId: string) {
          // Use transaction for the entire reception process
          await db.$transaction(async (tx: any) => {
              // 1. Get Order with Items
-             // Note: tx in transaction doesn't need getTenantPrisma again if we use `tx` which is already the prisma client,
-             // BUT we need tenant filtering key.
-             // Best pattern: use `getTenantPrisma(..., ..., tx)`
-             const txDb = getTenantPrisma(session.user.tenantId!, session.user.id!, tx);
-
-             const order = await txDb.purchaseOrder.findUnique({
+             // Note: tx doesn't support $extends, so we use `tx` directly (client base)
+             // and enforce the tenant constraint manually.
+             const order = await tx.purchaseOrder.findUnique({
                  where: { id: orderId },
                  include: { items: true }
              });
 
              if (!order) throw new Error('Orden no encontrada');
+             if (order.tenantId !== session.user.tenantId) throw new Error('Orden no encontrada');
              if (order.status !== 'PENDING') throw new Error('La orden no está en estado Pendiente');
 
              // 2. Process Items
@@ -122,10 +120,10 @@ export async function receivePurchaseOrder(orderId: string) {
                  // Weighted Average Cost Calculation (Optional, for now just Last Cost)
                  
                  // Fetch current part to see if we need to averaging
-                 // const part = await txDb.part.findUnique({ where: { id: item.partId } });
+                 // const part = await tx.part.findUnique({ where: { id: item.partId } });
                  // Let's set 'cost' to the new incoming cost (Latest Purchase Price)
                  
-                 await txDb.part.update({
+                 await tx.part.update({
                      where: { id: item.partId },
                      data: {
                          quantity: { increment: item.quantity },
@@ -136,7 +134,7 @@ export async function receivePurchaseOrder(orderId: string) {
              }
 
              // 3. Mark Order as RECEIVED
-             await txDb.purchaseOrder.update({
+             await tx.purchaseOrder.update({
                  where: { id: orderId },
                  data: {
                      status: 'RECEIVED',

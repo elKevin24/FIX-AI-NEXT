@@ -218,6 +218,7 @@ describe('receivePurchaseOrder (incremento de inventario)', () => {
     const txDb = makeTx();
     txDb.purchaseOrder.findUnique.mockResolvedValue({
       id: 'order-1',
+      tenantId: 'tenant-1',
       status: 'PENDING',
       items: [
         { partId: PART_ID, quantity: 4, unitCost: 10 },
