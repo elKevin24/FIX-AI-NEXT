@@ -24,6 +24,12 @@ export class UpdateTicketStatusUseCase {
              throw new Error('Ticket no encontrado');
         }
 
+        if (status === 'CANCELLED') {
+            if (!note || note.trim().length < 10) {
+                throw new Error('Debes ingresar un motivo de cancelación de al menos 10 caracteres');
+            }
+        }
+
         await tenantDb.$transaction(async (tx: any) => {
              // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
              // We must apply the tenant constraint manually.

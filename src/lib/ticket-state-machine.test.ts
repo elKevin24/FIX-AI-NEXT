@@ -45,7 +45,6 @@ describe('Ticket State Machine', () => {
       [TicketStatus.RESOLVED, 'start'],
       [TicketStatus.RESOLVED, 'wait_for_parts'],
       [TicketStatus.CLOSED, 'deliver'],
-      [TicketStatus.CLOSED, 'cancel'],
       [TicketStatus.CLOSED, 'resolve'],
       [TicketStatus.CANCELLED, 'deliver'],
       [TicketStatus.CANCELLED, 'cancel'],
@@ -69,8 +68,8 @@ describe('Ticket State Machine', () => {
     it('RESOLVED allows deliver, reopen, cancel', () => {
       expect(getValidActions(TicketStatus.RESOLVED).sort()).toEqual(['cancel', 'deliver', 'reopen']);
     });
-    it('CLOSED only allows reopen', () => {
-      expect(getValidActions(TicketStatus.CLOSED)).toEqual(['reopen']);
+    it('CLOSED allows reopen, cancel', () => {
+      expect(getValidActions(TicketStatus.CLOSED).sort()).toEqual(['cancel', 'reopen']);
     });
     it('CANCELLED only allows reopen', () => {
       expect(getValidActions(TicketStatus.CANCELLED)).toEqual(['reopen']);
@@ -102,10 +101,9 @@ describe('Ticket State Machine', () => {
     });
 
     it('cancel at any point is valid', () => {
-      for (const status of [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_FOR_PARTS, TicketStatus.RESOLVED]) {
+      for (const status of [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_FOR_PARTS, TicketStatus.RESOLVED, TicketStatus.CLOSED]) {
         expect(isValidTransition(status, 'cancel')).toBe(true);
       }
-      expect(isValidTransition(TicketStatus.CLOSED, 'cancel')).toBe(false);
       expect(isValidTransition(TicketStatus.CANCELLED, 'cancel')).toBe(false);
     });
 

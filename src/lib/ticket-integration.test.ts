@@ -413,7 +413,7 @@ describe('Ticket Integration — Full Workshops', () => {
       const result = await createTicket({ title: 'Cancel test' });
       const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
 
-      const r = await updateTicketStatus(ticketId, 'CANCELLED');
+      const r = await updateTicketStatus(ticketId, 'CANCELLED', 'Cliente solicitó cancelación por costo');
       expect(r.success).toBe(true);
       expect(state.tickets.get(ticketId)?.status).toBe('CANCELLED');
     });
@@ -427,13 +427,22 @@ describe('Ticket Integration — Full Workshops', () => {
 
       expect(state.parts.get(PART1)?.quantity).toBe(8);
 
-      const r = await updateTicketStatus(ticketId, 'CANCELLED');
+      const r = await updateTicketStatus(ticketId, 'CANCELLED', 'Cliente no aceptó la cotización de repuestos');
       expect(r.success).toBe(true);
       expect(state.tickets.get(ticketId)?.status).toBe('CANCELLED');
       expect(state.parts.get(PART1)?.quantity).toBe(10);
     });
 
-    it('TK-01d: reject invalid status value', async () => {
+    it('TK-01d: cancel with short reason (< 10 chars) is rejected', async () => {
+      const result = await createTicket({ title: 'Cancel short note' });
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+
+      const r = await updateTicketStatus(ticketId, 'CANCELLED', 'Corto');
+      expect(r.success).toBe(false);
+      expect(r.message).toContain('motivo de cancelación');
+    });
+
+    it('TK-01e: reject invalid status value', async () => {
       const result = await createTicket({ title: 'Invalid status' });
       const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
 
