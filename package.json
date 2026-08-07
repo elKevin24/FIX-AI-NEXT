@@ -92,8 +92,6 @@
     "vitest": "^4.0.18"
   },
   "overrides": {
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
     "@tootallnate/once": "^3.0.1",
     "esbuild": "^0.28.1",
     "fast-xml-parser": "^5.10.1",
