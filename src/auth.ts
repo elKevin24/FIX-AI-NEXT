@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
+import type { JWT } from "next-auth/jwt";
 
 /**
  * Busca usuario por email y tenant.
@@ -174,17 +175,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.id = token.sub;
             }
             if (token.role && session.user) {
-                session.user.role = token.role as "ADMIN" | "MANAGER" | "TECHNICIAN" | "VIEWER";
+                session.user['role'] = token.role as "ADMIN" | "MANAGER" | "TECHNICIAN" | "VIEWER";
             }
             if (token.tenantId && session.user) {
-                session.user.tenantId = token.tenantId as string;
+                session.user['tenantId'] = token.tenantId as string;
             }
             if (typeof token.passwordMustChange === 'boolean' && session.user) {
-                session.user.passwordMustChange = token.passwordMustChange;
+                session.user['passwordMustChange'] = token.passwordMustChange;
             }
             return session;
         },
-        async jwt({ token, user, trigger }) {
+        async jwt({ token, user, trigger }: { token: JWT; user: any; trigger?: string }) {
             if (user) {
                 token.role = user.role;
                 token.tenantId = user.tenantId;

@@ -83,7 +83,7 @@ export async function notifyPartsApprovalRequired(
                 quantity,
                 priceAtProposal,
                 total,
-                ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
             })
         });
     }
@@ -124,7 +124,7 @@ export async function notifyTicketStatusChange(
                 ticketTitle: ticket.title,
                 oldStatus: STATUS_LABELS[oldStatus] || oldStatus,
                 newStatus: statusLabel,
-                ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`,
+                ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`,
                 note: note
             })
         });
@@ -162,7 +162,7 @@ export async function notifyTechnicianAssigned(
                  ticketNumber: ticketRef || '',
                  ticketTitle: ticket.title,
                  assignedBy: actorName,
-                 ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                 ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
              })
         });
     }
@@ -185,7 +185,7 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
                  ticketTitle: ticket.title,
                  deviceType: ticket.deviceType || '',
                  deviceModel: ticket.deviceModel || '',
-                 ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                 ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
             })
         });
     }

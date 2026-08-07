@@ -29,7 +29,7 @@ export const PartsApprovalRequiredEmail = ({
   quantity = 1,
   priceAtProposal = 0,
   total = 0,
-  ticketLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets`,
+  ticketLink = `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets`,
 }: PartsApprovalRequiredEmailProps) => {
   return (
     <EmailLayout
