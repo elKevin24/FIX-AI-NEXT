@@ -12,6 +12,21 @@ const mockPrisma = vi.hoisted(() => ({
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 
+// The extension's query hooks are internal runtime state, not part of the
+// public PrismaClient surface, so tests access them through a narrow cast.
+type ExtendedQueryDb = {
+  query: {
+    $allModels: {
+      findMany: (args: unknown) => Promise<unknown>;
+      findFirst: (args: unknown) => Promise<unknown>;
+    };
+  };
+};
+
+function getTestDb(tenantId: string, userId: string): ExtendedQueryDb {
+  return getTenantPrisma(tenantId, userId) as unknown as ExtendedQueryDb;
+}
+
 describe('Tenant Isolation', () => {
   it('debería lanzar un error si no se provee tenantId', () => {
       expect(() => getTenantPrisma('', 'user-1')).toThrow('tenantId es requerido para aislar la base de datos');
@@ -22,14 +37,14 @@ describe('Tenant Isolation', () => {
   });
 
   it('getTenantPrisma returns an extended client', () => {
-    const db = getTenantPrisma('tenant-1', 'user-1');
+    const db = getTestDb('tenant-1', 'user-1');
     expect(db).toBeDefined();
     expect(db.query).toBeDefined();
     expect((db as any).__isExtended).toBe(true);
   });
 
   it('injects tenantId into findMany where clause', async () => {
-    const db = getTenantPrisma('tenant-abc', 'user-1');
+    const db = getTestDb('tenant-abc', 'user-1');
     const queryFn = db.query.$allModels.findMany;
 
     const fakeQuery = vi.fn().mockResolvedValue([]);
@@ -41,7 +56,7 @@ describe('Tenant Isolation', () => {
   });
 
   it('injects tenantId into findFirst where clause', async () => {
-    const db = getTenantPrisma('tenant-xyz', 'user-1');
+    const db = getTestDb('tenant-xyz', 'user-1');
     const queryFn = db.query.$allModels.findFirst;
 
     const fakeQuery = vi.fn().mockResolvedValue(null);
@@ -53,7 +68,7 @@ describe('Tenant Isolation', () => {
   });
 
   it('does NOT inject tenantId for non-tenant models', async () => {
-    const db = getTenantPrisma('tenant-1', 'user-1');
+    const db = getTestDb('tenant-1', 'user-1');
     const queryFn = db.query.$allModels.findMany;
 
     const fakeQuery = vi.fn().mockResolvedValue([]);
@@ -63,7 +78,7 @@ describe('Tenant Isolation', () => {
   });
 
   it('preserves existing where fields when injecting tenantId', async () => {
-    const db = getTenantPrisma('t-1', 'user-1');
+    const db = getTestDb('t-1', 'user-1');
     const queryFn = db.query.$allModels.findMany;
 
     const fakeQuery = vi.fn().mockResolvedValue([]);

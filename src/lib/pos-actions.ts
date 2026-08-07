@@ -293,7 +293,7 @@ export async function getPartsForPOS(search?: string) {
   const where: Record<string, unknown> = { quantity: { gt: 0 } };
 
   if (search?.trim()) {
-    where.OR = [
+    where['OR'] = [
       { name: { contains: search, mode: 'insensitive' } },
       { sku: { contains: search, mode: 'insensitive' } },
     ];
@@ -317,7 +317,7 @@ export async function createPOSSale(rawData: CreatePOSSaleData) {
 
   const validatedFields = CreatePOSSaleSchema.safeParse(rawData);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const data = validatedFields.data;
 
@@ -387,7 +387,7 @@ export async function voidPOSSale(saleId: string, reason: string) {
   }
 
   const cashPayments = sale.payments.filter(
-    (p: (typeof sale.payments)[number]) => p.paymentMethod === PaymentMethod.CASH,
+    (p: (typeof sale.payments)[number]) => p.method === PaymentMethod.CASH,
   );
   const openCashRegister = await requireOpenCashRegister(db, tenantId, cashPayments.length > 0);
 
@@ -439,18 +439,18 @@ export async function getPOSSales(filters?: POSSaleFilters) {
 
   const where: Record<string, unknown> = { tenantId };
 
-  if (filters?.status) where.status = filters.status;
-  if (filters?.customerId) where.customerId = filters.customerId;
+  if (filters?.status) where['status'] = filters.status;
+  if (filters?.customerId) where['customerId'] = filters.customerId;
 
   if (filters?.from || filters?.to) {
     const dateRange: Record<string, unknown> = {};
-    if (filters.from) dateRange.gte = filters.from;
-    if (filters.to) dateRange.lte = filters.to;
-    where.createdAt = dateRange;
+    if (filters.from) dateRange['gte'] = filters.from;
+    if (filters.to) dateRange['lte'] = filters.to;
+    where['createdAt'] = dateRange;
   }
 
   if (filters?.search) {
-    where.OR = [
+    where['OR'] = [
       { saleNumber: { contains: filters.search, mode: 'insensitive' } },
       { customerName: { contains: filters.search, mode: 'insensitive' } },
     ];
@@ -459,9 +459,9 @@ export async function getPOSSales(filters?: POSSaleFilters) {
   const sales = await db.pOSSale.findMany({
     where,
     include: {
-      customer: { select: { id: true, name: true } },
-      items: { select: { id: true, partName: true, quantity: true, unitPrice: true, total: true } },
-      payments: { select: { paymentMethod: true, amount: true } },
+      customer: { select: { id: true, name: true, nit: true } },
+      items: { select: { id: true, quantity: true, unitPrice: true, part: { select: { name: true } } } },
+      payments: { select: { method: true, amount: true } },
       createdBy: { select: { name: true, email: true } },
     },
     orderBy: { createdAt: 'desc' },
@@ -469,13 +469,16 @@ export async function getPOSSales(filters?: POSSaleFilters) {
 
   return sales.map((sale: (typeof sales)[number]) => ({
     ...normalizeSaleDecimals(sale),
+    customerNIT: sale.customer?.nit ?? null,
     items: sale.items.map((item: (typeof sale.items)[number]) => ({
-      ...item,
+      id: item.id,
+      partName: item.part.name,
+      quantity: item.quantity,
       unitPrice: decimalToNumber(item.unitPrice),
-      total: decimalToNumber(item.total),
+      total: decimalToNumber(item.unitPrice) * item.quantity,
     })),
     payments: sale.payments.map((payment: (typeof sale.payments)[number]) => ({
-      ...payment,
+      paymentMethod: payment.method,
       amount: decimalToNumber(payment.amount),
     })),
   }));
@@ -490,7 +493,7 @@ export async function getCustomersForPOS(search?: string) {
   const where: Record<string, unknown> = { tenantId };
 
   if (search?.trim()) {
-    where.OR = [
+    where['OR'] = [
       { name: { contains: search, mode: 'insensitive' } },
       { nit: { contains: search, mode: 'insensitive' } },
       { phone: { contains: search, mode: 'insensitive' } },
@@ -515,9 +518,9 @@ export async function getPOSSalesStats(from?: Date, to?: Date) {
 
   if (from || to) {
     const dateRange: Record<string, unknown> = {};
-    if (from) dateRange.gte = from;
-    if (to) dateRange.lte = to;
-    where.createdAt = dateRange;
+    if (from) dateRange['gte'] = from;
+    if (to) dateRange['lte'] = to;
+    where['createdAt'] = dateRange;
   }
 
   const [stats, payments] = await Promise.all([

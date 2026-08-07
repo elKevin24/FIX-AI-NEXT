@@ -186,15 +186,15 @@ export async function createServiceTemplate(formData: FormData) {
   // Convert numerical fields from string to number for Zod validation
   const dataToValidate = {
     ...formDataObj,
-    estimatedDuration: formDataObj.estimatedDuration ? Number(formDataObj.estimatedDuration) : undefined,
-    laborCost: formDataObj.laborCost ? Number(formDataObj.laborCost) : undefined,
-    isActive: formDataObj.isActive === 'true', // Convert string 'true' to boolean true
+    estimatedDuration: formDataObj['estimatedDuration'] ? Number(formDataObj['estimatedDuration']) : undefined,
+    laborCost: formDataObj['laborCost'] ? Number(formDataObj['laborCost']) : undefined,
+    isActive: formDataObj['isActive'] === 'true', // Convert string 'true' to boolean true
   };
 
   const validatedFields = CreateServiceTemplateSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
-    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
   const data = validatedFields.data;
@@ -233,15 +233,15 @@ export async function updateServiceTemplate(id: string, formData: FormData) {
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
     ...formDataObj,
-    estimatedDuration: formDataObj.estimatedDuration ? Number(formDataObj.estimatedDuration) : undefined,
-    laborCost: formDataObj.laborCost ? Number(formDataObj.laborCost) : undefined,
-    isActive: formDataObj.isActive === 'true', // Convert string 'true' to boolean true
+    estimatedDuration: formDataObj['estimatedDuration'] ? Number(formDataObj['estimatedDuration']) : undefined,
+    laborCost: formDataObj['laborCost'] ? Number(formDataObj['laborCost']) : undefined,
+    isActive: formDataObj['isActive'] === 'true', // Convert string 'true' to boolean true
   };
 
   const validatedFields = UpdateServiceTemplateSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
-    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
   const data = validatedFields.data;
@@ -441,7 +441,7 @@ export async function createTicketFromTemplate(formData: FormData) {
   const validatedFields = CreateTicketFromTemplateSchema.safeParse({ ...formDataObj, optionalParts });
 
   if (!validatedFields.success) {
-    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
   const { templateId, deviceType, deviceModel, customerId, optionalParts: selectedOptionalPartIds } = validatedFields.data;
@@ -648,14 +648,14 @@ export async function addPartToTemplate(formData: FormData) {
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
     ...formDataObj,
-    quantity: Number(formDataObj.quantity),
-    required: formDataObj.required === 'true',
+    quantity: Number(formDataObj['quantity']),
+    required: formDataObj['required'] === 'true',
   };
 
   const validatedFields = AddPartToTemplateSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
-    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
   const { templateId, partId, quantity, required } = validatedFields.data;
@@ -722,15 +722,15 @@ export async function updateTemplateDefaultPart(formData: FormData) {
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
     ...formDataObj,
-    id: formDataObj.id, // Assuming 'id' is passed as a hidden field
-    quantity: Number(formDataObj.quantity),
-    required: formDataObj.required === 'true',
+    id: formDataObj['id'], // Assuming 'id' is passed as a hidden field
+    quantity: Number(formDataObj['quantity']),
+    required: formDataObj['required'] === 'true',
   };
 
   const validatedFields = UpdateTemplateDefaultPartSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
-    throw new Error(`Error de validación: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Error de validación: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
   const { id, quantity, required } = validatedFields.data;

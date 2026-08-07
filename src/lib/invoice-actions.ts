@@ -61,7 +61,7 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
 
   const validatedFields = GenerateInvoiceSchema.safeParse(rawData);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const data = validatedFields.data;
 
@@ -324,7 +324,7 @@ export async function registerPayment(rawData: PaymentData) {
 
   const validatedFields = RegisterPaymentSchema.safeParse(rawData);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const data = validatedFields.data;
 
