@@ -62,15 +62,15 @@ export default function TicketWorkflowActions({ ticket, availableUsers, isAdmin,
     const statusClass = `status-${ticket.status.toLowerCase()}`;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h3 className={styles.title}>Flujo de Trabajo</h3>
-                <span className={`${styles.statusBadge} ${styles[statusClass]}`}>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
+                <h3 className={styles['title']}>Flujo de Trabajo</h3>
+                <span className={`${styles['statusBadge']} ${styles[statusClass]}`}>
                     {getStatusLabel(ticket.status)}
                 </span>
             </div>
 
-            <div className={styles.actionsGrid}>
+            <div className={styles['actionsGrid']}>
                 {/* OPEN Actions */}
                 {ticket.status === 'OPEN' && (
                     <>

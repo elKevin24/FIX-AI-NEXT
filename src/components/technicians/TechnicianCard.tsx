@@ -53,24 +53,24 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'AVAILABLE':
-        return styles.statusAvailable;
+        return styles['statusAvailable'];
       case 'ON_VACATION':
-        return styles.statusVacation;
+        return styles['statusVacation'];
       case 'ON_LEAVE':
-        return styles.statusLeave;
+        return styles['statusLeave'];
       case 'IN_TRAINING':
-        return styles.statusTraining;
+        return styles['statusTraining'];
       case 'SICK_LEAVE':
-        return styles.statusSick;
+        return styles['statusSick'];
       default:
-        return styles.statusUnavailable;
+        return styles['statusUnavailable'];
     }
   };
 
   const getUtilizationClass = () => {
-    if (technician.utilizationPercent >= 86) return styles.utilizationHigh;
-    if (technician.utilizationPercent >= 61) return styles.utilizationMedium;
-    return styles.utilizationLow;
+    if (technician.utilizationPercent >= 86) return styles['utilizationHigh'];
+    if (technician.utilizationPercent >= 61) return styles['utilizationMedium'];
+    return styles['utilizationLow'];
   };
 
   const formatStatus = (status: string) => {
@@ -87,63 +87,63 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
   };
 
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <div className={styles.technicianInfo}>
-          <div className={styles.avatar}>
+    <div className={styles['card']}>
+      <div className={styles['header']}>
+        <div className={styles['technicianInfo']}>
+          <div className={styles['avatar']}>
             {(technician.name || technician.email).charAt(0).toUpperCase()}
           </div>
           <div>
-            <h3 className={styles.name}>{technician.name || technician.email}</h3>
-            <p className={styles.email}>{technician.email}</p>
+            <h3 className={styles['name']}>{technician.name || technician.email}</h3>
+            <p className={styles['email']}>{technician.email}</p>
           </div>
         </div>
-        <span className={`${styles.statusBadge} ${getStatusBadgeClass(technician.status)}`}>
+        <span className={`${styles['statusBadge']} ${getStatusBadgeClass(technician.status)}`}>
           {formatStatus(technician.status)}
         </span>
       </div>
 
       {technician.status !== 'AVAILABLE' && technician.statusReason && (
-        <div className={styles.statusReason}>
-          <span className={styles.reasonIcon}>ℹ️</span>
+        <div className={styles['statusReason']}>
+          <span className={styles['reasonIcon']}>ℹ️</span>
           <span>{technician.statusReason}</span>
           {technician.availableFrom && (
-            <span className={styles.returnDate}>
+            <span className={styles['returnDate']}>
               Returns: {formatDate(technician.availableFrom)}
             </span>
           )}
         </div>
       )}
 
-      <div className={styles.workload}>
-        <div className={styles.workloadHeader}>
-          <span className={styles.workloadLabel}>Workload</span>
-          <span className={styles.workloadValue}>
+      <div className={styles['workload']}>
+        <div className={styles['workloadHeader']}>
+          <span className={styles['workloadLabel']}>Workload</span>
+          <span className={styles['workloadValue']}>
             {technician.currentWorkload} / {technician.maxConcurrentTickets}
           </span>
         </div>
-        <div className={styles.progressBar}>
+        <div className={styles['progressBar']}>
           <div
-            className={`${styles.progressFill} ${getUtilizationClass()}`}
+            className={`${styles['progressFill']} ${getUtilizationClass()}`}
             style={{ width: `${technician.utilizationPercent}%` }}
           />
         </div>
-        <div className={styles.workloadFooter}>
-          <span className={styles.utilizationText}>
+        <div className={styles['workloadFooter']}>
+          <span className={styles['utilizationText']}>
             {technician.utilizationPercent}% utilized
           </span>
-          <span className={styles.slotsText}>
+          <span className={styles['slotsText']}>
             {technician.availableSlots} slot{technician.availableSlots !== 1 ? 's' : ''} available
           </span>
         </div>
       </div>
 
       {technician.specializations.length > 0 && (
-        <div className={styles.specializations}>
-          <span className={styles.specializationsLabel}>Specializations:</span>
-          <div className={styles.specializationTags}>
+        <div className={styles['specializations']}>
+          <span className={styles['specializationsLabel']}>Specializations:</span>
+          <div className={styles['specializationTags']}>
             {technician.specializations.map((spec) => (
-              <span key={spec} className={styles.specializationTag}>
+              <span key={spec} className={styles['specializationTag']}>
                 {spec.replace(/_/g, ' ')}
               </span>
             ))}
@@ -151,38 +151,38 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
         </div>
       )}
 
-      <div className={styles.ticketBreakdown}>
-        <h4 className={styles.breakdownTitle}>Tickets by Status</h4>
-        <div className={styles.breakdownGrid}>
+      <div className={styles['ticketBreakdown']}>
+        <h4 className={styles['breakdownTitle']}>Tickets by Status</h4>
+        <div className={styles['breakdownGrid']}>
           {technician.ticketsByStatus.OPEN > 0 && (
-            <div className={styles.breakdownItem}>
-              <span className={`${styles.breakdownBadge} ${styles.badgeOpen}`}>OPEN</span>
-              <span className={styles.breakdownCount}>{technician.ticketsByStatus.OPEN}</span>
+            <div className={styles['breakdownItem']}>
+              <span className={`${styles['breakdownBadge']} ${styles['badgeOpen']}`}>OPEN</span>
+              <span className={styles['breakdownCount']}>{technician.ticketsByStatus.OPEN}</span>
             </div>
           )}
           {technician.ticketsByStatus.IN_PROGRESS > 0 && (
-            <div className={styles.breakdownItem}>
-              <span className={`${styles.breakdownBadge} ${styles.badgeInProgress}`}>IN PROGRESS</span>
-              <span className={styles.breakdownCount}>{technician.ticketsByStatus.IN_PROGRESS}</span>
+            <div className={styles['breakdownItem']}>
+              <span className={`${styles['breakdownBadge']} ${styles['badgeInProgress']}`}>IN PROGRESS</span>
+              <span className={styles['breakdownCount']}>{technician.ticketsByStatus.IN_PROGRESS}</span>
             </div>
           )}
           {technician.ticketsByStatus.WAITING_FOR_PARTS > 0 && (
-            <div className={styles.breakdownItem}>
-              <span className={`${styles.breakdownBadge} ${styles.badgeWaiting}`}>WAITING</span>
-              <span className={styles.breakdownCount}>{technician.ticketsByStatus.WAITING_FOR_PARTS}</span>
+            <div className={styles['breakdownItem']}>
+              <span className={`${styles['breakdownBadge']} ${styles['badgeWaiting']}`}>WAITING</span>
+              <span className={styles['breakdownCount']}>{technician.ticketsByStatus.WAITING_FOR_PARTS}</span>
             </div>
           )}
         </div>
 
         {(technician.ticketsByPriority.URGENT > 0 || technician.ticketsByPriority.HIGH > 0) && (
-          <div className={styles.priorityAlert}>
+          <div className={styles['priorityAlert']}>
             {technician.ticketsByPriority.URGENT > 0 && (
-              <span className={styles.priorityUrgent}>
+              <span className={styles['priorityUrgent']}>
                 🔴 {technician.ticketsByPriority.URGENT} urgent
               </span>
             )}
             {technician.ticketsByPriority.HIGH > 0 && (
-              <span className={styles.priorityHigh}>
+              <span className={styles['priorityHigh']}>
                 🟡 {technician.ticketsByPriority.HIGH} high
               </span>
             )}
@@ -190,31 +190,31 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
         )}
       </div>
 
-      <div className={styles.actions}>
+      <div className={styles['actions']}>
         <button
           onClick={() => setShowTickets(!showTickets)}
-          className={styles.actionButton}
+          className={styles['actionButton']}
         >
           {showTickets ? '▲ Hide Tickets' : `▼ View Tickets (${technician.tickets.length})`}
         </button>
       </div>
 
       {showTickets && technician.tickets.length > 0 && (
-        <div className={styles.ticketsList}>
+        <div className={styles['ticketsList']}>
           {technician.tickets.map((ticket) => (
             <a
               key={ticket.id}
               href={`/dashboard/tickets/${ticket.id}`}
-              className={styles.ticketItem}
+              className={styles['ticketItem']}
             >
-              <div className={styles.ticketHeader}>
-                <span className={styles.ticketId}>#{ticket.id.slice(0, 8)}</span>
-                <span className={`${styles.ticketPriority} ${styles[`priority${ticket.priority}`]}`}>
+              <div className={styles['ticketHeader']}>
+                <span className={styles['ticketId']}>#{ticket.id.slice(0, 8)}</span>
+                <span className={`${styles['ticketPriority']} ${styles[`priority${ticket.priority}`]}`}>
                   {ticket.priority}
                 </span>
               </div>
-              <div className={styles.ticketTitle}>{ticket.title}</div>
-              <div className={styles.ticketCustomer}>{ticket.customer.name}</div>
+              <div className={styles['ticketTitle']}>{ticket.title}</div>
+              <div className={styles['ticketCustomer']}>{ticket.customer.name}</div>
             </a>
           ))}
         </div>

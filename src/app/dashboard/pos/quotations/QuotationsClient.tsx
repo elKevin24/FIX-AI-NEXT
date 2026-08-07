@@ -408,14 +408,14 @@ export function QuotationsClient({
         });
 
     return (
-        <div className={styles.container}>
+        <div className={styles['container']}>
             {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.titleSection}>
+            <div className={styles['header']}>
+                <div className={styles['titleSection']}>
                     <h1>Cotizaciones</h1>
                     <p>Gestión de cotizaciones y propuestas</p>
                 </div>
-                <div className={styles.actions}>
+                <div className={styles['actions']}>
                     <Button onClick={() => setShowCreateModal(true)}>
                         + Nueva Cotización
                     </Button>
@@ -423,38 +423,38 @@ export function QuotationsClient({
             </div>
 
             {/* Stats */}
-            <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
+            <div className={styles['statsGrid']}>
+                <div className={styles['statCard']}>
                     <h3>Total Cotizaciones</h3>
-                    <div className={styles.value}>{stats.totalQuotations}</div>
+                    <div className={styles['value']}>{stats.totalQuotations}</div>
                 </div>
-                <div className={`${styles.statCard} ${styles.warning}`}>
+                <div className={`${styles['statCard']} ${styles['warning']}`}>
                     <h3>Pendientes</h3>
-                    <div className={styles.value}>{stats.pendingQuotations}</div>
+                    <div className={styles['value']}>{stats.pendingQuotations}</div>
                 </div>
-                <div className={`${styles.statCard} ${styles.success}`}>
+                <div className={`${styles['statCard']} ${styles['success']}`}>
                     <h3>Convertidas (mes)</h3>
-                    <div className={styles.value}>{stats.convertedThisMonth}</div>
+                    <div className={styles['value']}>{stats.convertedThisMonth}</div>
                 </div>
-                <div className={`${styles.statCard} ${styles.info}`}>
+                <div className={`${styles['statCard']} ${styles['info']}`}>
                     <h3>Tasa Conversión</h3>
-                    <div className={styles.value}>{stats.conversionRate}%</div>
+                    <div className={styles['value']}>{stats.conversionRate}%</div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className={styles.filtersBar}>
+            <div className={styles['filtersBar']}>
                 <input
                     type="text"
                     placeholder="Buscar por número o cliente..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={styles.searchInput}
+                    className={styles['searchInput']}
                 />
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as QuotationStatus | '')}
-                    className={styles.filterSelect}
+                    className={styles['filterSelect']}
                 >
                     <option value="">Todos los estados</option>
                     <option value="DRAFT">Borrador</option>
@@ -468,8 +468,8 @@ export function QuotationsClient({
             </div>
 
             {/* Table */}
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
+            <div className={styles['tableContainer']}>
+                <table className={styles['table']}>
                     <thead>
                         <tr>
                             <th>Cotización</th>
@@ -484,7 +484,7 @@ export function QuotationsClient({
                         {filteredQuotations.length === 0 ? (
                             <tr>
                                 <td colSpan={6}>
-                                    <div className={styles.emptyState}>
+                                    <div className={styles['emptyState']}>
                                         <h3>No hay cotizaciones</h3>
                                         <p>Crea una nueva cotización para comenzar</p>
                                     </div>
@@ -494,28 +494,28 @@ export function QuotationsClient({
                             filteredQuotations.map((q) => (
                                 <tr key={q.id}>
                                     <td>
-                                        <span className={styles.quotationNumber}>
+                                        <span className={styles['quotationNumber']}>
                                             {q.quotationNumber}
                                         </span>
-                                        <div className={styles.dateInfo}>
-                                            <span className={styles.dateLabel}>
+                                        <div className={styles['dateInfo']}>
+                                            <span className={styles['dateLabel']}>
                                                 {formatDate(q.createdAt)}
                                             </span>
                                         </div>
                                     </td>
                                     <td>
-                                        <div className={styles.customerInfo}>
-                                            <span className={styles.customerName}>
+                                        <div className={styles['customerInfo']}>
+                                            <span className={styles['customerName']}>
                                                 {q.customer?.name || q.customerName}
                                             </span>
                                             {(q.customerEmail || q.customerPhone) && (
-                                                <span className={styles.customerContact}>
+                                                <span className={styles['customerContact']}>
                                                     {q.customerEmail || q.customerPhone}
                                                 </span>
                                             )}
                                         </div>
                                     </td>
-                                    <td className={styles.amount}>
+                                    <td className={styles['amount']}>
                                         {formatCurrency(q.total)}
                                     </td>
                                     <td>{getStatusBadge(q.status)}</td>
@@ -523,7 +523,7 @@ export function QuotationsClient({
                                         <span
                                             className={
                                                 new Date(q.validUntil) < new Date()
-                                                    ? styles.dateExpired
+                                                    ? styles['dateExpired']
                                                     : ''
                                             }
                                         >
@@ -531,16 +531,16 @@ export function QuotationsClient({
                                         </span>
                                     </td>
                                     <td>
-                                        <div className={styles.actionsCell}>
+                                        <div className={styles['actionsCell']}>
                                             <button
-                                                className={styles.actionBtn}
+                                                className={styles['actionBtn']}
                                                 onClick={() => handleViewDetail(q)}
                                             >
                                                 Ver
                                             </button>
                                             {q.status === 'DRAFT' && (
                                                 <button
-                                                    className={`${styles.actionBtn} ${styles.primary}`}
+                                                    className={`${styles['actionBtn']} ${styles['primary']}`}
                                                     onClick={() =>
                                                         handleStatusChange(q.id, 'SENT')
                                                     }
@@ -550,7 +550,7 @@ export function QuotationsClient({
                                             )}
                                             {q.status === 'ACCEPTED' && (
                                                 <button
-                                                    className={`${styles.actionBtn} ${styles.success}`}
+                                                    className={`${styles['actionBtn']} ${styles['success']}`}
                                                     onClick={() => handleViewDetail(q)}
                                                 >
                                                     Convertir
@@ -567,21 +567,21 @@ export function QuotationsClient({
 
             {/* Create Modal */}
             {showCreateModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
+                <div className={styles['modalOverlay']} onClick={() => setShowCreateModal(false)}>
+                    <div className={styles['modal']} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles['modalHeader']}>
                             <h2>Nueva Cotización</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={styles['closeBtn']}
                                 onClick={() => setShowCreateModal(false)}
                             >
                                 ×
                             </button>
                         </div>
-                        <div className={styles.modalBody}>
+                        <div className={styles['modalBody']}>
                             {/* Customer Selection */}
-                            <div className={styles.formGrid}>
-                                <div className={styles.formGroup}>
+                            <div className={styles['formGrid']}>
+                                <div className={styles['formGroup']}>
                                     <label>Cliente Registrado</label>
                                     <select
                                         value={selectedCustomerId}
@@ -607,7 +607,7 @@ export function QuotationsClient({
                                         ))}
                                     </select>
                                 </div>
-                                <div className={styles.formGroup}>
+                                <div className={styles['formGroup']}>
                                     <label>Nombre</label>
                                     <input
                                         type="text"
@@ -617,7 +617,7 @@ export function QuotationsClient({
                                         disabled={!!selectedCustomerId}
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
+                                <div className={styles['formGroup']}>
                                     <label>Teléfono</label>
                                     <input
                                         type="tel"
@@ -625,7 +625,7 @@ export function QuotationsClient({
                                         onChange={(e) => setCustomerPhone(e.target.value)}
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
+                                <div className={styles['formGroup']}>
                                     <label>Email</label>
                                     <input
                                         type="email"
@@ -636,31 +636,31 @@ export function QuotationsClient({
                             </div>
 
                             {/* Product Search */}
-                            <div className={styles.productSearch}>
+                            <div className={styles['productSearch']}>
                                 <input
                                     type="text"
                                     placeholder="Buscar producto por nombre o SKU..."
                                     value={productSearch}
                                     onChange={(e) => setProductSearch(e.target.value)}
-                                    className={styles.productSearchInput}
+                                    className={styles['productSearchInput']}
                                 />
                                 {productResults.length > 0 && (
-                                    <div className={styles.productResults}>
+                                    <div className={styles['productResults']}>
                                         {productResults.map((part) => (
                                             <div
                                                 key={part.id}
-                                                className={styles.productResult}
+                                                className={styles['productResult']}
                                                 onClick={() => addToCart(part)}
                                             >
-                                                <div className={styles.productResultInfo}>
-                                                    <span className={styles.productResultName}>
+                                                <div className={styles['productResultInfo']}>
+                                                    <span className={styles['productResultName']}>
                                                         {part.name}
                                                     </span>
-                                                    <span className={styles.productResultSku}>
+                                                    <span className={styles['productResultSku']}>
                                                         {part.sku} • Stock: {part.quantity}
                                                     </span>
                                                 </div>
-                                                <span className={styles.productResultPrice}>
+                                                <span className={styles['productResultPrice']}>
                                                     {formatCurrency(part.price)}
                                                 </span>
                                             </div>
@@ -670,9 +670,9 @@ export function QuotationsClient({
                             </div>
 
                             {/* Items Table */}
-                            <div className={styles.itemsSection}>
+                            <div className={styles['itemsSection']}>
                                 <h3>Productos</h3>
-                                <table className={styles.itemsTable}>
+                                <table className={styles['itemsTable']}>
                                     <thead>
                                         <tr>
                                             <th>Producto</th>
@@ -686,7 +686,7 @@ export function QuotationsClient({
                                     <tbody>
                                         {cartItems.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className={styles.noItems}>
+                                                <td colSpan={6} className={styles['noItems']}>
                                                     Busca y agrega productos
                                                 </td>
                                             </tr>
@@ -715,7 +715,7 @@ export function QuotationsClient({
                                                                             1
                                                                     )
                                                                 }
-                                                                className={styles.itemInput}
+                                                                className={styles['itemInput']}
                                                             />
                                                         </td>
                                                         <td>
@@ -733,7 +733,7 @@ export function QuotationsClient({
                                                                         ) || 0
                                                                     )
                                                                 }
-                                                                className={styles.itemInput}
+                                                                className={styles['itemInput']}
                                                             />
                                                         </td>
                                                         <td>
@@ -751,7 +751,7 @@ export function QuotationsClient({
                                                                         ) || 0
                                                                     )
                                                                 }
-                                                                className={styles.itemInput}
+                                                                className={styles['itemInput']}
                                                             />
                                                         </td>
                                                         <td>
@@ -761,7 +761,7 @@ export function QuotationsClient({
                                                         </td>
                                                         <td>
                                                             <button
-                                                                className={styles.removeItemBtn}
+                                                                className={styles['removeItemBtn']}
                                                                 onClick={() =>
                                                                     removeFromCart(item.partId)
                                                                 }
@@ -778,8 +778,8 @@ export function QuotationsClient({
                             </div>
 
                             {/* Options */}
-                            <div className={styles.formGrid}>
-                                <div className={styles.formGroup}>
+                            <div className={styles['formGrid']}>
+                                <div className={styles['formGroup']}>
                                     <label>Descuento Global (%)</label>
                                     <input
                                         type="number"
@@ -791,7 +791,7 @@ export function QuotationsClient({
                                         }
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
+                                <div className={styles['formGroup']}>
                                     <label>Válida por (días)</label>
                                     <input
                                         type="number"
@@ -802,7 +802,7 @@ export function QuotationsClient({
                                         }
                                     />
                                 </div>
-                                <div className={`${styles.formGroup} ${styles.full}`}>
+                                <div className={`${styles['formGroup']} ${styles['full']}`}>
                                     <label>Notas</label>
                                     <textarea
                                         value={notes}
@@ -813,30 +813,30 @@ export function QuotationsClient({
                             </div>
 
                             {/* Totals */}
-                            <div className={styles.totalsSection}>
-                                <div className={styles.totalsBox}>
-                                    <div className={styles.totalsRow}>
+                            <div className={styles['totalsSection']}>
+                                <div className={styles['totalsBox']}>
+                                    <div className={styles['totalsRow']}>
                                         <span>Subtotal:</span>
                                         <span>{formatCurrency(subtotal)}</span>
                                     </div>
                                     {discountAmount > 0 && (
-                                        <div className={styles.totalsRow}>
+                                        <div className={styles['totalsRow']}>
                                             <span>Descuento:</span>
                                             <span>-{formatCurrency(discountAmount)}</span>
                                         </div>
                                     )}
-                                    <div className={styles.totalsRow}>
+                                    <div className={styles['totalsRow']}>
                                         <span>IVA ({taxRate}%):</span>
                                         <span>{formatCurrency(tax)}</span>
                                     </div>
-                                    <div className={`${styles.totalsRow} ${styles.total}`}>
+                                    <div className={`${styles['totalsRow']} ${styles['total']}`}>
                                         <span>Total:</span>
                                         <span>{formatCurrency(total)}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className={styles.modalFooter}>
+                        <div className={styles['modalFooter']}>
                             <Button
                                 variant="secondary"
                                 onClick={() => setShowCreateModal(false)}
@@ -853,22 +853,22 @@ export function QuotationsClient({
 
             {/* Detail Modal */}
             {showDetailModal && selectedQuotation && (
-                <div className={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
+                <div className={styles['modalOverlay']} onClick={() => setShowDetailModal(false)}>
+                    <div className={styles['modal']} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles['modalHeader']}>
                             <h2>Cotización {selectedQuotation.quotationNumber}</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={styles['closeBtn']}
                                 onClick={() => setShowDetailModal(false)}
                             >
                                 ×
                             </button>
                         </div>
-                        <div className={styles.modalBody}>
-                            <div className={styles.detailGrid}>
-                                <div className={styles.detailSection}>
+                        <div className={styles['modalBody']}>
+                            <div className={styles['detailGrid']}>
+                                <div className={styles['detailSection']}>
                                     <h3>Cliente</h3>
-                                    <div className={styles.detailRow}>
+                                    <div className={styles['detailRow']}>
                                         <label>Nombre:</label>
                                         <span>
                                             {selectedQuotation.customer?.name ||
@@ -876,35 +876,35 @@ export function QuotationsClient({
                                         </span>
                                     </div>
                                     {selectedQuotation.customerEmail && (
-                                        <div className={styles.detailRow}>
+                                        <div className={styles['detailRow']}>
                                             <label>Email:</label>
                                             <span>{selectedQuotation.customerEmail}</span>
                                         </div>
                                     )}
                                     {selectedQuotation.customerPhone && (
-                                        <div className={styles.detailRow}>
+                                        <div className={styles['detailRow']}>
                                             <label>Teléfono:</label>
                                             <span>{selectedQuotation.customerPhone}</span>
                                         </div>
                                     )}
                                 </div>
-                                <div className={styles.detailSection}>
+                                <div className={styles['detailSection']}>
                                     <h3>Información</h3>
-                                    <div className={styles.detailRow}>
+                                    <div className={styles['detailRow']}>
                                         <label>Estado:</label>
                                         <span>
                                             {getStatusBadge(selectedQuotation.status)}
                                         </span>
                                     </div>
-                                    <div className={styles.detailRow}>
+                                    <div className={styles['detailRow']}>
                                         <label>Creada:</label>
                                         <span>{formatDate(selectedQuotation.createdAt)}</span>
                                     </div>
-                                    <div className={styles.detailRow}>
+                                    <div className={styles['detailRow']}>
                                         <label>Válida hasta:</label>
                                         <span>{formatDate(selectedQuotation.validUntil)}</span>
                                     </div>
-                                    <div className={styles.detailRow}>
+                                    <div className={styles['detailRow']}>
                                         <label>Creada por:</label>
                                         <span>{selectedQuotation.createdBy?.name}</span>
                                     </div>
@@ -912,9 +912,9 @@ export function QuotationsClient({
                             </div>
 
                             {/* Items */}
-                            <div className={styles.itemsSection}>
+                            <div className={styles['itemsSection']}>
                                 <h3>Productos</h3>
-                                <table className={styles.itemsTable}>
+                                <table className={styles['itemsTable']}>
                                     <thead>
                                         <tr>
                                             <th>Producto</th>
@@ -952,16 +952,16 @@ export function QuotationsClient({
                             </div>
 
                             {/* Totals */}
-                            <div className={styles.totalsSection}>
-                                <div className={styles.totalsBox}>
-                                    <div className={styles.totalsRow}>
+                            <div className={styles['totalsSection']}>
+                                <div className={styles['totalsBox']}>
+                                    <div className={styles['totalsRow']}>
                                         <span>Subtotal:</span>
                                         <span>
                                             {formatCurrency(selectedQuotation.subtotal)}
                                         </span>
                                     </div>
                                     {selectedQuotation.discountAmount > 0 && (
-                                        <div className={styles.totalsRow}>
+                                        <div className={styles['totalsRow']}>
                                             <span>Descuento:</span>
                                             <span>
                                                 -
@@ -971,13 +971,13 @@ export function QuotationsClient({
                                             </span>
                                         </div>
                                     )}
-                                    <div className={styles.totalsRow}>
+                                    <div className={styles['totalsRow']}>
                                         <span>IVA ({selectedQuotation.taxRate}%):</span>
                                         <span>
                                             {formatCurrency(selectedQuotation.taxAmount)}
                                         </span>
                                     </div>
-                                    <div className={`${styles.totalsRow} ${styles.total}`}>
+                                    <div className={`${styles['totalsRow']} ${styles['total']}`}>
                                         <span>Total:</span>
                                         <span>
                                             {formatCurrency(selectedQuotation.total)}
@@ -987,13 +987,13 @@ export function QuotationsClient({
                             </div>
 
                             {selectedQuotation.notes && (
-                                <div className={styles.detailSection}>
+                                <div className={styles['detailSection']}>
                                     <h3>Notas</h3>
                                     <p>{selectedQuotation.notes}</p>
                                 </div>
                             )}
                         </div>
-                        <div className={styles.modalFooter}>
+                        <div className={styles['modalFooter']}>
                             {selectedQuotation.status === 'DRAFT' && (
                                 <>
                                     <Button
@@ -1063,34 +1063,34 @@ export function QuotationsClient({
             {/* Convert to Sale Modal */}
             {showConvertModal && selectedQuotation && (
                 <div
-                    className={styles.modalOverlay}
+                    className={styles['modalOverlay']}
                     onClick={() => setShowConvertModal(false)}
                 >
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
+                    <div className={styles['modal']} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles['modalHeader']}>
                             <h2>Convertir a Venta</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={styles['closeBtn']}
                                 onClick={() => setShowConvertModal(false)}
                             >
                                 ×
                             </button>
                         </div>
-                        <div className={styles.modalBody}>
-                            <div className={styles.detailSection}>
+                        <div className={styles['modalBody']}>
+                            <div className={styles['detailSection']}>
                                 <h3>Cotización</h3>
-                                <div className={styles.detailRow}>
+                                <div className={styles['detailRow']}>
                                     <label>Número:</label>
                                     <span>{selectedQuotation.quotationNumber}</span>
                                 </div>
-                                <div className={styles.detailRow}>
+                                <div className={styles['detailRow']}>
                                     <label>Cliente:</label>
                                     <span>
                                         {selectedQuotation.customer?.name ||
                                             selectedQuotation.customerName}
                                     </span>
                                 </div>
-                                <div className={styles.detailRow}>
+                                <div className={styles['detailRow']}>
                                     <label>Total:</label>
                                     <span style={{ fontWeight: 700 }}>
                                         {formatCurrency(selectedQuotation.total)}
@@ -1098,16 +1098,16 @@ export function QuotationsClient({
                                 </div>
                             </div>
 
-                            <div className={styles.paymentSection}>
+                            <div className={styles['paymentSection']}>
                                 <h3>Métodos de Pago</h3>
-                                <div className={styles.paymentMethods}>
+                                <div className={styles['paymentMethods']}>
                                     {(['CASH', 'CARD', 'TRANSFER'] as PaymentMethod[]).map(
                                         (method) => (
                                             <button
                                                 key={method}
-                                                className={`${styles.paymentMethodBtn} ${
+                                                className={`${styles['paymentMethodBtn']} ${
                                                     selectedPaymentMethod === method
-                                                        ? styles.active
+                                                        ? styles['active']
                                                         : ''
                                                 }`}
                                                 onClick={() => setSelectedPaymentMethod(method)}
@@ -1125,10 +1125,10 @@ export function QuotationsClient({
                                     </Button>
                                 </div>
 
-                                <div className={styles.paymentsList}>
+                                <div className={styles['paymentsList']}>
                                     {payments.map((payment: any, index: number) => (
-                                        <div key={index} className={styles.paymentRow}>
-                                            <span className={styles.method}>
+                                        <div key={index} className={styles['paymentRow']}>
+                                            <span className={styles['method']}>
                                                 {payment.method === 'CASH'
                                                     ? 'Efectivo'
                                                     : payment.method === 'CARD'
@@ -1164,7 +1164,7 @@ export function QuotationsClient({
                                                 />
                                             )}
                                             <button
-                                                className={styles.removePaymentBtn}
+                                                className={styles['removePaymentBtn']}
                                                 onClick={() => removePayment(index)}
                                             >
                                                 ×
@@ -1173,11 +1173,11 @@ export function QuotationsClient({
                                     ))}
                                 </div>
 
-                                <div className={styles.paymentSummary}>
+                                <div className={styles['paymentSummary']}>
                                     <span>Total a pagar:</span>
                                     <span>{formatCurrency(selectedQuotation.total)}</span>
                                 </div>
-                                <div className={styles.paymentSummary}>
+                                <div className={styles['paymentSummary']}>
                                     <span>Total pagos:</span>
                                     <span>
                                         {formatCurrency(
@@ -1185,15 +1185,15 @@ export function QuotationsClient({
                                         )}
                                     </span>
                                 </div>
-                                <div className={styles.paymentSummary}>
+                                <div className={styles['paymentSummary']}>
                                     <span>Restante:</span>
                                     <span
-                                        className={`${styles.remaining} ${
+                                        className={`${styles['remaining']} ${
                                             selectedQuotation.total -
                                                 payments.reduce((s, p) => s + p.amount, 0) >
                                             0.01
-                                                ? styles.error
-                                                : styles.success
+                                                ? styles['error']
+                                                : styles['success']
                                         }`}
                                     >
                                         {formatCurrency(
@@ -1204,7 +1204,7 @@ export function QuotationsClient({
                                 </div>
                             </div>
                         </div>
-                        <div className={styles.modalFooter}>
+                        <div className={styles['modalFooter']}>
                             <Button
                                 variant="secondary"
                                 onClick={() => setShowConvertModal(false)}

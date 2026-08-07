@@ -54,16 +54,16 @@ export default function AvailabilityList({ absences, canEdit }: AvailabilityList
     }
 
     return (
-        <div style={styles.container}>
-            <table style={styles.table}>
+        <div style={styles['container']}>
+            <table style={styles['table']}>
                 <thead>
                     <tr>
-                        <th style={styles.th}>Motivo</th>
-                        <th style={styles.th}>Desde</th>
-                        <th style={styles.th}>Hasta</th>
-                        <th style={styles.th}>Notas</th>
-                        <th style={styles.th}>Estado</th>
-                        {canEdit && <th style={styles.th}>Acciones</th>}
+                        <th style={styles['th']}>Motivo</th>
+                        <th style={styles['th']}>Desde</th>
+                        <th style={styles['th']}>Hasta</th>
+                        <th style={styles['th']}>Notas</th>
+                        <th style={styles['th']}>Estado</th>
+                        {canEdit && <th style={styles['th']}>Acciones</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -74,19 +74,19 @@ export default function AvailabilityList({ absences, canEdit }: AvailabilityList
                         
                         return (
                             <tr key={absence.id} style={{ opacity: isPast ? 0.6 : 1 }}>
-                                <td style={styles.td}>
+                                <td style={styles['td']}>
                                     <span style={{ 
-                                        ...styles.badge, 
+                                        ...styles['badge'], 
                                         backgroundColor: STATUS_COLORS[absence.reason] || '#f1f5f9',
                                         color: 'black' // Simple fallback, class names would be better
                                     }}>
                                         {absence.reason.replace('_', ' ')}
                                     </span>
                                 </td>
-                                <td style={styles.td}>{absence.startDate.toLocaleDateString()}</td>
-                                <td style={styles.td}>{absence.endDate.toLocaleDateString()}</td>
-                                <td style={styles.td}>{absence.notes || '-'}</td>
-                                <td style={styles.td}>
+                                <td style={styles['td']}>{absence.startDate.toLocaleDateString()}</td>
+                                <td style={styles['td']}>{absence.endDate.toLocaleDateString()}</td>
+                                <td style={styles['td']}>{absence.notes || '-'}</td>
+                                <td style={styles['td']}>
                                     {isActive ? (
                                         <span style={{color: '#16a34a', fontWeight: 'bold'}}>● Activo</span>
                                     ) : isPast ? (
@@ -96,7 +96,7 @@ export default function AvailabilityList({ absences, canEdit }: AvailabilityList
                                     )}
                                 </td>
                                 {canEdit && (
-                                    <td style={styles.td}>
+                                    <td style={styles['td']}>
                                         {!isPast && <DeleteButton id={absence.id} />}
                                     </td>
                                 )}

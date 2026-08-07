@@ -79,10 +79,10 @@ export default function GlobalSearch() {
 
     const getBadgeClass = (type: string) => {
         switch (type) {
-            case 'ticket': return styles.ticketBadge;
-            case 'customer': return styles.customerBadge;
-            case 'part': return styles.partBadge;
-            default: return styles.ticketBadge;
+            case 'ticket': return styles['ticketBadge'];
+            case 'customer': return styles['customerBadge'];
+            case 'part': return styles['partBadge'];
+            default: return styles['ticketBadge'];
         }
     };
 
@@ -96,10 +96,10 @@ export default function GlobalSearch() {
     };
 
     return (
-        <div ref={wrapperRef} className={styles.container}>
-            <div className={styles.searchWrapper}>
+        <div ref={wrapperRef} className={styles['container']}>
+            <div className={styles['searchWrapper']}>
                 <svg
-                    className={styles.searchIcon}
+                    className={styles['searchIcon']}
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
@@ -114,7 +114,7 @@ export default function GlobalSearch() {
                 </svg>
                 <input
                     type="text"
-                    className={styles.searchInput}
+                    className={styles['searchInput']}
                     placeholder="Buscar tickets, clientes, repuestos..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -123,34 +123,34 @@ export default function GlobalSearch() {
                     autoComplete="off"
                 />
                 {isLoading && (
-                    <div className={styles.loading}>
-                        <div className={styles.loadingSpinner}></div>
+                    <div className={styles['loading']}>
+                        <div className={styles['loadingSpinner']}></div>
                     </div>
                 )}
             </div>
 
             {isOpen && results.length > 0 && (
-                <div className={styles.dropdown}>
-                    <div className={styles.resultsContainer}>
+                <div className={styles['dropdown']}>
+                    <div className={styles['resultsContainer']}>
                         {results.map((result) => (
                             <div
                                 key={`${result.type}-${result.id}`}
                                 onClick={() => handleResultClick(result)}
-                                className={styles.resultItem}
+                                className={styles['resultItem']}
                             >
                                 <span className={getBadgeClass(result.type)}>
                                     {getBadgeLabel(result.type)}
                                 </span>
-                                <div className={styles.resultContent}>
-                                    <div className={styles.resultTitle}>
+                                <div className={styles['resultContent']}>
+                                    <div className={styles['resultTitle']}>
                                         {result.title}
                                     </div>
-                                    <div className={styles.resultSubtitle}>
+                                    <div className={styles['resultSubtitle']}>
                                         {result.subtitle}
                                     </div>
                                 </div>
                                 {result.status && (
-                                    <span className={styles.statusTag}>
+                                    <span className={styles['statusTag']}>
                                         {result.status}
                                     </span>
                                 )}
@@ -162,7 +162,7 @@ export default function GlobalSearch() {
                             setIsOpen(false);
                             router.push(`/dashboard/search?q=${encodeURIComponent(query)}`);
                         }}
-                        className={styles.viewAll}
+                        className={styles['viewAll']}
                     >
                         Ver todos los resultados
                     </div>
@@ -170,7 +170,7 @@ export default function GlobalSearch() {
             )}
 
             {isOpen && query.length >= 2 && results.length === 0 && !isLoading && (
-                <div className={`${styles.dropdown} ${styles.noResults}`}>
+                <div className={`${styles['dropdown']} ${styles['noResults']}`}>
                     No se encontraron resultados
                 </div>
             )}

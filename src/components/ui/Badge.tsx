@@ -9,7 +9,7 @@ export interface BadgeProps {
 
 export function Badge({ variant = 'gray', children, className = '' }: BadgeProps) {
   const classes = [
-    styles.base,
+    styles['base'],
     styles[variant],
     className
   ].filter(Boolean).join(' ');

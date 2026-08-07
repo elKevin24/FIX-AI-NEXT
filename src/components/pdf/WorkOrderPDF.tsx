@@ -180,75 +180,75 @@ export const WorkOrderPDF: React.FC<WorkOrderData> = ({ ticket }) => {
 
     return (
         <Document>
-            <Page size="A4" style={styles.page}>
+            <Page size="A4" style={styles['page']}>
                 {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.companyName}>{ticket.tenant.name}</Text>
-                    <Text style={styles.documentTitle}>Orden de Ingreso #{ticket.id.slice(0, 8).toUpperCase()}</Text>
-                    <View style={styles.metadataRow}>
+                <View style={styles['header']}>
+                    <Text style={styles['companyName']}>{ticket.tenant.name}</Text>
+                    <Text style={styles['documentTitle']}>Orden de Ingreso #{ticket.id.slice(0, 8).toUpperCase()}</Text>
+                    <View style={styles['metadataRow']}>
                         <Text>Fecha de emisión: {formattedDate}</Text>
                     </View>
                 </View>
 
                 {/* Información del Cliente */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Datos del Cliente</Text>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Nombre:</Text>
-                        <Text style={styles.value}>{ticket.customer.name}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Datos del Cliente</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Nombre:</Text>
+                        <Text style={styles['value']}>{ticket.customer.name}</Text>
                     </View>
                     {ticket.customer.phone && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Teléfono:</Text>
-                            <Text style={styles.value}>{ticket.customer.phone}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Teléfono:</Text>
+                            <Text style={styles['value']}>{ticket.customer.phone}</Text>
                         </View>
                     )}
                     {ticket.customer.email && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Email:</Text>
-                            <Text style={styles.value}>{ticket.customer.email}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Email:</Text>
+                            <Text style={styles['value']}>{ticket.customer.email}</Text>
                         </View>
                     )}
                     {ticket.customer.address && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Dirección:</Text>
-                            <Text style={styles.value}>{ticket.customer.address}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Dirección:</Text>
+                            <Text style={styles['value']}>{ticket.customer.address}</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Información del Equipo */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Información del Equipo</Text>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Dispositivo:</Text>
-                        <Text style={styles.value}>{ticket.title}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Información del Equipo</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Dispositivo:</Text>
+                        <Text style={styles['value']}>{ticket.title}</Text>
                     </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Prioridad:</Text>
-                        <Text style={styles.value}>{getPriorityLabel(ticket.priority)}</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Prioridad:</Text>
+                        <Text style={styles['value']}>{getPriorityLabel(ticket.priority)}</Text>
                     </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Estado:</Text>
-                        <Text style={styles.value}>{getStatusLabel(ticket.status)}</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Estado:</Text>
+                        <Text style={styles['value']}>{getStatusLabel(ticket.status)}</Text>
                     </View>
                     {ticket.assignedTo && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Técnico asignado:</Text>
-                            <Text style={styles.value}>{ticket.assignedTo.name || ticket.assignedTo.email}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Técnico asignado:</Text>
+                            <Text style={styles['value']}>{ticket.assignedTo.name || ticket.assignedTo.email}</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Falla Reportada */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Falla Reportada</Text>
-                    <Text style={styles.description}>{ticket.description}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Falla Reportada</Text>
+                    <Text style={styles['description']}>{ticket.description}</Text>
                 </View>
 
                 {/* Condiciones del Servicio */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Condiciones del Servicio</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Condiciones del Servicio</Text>
                     <Text style={{ marginBottom: 5, lineHeight: 1.5 }}>
                         • El tiempo de reparación dependerá de la disponibilidad de repuestos.
                     </Text>
@@ -264,20 +264,20 @@ export const WorkOrderPDF: React.FC<WorkOrderData> = ({ ticket }) => {
                 </View>
 
                 {/* Firmas */}
-                <View style={styles.signatureSection}>
+                <View style={styles['signatureSection']}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 20 }}>
                         Firmas de Conformidad
                     </Text>
-                    <View style={styles.signatureBox}>
-                        <View style={styles.signatureItem}>
-                            <View style={styles.signatureLine} />
+                    <View style={styles['signatureBox']}>
+                        <View style={styles['signatureItem']}>
+                            <View style={styles['signatureLine']} />
                             <Text style={{ fontSize: 10, color: '#6b7280' }}>Firma del Cliente</Text>
                             <Text style={{ fontSize: 9, color: '#9ca3af', marginTop: 3 }}>
                                 {ticket.customer.name}
                             </Text>
                         </View>
-                        <View style={styles.signatureItem}>
-                            <View style={styles.signatureLine} />
+                        <View style={styles['signatureItem']}>
+                            <View style={styles['signatureLine']} />
                             <Text style={{ fontSize: 10, color: '#6b7280' }}>Firma del Técnico</Text>
                             <Text style={{ fontSize: 9, color: '#9ca3af', marginTop: 3 }}>
                                 {ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}
@@ -287,7 +287,7 @@ export const WorkOrderPDF: React.FC<WorkOrderData> = ({ ticket }) => {
                 </View>
 
                 {/* Footer */}
-                <View style={styles.footer}>
+                <View style={styles['footer']}>
                     <Text style={{ fontSize: 9, color: '#6b7280', textAlign: 'center' }}>
                         Este documento es un comprobante de ingreso del equipo. Conserve este documento para el retiro.
                     </Text>

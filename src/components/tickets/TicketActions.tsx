@@ -225,9 +225,9 @@ const TicketActions: React.FC<TicketActionsProps> = ({
     const canShare = supportsWebShare();
 
     return (
-        <div className={styles.container}>
+        <div className={styles['container']}>
             {/* Ticket Component */}
-            <div className={styles.ticketWrapper}>
+            <div className={styles['ticketWrapper']}>
                 <Ticket80mm
                     ref={ticketRef}
                     ticket={ticket}
@@ -240,55 +240,55 @@ const TicketActions: React.FC<TicketActionsProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className={styles.actionsBar}>
+            <div className={styles['actionsBar']}>
                 <button
-                    className={styles.actionButton}
+                    className={styles['actionButton']}
                     onClick={handleDownloadImage}
                     disabled={isProcessing}
                     title="Descargar como Imagen"
                 >
-                    <span className={styles.buttonIcon}>📷</span>
-                    <span className={styles.buttonText}>Imagen</span>
+                    <span className={styles['buttonIcon']}>📷</span>
+                    <span className={styles['buttonText']}>Imagen</span>
                 </button>
 
                 <button
-                    className={styles.actionButton}
+                    className={styles['actionButton']}
                     onClick={handleDownloadPDF}
                     disabled={isProcessing}
                     title="Descargar como PDF"
                 >
-                    <span className={styles.buttonIcon}>📄</span>
-                    <span className={styles.buttonText}>PDF</span>
+                    <span className={styles['buttonIcon']}>📄</span>
+                    <span className={styles['buttonText']}>PDF</span>
                 </button>
 
                 {isMobile && canShare && (
                     <button
-                        className={`${styles.actionButton} ${styles.shareButton}`}
+                        className={`${styles['actionButton']} ${styles['shareButton']}`}
                         onClick={handleShare}
                         disabled={isProcessing}
                         title="Compartir por WhatsApp/Telegram"
                     >
-                        <span className={styles.buttonIcon}>📱</span>
-                        <span className={styles.buttonText}>Compartir</span>
+                        <span className={styles['buttonIcon']}>📱</span>
+                        <span className={styles['buttonText']}>Compartir</span>
                     </button>
                 )}
 
                 <button
-                    className={styles.actionButton}
+                    className={styles['actionButton']}
                     onClick={handlePrint}
                     disabled={isProcessing}
                     title="Imprimir"
                 >
-                    <span className={styles.buttonIcon}>🖨️</span>
-                    <span className={styles.buttonText}>Imprimir</span>
+                    <span className={styles['buttonIcon']}>🖨️</span>
+                    <span className={styles['buttonText']}>Imprimir</span>
                 </button>
             </div>
 
             {/* Processing Indicator */}
             {isProcessing && (
-                <div className={styles.processingOverlay}>
-                    <div className={styles.spinner}></div>
-                    <p className={styles.processingText}>Procesando...</p>
+                <div className={styles['processingOverlay']}>
+                    <div className={styles['spinner']}></div>
+                    <p className={styles['processingText']}>Procesando...</p>
                 </div>
             )}
         </div>

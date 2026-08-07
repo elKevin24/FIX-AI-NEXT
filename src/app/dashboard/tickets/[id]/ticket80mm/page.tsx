@@ -104,18 +104,18 @@ export default async function Ticket80mmPage({ params }: Props) {
     };
 
     return (
-        <main className={styles.container}>
-            <div className={styles.header}>
-                <Link href={`/dashboard/tickets/${id}`} className={styles.backButton}>
+        <main className={styles['container']}>
+            <div className={styles['header']}>
+                <Link href={`/dashboard/tickets/${id}`} className={styles['backButton']}>
                     ← Volver al Ticket
                 </Link>
-                <h1 className={styles.title}>Ticket 80mm - Orden de Servicio</h1>
-                <p className={styles.subtitle}>
+                <h1 className={styles['title']}>Ticket 80mm - Orden de Servicio</h1>
+                <p className={styles['subtitle']}>
                     Formato optimizado para impresión térmica y compartir
                 </p>
             </div>
 
-            <div className={styles.content}>
+            <div className={styles['content']}>
                 <TicketActions
                     ticket={ticketData}
                     showParts={true}
@@ -124,7 +124,7 @@ export default async function Ticket80mmPage({ params }: Props) {
                 />
             </div>
 
-            <div className={styles.instructions}>
+            <div className={styles['instructions']}>
                 <h2>💡 Instrucciones</h2>
                 <ul>
                     <li>

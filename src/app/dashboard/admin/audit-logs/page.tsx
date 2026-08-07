@@ -14,11 +14,11 @@ export default async function AuditLogsPage(props: {
     }
 
     const tenantId = session.user.tenantId;
-    const limit = Number(searchParams.limit) || 50;
-    const offset = Number(searchParams.offset) || 0;
+    const limit = Number(searchParams['limit']) || 50;
+    const offset = Number(searchParams['offset']) || 0;
 
     const { logs, total } = await getAuditLogs(tenantId, limit, offset, {
-        action: searchParams.action as any
+        action: searchParams['action'] as any
     });
 
     return (

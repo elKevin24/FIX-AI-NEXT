@@ -108,9 +108,9 @@ export function WorkloadDashboard() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div className={styles['container']}>
+        <div className={styles['loading']}>
+          <div className={styles['spinner']}></div>
           <p>Loading workload data...</p>
         </div>
       </div>
@@ -119,10 +119,10 @@ export function WorkloadDashboard() {
 
   if (error) {
     return (
-      <div className={styles.container}>
-        <div className={styles.error}>
+      <div className={styles['container']}>
+        <div className={styles['error']}>
           <p>Error: {error}</p>
-          <button onClick={fetchWorkload} className={styles.retryButton}>
+          <button onClick={fetchWorkload} className={styles['retryButton']}>
             Retry
           </button>
         </div>
@@ -161,26 +161,26 @@ export function WorkloadDashboard() {
   });
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <div className={styles['container']}>
+      <header className={styles['header']}>
         <div>
           <h1>Technician Workload</h1>
           <p>Monitor and manage technician capacity and assignments</p>
         </div>
-        <button onClick={fetchWorkload} className={styles.refreshButton}>
+        <button onClick={fetchWorkload} className={styles['refreshButton']}>
           🔄 Refresh
         </button>
       </header>
 
       <WorkloadSummary summary={data.summary} />
 
-      <div className={styles.controls}>
-        <div className={styles.filterGroup}>
+      <div className={styles['controls']}>
+        <div className={styles['filterGroup']}>
           <label>Filter:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className={styles.select}
+            className={styles['select']}
           >
             <option value="all">All Technicians</option>
             <option value="available">Available Only</option>
@@ -189,12 +189,12 @@ export function WorkloadDashboard() {
           </select>
         </div>
 
-        <div className={styles.filterGroup}>
+        <div className={styles['filterGroup']}>
           <label>Sort by:</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className={styles.select}
+            className={styles['select']}
           >
             <option value="utilization">Utilization</option>
             <option value="workload">Workload</option>
@@ -203,9 +203,9 @@ export function WorkloadDashboard() {
         </div>
       </div>
 
-      <div className={styles.techniciansGrid}>
+      <div className={styles['techniciansGrid']}>
         {filteredTechnicians.length === 0 ? (
-          <div className={styles.emptyState}>
+          <div className={styles['emptyState']}>
             <p>No technicians found with the selected filters.</p>
           </div>
         ) : (

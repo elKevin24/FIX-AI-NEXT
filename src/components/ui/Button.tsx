@@ -28,15 +28,15 @@ export function Button({
 }: ButtonProps) {
   
   // Map variant strings to styles
-  const variantStyle = styles[variant] || styles.primary;
+  const variantStyle = styles[variant] || styles['primary'];
   
   // Map size strings to styles
-  const sizeStyle = size === 'base' ? styles.baseSize : styles[size];
+  const sizeStyle = size === 'base' ? styles['baseSize'] : styles[size];
   
-  const widthStyle = fullWidth ? styles.fullWidth : '';
+  const widthStyle = fullWidth ? styles['fullWidth'] : '';
 
   const classes = [
-    styles.base,
+    styles['base'],
     variantStyle,
     sizeStyle,
     widthStyle,
@@ -49,10 +49,10 @@ export function Button({
       disabled={disabled || isLoading} 
       {...props}
     >
-      {isLoading && <span className={styles.spinner} aria-hidden="true" />}
-      {!isLoading && leftIcon && <span className={styles.iconLeft}>{leftIcon}</span>}
+      {isLoading && <span className={styles['spinner']} aria-hidden="true" />}
+      {!isLoading && leftIcon && <span className={styles['iconLeft']}>{leftIcon}</span>}
       {children}
-      {!isLoading && rightIcon && <span className={styles.iconRight}>{rightIcon}</span>}
+      {!isLoading && rightIcon && <span className={styles['iconRight']}>{rightIcon}</span>}
     </Component>
   );
 }
