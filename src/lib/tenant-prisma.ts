@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { prisma } from "./prisma";
 
 const TENANTED_MODELS = new Set([
@@ -30,7 +31,7 @@ function hasUpdatedBy(model: string): boolean {
     return MODELS_WITH_UPDATED_BY.has(model);
 }
 
-export function getTenantPrisma(tenantId: string, userId?: string) {
+export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient {
     if (!tenantId) {
         throw new Error('tenantId es requerido para aislar la base de datos');
     }
@@ -151,5 +152,5 @@ export function getTenantPrisma(tenantId: string, userId?: string) {
                 },
             },
         },
-    });
+    }) as unknown as PrismaClient;
 }

@@ -21,7 +21,7 @@ export async function createCustomer(prevState: any, formData: FormData) {
     const validatedFields = CreateCustomerSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { success: false, message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
     try {
@@ -50,7 +50,7 @@ export async function updateCustomer(prevState: any, formData: FormData) {
     const validatedFields = UpdateCustomerSchema.safeParse(formDataObj);
 
     if (!validatedFields.success) {
-        return { success: false, message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
     try {
