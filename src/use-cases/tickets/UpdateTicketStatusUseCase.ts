@@ -48,9 +48,14 @@ export class UpdateTicketStatusUseCase {
                  }
              }
 
+             const updateData: any = { status: status as any, updatedById: userId };
+             if (status === 'CANCELLED' && note) {
+                 updateData.cancellationReason = note;
+             }
+
              await tx.ticket.update({
                  where: { id: ticketId, tenantId: existingTicket.tenantId },
-                 data: { status: status as any, updatedById: userId }
+                 data: updateData
              });
 
              if (note) {
