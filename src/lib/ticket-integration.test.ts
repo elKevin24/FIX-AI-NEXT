@@ -236,12 +236,27 @@ function makeDb() {
       const id = nextId('pu');
       const pu = { id, ...data };
       state.partUsages.set(id, pu);
+      
+      // Simulate PostgreSQL Trigger: trg_sync_part_inventory (INSERT)
+      const part = state.parts.get(data.partId);
+      if (part) {
+        if (part.quantity < data.quantity) {
+           throw new Error(`Stock insuficiente para el repuesto ID ${data.partId}`);
+        }
+        part.quantity -= data.quantity;
+      }
       return pu;
     }),
     delete: vi.fn(({ where }: any) => {
       const pu = state.partUsages.get(where.id);
       if (pu) {
         state.partUsages.delete(where.id);
+        
+        // Simulate PostgreSQL Trigger: trg_sync_part_inventory (DELETE)
+        const part = state.parts.get(pu.partId);
+        if (part) {
+           part.quantity += pu.quantity;
+        }
       }
     }),
   };

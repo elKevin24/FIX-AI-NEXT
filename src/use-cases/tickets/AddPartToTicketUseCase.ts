@@ -48,10 +48,7 @@ export class AddPartToTicketUseCase {
                 }
             });
 
-            await tx.part.update({
-                where: { id: partId },
-                data: { quantity: { decrement: quantity } }
-            });
+
 
             const updatedPart = await tx.part.findUnique({
                 where: { id: partId },

@@ -119,10 +119,6 @@ describe('addPartToTicket (cálculos de inventario)', () => {
     expect(tx.partUsage.create).toHaveBeenCalledWith({
       data: { ticketId: TICKET_ID, partId: PART_ID, quantity: 1 },
     });
-    expect(tx.part.update).toHaveBeenCalledWith({
-      where: { id: PART_ID },
-      data: { quantity: { decrement: 1 } },
-    });
   });
 
   it('notifica stock bajo cuando quantity <= minStock', async () => {
@@ -180,10 +176,6 @@ describe('removePartFromTicket (restauración de stock)', () => {
 
     expect(result.success).toBe(true);
     expect(tx.partUsage.delete).toHaveBeenCalledWith({ where: { id: 'usage-1' } });
-    expect(tx.part.update).toHaveBeenCalledWith({
-      where: { id: PART_ID },
-      data: { quantity: { increment: 3 } },
-    });
   });
 
   it('rechaza si el uso es de otro tenant', async () => {
