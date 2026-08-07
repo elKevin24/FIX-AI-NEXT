@@ -7,11 +7,13 @@
 
 export enum TicketStatus {
   OPEN = 'OPEN',
+  WAITING_APPROVAL = 'WAITING_APPROVAL',
   IN_PROGRESS = 'IN_PROGRESS',
   WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
   RESOLVED = 'RESOLVED',
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
 }
 
 export type TicketAction =
@@ -23,7 +25,9 @@ export type TicketAction =
   | 'resolve'
   | 'deliver'
   | 'cancel'
-  | 'reopen';
+  | 'reopen'
+  | 'approve'
+  | 'reject';
 
 /**
  * Mapa de transiciones válidas: [estado_actual][acción] -> estado_nuevo
@@ -32,6 +36,11 @@ const VALID_TRANSITIONS: Record<TicketStatus, Partial<Record<TicketAction, Ticke
   [TicketStatus.OPEN]: {
     take: TicketStatus.IN_PROGRESS,
     assign: TicketStatus.IN_PROGRESS,
+    cancel: TicketStatus.CANCELLED,
+  },
+  [TicketStatus.WAITING_APPROVAL]: {
+    approve: TicketStatus.IN_PROGRESS,
+    reject: TicketStatus.REJECTED,
     cancel: TicketStatus.CANCELLED,
   },
   [TicketStatus.IN_PROGRESS]: {
@@ -53,6 +62,9 @@ const VALID_TRANSITIONS: Record<TicketStatus, Partial<Record<TicketAction, Ticke
     cancel: TicketStatus.CANCELLED,
   },
   [TicketStatus.CANCELLED]: {
+    reopen: TicketStatus.OPEN,
+  },
+  [TicketStatus.REJECTED]: {
     reopen: TicketStatus.OPEN,
   },
 };
@@ -106,6 +118,9 @@ export function describeTransition(
     'OPEN->take': 'Técnico toma el ticket y comienza a trabajar',
     'OPEN->assign': 'Admin asigna el ticket a un técnico',
     'OPEN->cancel': 'Ticket cancelado sin iniciar trabajo',
+    'WAITING_APPROVAL->approve': 'Cliente autoriza los repuestos propuestos',
+    'WAITING_APPROVAL->reject': 'Cliente rechaza los repuestos propuestos',
+    'WAITING_APPROVAL->cancel': 'Ticket cancelado mientras se esperaba aprobación',
     'IN_PROGRESS->wait_for_parts': 'Trabajo pausado esperando repuestos',
     'IN_PROGRESS->resolve': 'Reparación completada',
     'IN_PROGRESS->cancel': 'Ticket cancelado durante el trabajo',
@@ -116,6 +131,7 @@ export function describeTransition(
     'RESOLVED->cancel': 'Ticket cancelado después de resolver',
     'CLOSED->reopen': 'Cliente reporta nuevo problema, se reabre',
     'CANCELLED->reopen': 'Ticket cancelado se reactiva',
+    'REJECTED->reopen': 'Ticket rechazado se reactiva',
   };
 
   const key = `${currentStatus}->${action}`;

@@ -122,6 +122,8 @@ export class CreateTicketUseCase {
                             ticketId: newTicket.id,
                             partId: partItem.partId,
                             quantity: partItem.quantity,
+                            approved: true,
+                            priceAtProposal: part.price,
                         },
                     });
 

@@ -293,11 +293,9 @@ describe('quotation-actions', () => {
       expect(result.expiredCount).toBe(3);
     });
 
-    it('returns with no session silently', async () => {
+    it('throws when there is no session', async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
-      const result = await markExpiredQuotations();
-      expect(result.success).toBe(true);
-      expect(result.expiredCount).toBe(0);
+      await expect(markExpiredQuotations()).rejects.toThrow('No autorizado');
     });
   });
 });

@@ -35,6 +35,8 @@ interface PartUsage {
     id: string;
     quantity: number;
     createdAt: Date;
+    approved: boolean;
+    priceAtProposal?: any;
     part: Part;
 }
 
@@ -108,6 +110,7 @@ interface Props {
 
 const STATUS_OPTIONS = [
     { value: 'OPEN', label: 'Abierto', color: 'open' },
+    { value: 'WAITING_APPROVAL', label: 'Esperando Aprobación', color: 'waiting_approval' },
     { value: 'IN_PROGRESS', label: 'En Progreso', color: 'in_progress' },
     { value: 'WAITING_FOR_PARTS', label: 'Esperando Repuestos', color: 'waiting_for_parts' },
     { value: 'RESOLVED', label: 'Resuelto', color: 'resolved' },
@@ -538,6 +541,8 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 ticketId={ticket.id}
                 partsUsed={ticket.partsUsed}
                 availableParts={availableParts}
+                ticketStatus={ticket.status}
+                canApprove={isAdmin || isSuperAdmin}
             />
 
             {/* Notes Section & Timeline */}
