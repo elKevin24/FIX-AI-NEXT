@@ -30,7 +30,7 @@ export async function createPart(prevState: any, formData: FormData) {
     const validatedFields = CreatePartSchema.safeParse(data);
 
     if (!validatedFields.success) {
-        return { success: false, message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
     try {
@@ -64,7 +64,7 @@ export async function updatePart(prevState: any, formData: FormData) {
     const validatedFields = UpdatePartSchema.safeParse(data);
 
     if (!validatedFields.success) {
-        return { success: false, message: validatedFields.error.errors[0].message };
+        return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
     const superAdmin = isSuperAdmin(session.user);
