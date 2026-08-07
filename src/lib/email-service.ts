@@ -14,18 +14,18 @@ interface SendEmailParams {
 type EmailProvider = 'smtp' | 'resend' | 'log';
 
 function resolveProvider(): EmailProvider {
-  const explicit = process.env.EMAIL_PROVIDER?.toLowerCase();
+  const explicit = process.env['EMAIL_PROVIDER']?.toLowerCase();
   if (explicit === 'smtp' || explicit === 'resend' || explicit === 'log') return explicit;
 
-  if (process.env.SMTP_HOST && process.env.SMTP_USER) return 'smtp';
-  if (process.env.RESEND_API_KEY) return 'resend';
+  if (process.env['SMTP_HOST'] && process.env['SMTP_USER']) return 'smtp';
+  if (process.env['RESEND_API_KEY']) return 'resend';
   return 'log';
 }
 
 function getFrom() {
   return (
-    process.env.EMAIL_FROM ||
-    process.env.RESEND_FROM_EMAIL ||
+    process.env['EMAIL_FROM'] ||
+    process.env['RESEND_FROM_EMAIL'] ||
     'FIX-AI <onboarding@resend.dev>'
   );
 }
@@ -33,12 +33,12 @@ function getFrom() {
 async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) {
   const htmlContent = html || (react ? await render(react) : undefined);
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true',
+    host: process.env['SMTP_HOST'],
+    port: Number(process.env['SMTP_PORT']) || 587,
+    secure: process.env['SMTP_SECURE'] === 'true',
     auth: {
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
+      user: process.env['SMTP_USER'] || '',
+      pass: process.env['SMTP_PASS'] || '',
     },
   });
 
@@ -54,7 +54,7 @@ async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) 
 }
 
 async function sendViaResend({ to, subject, text, html, react }: SendEmailParams) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = new Resend(process.env['RESEND_API_KEY']);
 
   const { data, error } = await resend.emails.send({
     from: getFrom(),
