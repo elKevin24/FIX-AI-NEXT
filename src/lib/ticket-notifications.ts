@@ -5,6 +5,7 @@ import { TicketCreatedEmail } from '@/emails/TicketCreated';
 import { TicketStatusChangedEmail } from '@/emails/TicketStatusChanged';
 import { TechnicianAssignedEmail } from '@/emails/TechnicianAssigned';
 import { LowStockEmail } from '@/emails/LowStock';
+import { PartsApprovalRequiredEmail } from '@/emails/PartsApprovalRequired';
 
 // --- Types ---
 
@@ -32,14 +33,61 @@ export interface TicketNotificationData {
 
 const STATUS_LABELS: Record<string, string> = {
     OPEN: 'Abierto',
+    WAITING_APPROVAL: 'Esperando Aprobación',
     IN_PROGRESS: 'En Progreso',
     WAITING_FOR_PARTS: 'Esperando Repuestos',
     RESOLVED: 'Resuelto',
     CLOSED: 'Cerrado',
     CANCELLED: 'Cancelado',
+    REJECTED: 'Rechazado',
 };
 
 // --- Notification Functions ---
+
+/**
+ * Notifica al cliente que los repuestos propuestos requieren su aprobación.
+ * Destinatarios: Cliente (Email) y Técnico asignado (In-app)
+ */
+export async function notifyPartsApprovalRequired(
+    ticket: TicketNotificationData,
+    part: { id: string; name: string; sku?: string | null },
+    quantity: number,
+    priceAtProposal: number,
+    total: number,
+) {
+    const ticketRef = ticket.ticketNumber;
+
+    // 1. Notificar al Técnico Asignado (In-app)
+    if (ticket.assignedToId) {
+        await createNotification({
+            userId: ticket.assignedToId,
+            tenantId: ticket.tenantId,
+            type: 'INFO',
+            title: 'Repuestos pendientes de aprobación',
+            message: `El ticket #${ticketRef} espera la aprobación del cliente por "${part.name}" (${quantity} uds).`,
+            link: `/dashboard/tickets/${ticket.id}`
+        });
+    }
+
+    // 2. Notificar al Cliente (Email)
+    if (ticket.customer.email) {
+        await sendEmail({
+            to: ticket.customer.email,
+            subject: `[FIX-AI] Aprobación de repuestos - ticket #${ticketRef}`,
+            react: PartsApprovalRequiredEmail({
+                customerName: ticket.customer.name,
+                ticketNumber: ticketRef || '',
+                ticketTitle: ticket.title,
+                partName: part.name,
+                partSku: part.sku || '',
+                quantity,
+                priceAtProposal,
+                total,
+                ticketLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+            })
+        });
+    }
+}
 
 /**
  * Notifica cuando un ticket cambia de estado

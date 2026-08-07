@@ -14,10 +14,11 @@ vi.mock('@/lib/ticket-notifications', () => ({
   notifyTicketCreated: vi.fn(),
   notifyTicketStatusChange: vi.fn(),
   notifyTechnicianAssigned: vi.fn(),
+  notifyPartsApprovalRequired: vi.fn(),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
-import { notifyLowStock } from '@/lib/ticket-notifications';
+import { notifyPartsApprovalRequired } from '@/lib/ticket-notifications';
 
 const SESSION = {
   user: {
@@ -41,6 +42,7 @@ function makeTx(overrides: Record<string, any> = {}) {
   return {
     ticket: {
       findUnique: vi.fn().mockResolvedValue({ id: TICKET_ID, tenantId: 'tenant-1' }),
+      update: vi.fn().mockResolvedValue({ id: TICKET_ID }),
     },
     part: {
       findUnique: vi.fn(),
@@ -65,7 +67,7 @@ function makeTx(overrides: Record<string, any> = {}) {
   };
 }
 
-describe('addPartToTicket (cálculos de inventario)', () => {
+describe('addPartToTicket (propuesta de repuestos con aprobación)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (auth as any).mockResolvedValue(SESSION);
@@ -82,21 +84,6 @@ describe('addPartToTicket (cálculos de inventario)', () => {
     expect(result).toEqual({ success: false, message: 'Datos inválidos' });
   });
 
-  it('rechaza stock insuficiente con detalle de disponibilidad', async () => {
-    const tx = makeTx();
-    tx.part.findUnique.mockResolvedValue({ id: PART_ID, tenantId: 'tenant-1', quantity: 2 });
-    const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
-    (getTenantPrisma as any).mockReturnValue(tenantDb);
-
-    const result = await addPartToTicket(null, formDataFrom({ ticketId: TICKET_ID, partId: PART_ID, quantity: '5' }));
-
-    expect(result.success).toBe(false);
-    expect(result.message).toContain('Stock insuficiente');
-    expect(result.message).toContain('Disponible: 2');
-    expect(tx.partUsage.create).not.toHaveBeenCalled();
-    expect(tx.part.update).not.toHaveBeenCalled();
-  });
-
   it('rechaza repuesto de otro tenant', async () => {
     const tx = makeTx();
     tx.part.findUnique.mockResolvedValue({ id: PART_ID, tenantId: 'tenant-OTRO', quantity: 100 });
@@ -108,11 +95,11 @@ describe('addPartToTicket (cálculos de inventario)', () => {
     expect(result.message).toBe('No autorizado');
   });
 
-  it('crea partUsage y decrementa stock cuando hay inventario', async () => {
+  it('crea partUsage pendiente (approved:false) y NO decrementa stock', async () => {
     const tx = makeTx();
-    tx.part.findUnique.mockResolvedValue({ id: PART_ID, tenantId: 'tenant-1', quantity: 10 });
-    tx.part.findUnique.mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 10 });
-    tx.part.findUnique.mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 9, name: 'Batería', minStock: 2 });
+    tx.part.findUnique.mockResolvedValue({
+      id: PART_ID, tenantId: 'tenant-1', quantity: 10, name: 'Batería', sku: 'BAT-1', price: 150,
+    });
     const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
     (getTenantPrisma as any).mockReturnValue(tenantDb);
 
@@ -120,35 +107,66 @@ describe('addPartToTicket (cálculos de inventario)', () => {
 
     expect(result.success).toBe(true);
     expect(tx.partUsage.create).toHaveBeenCalledWith({
-      data: { ticketId: TICKET_ID, partId: PART_ID, quantity: 1 },
+      data: { ticketId: TICKET_ID, partId: PART_ID, quantity: 1, approved: false, priceAtProposal: 150 },
     });
+    // El descuento de stock lo hace el trigger solo cuando approved=true
+    expect(tx.part.update).not.toHaveBeenCalled();
   });
 
-  it('notifica stock bajo cuando quantity <= minStock', async () => {
+  it('pasa el ticket a WAITING_APPROVAL cuando está OPEN', async () => {
     const tx = makeTx();
-    tx.part.findUnique
-      .mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 3 })
-      .mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 2, name: 'Batería', minStock: 3 });
-    const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
-    (getTenantPrisma as any).mockReturnValue(tenantDb);
-
-    const result = await addPartToTicket(null, formDataFrom({ ticketId: TICKET_ID, partId: PART_ID, quantity: '1' }));
-
-    expect(result.success).toBe(true);
-    expect(notifyLowStock).toHaveBeenCalled();
-  });
-
-  it('NO notifica stock bajo cuando quantity > minStock', async () => {
-    const tx = makeTx();
-    tx.part.findUnique
-      .mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 10 })
-      .mockResolvedValueOnce({ id: PART_ID, tenantId: 'tenant-1', quantity: 9, name: 'Batería', minStock: 2 });
+    tx.part.findUnique.mockResolvedValue({
+      id: PART_ID, tenantId: 'tenant-1', quantity: 10, name: 'Batería', price: 150,
+    });
+    tx.ticket.findUnique.mockResolvedValue({
+      id: TICKET_ID, tenantId: 'tenant-1', status: 'OPEN', ticketNumber: 'TICK-0001', title: 'Reparación',
+    });
     const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
     (getTenantPrisma as any).mockReturnValue(tenantDb);
 
     await addPartToTicket(null, formDataFrom({ ticketId: TICKET_ID, partId: PART_ID, quantity: '1' }));
 
-    expect(notifyLowStock).not.toHaveBeenCalled();
+    expect(tx.ticket.update).toHaveBeenCalledWith({
+      where: { id: TICKET_ID, tenantId: 'tenant-1' },
+      data: { status: 'WAITING_APPROVAL', updatedById: 'user-1' },
+    });
+  });
+
+  it('no cambia el estado si el ticket está en estado terminal (CLOSED)', async () => {
+    const tx = makeTx();
+    tx.part.findUnique.mockResolvedValue({
+      id: PART_ID, tenantId: 'tenant-1', quantity: 10, name: 'Batería', price: 150,
+    });
+    tx.ticket.findUnique.mockResolvedValue({
+      id: TICKET_ID, tenantId: 'tenant-1', status: 'CLOSED', ticketNumber: 'TICK-0001', title: 'Reparación',
+    });
+    const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
+    (getTenantPrisma as any).mockReturnValue(tenantDb);
+
+    await addPartToTicket(null, formDataFrom({ ticketId: TICKET_ID, partId: PART_ID, quantity: '1' }));
+
+    expect(tx.ticket.update).not.toHaveBeenCalled();
+  });
+
+  it('notifica que se requiere la aprobación del cliente', async () => {
+    const tx = makeTx();
+    tx.part.findUnique.mockResolvedValue({
+      id: PART_ID, tenantId: 'tenant-1', quantity: 10, name: 'Batería', sku: 'BAT-1', price: 150,
+    });
+    tx.ticket.findUnique.mockResolvedValue({
+      id: TICKET_ID, tenantId: 'tenant-1', status: 'OPEN', ticketNumber: 'TICK-0001', title: 'Reparación',
+      customerId: 'customer-1', assignedToId: null,
+      customer: { id: 'customer-1', name: 'Cliente A', email: 'cliente@test.com' },
+    });
+    const tenantDb = { $transaction: vi.fn(async (cb: any) => cb(tx)) };
+    (getTenantPrisma as any).mockReturnValue(tenantDb);
+
+    await addPartToTicket(null, formDataFrom({ ticketId: TICKET_ID, partId: PART_ID, quantity: '2' }));
+
+    expect(notifyPartsApprovalRequired).toHaveBeenCalled();
+    const [, partArg, quantityArg] = (notifyPartsApprovalRequired as any).mock.calls[0];
+    expect(partArg).toMatchObject({ name: 'Batería', sku: 'BAT-1' });
+    expect(quantityArg).toBe(2);
   });
 });
 

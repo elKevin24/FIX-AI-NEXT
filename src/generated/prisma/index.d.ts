@@ -332,6 +332,8 @@ export const AuditAction: {
   TICKET_DELETED: 'TICKET_DELETED',
   TICKET_STATUS_CHANGED: 'TICKET_STATUS_CHANGED',
   TICKET_ASSIGNED: 'TICKET_ASSIGNED',
+  PARTS_APPROVED: 'PARTS_APPROVED',
+  PARTS_REJECTED: 'PARTS_REJECTED',
   CONFIG_CHANGED: 'CONFIG_CHANGED',
   TENANT_CONFIG_CHANGED: 'TENANT_CONFIG_CHANGED',
   EXPORT_DATA: 'EXPORT_DATA',
@@ -4185,6 +4187,7 @@ export namespace Prisma {
     assignedTickets: number
     createdTickets: number
     updatedTickets: number
+    partUsagesApproved: number
     uploadedAttachments: number
   }
 
@@ -4217,6 +4220,7 @@ export namespace Prisma {
     assignedTickets?: boolean | UserCountOutputTypeCountAssignedTicketsArgs
     createdTickets?: boolean | UserCountOutputTypeCountCreatedTicketsArgs
     updatedTickets?: boolean | UserCountOutputTypeCountUpdatedTicketsArgs
+    partUsagesApproved?: boolean | UserCountOutputTypeCountPartUsagesApprovedArgs
     uploadedAttachments?: boolean | UserCountOutputTypeCountUploadedAttachmentsArgs
   }
 
@@ -4425,6 +4429,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountUpdatedTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPartUsagesApprovedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PartUsageWhereInput
   }
 
   /**
@@ -6848,6 +6859,7 @@ export namespace Prisma {
     assignedTickets?: boolean | User$assignedTicketsArgs<ExtArgs>
     createdTickets?: boolean | User$createdTicketsArgs<ExtArgs>
     updatedTickets?: boolean | User$updatedTicketsArgs<ExtArgs>
+    partUsagesApproved?: boolean | User$partUsagesApprovedArgs<ExtArgs>
     uploadedAttachments?: boolean | User$uploadedAttachmentsArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -6967,6 +6979,7 @@ export namespace Prisma {
     assignedTickets?: boolean | User$assignedTicketsArgs<ExtArgs>
     createdTickets?: boolean | User$createdTicketsArgs<ExtArgs>
     updatedTickets?: boolean | User$updatedTicketsArgs<ExtArgs>
+    partUsagesApproved?: boolean | User$partUsagesApprovedArgs<ExtArgs>
     uploadedAttachments?: boolean | User$uploadedAttachmentsArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -7016,6 +7029,7 @@ export namespace Prisma {
       assignedTickets: Prisma.$TicketPayload<ExtArgs>[]
       createdTickets: Prisma.$TicketPayload<ExtArgs>[]
       updatedTickets: Prisma.$TicketPayload<ExtArgs>[]
+      partUsagesApproved: Prisma.$PartUsagePayload<ExtArgs>[]
       uploadedAttachments: Prisma.$TicketAttachmentPayload<ExtArgs>[]
       tenant: Prisma.$TenantPayload<ExtArgs>
     }
@@ -7467,6 +7481,7 @@ export namespace Prisma {
     assignedTickets<T extends User$assignedTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$assignedTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdTickets<T extends User$createdTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     updatedTickets<T extends User$updatedTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$updatedTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    partUsagesApproved<T extends User$partUsagesApprovedArgs<ExtArgs> = {}>(args?: Subset<T, User$partUsagesApprovedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PartUsagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     uploadedAttachments<T extends User$uploadedAttachmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$uploadedAttachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -8647,6 +8662,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
+   * User.partUsagesApproved
+   */
+  export type User$partUsagesApprovedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PartUsage
+     */
+    select?: PartUsageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PartUsage
+     */
+    omit?: PartUsageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PartUsageInclude<ExtArgs> | null
+    where?: PartUsageWhereInput
+    orderBy?: PartUsageOrderByWithRelationInput | PartUsageOrderByWithRelationInput[]
+    cursor?: PartUsageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PartUsageScalarFieldEnum | PartUsageScalarFieldEnum[]
   }
 
   /**
@@ -16542,15 +16581,21 @@ export namespace Prisma {
 
   export type PartUsageAvgAggregateOutputType = {
     quantity: number | null
+    priceAtProposal: Decimal | null
   }
 
   export type PartUsageSumAggregateOutputType = {
     quantity: number | null
+    priceAtProposal: Decimal | null
   }
 
   export type PartUsageMinAggregateOutputType = {
     id: string | null
     quantity: number | null
+    approved: boolean | null
+    approvedAt: Date | null
+    approvedById: string | null
+    priceAtProposal: Decimal | null
     ticketId: string | null
     partId: string | null
     createdAt: Date | null
@@ -16559,6 +16604,10 @@ export namespace Prisma {
   export type PartUsageMaxAggregateOutputType = {
     id: string | null
     quantity: number | null
+    approved: boolean | null
+    approvedAt: Date | null
+    approvedById: string | null
+    priceAtProposal: Decimal | null
     ticketId: string | null
     partId: string | null
     createdAt: Date | null
@@ -16567,6 +16616,10 @@ export namespace Prisma {
   export type PartUsageCountAggregateOutputType = {
     id: number
     quantity: number
+    approved: number
+    approvedAt: number
+    approvedById: number
+    priceAtProposal: number
     ticketId: number
     partId: number
     createdAt: number
@@ -16576,15 +16629,21 @@ export namespace Prisma {
 
   export type PartUsageAvgAggregateInputType = {
     quantity?: true
+    priceAtProposal?: true
   }
 
   export type PartUsageSumAggregateInputType = {
     quantity?: true
+    priceAtProposal?: true
   }
 
   export type PartUsageMinAggregateInputType = {
     id?: true
     quantity?: true
+    approved?: true
+    approvedAt?: true
+    approvedById?: true
+    priceAtProposal?: true
     ticketId?: true
     partId?: true
     createdAt?: true
@@ -16593,6 +16652,10 @@ export namespace Prisma {
   export type PartUsageMaxAggregateInputType = {
     id?: true
     quantity?: true
+    approved?: true
+    approvedAt?: true
+    approvedById?: true
+    priceAtProposal?: true
     ticketId?: true
     partId?: true
     createdAt?: true
@@ -16601,6 +16664,10 @@ export namespace Prisma {
   export type PartUsageCountAggregateInputType = {
     id?: true
     quantity?: true
+    approved?: true
+    approvedAt?: true
+    approvedById?: true
+    priceAtProposal?: true
     ticketId?: true
     partId?: true
     createdAt?: true
@@ -16696,6 +16763,10 @@ export namespace Prisma {
   export type PartUsageGroupByOutputType = {
     id: string
     quantity: number
+    approved: boolean
+    approvedAt: Date | null
+    approvedById: string | null
+    priceAtProposal: Decimal
     ticketId: string
     partId: string
     createdAt: Date
@@ -16723,9 +16794,14 @@ export namespace Prisma {
   export type PartUsageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     quantity?: boolean
+    approved?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    priceAtProposal?: boolean
     ticketId?: boolean
     partId?: boolean
     createdAt?: boolean
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["partUsage"]>
@@ -16733,9 +16809,14 @@ export namespace Prisma {
   export type PartUsageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     quantity?: boolean
+    approved?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    priceAtProposal?: boolean
     ticketId?: boolean
     partId?: boolean
     createdAt?: boolean
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["partUsage"]>
@@ -16743,9 +16824,14 @@ export namespace Prisma {
   export type PartUsageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     quantity?: boolean
+    approved?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    priceAtProposal?: boolean
     ticketId?: boolean
     partId?: boolean
     createdAt?: boolean
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["partUsage"]>
@@ -16753,21 +16839,28 @@ export namespace Prisma {
   export type PartUsageSelectScalar = {
     id?: boolean
     quantity?: boolean
+    approved?: boolean
+    approvedAt?: boolean
+    approvedById?: boolean
+    priceAtProposal?: boolean
     ticketId?: boolean
     partId?: boolean
     createdAt?: boolean
   }
 
-  export type PartUsageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quantity" | "ticketId" | "partId" | "createdAt", ExtArgs["result"]["partUsage"]>
+  export type PartUsageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quantity" | "approved" | "approvedAt" | "approvedById" | "priceAtProposal" | "ticketId" | "partId" | "createdAt", ExtArgs["result"]["partUsage"]>
   export type PartUsageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }
   export type PartUsageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }
   export type PartUsageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    approvedBy?: boolean | PartUsage$approvedByArgs<ExtArgs>
     part?: boolean | PartDefaultArgs<ExtArgs>
     ticket?: boolean | TicketDefaultArgs<ExtArgs>
   }
@@ -16775,12 +16868,17 @@ export namespace Prisma {
   export type $PartUsagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PartUsage"
     objects: {
+      approvedBy: Prisma.$UserPayload<ExtArgs> | null
       part: Prisma.$PartPayload<ExtArgs>
       ticket: Prisma.$TicketPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       quantity: number
+      approved: boolean
+      approvedAt: Date | null
+      approvedById: string | null
+      priceAtProposal: Prisma.Decimal
       ticketId: string
       partId: string
       createdAt: Date
@@ -17178,6 +17276,7 @@ export namespace Prisma {
    */
   export interface Prisma__PartUsageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    approvedBy<T extends PartUsage$approvedByArgs<ExtArgs> = {}>(args?: Subset<T, PartUsage$approvedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     part<T extends PartDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PartDefaultArgs<ExtArgs>>): Prisma__PartClient<$Result.GetResult<Prisma.$PartPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     ticket<T extends TicketDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TicketDefaultArgs<ExtArgs>>): Prisma__TicketClient<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -17211,6 +17310,10 @@ export namespace Prisma {
   interface PartUsageFieldRefs {
     readonly id: FieldRef<"PartUsage", 'String'>
     readonly quantity: FieldRef<"PartUsage", 'Int'>
+    readonly approved: FieldRef<"PartUsage", 'Boolean'>
+    readonly approvedAt: FieldRef<"PartUsage", 'DateTime'>
+    readonly approvedById: FieldRef<"PartUsage", 'String'>
+    readonly priceAtProposal: FieldRef<"PartUsage", 'Decimal'>
     readonly ticketId: FieldRef<"PartUsage", 'String'>
     readonly partId: FieldRef<"PartUsage", 'String'>
     readonly createdAt: FieldRef<"PartUsage", 'DateTime'>
@@ -17612,6 +17715,25 @@ export namespace Prisma {
      * Limit how many PartUsages to delete.
      */
     limit?: number
+  }
+
+  /**
+   * PartUsage.approvedBy
+   */
+  export type PartUsage$approvedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -45639,6 +45761,10 @@ export namespace Prisma {
   export const PartUsageScalarFieldEnum: {
     id: 'id',
     quantity: 'quantity',
+    approved: 'approved',
+    approvedAt: 'approvedAt',
+    approvedById: 'approvedById',
+    priceAtProposal: 'priceAtProposal',
     ticketId: 'ticketId',
     partId: 'partId',
     createdAt: 'createdAt'
@@ -46578,6 +46704,7 @@ export namespace Prisma {
     assignedTickets?: TicketListRelationFilter
     createdTickets?: TicketListRelationFilter
     updatedTickets?: TicketListRelationFilter
+    partUsagesApproved?: PartUsageListRelationFilter
     uploadedAttachments?: TicketAttachmentListRelationFilter
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
   }
@@ -46636,6 +46763,7 @@ export namespace Prisma {
     assignedTickets?: TicketOrderByRelationAggregateInput
     createdTickets?: TicketOrderByRelationAggregateInput
     updatedTickets?: TicketOrderByRelationAggregateInput
+    partUsagesApproved?: PartUsageOrderByRelationAggregateInput
     uploadedAttachments?: TicketAttachmentOrderByRelationAggregateInput
     tenant?: TenantOrderByWithRelationInput
   }
@@ -46698,6 +46826,7 @@ export namespace Prisma {
     assignedTickets?: TicketListRelationFilter
     createdTickets?: TicketListRelationFilter
     updatedTickets?: TicketListRelationFilter
+    partUsagesApproved?: PartUsageListRelationFilter
     uploadedAttachments?: TicketAttachmentListRelationFilter
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
   }, "id" | "unique_email_per_tenant">
@@ -47410,9 +47539,14 @@ export namespace Prisma {
     NOT?: PartUsageWhereInput | PartUsageWhereInput[]
     id?: UuidFilter<"PartUsage"> | string
     quantity?: IntFilter<"PartUsage"> | number
+    approved?: BoolFilter<"PartUsage"> | boolean
+    approvedAt?: DateTimeNullableFilter<"PartUsage"> | Date | string | null
+    approvedById?: UuidNullableFilter<"PartUsage"> | string | null
+    priceAtProposal?: DecimalFilter<"PartUsage"> | Decimal | DecimalJsLike | number | string
     ticketId?: UuidFilter<"PartUsage"> | string
     partId?: UuidFilter<"PartUsage"> | string
     createdAt?: DateTimeFilter<"PartUsage"> | Date | string
+    approvedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     part?: XOR<PartScalarRelationFilter, PartWhereInput>
     ticket?: XOR<TicketScalarRelationFilter, TicketWhereInput>
   }
@@ -47420,9 +47554,14 @@ export namespace Prisma {
   export type PartUsageOrderByWithRelationInput = {
     id?: SortOrder
     quantity?: SortOrder
+    approved?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedById?: SortOrderInput | SortOrder
+    priceAtProposal?: SortOrder
     ticketId?: SortOrder
     partId?: SortOrder
     createdAt?: SortOrder
+    approvedBy?: UserOrderByWithRelationInput
     part?: PartOrderByWithRelationInput
     ticket?: TicketOrderByWithRelationInput
   }
@@ -47433,9 +47572,14 @@ export namespace Prisma {
     OR?: PartUsageWhereInput[]
     NOT?: PartUsageWhereInput | PartUsageWhereInput[]
     quantity?: IntFilter<"PartUsage"> | number
+    approved?: BoolFilter<"PartUsage"> | boolean
+    approvedAt?: DateTimeNullableFilter<"PartUsage"> | Date | string | null
+    approvedById?: UuidNullableFilter<"PartUsage"> | string | null
+    priceAtProposal?: DecimalFilter<"PartUsage"> | Decimal | DecimalJsLike | number | string
     ticketId?: UuidFilter<"PartUsage"> | string
     partId?: UuidFilter<"PartUsage"> | string
     createdAt?: DateTimeFilter<"PartUsage"> | Date | string
+    approvedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     part?: XOR<PartScalarRelationFilter, PartWhereInput>
     ticket?: XOR<TicketScalarRelationFilter, TicketWhereInput>
   }, "id">
@@ -47443,6 +47587,10 @@ export namespace Prisma {
   export type PartUsageOrderByWithAggregationInput = {
     id?: SortOrder
     quantity?: SortOrder
+    approved?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedById?: SortOrderInput | SortOrder
+    priceAtProposal?: SortOrder
     ticketId?: SortOrder
     partId?: SortOrder
     createdAt?: SortOrder
@@ -47459,6 +47607,10 @@ export namespace Prisma {
     NOT?: PartUsageScalarWhereWithAggregatesInput | PartUsageScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"PartUsage"> | string
     quantity?: IntWithAggregatesFilter<"PartUsage"> | number
+    approved?: BoolWithAggregatesFilter<"PartUsage"> | boolean
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"PartUsage"> | Date | string | null
+    approvedById?: UuidNullableWithAggregatesFilter<"PartUsage"> | string | null
+    priceAtProposal?: DecimalWithAggregatesFilter<"PartUsage"> | Decimal | DecimalJsLike | number | string
     ticketId?: UuidWithAggregatesFilter<"PartUsage"> | string
     partId?: UuidWithAggregatesFilter<"PartUsage"> | string
     createdAt?: DateTimeWithAggregatesFilter<"PartUsage"> | Date | string
@@ -49822,6 +49974,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -49878,6 +50031,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -49932,6 +50086,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -49988,6 +50143,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -50758,7 +50914,11 @@ export namespace Prisma {
   export type PartUsageCreateInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
+    approvedBy?: UserCreateNestedOneWithoutPartUsagesApprovedInput
     part: PartCreateNestedOneWithoutUsagesInput
     ticket: TicketCreateNestedOneWithoutPartsUsedInput
   }
@@ -50766,6 +50926,10 @@ export namespace Prisma {
   export type PartUsageUncheckedCreateInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     ticketId: string
     partId: string
     createdAt?: Date | string
@@ -50774,7 +50938,11 @@ export namespace Prisma {
   export type PartUsageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approvedBy?: UserUpdateOneWithoutPartUsagesApprovedNestedInput
     part?: PartUpdateOneRequiredWithoutUsagesNestedInput
     ticket?: TicketUpdateOneRequiredWithoutPartsUsedNestedInput
   }
@@ -50782,6 +50950,10 @@ export namespace Prisma {
   export type PartUsageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     ticketId?: StringFieldUpdateOperationsInput | string
     partId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -50790,6 +50962,10 @@ export namespace Prisma {
   export type PartUsageCreateManyInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     ticketId: string
     partId: string
     createdAt?: Date | string
@@ -50798,12 +50974,19 @@ export namespace Prisma {
   export type PartUsageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PartUsageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     ticketId?: StringFieldUpdateOperationsInput | string
     partId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -53526,6 +53709,12 @@ export namespace Prisma {
     none?: TicketNoteWhereInput
   }
 
+  export type PartUsageListRelationFilter = {
+    every?: PartUsageWhereInput
+    some?: PartUsageWhereInput
+    none?: PartUsageWhereInput
+  }
+
   export type TicketAttachmentListRelationFilter = {
     every?: TicketAttachmentWhereInput
     some?: TicketAttachmentWhereInput
@@ -53550,6 +53739,10 @@ export namespace Prisma {
   }
 
   export type TicketNoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PartUsageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -53794,12 +53987,6 @@ export namespace Prisma {
     isNot?: InvoiceWhereInput | null
   }
 
-  export type PartUsageListRelationFilter = {
-    every?: PartUsageWhereInput
-    some?: PartUsageWhereInput
-    none?: PartUsageWhereInput
-  }
-
   export type TicketServiceListRelationFilter = {
     every?: TicketServiceWhereInput
     some?: TicketServiceWhereInput
@@ -53814,10 +54001,6 @@ export namespace Prisma {
   export type ServiceTemplateNullableScalarRelationFilter = {
     is?: ServiceTemplateWhereInput | null
     isNot?: ServiceTemplateWhereInput | null
-  }
-
-  export type PartUsageOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type TicketServiceOrderByRelationAggregateInput = {
@@ -54239,6 +54422,10 @@ export namespace Prisma {
   export type PartUsageCountOrderByAggregateInput = {
     id?: SortOrder
     quantity?: SortOrder
+    approved?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    priceAtProposal?: SortOrder
     ticketId?: SortOrder
     partId?: SortOrder
     createdAt?: SortOrder
@@ -54246,11 +54433,16 @@ export namespace Prisma {
 
   export type PartUsageAvgOrderByAggregateInput = {
     quantity?: SortOrder
+    priceAtProposal?: SortOrder
   }
 
   export type PartUsageMaxOrderByAggregateInput = {
     id?: SortOrder
     quantity?: SortOrder
+    approved?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    priceAtProposal?: SortOrder
     ticketId?: SortOrder
     partId?: SortOrder
     createdAt?: SortOrder
@@ -54259,6 +54451,10 @@ export namespace Prisma {
   export type PartUsageMinOrderByAggregateInput = {
     id?: SortOrder
     quantity?: SortOrder
+    approved?: SortOrder
+    approvedAt?: SortOrder
+    approvedById?: SortOrder
+    priceAtProposal?: SortOrder
     ticketId?: SortOrder
     partId?: SortOrder
     createdAt?: SortOrder
@@ -54266,6 +54462,7 @@ export namespace Prisma {
 
   export type PartUsageSumOrderByAggregateInput = {
     quantity?: SortOrder
+    priceAtProposal?: SortOrder
   }
 
   export type EnumAuditActionFilter<$PrismaModel = never> = {
@@ -56808,6 +57005,13 @@ export namespace Prisma {
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
   }
 
+  export type PartUsageCreateNestedManyWithoutApprovedByInput = {
+    create?: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput> | PartUsageCreateWithoutApprovedByInput[] | PartUsageUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: PartUsageCreateOrConnectWithoutApprovedByInput | PartUsageCreateOrConnectWithoutApprovedByInput[]
+    createMany?: PartUsageCreateManyApprovedByInputEnvelope
+    connect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+  }
+
   export type TicketAttachmentCreateNestedManyWithoutUploadedByInput = {
     create?: XOR<TicketAttachmentCreateWithoutUploadedByInput, TicketAttachmentUncheckedCreateWithoutUploadedByInput> | TicketAttachmentCreateWithoutUploadedByInput[] | TicketAttachmentUncheckedCreateWithoutUploadedByInput[]
     connectOrCreate?: TicketAttachmentCreateOrConnectWithoutUploadedByInput | TicketAttachmentCreateOrConnectWithoutUploadedByInput[]
@@ -57021,6 +57225,13 @@ export namespace Prisma {
     connectOrCreate?: TicketCreateOrConnectWithoutUpdatedByInput | TicketCreateOrConnectWithoutUpdatedByInput[]
     createMany?: TicketCreateManyUpdatedByInputEnvelope
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type PartUsageUncheckedCreateNestedManyWithoutApprovedByInput = {
+    create?: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput> | PartUsageCreateWithoutApprovedByInput[] | PartUsageUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: PartUsageCreateOrConnectWithoutApprovedByInput | PartUsageCreateOrConnectWithoutApprovedByInput[]
+    createMany?: PartUsageCreateManyApprovedByInputEnvelope
+    connect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
   }
 
   export type TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput = {
@@ -57476,6 +57687,20 @@ export namespace Prisma {
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
   }
 
+  export type PartUsageUpdateManyWithoutApprovedByNestedInput = {
+    create?: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput> | PartUsageCreateWithoutApprovedByInput[] | PartUsageUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: PartUsageCreateOrConnectWithoutApprovedByInput | PartUsageCreateOrConnectWithoutApprovedByInput[]
+    upsert?: PartUsageUpsertWithWhereUniqueWithoutApprovedByInput | PartUsageUpsertWithWhereUniqueWithoutApprovedByInput[]
+    createMany?: PartUsageCreateManyApprovedByInputEnvelope
+    set?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    disconnect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    delete?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    connect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    update?: PartUsageUpdateWithWhereUniqueWithoutApprovedByInput | PartUsageUpdateWithWhereUniqueWithoutApprovedByInput[]
+    updateMany?: PartUsageUpdateManyWithWhereWithoutApprovedByInput | PartUsageUpdateManyWithWhereWithoutApprovedByInput[]
+    deleteMany?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
+  }
+
   export type TicketAttachmentUpdateManyWithoutUploadedByNestedInput = {
     create?: XOR<TicketAttachmentCreateWithoutUploadedByInput, TicketAttachmentUncheckedCreateWithoutUploadedByInput> | TicketAttachmentCreateWithoutUploadedByInput[] | TicketAttachmentUncheckedCreateWithoutUploadedByInput[]
     connectOrCreate?: TicketAttachmentCreateOrConnectWithoutUploadedByInput | TicketAttachmentCreateOrConnectWithoutUploadedByInput[]
@@ -57898,6 +58123,20 @@ export namespace Prisma {
     update?: TicketUpdateWithWhereUniqueWithoutUpdatedByInput | TicketUpdateWithWhereUniqueWithoutUpdatedByInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutUpdatedByInput | TicketUpdateManyWithWhereWithoutUpdatedByInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput = {
+    create?: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput> | PartUsageCreateWithoutApprovedByInput[] | PartUsageUncheckedCreateWithoutApprovedByInput[]
+    connectOrCreate?: PartUsageCreateOrConnectWithoutApprovedByInput | PartUsageCreateOrConnectWithoutApprovedByInput[]
+    upsert?: PartUsageUpsertWithWhereUniqueWithoutApprovedByInput | PartUsageUpsertWithWhereUniqueWithoutApprovedByInput[]
+    createMany?: PartUsageCreateManyApprovedByInputEnvelope
+    set?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    disconnect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    delete?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    connect?: PartUsageWhereUniqueInput | PartUsageWhereUniqueInput[]
+    update?: PartUsageUpdateWithWhereUniqueWithoutApprovedByInput | PartUsageUpdateWithWhereUniqueWithoutApprovedByInput[]
+    updateMany?: PartUsageUpdateManyWithWhereWithoutApprovedByInput | PartUsageUpdateManyWithWhereWithoutApprovedByInput[]
+    deleteMany?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
   }
 
   export type TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput = {
@@ -58934,6 +59173,12 @@ export namespace Prisma {
     update?: XOR<XOR<PurchaseOrderUpdateToOneWithWhereWithoutItemsInput, PurchaseOrderUpdateWithoutItemsInput>, PurchaseOrderUncheckedUpdateWithoutItemsInput>
   }
 
+  export type UserCreateNestedOneWithoutPartUsagesApprovedInput = {
+    create?: XOR<UserCreateWithoutPartUsagesApprovedInput, UserUncheckedCreateWithoutPartUsagesApprovedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPartUsagesApprovedInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type PartCreateNestedOneWithoutUsagesInput = {
     create?: XOR<PartCreateWithoutUsagesInput, PartUncheckedCreateWithoutUsagesInput>
     connectOrCreate?: PartCreateOrConnectWithoutUsagesInput
@@ -58944,6 +59189,16 @@ export namespace Prisma {
     create?: XOR<TicketCreateWithoutPartsUsedInput, TicketUncheckedCreateWithoutPartsUsedInput>
     connectOrCreate?: TicketCreateOrConnectWithoutPartsUsedInput
     connect?: TicketWhereUniqueInput
+  }
+
+  export type UserUpdateOneWithoutPartUsagesApprovedNestedInput = {
+    create?: XOR<UserCreateWithoutPartUsagesApprovedInput, UserUncheckedCreateWithoutPartUsagesApprovedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPartUsagesApprovedInput
+    upsert?: UserUpsertWithoutPartUsagesApprovedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPartUsagesApprovedInput, UserUpdateWithoutPartUsagesApprovedInput>, UserUncheckedUpdateWithoutPartUsagesApprovedInput>
   }
 
   export type PartUpdateOneRequiredWithoutUsagesNestedInput = {
@@ -61859,6 +62114,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
   }
 
@@ -61913,6 +62169,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -62661,6 +62918,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -62716,6 +62974,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -62774,6 +63033,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -62829,6 +63089,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -62887,6 +63148,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -62942,6 +63204,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -63005,6 +63268,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -63060,6 +63324,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -64372,6 +64637,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PartUsageCreateWithoutApprovedByInput = {
+    id?: string
+    quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    part: PartCreateNestedOneWithoutUsagesInput
+    ticket: TicketCreateNestedOneWithoutPartsUsedInput
+  }
+
+  export type PartUsageUncheckedCreateWithoutApprovedByInput = {
+    id?: string
+    quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
+    ticketId: string
+    partId: string
+    createdAt?: Date | string
+  }
+
+  export type PartUsageCreateOrConnectWithoutApprovedByInput = {
+    where: PartUsageWhereUniqueInput
+    create: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput>
+  }
+
+  export type PartUsageCreateManyApprovedByInputEnvelope = {
+    data: PartUsageCreateManyApprovedByInput | PartUsageCreateManyApprovedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TicketAttachmentCreateWithoutUploadedByInput = {
     id?: string
     filename: string
@@ -64522,6 +64819,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -64577,6 +64875,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -64641,6 +64940,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -64696,6 +64996,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -65232,6 +65533,37 @@ export namespace Prisma {
     data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutUpdatedByInput>
   }
 
+  export type PartUsageUpsertWithWhereUniqueWithoutApprovedByInput = {
+    where: PartUsageWhereUniqueInput
+    update: XOR<PartUsageUpdateWithoutApprovedByInput, PartUsageUncheckedUpdateWithoutApprovedByInput>
+    create: XOR<PartUsageCreateWithoutApprovedByInput, PartUsageUncheckedCreateWithoutApprovedByInput>
+  }
+
+  export type PartUsageUpdateWithWhereUniqueWithoutApprovedByInput = {
+    where: PartUsageWhereUniqueInput
+    data: XOR<PartUsageUpdateWithoutApprovedByInput, PartUsageUncheckedUpdateWithoutApprovedByInput>
+  }
+
+  export type PartUsageUpdateManyWithWhereWithoutApprovedByInput = {
+    where: PartUsageScalarWhereInput
+    data: XOR<PartUsageUpdateManyMutationInput, PartUsageUncheckedUpdateManyWithoutApprovedByInput>
+  }
+
+  export type PartUsageScalarWhereInput = {
+    AND?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
+    OR?: PartUsageScalarWhereInput[]
+    NOT?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
+    id?: UuidFilter<"PartUsage"> | string
+    quantity?: IntFilter<"PartUsage"> | number
+    approved?: BoolFilter<"PartUsage"> | boolean
+    approvedAt?: DateTimeNullableFilter<"PartUsage"> | Date | string | null
+    approvedById?: UuidNullableFilter<"PartUsage"> | string | null
+    priceAtProposal?: DecimalFilter<"PartUsage"> | Decimal | DecimalJsLike | number | string
+    ticketId?: UuidFilter<"PartUsage"> | string
+    partId?: UuidFilter<"PartUsage"> | string
+    createdAt?: DateTimeFilter<"PartUsage"> | Date | string
+  }
+
   export type TicketAttachmentUpsertWithWhereUniqueWithoutUploadedByInput = {
     where: TicketAttachmentWhereUniqueInput
     update: XOR<TicketAttachmentUpdateWithoutUploadedByInput, TicketAttachmentUncheckedUpdateWithoutUploadedByInput>
@@ -65376,6 +65708,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -65431,6 +65764,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -65858,6 +66192,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -65913,6 +66248,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -65982,6 +66318,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -66037,6 +66374,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -66244,6 +66582,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -66299,6 +66638,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -66404,13 +66744,21 @@ export namespace Prisma {
   export type PartUsageCreateWithoutTicketInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
+    approvedBy?: UserCreateNestedOneWithoutPartUsagesApprovedInput
     part: PartCreateNestedOneWithoutUsagesInput
   }
 
   export type PartUsageUncheckedCreateWithoutTicketInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     partId: string
     createdAt?: Date | string
   }
@@ -66529,6 +66877,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteCreateNestedManyWithoutAuthorInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -66584,6 +66933,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedCreateNestedManyWithoutAuthorInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -66642,6 +66992,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteCreateNestedManyWithoutAuthorInput
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -66697,6 +67048,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedCreateNestedManyWithoutAuthorInput
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -66902,6 +67254,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteCreateNestedManyWithoutAuthorInput
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -66957,6 +67310,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedCreateNestedManyWithoutAuthorInput
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -67102,17 +67456,6 @@ export namespace Prisma {
     data: XOR<PartUsageUpdateManyMutationInput, PartUsageUncheckedUpdateManyWithoutTicketInput>
   }
 
-  export type PartUsageScalarWhereInput = {
-    AND?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
-    OR?: PartUsageScalarWhereInput[]
-    NOT?: PartUsageScalarWhereInput | PartUsageScalarWhereInput[]
-    id?: UuidFilter<"PartUsage"> | string
-    quantity?: IntFilter<"PartUsage"> | number
-    ticketId?: UuidFilter<"PartUsage"> | string
-    partId?: UuidFilter<"PartUsage"> | string
-    createdAt?: DateTimeFilter<"PartUsage"> | Date | string
-  }
-
   export type TicketNoteUpsertWithWhereUniqueWithoutTicketInput = {
     where: TicketNoteWhereUniqueInput
     update: XOR<TicketNoteUpdateWithoutTicketInput, TicketNoteUncheckedUpdateWithoutTicketInput>
@@ -67218,6 +67561,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUpdateManyWithoutAuthorNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -67273,6 +67617,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedUpdateManyWithoutAuthorNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -67337,6 +67682,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUpdateManyWithoutAuthorNestedInput
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -67392,6 +67738,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -67621,6 +67968,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUpdateManyWithoutAuthorNestedInput
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -67676,6 +68024,7 @@ export namespace Prisma {
     ticketNotes?: TicketNoteUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -67811,6 +68160,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
 
@@ -67866,6 +68216,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
   }
 
   export type UserCreateOrConnectWithoutUploadedAttachmentsInput = {
@@ -68006,6 +68357,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
 
@@ -68061,6 +68413,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
   }
 
   export type CreditNoteItemCreateWithoutPartInput = {
@@ -68139,6 +68492,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -68194,6 +68548,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -68411,6 +68766,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -68466,6 +68822,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -68477,13 +68834,21 @@ export namespace Prisma {
   export type PartUsageCreateWithoutPartInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
+    approvedBy?: UserCreateNestedOneWithoutPartUsagesApprovedInput
     ticket: TicketCreateNestedOneWithoutPartsUsedInput
   }
 
   export type PartUsageUncheckedCreateWithoutPartInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     ticketId: string
     createdAt?: Date | string
   }
@@ -68587,6 +68952,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -68642,6 +69008,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -68880,6 +69247,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -68935,6 +69303,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -69290,6 +69659,121 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateWithoutPartUsagesApprovedInput = {
+    id?: string
+    email: string
+    password: string
+    firstName?: string | null
+    lastName?: string | null
+    name?: string | null
+    role?: $Enums.UserRole
+    isActive?: boolean
+    passwordMustChange?: boolean
+    lastLoginAt?: Date | string | null
+    failedLoginAttempts?: number
+    lockedUntil?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: $Enums.TechnicianStatus
+    maxConcurrentTickets?: number
+    statusReason?: string | null
+    availableFrom?: Date | string | null
+    availableUntil?: Date | string | null
+    createdBy?: UserCreateNestedOneWithoutUsersCreatedInput
+    updatedBy?: UserCreateNestedOneWithoutUsersUpdatedInput
+    usersCreated?: UserCreateNestedManyWithoutCreatedByInput
+    usersUpdated?: UserCreateNestedManyWithoutUpdatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    sessionLogs?: SessionLogCreateNestedManyWithoutUserInput
+    presence?: UserPresenceCreateNestedOneWithoutUserInput
+    closedCashRegisters?: CashRegisterCreateNestedManyWithoutClosedByInput
+    openedCashRegisters?: CashRegisterCreateNestedManyWithoutOpenedByInput
+    cashTransactions?: CashTransactionCreateNestedManyWithoutCreatedByInput
+    creditNotesCreated?: CreditNoteCreateNestedManyWithoutCreatedByInput
+    creditNotesProcessed?: CreditNoteCreateNestedManyWithoutProcessedByInput
+    createdCustomers?: CustomerCreateNestedManyWithoutCreatedByInput
+    updatedCustomers?: CustomerCreateNestedManyWithoutUpdatedByInput
+    createdInvoices?: InvoiceCreateNestedManyWithoutCreatedByInput
+    updatedInvoices?: InvoiceCreateNestedManyWithoutUpdatedByInput
+    invoiceHistory?: InvoiceHistoryCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdParts?: PartCreateNestedManyWithoutCreatedByInput
+    updatedParts?: PartCreateNestedManyWithoutUpdatedByInput
+    posSales?: POSSaleCreateNestedManyWithoutCreatedByInput
+    posQuotations?: POSQuotationCreateNestedManyWithoutCreatedByInput
+    receivedPayments?: PaymentCreateNestedManyWithoutReceivedByInput
+    createdTemplates?: ServiceTemplateCreateNestedManyWithoutCreatedByInput
+    updatedTemplates?: ServiceTemplateCreateNestedManyWithoutUpdatedByInput
+    specializations?: TechnicianSpecializationCreateNestedManyWithoutUserInput
+    unavailabilities?: TechnicianUnavailabilityCreateNestedManyWithoutUserInput
+    ticketNotes?: TicketNoteCreateNestedManyWithoutAuthorInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
+    updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
+    tenant: TenantCreateNestedOneWithoutUsersInput
+  }
+
+  export type UserUncheckedCreateWithoutPartUsagesApprovedInput = {
+    id?: string
+    email: string
+    password: string
+    firstName?: string | null
+    lastName?: string | null
+    name?: string | null
+    role?: $Enums.UserRole
+    tenantId: string
+    isActive?: boolean
+    passwordMustChange?: boolean
+    lastLoginAt?: Date | string | null
+    failedLoginAttempts?: number
+    lockedUntil?: Date | string | null
+    createdById?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: $Enums.TechnicianStatus
+    maxConcurrentTickets?: number
+    statusReason?: string | null
+    availableFrom?: Date | string | null
+    availableUntil?: Date | string | null
+    usersCreated?: UserUncheckedCreateNestedManyWithoutCreatedByInput
+    usersUpdated?: UserUncheckedCreateNestedManyWithoutUpdatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    sessionLogs?: SessionLogUncheckedCreateNestedManyWithoutUserInput
+    presence?: UserPresenceUncheckedCreateNestedOneWithoutUserInput
+    closedCashRegisters?: CashRegisterUncheckedCreateNestedManyWithoutClosedByInput
+    openedCashRegisters?: CashRegisterUncheckedCreateNestedManyWithoutOpenedByInput
+    cashTransactions?: CashTransactionUncheckedCreateNestedManyWithoutCreatedByInput
+    creditNotesCreated?: CreditNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    creditNotesProcessed?: CreditNoteUncheckedCreateNestedManyWithoutProcessedByInput
+    createdCustomers?: CustomerUncheckedCreateNestedManyWithoutCreatedByInput
+    updatedCustomers?: CustomerUncheckedCreateNestedManyWithoutUpdatedByInput
+    createdInvoices?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    updatedInvoices?: InvoiceUncheckedCreateNestedManyWithoutUpdatedByInput
+    invoiceHistory?: InvoiceHistoryUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdParts?: PartUncheckedCreateNestedManyWithoutCreatedByInput
+    updatedParts?: PartUncheckedCreateNestedManyWithoutUpdatedByInput
+    posSales?: POSSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    posQuotations?: POSQuotationUncheckedCreateNestedManyWithoutCreatedByInput
+    receivedPayments?: PaymentUncheckedCreateNestedManyWithoutReceivedByInput
+    createdTemplates?: ServiceTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    updatedTemplates?: ServiceTemplateUncheckedCreateNestedManyWithoutUpdatedByInput
+    specializations?: TechnicianSpecializationUncheckedCreateNestedManyWithoutUserInput
+    unavailabilities?: TechnicianUnavailabilityUncheckedCreateNestedManyWithoutUserInput
+    ticketNotes?: TicketNoteUncheckedCreateNestedManyWithoutAuthorInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
+    updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPartUsagesApprovedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPartUsagesApprovedInput, UserUncheckedCreateWithoutPartUsagesApprovedInput>
+  }
+
   export type PartCreateWithoutUsagesInput = {
     id?: string
     name: string
@@ -69402,6 +69886,127 @@ export namespace Prisma {
   export type TicketCreateOrConnectWithoutPartsUsedInput = {
     where: TicketWhereUniqueInput
     create: XOR<TicketCreateWithoutPartsUsedInput, TicketUncheckedCreateWithoutPartsUsedInput>
+  }
+
+  export type UserUpsertWithoutPartUsagesApprovedInput = {
+    update: XOR<UserUpdateWithoutPartUsagesApprovedInput, UserUncheckedUpdateWithoutPartUsagesApprovedInput>
+    create: XOR<UserCreateWithoutPartUsagesApprovedInput, UserUncheckedCreateWithoutPartUsagesApprovedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPartUsagesApprovedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPartUsagesApprovedInput, UserUncheckedUpdateWithoutPartUsagesApprovedInput>
+  }
+
+  export type UserUpdateWithoutPartUsagesApprovedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    passwordMustChange?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failedLoginAttempts?: IntFieldUpdateOperationsInput | number
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumTechnicianStatusFieldUpdateOperationsInput | $Enums.TechnicianStatus
+    maxConcurrentTickets?: IntFieldUpdateOperationsInput | number
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    availableFrom?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    availableUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdBy?: UserUpdateOneWithoutUsersCreatedNestedInput
+    updatedBy?: UserUpdateOneWithoutUsersUpdatedNestedInput
+    usersCreated?: UserUpdateManyWithoutCreatedByNestedInput
+    usersUpdated?: UserUpdateManyWithoutUpdatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    sessionLogs?: SessionLogUpdateManyWithoutUserNestedInput
+    presence?: UserPresenceUpdateOneWithoutUserNestedInput
+    closedCashRegisters?: CashRegisterUpdateManyWithoutClosedByNestedInput
+    openedCashRegisters?: CashRegisterUpdateManyWithoutOpenedByNestedInput
+    cashTransactions?: CashTransactionUpdateManyWithoutCreatedByNestedInput
+    creditNotesCreated?: CreditNoteUpdateManyWithoutCreatedByNestedInput
+    creditNotesProcessed?: CreditNoteUpdateManyWithoutProcessedByNestedInput
+    createdCustomers?: CustomerUpdateManyWithoutCreatedByNestedInput
+    updatedCustomers?: CustomerUpdateManyWithoutUpdatedByNestedInput
+    createdInvoices?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    updatedInvoices?: InvoiceUpdateManyWithoutUpdatedByNestedInput
+    invoiceHistory?: InvoiceHistoryUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdParts?: PartUpdateManyWithoutCreatedByNestedInput
+    updatedParts?: PartUpdateManyWithoutUpdatedByNestedInput
+    posSales?: POSSaleUpdateManyWithoutCreatedByNestedInput
+    posQuotations?: POSQuotationUpdateManyWithoutCreatedByNestedInput
+    receivedPayments?: PaymentUpdateManyWithoutReceivedByNestedInput
+    createdTemplates?: ServiceTemplateUpdateManyWithoutCreatedByNestedInput
+    updatedTemplates?: ServiceTemplateUpdateManyWithoutUpdatedByNestedInput
+    specializations?: TechnicianSpecializationUpdateManyWithoutUserNestedInput
+    unavailabilities?: TechnicianUnavailabilityUpdateManyWithoutUserNestedInput
+    ticketNotes?: TicketNoteUpdateManyWithoutAuthorNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
+    updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPartUsagesApprovedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    passwordMustChange?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failedLoginAttempts?: IntFieldUpdateOperationsInput | number
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumTechnicianStatusFieldUpdateOperationsInput | $Enums.TechnicianStatus
+    maxConcurrentTickets?: IntFieldUpdateOperationsInput | number
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    availableFrom?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    availableUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usersCreated?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
+    usersUpdated?: UserUncheckedUpdateManyWithoutUpdatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    sessionLogs?: SessionLogUncheckedUpdateManyWithoutUserNestedInput
+    presence?: UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+    closedCashRegisters?: CashRegisterUncheckedUpdateManyWithoutClosedByNestedInput
+    openedCashRegisters?: CashRegisterUncheckedUpdateManyWithoutOpenedByNestedInput
+    cashTransactions?: CashTransactionUncheckedUpdateManyWithoutCreatedByNestedInput
+    creditNotesCreated?: CreditNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    creditNotesProcessed?: CreditNoteUncheckedUpdateManyWithoutProcessedByNestedInput
+    createdCustomers?: CustomerUncheckedUpdateManyWithoutCreatedByNestedInput
+    updatedCustomers?: CustomerUncheckedUpdateManyWithoutUpdatedByNestedInput
+    createdInvoices?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    updatedInvoices?: InvoiceUncheckedUpdateManyWithoutUpdatedByNestedInput
+    invoiceHistory?: InvoiceHistoryUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdParts?: PartUncheckedUpdateManyWithoutCreatedByNestedInput
+    updatedParts?: PartUncheckedUpdateManyWithoutUpdatedByNestedInput
+    posSales?: POSSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    posQuotations?: POSQuotationUncheckedUpdateManyWithoutCreatedByNestedInput
+    receivedPayments?: PaymentUncheckedUpdateManyWithoutReceivedByNestedInput
+    createdTemplates?: ServiceTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    updatedTemplates?: ServiceTemplateUncheckedUpdateManyWithoutUpdatedByNestedInput
+    specializations?: TechnicianSpecializationUncheckedUpdateManyWithoutUserNestedInput
+    unavailabilities?: TechnicianUnavailabilityUncheckedUpdateManyWithoutUserNestedInput
+    ticketNotes?: TicketNoteUncheckedUpdateManyWithoutAuthorNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
+    updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type PartUpsertWithoutUsagesInput = {
@@ -69637,6 +70242,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -69692,6 +70298,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -69824,6 +70431,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -69879,6 +70487,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -69932,6 +70541,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -69987,6 +70597,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -70121,6 +70732,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -70176,6 +70788,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -70300,6 +70913,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -70355,6 +70969,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -70470,6 +71085,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -70525,6 +71141,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -70716,6 +71333,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -70771,6 +71389,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -70898,6 +71517,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -70953,6 +71573,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -71494,6 +72115,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -71549,6 +72171,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -71618,6 +72241,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -71673,6 +72297,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -71726,6 +72351,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -71781,6 +72407,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -71850,6 +72477,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -71905,6 +72533,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -72015,6 +72644,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -72070,6 +72700,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -72202,6 +72833,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -72257,6 +72889,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -72310,6 +72943,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -72365,6 +72999,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -72656,6 +73291,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -72711,6 +73347,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -72780,6 +73417,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -72835,6 +73473,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -73114,6 +73753,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -73169,6 +73809,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -73289,6 +73930,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -73344,6 +73986,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -73543,6 +74186,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -73598,6 +74242,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -73714,6 +74359,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -73769,6 +74415,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -73827,6 +74474,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -73882,6 +74530,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -74102,6 +74751,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -74157,6 +74807,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -74221,6 +74872,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -74276,6 +74928,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -74467,6 +75120,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -74522,6 +75176,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -74697,6 +75352,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -74752,6 +75408,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -75055,6 +75712,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -75110,6 +75768,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -75252,6 +75911,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -75307,6 +75967,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -75403,6 +76064,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -75458,6 +76120,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -75831,6 +76494,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -75886,6 +76550,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -76510,6 +77175,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -76565,6 +77231,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -76817,6 +77484,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -76872,6 +77540,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -77324,6 +77993,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -77379,6 +78049,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -77437,6 +78108,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -77492,6 +78164,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -77744,6 +78417,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -77799,6 +78473,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -77863,6 +78538,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -77918,6 +78594,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -78427,6 +79104,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -78482,6 +79160,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -78614,6 +79293,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -78669,6 +79349,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -78722,6 +79403,7 @@ export namespace Prisma {
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentCreateNestedManyWithoutUploadedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
   }
@@ -78777,6 +79459,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
     updatedTickets?: TicketUncheckedCreateNestedManyWithoutUpdatedByInput
+    partUsagesApproved?: PartUsageUncheckedCreateNestedManyWithoutApprovedByInput
     uploadedAttachments?: TicketAttachmentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
@@ -78968,6 +79651,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -79023,6 +79707,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -80377,6 +81062,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -80431,6 +81117,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -80951,6 +81638,17 @@ export namespace Prisma {
     estimatedCompletionDate?: Date | string | null
   }
 
+  export type PartUsageCreateManyApprovedByInput = {
+    id?: string
+    quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
+    ticketId: string
+    partId: string
+    createdAt?: Date | string
+  }
+
   export type TicketAttachmentCreateManyUploadedByInput = {
     id?: string
     ticketId: string
@@ -81012,6 +81710,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -81067,6 +81766,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -81144,6 +81844,7 @@ export namespace Prisma {
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUpdateManyWithoutUploadedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -81199,6 +81900,7 @@ export namespace Prisma {
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
     updatedTickets?: TicketUncheckedUpdateManyWithoutUpdatedByNestedInput
+    partUsagesApproved?: PartUsageUncheckedUpdateManyWithoutApprovedByNestedInput
     uploadedAttachments?: TicketAttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
@@ -82683,6 +83385,39 @@ export namespace Prisma {
     estimatedCompletionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type PartUsageUpdateWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    part?: PartUpdateOneRequiredWithoutUsagesNestedInput
+    ticket?: TicketUpdateOneRequiredWithoutPartsUsedNestedInput
+  }
+
+  export type PartUsageUncheckedUpdateWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ticketId?: StringFieldUpdateOperationsInput | string
+    partId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PartUsageUncheckedUpdateManyWithoutApprovedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ticketId?: StringFieldUpdateOperationsInput | string
+    partId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TicketAttachmentUpdateWithoutUploadedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     filename?: StringFieldUpdateOperationsInput | string
@@ -83226,6 +83961,10 @@ export namespace Prisma {
   export type PartUsageCreateManyTicketInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     partId: string
     createdAt?: Date | string
   }
@@ -83294,13 +84033,21 @@ export namespace Prisma {
   export type PartUsageUpdateWithoutTicketInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approvedBy?: UserUpdateOneWithoutPartUsagesApprovedNestedInput
     part?: PartUpdateOneRequiredWithoutUsagesNestedInput
   }
 
   export type PartUsageUncheckedUpdateWithoutTicketInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     partId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83308,6 +84055,10 @@ export namespace Prisma {
   export type PartUsageUncheckedUpdateManyWithoutTicketInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     partId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83438,6 +84189,10 @@ export namespace Prisma {
   export type PartUsageCreateManyPartInput = {
     id?: string
     quantity: number
+    approved?: boolean
+    approvedAt?: Date | string | null
+    approvedById?: string | null
+    priceAtProposal?: Decimal | DecimalJsLike | number | string
     ticketId: string
     createdAt?: Date | string
   }
@@ -83562,13 +84317,21 @@ export namespace Prisma {
   export type PartUsageUpdateWithoutPartInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approvedBy?: UserUpdateOneWithoutPartUsagesApprovedNestedInput
     ticket?: TicketUpdateOneRequiredWithoutPartsUsedNestedInput
   }
 
   export type PartUsageUncheckedUpdateWithoutPartInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     ticketId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83576,6 +84339,10 @@ export namespace Prisma {
   export type PartUsageUncheckedUpdateManyWithoutPartInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+    approved?: BoolFieldUpdateOperationsInput | boolean
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedById?: NullableStringFieldUpdateOperationsInput | string | null
+    priceAtProposal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     ticketId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
