@@ -49,7 +49,7 @@ export async function requireTenantSession(): Promise<TenantSessionContext> {
  * Asserts that a user has the required role; throws if they are a VIEWER.
  * Use after `requireTenantSession()` for role-based access control.
  */
-export function assertNotViewer(userRole: string, actionDescription: string): void {
+export async function assertNotViewer(userRole: string, actionDescription: string): Promise<void> {
     if (userRole === 'VIEWER') {
         throw new Error(`Los observadores no pueden ${actionDescription}`);
     }
@@ -58,7 +58,7 @@ export function assertNotViewer(userRole: string, actionDescription: string): vo
 /**
  * Asserts that the user has ADMIN role; throws if they do not.
  */
-export function assertAdmin(userRole: string): void {
+export async function assertAdmin(userRole: string): Promise<void> {
     if (userRole !== 'ADMIN') {
         throw new Error('Solo los administradores pueden realizar esta acción');
     }
