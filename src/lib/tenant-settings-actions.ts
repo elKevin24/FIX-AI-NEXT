@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@prisma/client';
 import { UpdateTenantSettingsSchema } from '@/lib/schemas';
 
 // ==================== Types ====================

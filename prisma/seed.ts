@@ -1,4 +1,4 @@
-import { UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '../src/generated/prisma';
+import { UserRole, TicketStatus, ServiceCategory, TicketPriority, AuditAction, AuditModule } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 import { prisma } from '../src/lib/prisma';
 

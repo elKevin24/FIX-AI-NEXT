@@ -5,7 +5,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@prisma/client';
 import {
     CreateTicketSchema,
     CreateBatchTicketsSchema,
