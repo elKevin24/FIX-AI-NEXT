@@ -32,29 +32,29 @@ const getStatusLabel = (status: string) => {
 
 const getPriorityClass = (priority: string | null) => {
     switch (priority) {
-        case 'URGENT': return styles.priorityUrgent;
-        case 'HIGH': return styles.priorityHigh;
-        case 'MEDIUM': return styles.priorityMedium;
-        default: return styles.priorityLow;
+        case 'URGENT': return styles['priorityUrgent'];
+        case 'HIGH': return styles['priorityHigh'];
+        case 'MEDIUM': return styles['priorityMedium'];
+        default: return styles['priorityLow'];
     }
 };
 
 export default function UrgentTicketsWidget({ tickets }: Props) {
     if (tickets.length === 0) {
         return (
-            <div className={styles.container}>
-                <div className={styles.emptyState}>
-                    <span className={styles.emptyIcon}>✓</span>
-                    <p className={styles.emptyText}>No hay tickets urgentes</p>
-                    <p className={styles.emptySubtext}>¡Excelente trabajo!</p>
+            <div className={styles['container']}>
+                <div className={styles['emptyState']}>
+                    <span className={styles['emptyIcon']}>✓</span>
+                    <p className={styles['emptyText']}>No hay tickets urgentes</p>
+                    <p className={styles['emptySubtext']}>¡Excelente trabajo!</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.ticketList}>
+        <div className={styles['container']}>
+            <div className={styles['ticketList']}>
                 {tickets.map((ticket) => {
                     const daysOld = Math.floor(
                         (new Date().getTime() - new Date(ticket.createdAt).getTime()) / (1000 * 60 * 60 * 24)
@@ -64,22 +64,22 @@ export default function UrgentTicketsWidget({ tickets }: Props) {
                         <Link
                             key={ticket.id}
                             href={`/dashboard/tickets/${ticket.id}`}
-                            className={styles.ticketCard}
+                            className={styles['ticketCard']}
                         >
-                            <div className={styles.ticketHeader}>
-                                <div className={styles.ticketInfo}>
-                                    <h4 className={styles.ticketTitle}>{ticket.title}</h4>
-                                    <p className={styles.ticketCustomer}>{ticket.customer.name}</p>
+                            <div className={styles['ticketHeader']}>
+                                <div className={styles['ticketInfo']}>
+                                    <h4 className={styles['ticketTitle']}>{ticket.title}</h4>
+                                    <p className={styles['ticketCustomer']}>{ticket.customer.name}</p>
                                 </div>
-                                <div className={`${styles.priorityBadge} ${getPriorityClass(ticket.priority)}`}>
+                                <div className={`${styles['priorityBadge']} ${getPriorityClass(ticket.priority)}`}>
                                     {ticket.priority || 'NORMAL'}
                                 </div>
                             </div>
-                            <div className={styles.ticketFooter}>
-                                <span className={styles.ticketStatus}>
+                            <div className={styles['ticketFooter']}>
+                                <span className={styles['ticketStatus']}>
                                     {getStatusLabel(ticket.status)}
                                 </span>
-                                <span className={styles.ticketAge}>
+                                <span className={styles['ticketAge']}>
                                     {daysOld === 0 ? 'Hoy' : `${daysOld} día${daysOld !== 1 ? 's' : ''}`}
                                 </span>
                             </div>

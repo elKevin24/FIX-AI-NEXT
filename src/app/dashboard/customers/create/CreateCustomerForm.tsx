@@ -92,7 +92,7 @@ export default function CreateCustomerForm() {
         helper="Optional"
       />
 
-      <div className={styles.formRow}>
+      <div className={styles['formRow']}>
         <Input
           label="DPI (ID)"
           name="dpi"
@@ -123,7 +123,7 @@ export default function CreateCustomerForm() {
         rows={3}
       />
 
-      <div className={styles.actions}>
+      <div className={styles['actions']}>
         <Button
           type="button"
           variant="secondary"

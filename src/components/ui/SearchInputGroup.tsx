@@ -40,10 +40,10 @@ export default function SearchInputGroup({
 
     return (
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-            <div className={`${styles.searchGroup} ${error ? styles.error : ''}`}>
+            <div className={`${styles['searchGroup']} ${error ? styles['error'] : ''}`}>
                 <input
                     type="text"
-                    className={styles.searchInput}
+                    className={styles['searchInput']}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -52,7 +52,7 @@ export default function SearchInputGroup({
                 />
                 <button
                     type="submit"
-                    className={styles.searchButton}
+                    className={styles['searchButton']}
                     disabled={disabled || isLoading}
                 >
                     {isLoading ? 'Buscando...' : buttonText}

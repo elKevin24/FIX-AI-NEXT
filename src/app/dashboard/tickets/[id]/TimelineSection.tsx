@@ -51,7 +51,7 @@ export default function TimelineSection({ events }: Props) {
     };
 
     return (
-        <div className={styles.tableContainer} style={{ padding: '2rem', marginTop: '1.5rem' }}>
+        <div className={styles['tableContainer']} style={{ padding: '2rem', marginTop: '1.5rem' }}>
             <h3 style={{ marginBottom: '1.5rem' }}>Bitácora de Reparación y Auditoría ({events.length} eventos)</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

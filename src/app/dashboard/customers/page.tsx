@@ -105,9 +105,9 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   const isAdmin = session.user.role === 'ADMIN';
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
+    <div className={styles['container']}>
+      <div className={styles['header']}>
+        <div className={styles['headerContent']}>
           <h1>Clientes</h1>
           <p>Gestiona la base de datos de clientes y su historial</p>
         </div>

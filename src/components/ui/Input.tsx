@@ -24,15 +24,15 @@ export function Input({
   const hasError = !!error;
 
   const inputClasses = [
-    styles.input,
-    hasError ? styles.errorInput : '',
+    styles['input'],
+    hasError ? styles['errorInput'] : '',
     className
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={styles.group}>
+    <div className={styles['group']}>
       {label && (
-        <label htmlFor={inputId} className={styles.label}>
+        <label htmlFor={inputId} className={styles['label']}>
           {label}
         </label>
       )}
@@ -44,12 +44,12 @@ export function Input({
         {...props}
       />
       {hasError && (
-        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+        <span id={errorId} className={`${styles['helper']} ${styles['errorMessage']}`}>
           {error}
         </span>
       )}
       {!hasError && helper && (
-        <span id={helperId} className={styles.helper}>
+        <span id={helperId} className={styles['helper']}>
           {helper}
         </span>
       )}

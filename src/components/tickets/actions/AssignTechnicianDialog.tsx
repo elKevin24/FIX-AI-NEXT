@@ -70,7 +70,7 @@ export function AssignTechnicianDialog({
         </>
       }
     >
-      <form id="assign-tech-form" action={action} className={styles.form}>
+      <form id="assign-tech-form" action={action} className={styles['form']}>
         <input type="hidden" name="ticketId" value={ticketId} />
         {/* Hidden fields to preserve state */}
         <input type="hidden" name="title" value={currentTitle} />
@@ -78,14 +78,14 @@ export function AssignTechnicianDialog({
         <input type="hidden" name="status" value={currentStatus} />
         <input type="hidden" name="priority" value={currentPriority || ''} />
 
-        <div className={styles.fieldGroup}>
-          <label htmlFor="assignedToId" className={styles.label}>
+        <div className={styles['fieldGroup']}>
+          <label htmlFor="assignedToId" className={styles['label']}>
             Seleccionar Técnico *
           </label>
           <select
             id="assignedToId"
             name="assignedToId"
-            className={styles.select}
+            className={styles['select']}
             required
             defaultValue=""
           >
@@ -99,7 +99,7 @@ export function AssignTechnicianDialog({
         </div>
 
         {state?.message && !state.success && (
-          <div className={styles.errorBox}>
+          <div className={styles['errorBox']}>
             {state.message}
           </div>
         )}

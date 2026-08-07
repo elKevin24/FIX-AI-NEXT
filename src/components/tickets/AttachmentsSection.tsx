@@ -85,9 +85,9 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     };
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h3 className={styles.title}>Attachments ({initialAttachments.length})</h3>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
+                <h3 className={styles['title']}>Attachments ({initialAttachments.length})</h3>
                 <button 
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
@@ -104,28 +104,28 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
                 />
             </div>
 
-            <div className={styles.grid}>
+            <div className={styles['grid']}>
                 {initialAttachments.map((att) => (
-                    <div key={att.id} className={styles.card}>
-                        <a href={att.url} target="_blank" rel="noopener noreferrer" className={styles.link}>
-                            <div className={styles.preview}>
+                    <div key={att.id} className={styles['card']}>
+                        <a href={att.url} target="_blank" rel="noopener noreferrer" className={styles['link']}>
+                            <div className={styles['preview']}>
                                 {att.mimeType.startsWith('image/') ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img src={att.url} alt={att.filename} className={styles.imagePreview} />
+                                    <img src={att.url} alt={att.filename} className={styles['imagePreview']} />
                                 ) : (
                                     <span style={{fontSize: '2rem'}}>📄</span>
                                 )}
                             </div>
                         </a>
-                        <div className={styles.info}>
-                            <div className={styles.filename} title={att.filename}>{att.filename}</div>
-                            <div className={styles.meta}>
+                        <div className={styles['info']}>
+                            <div className={styles['filename']} title={att.filename}>{att.filename}</div>
+                            <div className={styles['meta']}>
                                 <span>{formatSize(att.size)}</span>
                                 <span title={att.uploadedBy.name || 'Unknown'}>{att.uploadedBy.name?.split(' ')[0] || 'User'}</span>
                             </div>
                         </div>
                         <button 
-                            className={styles.deleteBtn}
+                            className={styles['deleteBtn']}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(att.id);

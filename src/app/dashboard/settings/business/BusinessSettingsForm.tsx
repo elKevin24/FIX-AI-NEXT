@@ -69,7 +69,7 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
     };
 
     return (
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleSubmit} className={styles['form']}>
             {message && (
                 <Alert variant={message.type === 'success' ? 'success' : 'error'}>
                     {message.text}
@@ -77,13 +77,13 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
             )}
 
             {/* Datos del Negocio */}
-            <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>Datos del Negocio</h2>
-                <p className={styles.sectionDescription}>
+            <section className={styles['section']}>
+                <h2 className={styles['sectionTitle']}>Datos del Negocio</h2>
+                <p className={styles['sectionDescription']}>
                     Información que aparecerá en el encabezado de facturas y documentos.
                 </p>
 
-                <div className={styles.formGrid}>
+                <div className={styles['formGrid']}>
                     <Input
                         label="Nombre del Negocio"
                         name="businessName"
@@ -118,7 +118,7 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
                     />
                 </div>
 
-                <div className={styles.fullWidth}>
+                <div className={styles['fullWidth']}>
                     <Textarea
                         label="Dirección"
                         name="businessAddress"
@@ -131,13 +131,13 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
             </section>
 
             {/* Configuración Fiscal */}
-            <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>Configuración Fiscal</h2>
-                <p className={styles.sectionDescription}>
+            <section className={styles['section']}>
+                <h2 className={styles['sectionTitle']}>Configuración Fiscal</h2>
+                <p className={styles['sectionDescription']}>
                     Configuración de impuestos y moneda para cálculos en facturas.
                 </p>
 
-                <div className={styles.formGrid}>
+                <div className={styles['formGrid']}>
                     <Input
                         label="Tasa de Impuesto (%)"
                         name="taxRate"
@@ -157,13 +157,13 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
                         placeholder="Ej: IVA"
                     />
 
-                    <div className={styles.selectWrapper}>
-                        <label className={styles.label}>Moneda</label>
+                    <div className={styles['selectWrapper']}>
+                        <label className={styles['label']}>Moneda</label>
                         <select
                             name="currency"
                             value={formData.currency}
                             onChange={handleChange}
-                            className={styles.select}
+                            className={styles['select']}
                         >
                             <option value="GTQ">GTQ - Quetzal</option>
                             <option value="USD">USD - Dólar</option>
@@ -175,13 +175,13 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
             </section>
 
             {/* Términos y Notas */}
-            <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>Términos y Notas</h2>
-                <p className={styles.sectionDescription}>
+            <section className={styles['section']}>
+                <h2 className={styles['sectionTitle']}>Términos y Notas</h2>
+                <p className={styles['sectionDescription']}>
                     Texto predeterminado que aparecerá en facturas y documentos.
                 </p>
 
-                <div className={styles.fullWidth}>
+                <div className={styles['fullWidth']}>
                     <Textarea
                         label="Términos de Pago por Defecto"
                         name="defaultPaymentTerms"
@@ -192,7 +192,7 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
                     />
                 </div>
 
-                <div className={styles.fullWidth}>
+                <div className={styles['fullWidth']}>
                     <Textarea
                         label="Pie de Página de Facturas"
                         name="invoiceFooter"
@@ -205,7 +205,7 @@ export default function BusinessSettingsForm({ initialSettings }: BusinessSettin
             </section>
 
             {/* Submit Button */}
-            <div className={styles.actions}>
+            <div className={styles['actions']}>
                 <Button
                     type="submit"
                     variant="primary"

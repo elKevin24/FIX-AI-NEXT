@@ -99,40 +99,40 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
   }));
 
   return (
-    <div className={styles.container}>
+    <div className={styles['container']}>
       {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Link href="/dashboard/settings/service-templates" className={styles.backLink}>
+      <header className={styles['header']}>
+        <div className={styles['headerLeft']}>
+          <Link href="/dashboard/settings/service-templates" className={styles['backLink']}>
             ← Volver a Plantillas
           </Link>
           <h1>Analytics de Plantillas</h1>
-          <p className={styles.subtitle}>
+          <p className={styles['subtitle']}>
             Métricas y estadísticas de uso de tus plantillas de servicio
           </p>
         </div>
 
-        <div className={styles.filters}>
-          <div className={styles.filterGroup}>
+        <div className={styles['filters']}>
+          <div className={styles['filterGroup']}>
             <label>Desde</label>
             <input
               type="date"
-              className={styles.input}
+              className={styles['input']}
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
-          <div className={styles.filterGroup}>
+          <div className={styles['filterGroup']}>
             <label>Hasta</label>
             <input
               type="date"
-              className={styles.input}
+              className={styles['input']}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
           <button
-            className={styles.updateButton}
+            className={styles['updateButton']}
             onClick={handleUpdate}
             disabled={isPending}
           >
@@ -142,33 +142,33 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
       </header>
 
       {/* Summary Cards */}
-      <div className={styles.summaryGrid}>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryIcon}>📋</span>
-          <div className={styles.summaryContent}>
-            <span className={styles.summaryLabel}>Total Plantillas</span>
-            <span className={styles.summaryValue}>{data.summary.totalTemplates}</span>
+      <div className={styles['summaryGrid']}>
+        <div className={styles['summaryCard']}>
+          <span className={styles['summaryIcon']}>📋</span>
+          <div className={styles['summaryContent']}>
+            <span className={styles['summaryLabel']}>Total Plantillas</span>
+            <span className={styles['summaryValue']}>{data.summary.totalTemplates}</span>
           </div>
         </div>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryIcon}>✅</span>
-          <div className={styles.summaryContent}>
-            <span className={styles.summaryLabel}>Plantillas Activas</span>
-            <span className={styles.summaryValue}>{data.summary.activeTemplates}</span>
+        <div className={styles['summaryCard']}>
+          <span className={styles['summaryIcon']}>✅</span>
+          <div className={styles['summaryContent']}>
+            <span className={styles['summaryLabel']}>Plantillas Activas</span>
+            <span className={styles['summaryValue']}>{data.summary.activeTemplates}</span>
           </div>
         </div>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryIcon}>🎫</span>
-          <div className={styles.summaryContent}>
-            <span className={styles.summaryLabel}>Tickets Creados</span>
-            <span className={styles.summaryValue}>{data.summary.totalTicketsCreated}</span>
+        <div className={styles['summaryCard']}>
+          <span className={styles['summaryIcon']}>🎫</span>
+          <div className={styles['summaryContent']}>
+            <span className={styles['summaryLabel']}>Tickets Creados</span>
+            <span className={styles['summaryValue']}>{data.summary.totalTicketsCreated}</span>
           </div>
         </div>
-        <div className={styles.summaryCard}>
-          <span className={styles.summaryIcon}>💰</span>
-          <div className={styles.summaryContent}>
-            <span className={styles.summaryLabel}>Ingresos (Mano de Obra)</span>
-            <span className={`${styles.summaryValue} ${styles.revenue}`}>
+        <div className={styles['summaryCard']}>
+          <span className={styles['summaryIcon']}>💰</span>
+          <div className={styles['summaryContent']}>
+            <span className={styles['summaryLabel']}>Ingresos (Mano de Obra)</span>
+            <span className={`${styles['summaryValue']} ${styles['revenue']}`}>
               {formatCurrency(data.summary.totalRevenueFromTemplates)}
             </span>
           </div>
@@ -176,11 +176,11 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
       </div>
 
       {/* Charts Grid */}
-      <div className={styles.chartsGrid}>
+      <div className={styles['chartsGrid']}>
         {/* Category Breakdown */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Tickets por Categoría</h2>
-          <div className={styles.chartContainer}>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Tickets por Categoría</h2>
+          <div className={styles['chartContainer']}>
             {categoryChartData.length > 0 ? (
               <ResponsiveContainer width="99%" height="100%">
                 <PieChart>
@@ -209,7 +209,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className={styles.emptyChart}>
+              <div className={styles['emptyChart']}>
                 <span>Sin datos en este período</span>
               </div>
             )}
@@ -217,9 +217,9 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
         </div>
 
         {/* Monthly Trend */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Tendencia Mensual</h2>
-          <div className={styles.chartContainer}>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Tendencia Mensual</h2>
+          <div className={styles['chartContainer']}>
             {trendChartData.length > 0 ? (
               <ResponsiveContainer width="99%" height="100%">
                 <LineChart data={trendChartData}>
@@ -255,7 +255,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className={styles.emptyChart}>
+              <div className={styles['emptyChart']}>
                 <span>Sin datos en este período</span>
               </div>
             )}
@@ -263,9 +263,9 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
         </div>
 
         {/* Revenue by Category */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Ingresos por Categoría</h2>
-          <div className={styles.chartContainer}>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Ingresos por Categoría</h2>
+          <div className={styles['chartContainer']}>
             {categoryChartData.length > 0 ? (
               <ResponsiveContainer width="99%" height="100%">
                 <BarChart data={categoryChartData} layout="vertical">
@@ -281,7 +281,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className={styles.emptyChart}>
+              <div className={styles['emptyChart']}>
                 <span>Sin datos en este período</span>
               </div>
             )}
@@ -289,10 +289,10 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
         </div>
 
         {/* Top Templates Table */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Plantillas Más Usadas</h2>
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Plantillas Más Usadas</h2>
+          <div className={styles['tableContainer']}>
+            <table className={styles['table']}>
               <thead>
                 <tr>
                   <th>Plantilla</th>
@@ -304,7 +304,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
               <tbody>
                 {data.templateUsage.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className={styles.emptyRow}>
+                    <td colSpan={4} className={styles['emptyRow']}>
                       Sin datos en este período
                     </td>
                   </tr>
@@ -312,23 +312,23 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
                   data.templateUsage.slice(0, 10).map((t) => (
                     <tr key={t.id}>
                       <td>
-                        <div className={styles.templateCell}>
+                        <div className={styles['templateCell']}>
                           <span
-                            className={styles.templateIcon}
+                            className={styles['templateIcon']}
                             style={{ backgroundColor: t.color || '#3B82F6' }}
                           >
                             {t.icon || '📋'}
                           </span>
                           <div>
                             <strong>{t.name}</strong>
-                            <span className={styles.categoryBadge}>
+                            <span className={styles['categoryBadge']}>
                               {CATEGORY_LABELS[t.category] || t.category}
                             </span>
                           </div>
                         </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className={styles.ticketBadge}>{t.ticketCount}</span>
+                        <span className={styles['ticketBadge']}>{t.ticketCount}</span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <strong>{formatCurrency(t.totalRevenue)}</strong>
@@ -346,10 +346,10 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
       </div>
 
       {/* Recent Activity */}
-      <div className={styles.card} style={{ marginTop: '1.5rem' }}>
-        <h2 className={styles.cardTitle}>Actividad Reciente</h2>
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
+      <div className={styles['card']} style={{ marginTop: '1.5rem' }}>
+        <h2 className={styles['cardTitle']}>Actividad Reciente</h2>
+        <div className={styles['tableContainer']}>
+          <table className={styles['table']}>
             <thead>
               <tr>
                 <th>Ticket</th>
@@ -362,7 +362,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
             <tbody>
               {data.recentActivity.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className={styles.emptyRow}>
+                  <td colSpan={5} className={styles['emptyRow']}>
                     No hay actividad reciente
                   </td>
                 </tr>
@@ -370,19 +370,19 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
                 data.recentActivity.map((a) => (
                   <tr key={a.id}>
                     <td>
-                      <Link href={`/dashboard/tickets/${a.id}`} className={styles.ticketLink}>
+                      <Link href={`/dashboard/tickets/${a.id}`} className={styles['ticketLink']}>
                         <strong>{a.ticketNumber || a.id.slice(0, 8)}</strong>
-                        <span className={styles.ticketTitle}>{a.title}</span>
+                        <span className={styles['ticketTitle']}>{a.title}</span>
                       </Link>
                     </td>
                     <td>
-                      <span className={styles.templateName}>
+                      <span className={styles['templateName']}>
                         {a.templateIcon} {a.templateName}
                       </span>
                     </td>
                     <td>{a.customerName}</td>
                     <td style={{ textAlign: 'center' }}>
-                      <span className={`${styles.statusBadge} ${styles[`status${a.status}`]}`}>
+                      <span className={`${styles['statusBadge']} ${styles[`status${a.status}`]}`}>
                         {STATUS_LABELS[a.status] || a.status}
                       </span>
                     </td>

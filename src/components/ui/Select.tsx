@@ -33,19 +33,19 @@ export function Select({
   const hasError = !!error;
 
   const selectClasses = [
-    styles.select,
-    hasError ? styles.errorInput : '',
+    styles['select'],
+    hasError ? styles['errorInput'] : '',
     className
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={styles.group}>
+    <div className={styles['group']}>
       {label && (
-        <label htmlFor={selectId} className={styles.label}>
+        <label htmlFor={selectId} className={styles['label']}>
           {label}
         </label>
       )}
-      <div className={styles.selectWrapper}>
+      <div className={styles['selectWrapper']}>
         <select
           id={selectId}
           className={selectClasses}
@@ -66,12 +66,12 @@ export function Select({
         </select>
       </div>
       {hasError && (
-        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+        <span id={errorId} className={`${styles['helper']} ${styles['errorMessage']}`}>
           {error}
         </span>
       )}
       {!hasError && helper && (
-        <span id={helperId} className={styles.helper}>
+        <span id={helperId} className={styles['helper']}>
           {helper}
         </span>
       )}

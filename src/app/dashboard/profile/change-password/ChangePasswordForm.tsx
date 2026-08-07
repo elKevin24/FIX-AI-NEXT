@@ -66,8 +66,8 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Ingresa tu contraseña actual"
                 />
-                {state.errors?.currentPassword && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.currentPassword[0]}</p>
+                {state.errors?.['currentPassword'] && (
+                    <p className="mt-1 text-sm text-red-600">{state.errors['currentPassword'][0]}</p>
                 )}
             </div>
 
@@ -85,8 +85,8 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Ingresa tu nueva contraseña"
                 />
-                {state.errors?.newPassword && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.newPassword[0]}</p>
+                {state.errors?.['newPassword'] && (
+                    <p className="mt-1 text-sm text-red-600">{state.errors['newPassword'][0]}</p>
                 )}
 
                 {/* Password requirements */}

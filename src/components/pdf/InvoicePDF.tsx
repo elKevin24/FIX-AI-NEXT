@@ -59,13 +59,13 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
 
     return (
         <Document>
-            <Page size="A4" style={styles.page}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>{invoice.tenant.name}</Text>
+            <Page size="A4" style={styles['page']}>
+                <View style={styles['header']}>
+                    <Text style={styles['title']}>{invoice.tenant.name}</Text>
                     <Text>FACTURA #{invoice.invoiceNumber}</Text>
                 </View>
 
-                <View style={styles.infoGrid}>
+                <View style={styles['infoGrid']}>
                     <View>
                         <Text style={{ fontWeight: 'bold' }}>FACTURAR A:</Text>
                         <Text>{invoice.customerName}</Text>
@@ -78,54 +78,54 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                     </View>
                 </View>
 
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>DETALLE DE SERVICIOS</Text>
-                    <View style={styles.table}>
-                        <View style={[styles.tableRow, styles.tableHeader]}>
-                            <Text style={styles.colDescription}>Descripción</Text>
-                            <Text style={styles.colQty}>Cant.</Text>
-                            <Text style={styles.colPrice}>Precio</Text>
-                            <Text style={styles.colTotal}>Total</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>DETALLE DE SERVICIOS</Text>
+                    <View style={styles['table']}>
+                        <View style={[styles['tableRow'], styles['tableHeader']]}>
+                            <Text style={styles['colDescription']}>Descripción</Text>
+                            <Text style={styles['colQty']}>Cant.</Text>
+                            <Text style={styles['colPrice']}>Precio</Text>
+                            <Text style={styles['colTotal']}>Total</Text>
                         </View>
                         
                         {/* Mano de Obra */}
-                        <View style={styles.tableRow}>
-                            <Text style={styles.colDescription}>Mano de Obra - {invoice.ticket.title}</Text>
-                            <Text style={styles.colQty}>1</Text>
-                            <Text style={styles.colPrice}>{formatCurrency(invoice.laborCost)}</Text>
-                            <Text style={styles.colTotal}>{formatCurrency(invoice.laborCost)}</Text>
+                        <View style={styles['tableRow']}>
+                            <Text style={styles['colDescription']}>Mano de Obra - {invoice.ticket.title}</Text>
+                            <Text style={styles['colQty']}>1</Text>
+                            <Text style={styles['colPrice']}>{formatCurrency(invoice.laborCost)}</Text>
+                            <Text style={styles['colTotal']}>{formatCurrency(invoice.laborCost)}</Text>
                         </View>
 
                         {/* Repuestos */}
                         {invoice.ticket.partsUsed.map((p, i) => (
-                            <View key={i} style={styles.tableRow}>
-                                <Text style={styles.colDescription}>{p.partName}</Text>
-                                <Text style={styles.colQty}>{p.quantity}</Text>
-                                <Text style={styles.colPrice}>{formatCurrency(p.unitPrice)}</Text>
-                                <Text style={styles.colTotal}>{formatCurrency(p.total)}</Text>
+                            <View key={i} style={styles['tableRow']}>
+                                <Text style={styles['colDescription']}>{p.partName}</Text>
+                                <Text style={styles['colQty']}>{p.quantity}</Text>
+                                <Text style={styles['colPrice']}>{formatCurrency(p.unitPrice)}</Text>
+                                <Text style={styles['colTotal']}>{formatCurrency(p.total)}</Text>
                             </View>
                         ))}
                     </View>
                 </View>
 
-                <View style={styles.totalsSection}>
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Subtotal:</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(invoice.subtotal)}</Text>
+                <View style={styles['totalsSection']}>
+                    <View style={styles['totalRow']}>
+                        <Text style={styles['totalLabel']}>Subtotal:</Text>
+                        <Text style={styles['totalValue']}>{formatCurrency(invoice.subtotal)}</Text>
                     </View>
                     {Number(invoice.discountAmount) > 0 && (
-                        <View style={styles.totalRow}>
-                            <Text style={styles.totalLabel}>Descuento:</Text>
-                            <Text style={styles.totalValue}>-{formatCurrency(invoice.discountAmount)}</Text>
+                        <View style={styles['totalRow']}>
+                            <Text style={styles['totalLabel']}>Descuento:</Text>
+                            <Text style={styles['totalValue']}>-{formatCurrency(invoice.discountAmount)}</Text>
                         </View>
                     )}
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>IVA:</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(invoice.taxAmount)}</Text>
+                    <View style={styles['totalRow']}>
+                        <Text style={styles['totalLabel']}>IVA:</Text>
+                        <Text style={styles['totalValue']}>{formatCurrency(invoice.taxAmount)}</Text>
                     </View>
-                    <View style={[styles.totalRow, styles.grandTotal]}>
-                        <Text style={styles.totalLabel}>TOTAL:</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(invoice.total)}</Text>
+                    <View style={[styles['totalRow'], styles['grandTotal']]}>
+                        <Text style={styles['totalLabel']}>TOTAL:</Text>
+                        <Text style={styles['totalValue']}>{formatCurrency(invoice.total)}</Text>
                     </View>
                 </View>
 
@@ -136,7 +136,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                     </View>
                 )}
 
-                <Text style={styles.footer}>
+                <Text style={styles['footer']}>
                     Esta factura es un documento tributario emitido por {invoice.tenant.name}.
                     Generado por FIX-AI Workshop Management.
                 </Text>

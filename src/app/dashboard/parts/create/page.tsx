@@ -9,15 +9,15 @@ export default function CreatePartPage() {
     const [state, formAction, isPending] = useActionState(createPart, null);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
                 <h1>Nuevo Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles.viewLink}>
+                <Link href="/dashboard/parts" className={styles['viewLink']}>
                     ← Volver
                 </Link>
             </div>
 
-            <div className={styles.tableContainer} style={{ maxWidth: '600px', padding: '2rem' }}>
+            <div className={styles['tableContainer']} style={{ maxWidth: '600px', padding: '2rem' }}>
                 <form action={formAction} className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                         <label htmlFor="name">Nombre del Repuesto *</label>
@@ -106,7 +106,7 @@ export default function CreatePartPage() {
                     <div className="flex gap-3 mt-4">
                         <button
                             type="submit"
-                            className={styles.createBtn}
+                            className={styles['createBtn']}
                             disabled={isPending}
                         >
                             {isPending ? 'Creando...' : 'Crear Repuesto'}
