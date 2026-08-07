@@ -45,6 +45,7 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [takingTicket, setTakingTicket] = useState<string | null>(null);
 
+  const userId = session?.user?.id;
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,8 +56,8 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
       const poolData = await poolRes.json();
 
       // Fetch user's current workload
-      if (session?.user?.id) {
-        const workloadRes = await fetch(`/api/technicians/${session.user.id}/availability`);
+      if (userId) {
+        const workloadRes = await fetch(`/api/technicians/${userId}/availability`);
         if (workloadRes.ok) {
           const workloadData = await workloadRes.json();
           setWorkload(workloadData);
@@ -69,13 +70,16 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
     } finally {
       setLoading(false);
     }
-  }, [session?.user?.id]);
+  }, [userId]);
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      await fetchData();
+    };
+    load();
 
     // Refresh every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
 

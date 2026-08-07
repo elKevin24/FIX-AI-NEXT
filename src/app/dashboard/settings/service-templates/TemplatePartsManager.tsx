@@ -48,17 +48,16 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
   const [editRequired, setEditRequired] = useState(false);
 
   useEffect(() => {
-    loadParts();
+    let ignore = false;
+    getAvailableParts()
+      .then((availableParts) => {
+        if (!ignore) setParts(availableParts);
+      })
+      .catch((err) => console.error('Error loading parts:', err));
+    return () => {
+      ignore = true;
+    };
   }, []);
-
-  const loadParts = async () => {
-    try {
-      const availableParts = await getAvailableParts();
-      setParts(availableParts);
-    } catch (err) {
-      console.error('Error loading parts:', err);
-    }
-  };
 
   const handleAddPart = async () => {
     if (!selectedPartId) {
