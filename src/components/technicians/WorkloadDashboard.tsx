@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import styles from './WorkloadDashboard.module.css';
 import { TechnicianCard } from './TechnicianCard';
 import { WorkloadSummary } from './WorkloadSummary';
@@ -67,27 +67,44 @@ export function WorkloadDashboard() {
   const [sortBy, setSortBy] = useState<'name' | 'workload' | 'utilization'>('utilization');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  useEffect(() => {
-    fetchWorkload();
-  }, []);
-
-  const fetchWorkload = async () => {
+  const fetchWorkload = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/technicians/workload');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch workload data');
-      }
-
-      const workloadData = await response.json();
+      const res = await fetch('/api/technicians/workload');
+      if (!res.ok) throw new Error('Failed to fetch workload data');
+      const workloadData = await res.json();
       setData(workloadData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    fetch('/api/technicians/workload')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch workload data');
+        return res.json();
+      })
+      .then((workloadData) => {
+        if (!ignore) {
+          setData(workloadData);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   if (loading) {
     return (

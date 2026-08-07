@@ -60,19 +60,19 @@ export default function TicketWizard() {
   const [success, setSuccess] = useState(false);
   const [addedOptionalPartIds, setAddedOptionalPartIds] = useState<Set<string>>(new Set());
 
-  // Auto-fill fields when template changes
-  useEffect(() => {
-    if (selectedTemplate) {
-      setTitle(selectedTemplate.defaultTitle);
-      setDescription(selectedTemplate.defaultDescription);
-      setPriority(selectedTemplate.defaultPriority);
+  // Synchronize fields when template selection changes
+  const handleTemplateChange = (template: ServiceTemplate | null) => {
+    setSelectedTemplate(template);
+    if (template) {
+      setTitle(template.defaultTitle);
+      setDescription(template.defaultDescription);
+      setPriority(template.defaultPriority);
     } else {
-      // Reset to defaults when template is deselected
       setTitle('');
       setDescription('');
       setPriority('MEDIUM');
     }
-  }, [selectedTemplate]);
+  };
 
   const handleSubmit = async () => {
     if (!customer) {
@@ -193,7 +193,7 @@ export default function TicketWizard() {
           <div className={styles.stepContent}>
             <TemplateSelector
               selectedTemplate={selectedTemplate}
-              onSelect={setSelectedTemplate}
+              onSelect={handleTemplateChange}
             />
 
             <div className={styles.actions}>
