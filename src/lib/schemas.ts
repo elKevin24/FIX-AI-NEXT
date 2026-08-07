@@ -60,6 +60,29 @@ export const UpdateTicketSchema = z.object({
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
 });
 
+export const UpdateTicketStatusSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'], {
+    errorMap: () => ({ message: 'Estado de ticket inválido.' })
+  }),
+  note: z.string().optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.status === 'CANCELLED') {
+    if (!data.note || data.note.trim().length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['note'],
+        message: 'Debes ingresar un motivo de cancelación de al menos 10 caracteres.',
+      });
+    }
+  }
+});
+
+export const DeleteTicketSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  reason: z.string().min(10, 'El motivo de eliminación debe tener al menos 10 caracteres.'),
+});
+
 // ============================================================================
 // USER SCHEMAS
 // ============================================================================
