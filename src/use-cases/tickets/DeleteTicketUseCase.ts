@@ -1,4 +1,4 @@
-import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { UpdateTicketStatusUseCase } from './UpdateTicketStatusUseCase';
 
 export interface DeleteTicketParams {
     ticketId: string;
@@ -13,22 +13,14 @@ export class DeleteTicketUseCase {
             throw new Error('El motivo de eliminación debe tener al menos 10 caracteres');
         }
 
-        const tenantDb = getTenantPrisma(tenantId, userId);
-
-        const existingTicket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId }
+        // Soft deletion: Updates status to CANCELLED, stores cancellationReason, returns parts to inventory, and logs audit note.
+        // The record is NEVER hard deleted from the database.
+        return UpdateTicketStatusUseCase.execute({
+            ticketId,
+            status: 'CANCELLED',
+            note: `[TICKET ELIMINADO/CANCELADO POR ADMIN]: ${reason}`,
+            tenantId,
+            userId,
         });
-
-        if (!existingTicket) {
-            throw new Error('Ticket no encontrado');
-        }
-
-        console.log(`[Audit Delete Ticket] Ticket #${existingTicket.ticketNumber} deleted by user ${userId}. Reason: ${reason}`);
-
-        await tenantDb.ticket.delete({
-            where: { id: ticketId },
-        });
-
-        return true;
     }
 }
