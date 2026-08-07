@@ -8,7 +8,7 @@
 ALTER TABLE part_usages
     ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT false,
     ADD COLUMN IF NOT EXISTS "approvedAt" TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS "approvedById" UUID REFERENCES users(id),
+    ADD COLUMN IF NOT EXISTS "approvedById" TEXT REFERENCES users(id),
     ADD COLUMN IF NOT EXISTS "priceAtProposal" DECIMAL(10,2) NOT NULL DEFAULT 0;
 
 CREATE INDEX IF NOT EXISTS part_usages_approved_idx ON part_usages(approved);
@@ -96,5 +96,6 @@ FOR EACH ROW EXECUTE FUNCTION trg_sync_part_inventory();
 -- ==========================================
 -- Acciones de auditoría para aprobación de repuestos
 -- ==========================================
-ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'PARTS_APPROVED';
-ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'PARTS_REJECTED';
+-- Nota: el enum "AuditAction" no existe en la cadena de migraciones (audit_logs.action
+-- es TEXT desde la migración init). El enum se crea con todos sus valores, incluidos
+-- PARTS_APPROVED/PARTS_REJECTED, en la migración de alineación convert_text_ids_to_uuid.
