@@ -27,11 +27,13 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
+    const prevNameRef = useRef(selectedCustomer?.name);
     useEffect(() => {
-        if (selectedCustomer?.name) {
+        if (selectedCustomer?.name && selectedCustomer.name !== prevNameRef.current) {
+            prevNameRef.current = selectedCustomer.name;
             setQuery(selectedCustomer.name);
         }
-    }, [selectedCustomer]);
+    }, [selectedCustomer?.name]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

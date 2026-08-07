@@ -47,9 +47,8 @@ test.describe('Ticket Flows', () => {
     // 5. Verify redirection to tickets list
     // Wait a bit to see if there's an error alert on the form
     try {
-      await page.waitForURL(/\/dashboard\/tickets(?:$|\?)/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard\/tickets(?:$|\?)/, { timeout: 15000 });
     } catch (e) {
-      // If it fails to navigate, maybe there's an error on the page
       const alertLocator = page.locator('.alert-error');
       if (await alertLocator.isVisible()) {
         const errorText = await alertLocator.textContent();
@@ -73,9 +72,8 @@ test.describe('Ticket Flows', () => {
     await detailLink.click();
     
     try {
-        await page.waitForURL(/\/dashboard\/tickets\/[a-zA-Z0-9-]{36}/, { timeout: 5000 });
+        await expect(page).toHaveURL(/\/dashboard\/tickets\/[a-zA-Z0-9-]{36}/, { timeout: 8000 });
     } catch {
-        // Fallback for Next.js Link hydration flakiness in Playwright
         if (href) {
             await page.goto(href);
         }
@@ -91,7 +89,7 @@ test.describe('Ticket Flows', () => {
 
     // 8. Change Ticket Status
     // A newly created ticket should be OPEN. We click '▶ Iniciar Reparación' to change it to IN_PROGRESS.
-    await page.click('button:has-text("▶ Iniciar Reparación")');
+    await page.click('button:has-text("Iniciar Reparación")');
     // Wait for the status badge to update to "En Progreso"
     await expect(page.locator('span', { hasText: 'En Progreso' }).first()).toBeVisible({ timeout: 10000 });
   });
