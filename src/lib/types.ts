@@ -3,4 +3,4 @@ export type ActionState<T = null> = {
     message: string;
     errors?: Record<string, string[]>;
     data?: T;
-};
+} | null;

@@ -5,7 +5,14 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema, UpdateTicketStatusSchema, DeleteTicketSchema } from '@/lib/schemas';
+import { Prisma } from '@/generated/prisma';
+import {
+    CreateTicketSchema,
+    CreateBatchTicketsSchema,
+    UpdateTicketSchema,
+    UpdateTicketStatusSchema,
+    DeleteTicketSchema,
+} from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
@@ -21,7 +28,7 @@ import { AddServiceToTicketUseCase } from '@/use-cases/tickets/AddServiceToTicke
 import { RemoveServiceFromTicketUseCase } from '@/use-cases/tickets/RemoveServiceFromTicketUseCase';
 
 /**
- * Get ticket by ID for public status check
+ * Get ticket by ID for public status check.
  */
 export async function getTicketById(rawId: string) {
     const ticket = await TicketRepository.findPublicByIdOrNumber(rawId);
@@ -34,22 +41,25 @@ export async function getTicketById(rawId: string) {
 }
 
 /**
- * Search ticket safely for client-side usage
+ * Search ticket safely for client-side usage. Returns null when not found
+ * instead of throwing, making it safe for UI error states.
  */
 export async function searchTicket(rawId: string) {
     try {
-        const ticket = await TicketRepository.findPublicByIdOrNumber(rawId);
-        return ticket;
+        return await TicketRepository.findPublicByIdOrNumber(rawId);
     } catch (error) {
-        console.error("Error searching ticket:", error);
+        console.error('Error searching ticket:', error);
         return null;
     }
 }
 
 /**
- * Create a new ticket with automatic customer lookup/creation (Server Action)
+ * Create a new ticket with automatic customer lookup/creation (Server Action).
  */
-export async function createTicket(prevState: any, formData: FormData): Promise<ActionState> {
+export async function createTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -71,16 +81,8 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
         accessories: formData.get('accessories') || undefined,
         checkInNotes: formData.get('checkInNotes') || undefined,
     };
-    
-    let initialParts = [];
-    try {
-        const partsJson = formData.get('initialParts');
-        if (partsJson && typeof partsJson === 'string') {
-             initialParts = JSON.parse(partsJson);
-        }
-    } catch (e) {
-        // Ignore parse error
-    }
+
+    const initialParts = parseJsonField<unknown[]>(formData.get('initialParts'), []);
 
     const customerName = formData.get('customerName') as string;
     const customerId = formData.get('customerId') as string;
@@ -89,55 +91,48 @@ export async function createTicket(prevState: any, formData: FormData): Promise<
     const customerDpi = formData.get('customerDpi') as string;
     const customerNit = formData.get('customerNit') as string;
 
-    const validatedFields = CreateTicketSchema.safeParse({
-        ...rawData,
-        initialParts
-    });
+    const validatedFields = CreateTicketSchema.safeParse({ ...rawData, initialParts });
 
     if (!validatedFields.success) {
-        console.error("Validation Errors:", validatedFields.error.flatten().fieldErrors);
         return {
             success: false,
             message: 'Error de validación',
-            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>
+            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>,
         };
     }
 
-    if ((!customerName || customerName.trim() === '') && !customerId) {
-        return { success: false, message: 'El nombre del cliente o un ID válido es requerido.'};
-    }    
-    
-    const ticketData = validatedFields.data;
+    if (!customerName?.trim() && !customerId) {
+        return { success: false, message: 'El nombre del cliente o un ID válido es requerido.' };
+    }
 
     try {
         await CreateTicketUseCase.execute({
-            ticketData,
-            customerInfo: {
-                customerName,
-                customerId,
-                customerEmail,
-                customerPhone,
-                customerDpi,
-                customerNit,
-            },
+            ticketData: validatedFields.data,
+            customerInfo: { customerName, customerId, customerEmail, customerPhone, customerDpi, customerNit },
             tenantId,
             userId: session.user.id,
         });
     } catch (error) {
-         console.error('Failed to create ticket:', error);
-         return { success: false, message: error instanceof Error ? error.message : 'Error creando el ticket' };
+        console.error('Failed to create ticket:', error);
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error creando el ticket',
+        };
     }
 
     redirect('/dashboard/tickets');
 }
 
 /**
- * Create multiple new tickets for a single customer (Server Action for batch creation)
+ * Create multiple tickets for a single customer (Server Action for batch creation).
  */
-export async function createBatchTickets(prevState: any, formData: FormData): Promise<ActionState> {
+export async function createBatchTickets(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
-        return { success: false, message: 'Unauthorized' };
+        return { success: false, message: 'No autorizado' };
     }
     if (session.user.role === 'VIEWER') {
         return { success: false, message: 'Los observadores no pueden crear tickets' };
@@ -155,129 +150,88 @@ export async function createBatchTickets(prevState: any, formData: FormData): Pr
         return { success: false, message: 'Customer name and ticket data are required.' };
     }
 
-    let ticketsData;
+    let ticketsData: z.infer<typeof CreateBatchTicketsSchema>;
     try {
-        ticketsData = JSON.parse(rawTickets);
-        const validated = CreateBatchTicketsSchema.safeParse(ticketsData);
+        const parsed = JSON.parse(rawTickets);
+        const validated = CreateBatchTicketsSchema.safeParse(parsed);
         if (!validated.success) {
-            return { 
-                success: false, 
+            return {
+                success: false,
                 message: 'Error de validación de tickets',
-                errors: { tickets: [validated.error.errors[0].message] }
+                errors: { tickets: [validated.error.errors[0].message] },
             };
         }
         ticketsData = validated.data;
-    } catch (e) {
+    } catch {
         return { success: false, message: 'Invalid ticket data format.' };
     }
 
     try {
-        const tenantId = session.user.tenantId;
+        const { tenantId } = session.user;
         const tenantDb = getTenantPrisma(tenantId, session.user.id);
 
-        let customer = null;
-
-        if (customerId) {
-            customer = await tenantDb.customer.findUnique({
-                where: { id: customerId },
-            });
-        }
-
-        if (!customer && customerEmail) {
-            customer = await tenantDb.customer.findFirst({ where: { email: customerEmail } });
-        }
-        if (!customer && customerPhone) {
-            customer = await tenantDb.customer.findFirst({ where: { phone: customerPhone } });
-        }
-        if (!customer) {
-            customer = await tenantDb.customer.findFirst({ where: { name: customerName } });
-        }
-
-        if (!customer) {
-            customer = await tenantDb.customer.create({
-                data: {
-                    name: customerName,
-                    email: customerEmail || null,
-                    phone: customerPhone || null,
-                    dpi: customerDpi || null,
-                    nit: customerNit || null,
-                    tenantId: tenantId,
-                    createdById: session.user.id,
-                    updatedById: session.user.id,
-                },
-            });
-        }
-
-        const currentCustomerId = customer.id;
-
-        const createdTicketIds = await tenantDb.$transaction(async (tx: any) => {
-            const tickets = await Promise.all(
-                ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) => 
-                    tx.ticket.create({
-                        data: {
-                            title: ticket.title,
-                            description: ticket.description,
-                            customerId: currentCustomerId,
-                            status: 'OPEN',
-                            tenantId: tenantId,
-                            deviceType: ticket.deviceType,
-                            deviceModel: ticket.deviceModel,
-                            serialNumber: ticket.serialNumber,
-                            accessories: ticket.accessories,
-                            checkInNotes: ticket.checkInNotes,
-                            createdById: session.user.id,
-                            updatedById: session.user.id,
-                        },
-                        select: { id: true }
-                    })
-                )
-            );
-            return tickets.map((t: any) => t.id);
+        const customer = await resolveOrCreateCustomer(tenantDb, {
+            customerId,
+            customerEmail,
+            customerPhone,
+            customerName,
+            customerDpi,
+            customerNit,
+            tenantId,
+            createdById: session.user.id,
         });
 
-        (async () => {
-             const createdTickets = await tenantDb.ticket.findMany({
-                where: { id: { in: createdTicketIds } },
-                include: { customer: true, assignedTo: true }
-            });
+        const createdTicketIds = await tenantDb.$transaction(
+            async (tx: Prisma.TransactionClient) => {
+                const tickets = await Promise.all(
+                    ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) =>
+                        tx.ticket.create({
+                            data: {
+                                title: ticket.title,
+                                description: ticket.description,
+                                customerId: customer.id,
+                                status: 'OPEN',
+                                tenantId,
+                                deviceType: ticket.deviceType,
+                                deviceModel: ticket.deviceModel,
+                                serialNumber: ticket.serialNumber,
+                                accessories: ticket.accessories,
+                                checkInNotes: ticket.checkInNotes,
+                                createdById: session.user.id,
+                                updatedById: session.user.id,
+                            },
+                            select: { id: true },
+                        }),
+                    ),
+                );
+                return tickets.map((ticket) => ticket.id);
+            },
+        );
 
-            for (const ticket of createdTickets) {
-                try {
-                    await notifyTicketCreated({
-                        id: ticket.id,
-                        ticketNumber: ticket.ticketNumber,
-                        title: ticket.title,
-                        deviceType: ticket.deviceType,
-                        deviceModel: ticket.deviceModel,
-                        status: ticket.status,
-                        customerId: ticket.customerId,
-                        customer: {
-                            id: ticket.customer.id,
-                            name: ticket.customer.name,
-                            email: ticket.customer.email,
-                        },
-                        assignedTo: ticket.assignedTo,
-                        tenantId: ticket.tenantId,
-                    });
-                } catch (notificationError) {
-                    console.error('Failed to send batch ticket notification:', notificationError);
-                }
-            }
-        })();
+        // Send notifications after the transaction commits. Using void to
+        // explicitly mark this as a non-awaited fire-and-forget call.
+        // Notification failures must NOT rollback the ticket creation.
+        void sendBatchTicketNotifications(tenantDb, createdTicketIds);
 
         revalidatePath('/dashboard/tickets');
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
-        return { success: false, message: 'Error de base de datos: No se pudieron crear los tickets.' };
+        return {
+            success: false,
+            message: 'Error de base de datos: No se pudieron crear los tickets.',
+        };
     }
 
     redirect('/dashboard/tickets');
 }
 
 /**
- * Update an existing ticket (Server Action)
+ * Update an existing ticket (Server Action).
  */
-export async function updateTicket(prevState: any, formData: FormData): Promise<ActionState> {
+export async function updateTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -287,12 +241,12 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
     }
 
     const { user } = session;
+    const rawData: Record<string, unknown> = Object.fromEntries(formData);
 
-    const rawData: Record<string, any> = Object.fromEntries(formData);
-    
+    // Normalize empty strings to null/undefined for optional fields
     if (rawData.assignedToId === '') rawData.assignedToId = null;
     if (rawData.priority === '') rawData.priority = null;
-    if (rawData.status === '') rawData.status = undefined; 
+    if (rawData.status === '') rawData.status = undefined;
     if (rawData.deviceType === '') rawData.deviceType = null;
     if (rawData.deviceModel === '') rawData.deviceModel = null;
     if (rawData.serialNumber === '') rawData.serialNumber = null;
@@ -306,7 +260,7 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
         return {
             success: false,
             message: 'Error de validación',
-            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>
+            errors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>,
         };
     }
 
@@ -321,14 +275,20 @@ export async function updateTicket(prevState: any, formData: FormData): Promise<
         return { success: true, message: 'Ticket actualizado exitosamente' };
     } catch (error) {
         console.error('Failed to update ticket:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el ticket.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el ticket.',
+        };
     }
 }
 
 /**
- * Quick status update for a ticket (Server Action)
+ * Quick status update for a ticket (Server Action).
  */
-export async function updateTicketStatus(prevState: any, formData: FormData): Promise<ActionState> {
+export async function updateTicketStatus(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -337,11 +297,12 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
         return { success: false, message: 'Los observadores no pueden cambiar el estado' };
     }
 
-    const ticketId = formData.get('ticketId') as string;
-    const status = formData.get('status') as string; 
-    const note = formData.get('note') as string | null;
+    const parseResult = UpdateTicketStatusSchema.safeParse({
+        ticketId: formData.get('ticketId') as string,
+        status: formData.get('status') as string,
+        note: formData.get('note') as string | null,
+    });
 
-    const parseResult = UpdateTicketStatusSchema.safeParse({ ticketId, status, note });
     if (!parseResult.success) {
         return {
             success: false,
@@ -363,27 +324,33 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
         return { success: true, message: 'Estado actualizado' };
     } catch (error) {
         console.error('Failed to update ticket status:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error al actualizar el estado.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error al actualizar el estado.',
+        };
     }
 }
 
 /**
- * Delete a ticket (Server Action)
+ * Delete a ticket (Server Action). Restricted to ADMIN role.
  */
-export async function deleteTicket(prevState: any, formData: FormData) {
+export async function deleteTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-
     if (session.user.role !== 'ADMIN') {
         return { success: false, message: 'Solo los administradores pueden eliminar tickets' };
     }
 
-    const ticketId = formData.get('ticketId') as string;
-    const reason = formData.get('reason') as string;
+    const parseResult = DeleteTicketSchema.safeParse({
+        ticketId: formData.get('ticketId') as string,
+        reason: formData.get('reason') as string,
+    });
 
-    const parseResult = DeleteTicketSchema.safeParse({ ticketId, reason });
     if (!parseResult.success) {
         return {
             success: false,
@@ -400,16 +367,22 @@ export async function deleteTicket(prevState: any, formData: FormData) {
         });
     } catch (error) {
         console.error('Failed to delete ticket:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el ticket.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el ticket.',
+        };
     }
 
     redirect('/dashboard/tickets');
 }
 
 /**
- * Add a note to a ticket (Server Action)
+ * Add a note to a ticket (Server Action).
  */
-export async function addTicketNote(prevState: any, formData: FormData) {
+export async function addTicketNote(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId || !session?.user?.id) {
         return { success: false, message: 'No autorizado' };
@@ -422,7 +395,7 @@ export async function addTicketNote(prevState: any, formData: FormData) {
     const content = formData.get('content') as string;
     const isInternal = formData.get('isInternal') === 'true';
 
-    if (!ticketId || !content || content.trim().length === 0) {
+    if (!ticketId || !content?.trim()) {
         return { success: false, message: 'El contenido de la nota es requerido' };
     }
 
@@ -443,9 +416,12 @@ export async function addTicketNote(prevState: any, formData: FormData) {
 }
 
 /**
- * Delete a ticket note (Server Action)
+ * Delete a ticket note (Server Action).
  */
-export async function deleteTicketNote(prevState: any, formData: FormData) {
+export async function deleteTicketNote(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId || !session?.user?.id) {
         return { success: false, message: 'No autorizado' };
@@ -467,19 +443,20 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
         });
 
         return { success: true, message: 'Nota eliminada' };
-    } catch (error: any) {
+    } catch (error) {
         console.error('Failed to delete note:', error);
-        if (error?.message?.includes('No autorizado')) {
-            return { success: false, message: error.message };
-        }
-        return { success: false, message: 'Error de base de datos: No se pudo eliminar la nota.' };
+        const message = error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar la nota.';
+        return { success: false, message };
     }
 }
 
 /**
- * Add a part to a ticket (Server Action)
+ * Add a part to a ticket (Server Action).
  */
-export async function addPartToTicket(prevState: any, formData: FormData) {
+export async function addPartToTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -487,7 +464,7 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
 
     const ticketId = formData.get('ticketId') as string;
     const partId = formData.get('partId') as string;
-    const quantity = parseInt(formData.get('quantity') as string);
+    const quantity = parseInt(formData.get('quantity') as string, 10);
 
     if (!ticketId || !partId || !quantity || isNaN(quantity) || quantity <= 0) {
         return { success: false, message: 'Datos inválidos' };
@@ -504,16 +481,22 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
         });
 
         return { success: true, message: 'Repuesto agregado al ticket' };
-    } catch (error: any) {
+    } catch (error) {
         console.error('Failed to add part to ticket:', error);
-        return { success: false, message: error.message || 'Error de base de datos: No se pudo agregar el repuesto.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo agregar el repuesto.',
+        };
     }
 }
 
 /**
- * Remove a part from a ticket (Server Action)
+ * Remove a part from a ticket (Server Action).
  */
-export async function removePartFromTicket(prevState: any, formData: FormData) {
+export async function removePartFromTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -534,16 +517,22 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
         });
 
         return { success: true, message: 'Repuesto removido del ticket' };
-    } catch (error: any) {
+    } catch (error) {
         console.error('Failed to remove part from ticket:', error);
-        return { success: false, message: error.message || 'Error de base de datos: No se pudo remover el repuesto.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo remover el repuesto.',
+        };
     }
 }
 
 /**
- * Add a service to a ticket (Server Action)
+ * Add a service to a ticket (Server Action).
  */
-export async function addServiceToTicket(prevState: any, formData: FormData) {
+export async function addServiceToTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -565,16 +554,22 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
         });
 
         return { success: true, message: 'Servicio agregado al ticket' };
-    } catch (error: any) {
+    } catch (error) {
         console.error('Failed to add service to ticket:', error);
-        return { success: false, message: error.message || 'Error de base de datos: No se pudo agregar el servicio.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo agregar el servicio.',
+        };
     }
 }
 
 /**
- * Remove a service from a ticket (Server Action)
+ * Remove a service from a ticket (Server Action).
  */
-export async function removeServiceFromTicket(prevState: any, formData: FormData) {
+export async function removeServiceFromTicket(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -590,8 +585,120 @@ export async function removeServiceFromTicket(prevState: any, formData: FormData
         });
 
         return { success: true, message: 'Servicio eliminado del ticket' };
-    } catch (error: any) {
+    } catch (error) {
         console.error('Failed to remove service from ticket:', error);
-        return { success: false, message: error.message || 'Error de base de datos: No se pudo eliminar el servicio.' };
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el servicio.',
+        };
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Private helpers
+// ---------------------------------------------------------------------------
+
+/** Safely parses a JSON string field, returning a fallback value on failure. */
+function parseJsonField<T>(raw: FormDataEntryValue | null, fallback: T): T {
+    if (!raw || typeof raw !== 'string') return fallback;
+    try {
+        return JSON.parse(raw) as T;
+    } catch {
+        return fallback;
+    }
+}
+
+interface CustomerResolutionInput {
+    customerId: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerName: string;
+    customerDpi: string;
+    customerNit: string;
+    tenantId: string;
+    createdById: string;
+}
+
+/**
+ * Resolves an existing customer by ID, email, phone, or name in that priority
+ * order, creating a new one only when no match is found.
+ */
+async function resolveOrCreateCustomer(
+    db: ReturnType<typeof getTenantPrisma>,
+    input: CustomerResolutionInput,
+) {
+    const { customerId, customerEmail, customerPhone, customerName, customerDpi, customerNit, tenantId, createdById } = input;
+
+    if (customerId) {
+        const existing = await db.customer.findUnique({ where: { id: customerId } });
+        if (existing) return existing;
+    }
+
+    if (customerEmail) {
+        const existing = await db.customer.findFirst({ where: { email: customerEmail } });
+        if (existing) return existing;
+    }
+
+    if (customerPhone) {
+        const existing = await db.customer.findFirst({ where: { phone: customerPhone } });
+        if (existing) return existing;
+    }
+
+    const byName = await db.customer.findFirst({ where: { name: customerName } });
+    if (byName) return byName;
+
+    return db.customer.create({
+        data: {
+            name: customerName,
+            email: customerEmail || null,
+            phone: customerPhone || null,
+            dpi: customerDpi || null,
+            nit: customerNit || null,
+            tenantId,
+            createdById,
+            updatedById: createdById,
+        },
+    });
+}
+
+/**
+ * Sends ticket creation notifications for a batch of newly created tickets.
+ * This is deliberately fire-and-forget: notification failures must not
+ * rollback the ticket creation transaction.
+ */
+async function sendBatchTicketNotifications(
+    db: ReturnType<typeof getTenantPrisma>,
+    ticketIds: string[],
+): Promise<void> {
+    try {
+        const tickets = await db.ticket.findMany({
+            where: { id: { in: ticketIds } },
+            include: { customer: true, assignedTo: true },
+        });
+
+        for (const ticket of tickets) {
+            try {
+                await notifyTicketCreated({
+                    id: ticket.id,
+                    ticketNumber: ticket.ticketNumber,
+                    title: ticket.title,
+                    deviceType: ticket.deviceType,
+                    deviceModel: ticket.deviceModel,
+                    status: ticket.status,
+                    customerId: ticket.customerId,
+                    customer: {
+                        id: ticket.customer.id,
+                        name: ticket.customer.name,
+                        email: ticket.customer.email,
+                    },
+                    assignedTo: ticket.assignedTo,
+                    tenantId: ticket.tenantId,
+                });
+            } catch (notificationError) {
+                console.error('Failed to send batch ticket notification:', notificationError);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to fetch tickets for notification:', error);
     }
 }

@@ -427,15 +427,12 @@ export async function registerPayment(rawData: PaymentData) {
       },
     });
 
-    // Si el pago es en efectivo, registrar en caja registradora
+    // Si el pago es en efectivo, registrar en caja registradora.
+    // IMPORTANT: This must throw on failure to rollback the entire transaction.
+    // A payment cannot be considered successful if the cash register entry fails —
+    // that would create a financial inconsistency (invoice PAID, cash not updated).
     if (data.paymentMethod === PaymentMethod.CASH) {
-      try {
-        await registerInvoicePaymentInCash(data.invoiceId, data.amount);
-      } catch (error) {
-        console.error('Error al registrar pago en caja:', error);
-        // No lanzamos error para no revertir el pago de la factura, 
-        // pero idealmente deberíamos informar al usuario.
-      }
+      await registerInvoicePaymentInCash(data.invoiceId, data.amount);
     }
 
     return { payment, invoice: updatedInvoice };
