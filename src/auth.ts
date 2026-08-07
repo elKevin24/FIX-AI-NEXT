@@ -5,6 +5,10 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 import type { JWT } from "next-auth/jwt";
+import { initializeNotificationSystem } from '@/lib/events/init';
+
+// Initialize notification system on module load
+initializeNotificationSystem();
 
 /**
  * Busca usuario por email y tenant.
