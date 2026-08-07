@@ -2,10 +2,11 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from '@/lib/notifications';
 import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
+import type { Prisma, TicketStatus } from '@/generated/prisma';
 
 export interface UpdateTicketStatusParams {
     ticketId: string;
-    status: string;
+    status: TicketStatus;
     note?: string | null;
     tenantId: string;
     userId: string;
@@ -30,7 +31,7 @@ export class UpdateTicketStatusUseCase {
             }
         }
 
-        await tenantDb.$transaction(async (tx: any) => {
+        await tenantDb.$transaction(async (tx: Prisma.TransactionClient) => {
              // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
              // We must apply the tenant constraint manually.
              
@@ -44,7 +45,7 @@ export class UpdateTicketStatusUseCase {
                  }
              }
 
-             const updateData: any = { status: status as any, updatedById: userId };
+             const updateData: Prisma.TicketUpdateInput = { status, updatedById: userId };
              if (status === 'CANCELLED' && note) {
                  updateData.cancellationReason = note;
              }
@@ -125,9 +126,9 @@ export class UpdateTicketStatusUseCase {
                 await notifyTicketStatusChange({
                     ...updatedFullTicket,
                     ticketNumber: updatedFullTicket.ticketNumber,
-                } as any, {
-                    oldStatus: existingTicket.status as any,
-                    newStatus: status as any,
+                }, {
+                    oldStatus: existingTicket.status,
+                    newStatus: status,
                 });
             }
         } catch (e) {
