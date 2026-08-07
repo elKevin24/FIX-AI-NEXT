@@ -6,7 +6,7 @@ interface AuthUser {
     tenantId?: string;
 }
 
-const SUPERADMIN_EMAILS = (process.env.SUPERADMIN_EMAILS || 'adminkev@example.com')
+const SUPERADMIN_EMAILS = (process.env['SUPERADMIN_EMAILS'] || 'adminkev@example.com')
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
