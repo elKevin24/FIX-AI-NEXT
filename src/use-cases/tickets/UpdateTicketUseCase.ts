@@ -76,6 +76,23 @@ export class UpdateTicketUseCase {
                  where: { id: ticketId },
                  data: updateData,
              });
+
+             await txTenantDb.auditLog.create({
+                data: {
+                    action: assignedToId && assignedToId !== existingTicket.assignedToId ? 'TICKET_ASSIGNED' : 'TICKET_UPDATED',
+                    module: 'TICKETS',
+                    details: JSON.stringify({
+                        id: existingTicket.id,
+                        oldStatus: existingTicket.status,
+                        newStatus: status,
+                        assignedToId,
+                    }),
+                    user: { connect: { id: userId } },
+                    tenant: { connect: { id: existingTicket.tenantId } },
+                    entityType: 'Ticket',
+                    entityId: existingTicket.id,
+                }
+             });
         });
 
         if (status && status !== existingTicket.status) {

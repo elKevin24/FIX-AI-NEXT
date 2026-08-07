@@ -54,6 +54,18 @@ export class UpdateTicketStatusUseCase {
                  data: updateData
              });
 
+             await tx.auditLog.create({
+                data: {
+                    action: 'TICKET_STATUS_CHANGED',
+                    module: 'TICKETS',
+                    details: JSON.stringify({ id: existingTicket.id, oldStatus: existingTicket.status, newStatus: status }),
+                    user: { connect: { id: userId } },
+                    tenant: { connect: { id: tenantId } },
+                    entityType: 'Ticket',
+                    entityId: existingTicket.id,
+                }
+             });
+
              if (note) {
                 await tx.ticketNote.create({
                     data: {
