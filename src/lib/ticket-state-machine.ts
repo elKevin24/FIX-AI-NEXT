@@ -50,6 +50,7 @@ const VALID_TRANSITIONS: Record<TicketStatus, Partial<Record<TicketAction, Ticke
   },
   [TicketStatus.CLOSED]: {
     reopen: TicketStatus.IN_PROGRESS,
+    cancel: TicketStatus.CANCELLED,
   },
   [TicketStatus.CANCELLED]: {
     reopen: TicketStatus.OPEN,
