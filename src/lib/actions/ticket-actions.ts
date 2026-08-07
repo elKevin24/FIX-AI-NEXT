@@ -5,7 +5,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema } from '@/lib/schemas';
+import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema, UpdateTicketStatusSchema, DeleteTicketSchema } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
@@ -341,23 +341,21 @@ export async function updateTicketStatus(prevState: any, formData: FormData): Pr
     const status = formData.get('status') as string; 
     const note = formData.get('note') as string | null;
 
-    const validStatuses = ['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'];
-    
-    if (!ticketId || !status) {
-        return { success: false, message: 'Campos requeridos faltantes' };
-    }
-    
-    if (!validStatuses.includes(status)) {
-        return { success: false, message: 'Estado inválido' };
+    const parseResult = UpdateTicketStatusSchema.safeParse({ ticketId, status, note });
+    if (!parseResult.success) {
+        return {
+            success: false,
+            message: parseResult.error.issues[0]?.message || 'Datos de estado inválidos.',
+        };
     }
 
     const { user } = session;
 
     try {
         await UpdateTicketStatusUseCase.execute({
-            ticketId,
-            status,
-            note,
+            ticketId: parseResult.data.ticketId,
+            status: parseResult.data.status,
+            note: parseResult.data.note,
             tenantId: user.tenantId,
             userId: user.id,
         });
@@ -383,20 +381,26 @@ export async function deleteTicket(prevState: any, formData: FormData) {
     }
 
     const ticketId = formData.get('ticketId') as string;
+    const reason = formData.get('reason') as string;
 
-    if (!ticketId) {
-        return { success: false, message: 'ID de ticket requerido' };
+    const parseResult = DeleteTicketSchema.safeParse({ ticketId, reason });
+    if (!parseResult.success) {
+        return {
+            success: false,
+            message: parseResult.error.issues[0]?.message || 'Datos de eliminación inválidos.',
+        };
     }
 
     try {
         await DeleteTicketUseCase.execute({
-            ticketId,
+            ticketId: parseResult.data.ticketId,
+            reason: parseResult.data.reason,
             tenantId: session.user.tenantId,
             userId: session.user.id,
         });
     } catch (error) {
         console.error('Failed to delete ticket:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo eliminar el ticket.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el ticket.' };
     }
 
     redirect('/dashboard/tickets');

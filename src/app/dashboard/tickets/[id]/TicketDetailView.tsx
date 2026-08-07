@@ -128,6 +128,8 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
     const [noteState, noteAction, isAddingNote] = useActionState(addTicketNote, null);
     const [deleteNoteState, deleteNoteAction, isDeletingNote] = useActionState(deleteTicketNote, null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteReason, setDeleteReason] = useState('');
+    const isDeleteReasonValid = deleteReason.trim().length >= 10;
     const [isEditing, setIsEditing] = useState(false);
     const [noteContent, setNoteContent] = useState('');
     const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
@@ -471,6 +473,26 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                     <form action={deleteAction}>
                                         <input type="hidden" name="ticketId" value={ticket.id} />
 
+                                        <div style={{ margin: '0.75rem 0' }}>
+                                            <label htmlFor="delete-reason" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.25rem' }}>
+                                                Motivo de eliminación * (mínimo 10 caracteres)
+                                            </label>
+                                            <textarea
+                                                id="delete-reason"
+                                                name="reason"
+                                                value={deleteReason}
+                                                onChange={(e) => setDeleteReason(e.target.value)}
+                                                placeholder="Ej: Registro duplicado / Creado por error..."
+                                                minLength={10}
+                                                required
+                                                rows={2}
+                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem' }}
+                                            />
+                                            <small style={{ color: isDeleteReasonValid ? '#059669' : '#dc2626', fontSize: '0.75rem', display: 'block', marginTop: '0.25rem' }}>
+                                                {deleteReason.trim().length} / 10 caracteres mínimos
+                                            </small>
+                                        </div>
+
                                         {deleteState?.message && (
                                             <p className={styles.errorMessage}>
                                                 {deleteState.message}
@@ -481,13 +503,16 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                             <button
                                                 type="submit"
                                                 className={styles.dangerBtn}
-                                                disabled={isDeleting}
+                                                disabled={isDeleting || !isDeleteReasonValid}
                                             >
                                                 {isDeleting ? 'Eliminando...' : 'Confirmar'}
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => setShowDeleteConfirm(false)}
+                                                onClick={() => {
+                                                    setShowDeleteConfirm(false);
+                                                    setDeleteReason('');
+                                                }}
                                                 className={styles.cancelBtn}
                                             >
                                                 Cancelar
