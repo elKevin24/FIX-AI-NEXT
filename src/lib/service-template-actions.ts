@@ -427,12 +427,16 @@ export async function createTicketFromTemplate(formData: FormData) {
   }
 
   const formDataObj = Object.fromEntries(formData);
-  
+
   let optionalParts: string[] | undefined;
-  try {
-      const raw = formData.get('optionalParts');
-      if (raw && typeof raw === 'string') optionalParts = JSON.parse(raw);
-  } catch (e) {}
+  const rawOptionalParts = formData.get('optionalParts');
+  if (rawOptionalParts && typeof rawOptionalParts === 'string') {
+    try {
+      optionalParts = JSON.parse(rawOptionalParts);
+    } catch {
+      throw new Error('El formato de las partes opcionales es inválido.');
+    }
+  }
 
   const validatedFields = CreateTicketFromTemplateSchema.safeParse({ ...formDataObj, optionalParts });
 
@@ -441,169 +445,78 @@ export async function createTicketFromTemplate(formData: FormData) {
   }
 
   const { templateId, deviceType, deviceModel, customerId, optionalParts: selectedOptionalPartIds } = validatedFields.data;
-
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
-  // Obtener plantilla con partes requeridas
-  const template = await db.serviceTemplate.findUnique({
-    where: { id: templateId },
-    include: {
-      defaultParts: {
-        include: {
-          part: true,
-        },
-      },
-    },
-  });
+  const template = await fetchValidatedTemplate(db, templateId, session.user.tenantId);
+  await assertCustomerBelongsToTenant(db, customerId, session.user.tenantId);
 
-  if (!template || template.tenantId !== session.user.tenantId) {
-    throw new Error('Plantilla no encontrada');
-  }
-
-  if (!template.isActive) {
-    throw new Error('Esta plantilla está inactiva');
-  }
-
-  // Validar que customer pertenece al tenant (CRITICAL: tenant isolation)
-  const customer = await db.customer.findUnique({
-    where: { id: customerId },
-  });
-
-  if (!customer || customer.tenantId !== session.user.tenantId) {
-    throw new Error('Cliente no encontrado o no pertenece a tu organización');
-  }
-
-  // ATOMIC TRANSACTION: Crear ticket y consumir stock automáticamente
-  const ticket = await db.$transaction(async (tx: any) => {
-    // 1. Crear el ticket
-    const newTicket = await tx.ticket.create({
-      data: {
-        title: template.defaultTitle,
-        description: template.defaultDescription,
-        priority: convertPriorityToEnum(template.defaultPriority),
-        deviceType: deviceType || 'PC',
-        deviceModel: deviceModel || '',
-        customerId,
-        tenantId: session.user.tenantId,
-        serviceTemplateId: templateId,
-        // Asignar automáticamente si el usuario es técnico
-        // Calcular DueDate basado en estimatedDuration
-        dueDate: template.estimatedDuration ? new Date(Date.now() + template.estimatedDuration * 60000) : undefined,
-        estimatedCompletionDate: template.estimatedDuration ? new Date(Date.now() + template.estimatedDuration * 60000) : undefined,
-        assignedToId:
-          session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
-        createdById: session.user.id,
-        updatedById: session.user.id,
-      },
-    });
-
-    // 2. Procesar partes REQUERIDAS con consumo atómico de stock
-    const requiredParts = template.defaultParts.filter((dp: any) => dp.required);
-
-    for (const defaultPart of requiredParts) {
-      // Check stock (Trigger enforces it too, but we check for clear error)
-      const part = await tx.part.findUnique({ where: { id: defaultPart.partId } });
-      
-      if (!part || part.quantity < defaultPart.quantity) {
-        throw new Error(
-          `Stock insuficiente para ${defaultPart.part.name}. ` +
-            `Disponible: ${part?.quantity || 0}, Requerido: ${defaultPart.quantity}`
-        );
-      }
-
-      // Registrar uso de parte
-      await tx.partUsage.create({
+  const ticket = await db.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const newTicket = await tx.ticket.create({
         data: {
-          ticketId: newTicket.id,
-          partId: defaultPart.partId,
-          quantity: defaultPart.quantity,
+          title: template.defaultTitle,
+          description: template.defaultDescription,
+          priority: convertPriorityToEnum(template.defaultPriority),
+          deviceType: deviceType || 'PC',
+          deviceModel: deviceModel || '',
+          customerId,
+          tenantId: session.user.tenantId,
+          serviceTemplateId: templateId,
+          dueDate: template.estimatedDuration
+            ? new Date(Date.now() + template.estimatedDuration * 60_000)
+            : undefined,
+          estimatedCompletionDate: template.estimatedDuration
+            ? new Date(Date.now() + template.estimatedDuration * 60_000)
+            : undefined,
+          assignedToId: session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
+          createdById: session.user.id,
+          updatedById: session.user.id,
         },
       });
 
-      // Check for low stock and notify admins
-      const updatedPart = await tx.part.findUnique({
-        where: { id: defaultPart.partId },
-        select: { id: true, name: true, quantity: true, minStock: true, tenantId: true }
-      });
+      const requiredParts = template.defaultParts.filter(
+        (part: TemplateWithParts['defaultParts'][number]) => part.required,
+      );
+      await consumePartsAtomically(tx, newTicket.id, requiredParts);
 
-      if (updatedPart && updatedPart.quantity <= updatedPart.minStock) {
-        await notifyLowStock(updatedPart.name, updatedPart.quantity, updatedPart.tenantId);
-      }
-    }
+      const optionalTemplateParts = template.defaultParts.filter(
+        (part: TemplateWithParts['defaultParts'][number]) => !part.required,
+      );
+      const selectedParts = optionalTemplateParts.filter(
+        (part: TemplateWithParts['defaultParts'][number]) => selectedOptionalPartIds?.includes(part.partId),
+      );
+      await consumePartsAtomically(tx, newTicket.id, selectedParts);
 
-    // 3. Agregar partes OPCIONALES seleccionadas
-    const optionalParts = template.defaultParts.filter((dp: any) => !dp.required);
-
-    if (optionalParts.length > 0 && selectedOptionalPartIds) {
-      for (const optionalPart of optionalParts) {
-        // Verificar si el usuario seleccionó esta parte opcional
-        if (selectedOptionalPartIds.includes(optionalPart.partId)) {
-           // Verificar stock y consumir (igual que requeridas)
-           const part = await tx.part.findUnique({
-             where: { id: optionalPart.partId },
-           });
-
-           if (!part || part.quantity < optionalPart.quantity) {
-             throw new Error(
-               `Stock insuficiente para parte opcional ${part?.name || 'desconocida'}. ` +
-               `Disponible: ${part?.quantity || 0}, Requerido: ${optionalPart.quantity}`
-             );
-           }
-           
-           // Decrementar stock
-           // REMOVED: Handled by DB trigger trg_update_stock_on_usage when partUsage is created below
-           // await tx.part.update({
-           //   where: { id: optionalPart.partId },
-           //   data: { quantity: { decrement: optionalPart.quantity } }
-           // });
-
-           // Registrar uso
-           await tx.partUsage.create({
-             data: {
-               ticketId: newTicket.id,
-               partId: optionalPart.partId,
-               quantity: optionalPart.quantity,
-             },
-           });
-        }
-      }
-    }
-
-    return newTicket;
-  }, {
-    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-  });
-
-  // Fetch the created ticket with customer data for notifications
-  const ticketWithCustomer = await db.ticket.findUnique({
-    where: { id: ticket.id },
-    include: {
-      customer: true,
-      assignedTo: true,
+      return newTicket;
     },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  );
+
+  const ticketWithRelations = await db.ticket.findUnique({
+    where: { id: ticket.id },
+    include: { customer: true, assignedTo: true },
   });
 
-  // Send notification to customer about ticket creation
-  if (ticketWithCustomer) {
+  if (ticketWithRelations) {
     try {
       await notifyTicketCreated({
-        id: ticketWithCustomer.id,
-        ticketNumber: ticketWithCustomer.ticketNumber,
-        title: ticketWithCustomer.title,
-        deviceType: ticketWithCustomer.deviceType,
-        deviceModel: ticketWithCustomer.deviceModel,
-        status: ticketWithCustomer.status,
-        customerId: ticketWithCustomer.customerId,
+        id: ticketWithRelations.id,
+        ticketNumber: ticketWithRelations.ticketNumber,
+        title: ticketWithRelations.title,
+        deviceType: ticketWithRelations.deviceType,
+        deviceModel: ticketWithRelations.deviceModel,
+        status: ticketWithRelations.status,
+        customerId: ticketWithRelations.customerId,
         customer: {
-          id: ticketWithCustomer.customer.id,
-          name: ticketWithCustomer.customer.name,
-          email: ticketWithCustomer.customer.email,
+          id: ticketWithRelations.customer.id,
+          name: ticketWithRelations.customer.name,
+          email: ticketWithRelations.customer.email,
         },
-        assignedTo: ticketWithCustomer.assignedTo,
-        tenantId: ticketWithCustomer.tenantId,
+        assignedTo: ticketWithRelations.assignedTo,
+        tenantId: ticketWithRelations.tenantId,
       });
     } catch (notificationError) {
-      // Log notification errors but don't fail the request
+      // Notification failures must not fail ticket creation
       console.error('Failed to send ticket creation notification:', notificationError);
     }
   }
@@ -611,6 +524,90 @@ export async function createTicketFromTemplate(formData: FormData) {
   revalidatePath('/dashboard/tickets');
   revalidatePath(`/dashboard/tickets/${ticket.id}`);
   return ticket;
+}
+
+// ---------------------------------------------------------------------------
+// Private helpers for createTicketFromTemplate
+// ---------------------------------------------------------------------------
+
+type TemplateWithParts = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getTenantPrisma>['serviceTemplate']['findUnique']>>
+> & {
+  defaultParts: Array<{
+    partId: string;
+    quantity: number;
+    required: boolean;
+    part: { name: string };
+  }>;
+};
+
+/** Fetches a service template and asserts it is active and belongs to the tenant. */
+async function fetchValidatedTemplate(
+  db: ReturnType<typeof getTenantPrisma>,
+  templateId: string,
+  tenantId: string,
+): Promise<TemplateWithParts> {
+  const template = await db.serviceTemplate.findUnique({
+    where: { id: templateId },
+    include: { defaultParts: { include: { part: true } } },
+  });
+
+  if (!template || template.tenantId !== tenantId) {
+    throw new Error('Plantilla no encontrada');
+  }
+  if (!template.isActive) {
+    throw new Error('Esta plantilla está inactiva');
+  }
+
+  return template as TemplateWithParts;
+}
+
+/** Asserts that a customer record exists and belongs to the current tenant. */
+async function assertCustomerBelongsToTenant(
+  db: ReturnType<typeof getTenantPrisma>,
+  customerId: string,
+  tenantId: string,
+): Promise<void> {
+  const customer = await db.customer.findUnique({ where: { id: customerId } });
+  if (!customer || customer.tenantId !== tenantId) {
+    throw new Error('Cliente no encontrado o no pertenece a tu organización');
+  }
+}
+
+/**
+ * Atomically validates and registers part usage for a list of template parts.
+ * The DB trigger `trg_update_stock_on_usage` handles the actual stock decrement,
+ * but we pre-validate here to surface clear, user-friendly stock errors before
+ * the trigger fires.
+ */
+async function consumePartsAtomically(
+  tx: Prisma.TransactionClient,
+  ticketId: string,
+  parts: Array<{ partId: string; quantity: number; part: { name: string } }>,
+): Promise<void> {
+  for (const templatePart of parts) {
+    const stock = await tx.part.findUnique({ where: { id: templatePart.partId } });
+
+    if (!stock || stock.quantity < templatePart.quantity) {
+      throw new Error(
+        `Stock insuficiente para ${templatePart.part.name}. ` +
+          `Disponible: ${stock?.quantity ?? 0}, Requerido: ${templatePart.quantity}`,
+      );
+    }
+
+    await tx.partUsage.create({
+      data: { ticketId, partId: templatePart.partId, quantity: templatePart.quantity },
+    });
+
+    const updatedStock = await tx.part.findUnique({
+      where: { id: templatePart.partId },
+      select: { name: true, quantity: true, minStock: true, tenantId: true },
+    });
+
+    if (updatedStock && updatedStock.quantity <= updatedStock.minStock) {
+      await notifyLowStock(updatedStock.name, updatedStock.quantity, updatedStock.tenantId);
+    }
+  }
 }
 
 // ============================================================================

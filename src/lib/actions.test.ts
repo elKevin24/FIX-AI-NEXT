@@ -220,7 +220,7 @@ describe('Core Actions CRUD', () => {
             const result = await createTicket(null, formData);
 
             expect(result).toEqual(expect.objectContaining({ success: false }));
-            expect(result.message).toMatch(/Stock insuficiente/);
+            expect(result!.message).toMatch(/Stock insuficiente/);
         });
 
         it('updateTicketStatus should update status', async () => {
@@ -316,8 +316,8 @@ describe('Core Actions CRUD', () => {
             formData.append('role', 'TECHNICIAN');
 
             const result = await createUser(null, formData);
-            expect(result.success).toBe(false);
-            expect(result.message).toBe('Solo los administradores pueden crear usuarios');
+            expect(result!.success).toBe(false);
+            expect(result!.message).toBe('Solo los administradores pueden crear usuarios');
         });
     });
 });
