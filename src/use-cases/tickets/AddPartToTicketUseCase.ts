@@ -48,7 +48,17 @@ export class AddPartToTicketUseCase {
                 }
             });
 
-
+            await tx.auditLog.create({
+                data: {
+                    action: 'TICKET_UPDATED',
+                    module: 'TICKETS',
+                    details: JSON.stringify({ ticketId, partId, quantity, type: 'PART_ADDED', newQuantity: part.quantity - quantity }),
+                    user: { connect: { id: userId } },
+                    tenant: { connect: { id: ticket.tenantId } },
+                    entityType: 'Ticket',
+                    entityId: ticketId,
+                }
+            });
 
             const updatedPart = await tx.part.findUnique({
                 where: { id: partId },

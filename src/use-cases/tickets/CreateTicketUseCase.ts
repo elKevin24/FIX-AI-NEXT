@@ -94,10 +94,13 @@ export class CreateTicketUseCase {
 
             await tx.auditLog.create({
                 data: {
-                    action: 'CREATE_TICKET',
+                    action: 'TICKET_CREATED',
+                    module: 'TICKETS',
                     details: JSON.stringify({ id: newTicket.id, title: newTicket.title }),
                     user: { connect: { id: userId } },
-                    tenant: { connect: { id: tenantId } }
+                    tenant: { connect: { id: tenantId } },
+                    entityType: 'Ticket',
+                    entityId: newTicket.id,
                 }
             });
 
