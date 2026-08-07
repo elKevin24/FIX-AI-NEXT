@@ -89,18 +89,18 @@ export default function SimpleTicketForm() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles['container']}>
             {/* --- White Cloudy Background Effects --- */}
-            <div className={styles.backgroundEffects}>
-                <div className={`${styles.blob} ${styles.blobBlue}`} />
-                <div className={`${styles.blob} ${styles.blobPurple}`} />
-                <div className={`${styles.blob} ${styles.blobEmerald}`} />
+            <div className={styles['backgroundEffects']}>
+                <div className={`${styles['blob']} ${styles['blobBlue']}`} />
+                <div className={`${styles['blob']} ${styles['blobPurple']}`} />
+                <div className={`${styles['blob']} ${styles['blobEmerald']}`} />
             </div>
 
-            <div className={styles.content}>
+            <div className={styles['content']}>
                 {/* Header Section */}
-                <div className={styles.header}>
-                    <h1 className={styles.title}>
+                <div className={styles['header']}>
+                    <h1 className={styles['title']}>
                         Nuevo Ticket
                     </h1>
                 </div>
@@ -113,18 +113,18 @@ export default function SimpleTicketForm() {
                     </div>
                 )}
 
-                <form action={handleSubmit} className={styles.form}>
+                <form action={handleSubmit} className={styles['form']}>
 
                     {/* --- Customer Glass Card --- */}
-                    <div className={styles.glassCard}>
-                        <div className={styles.cardHeader}>
-                            <div className={styles.iconCircle}>
+                    <div className={styles['glassCard']}>
+                        <div className={styles['cardHeader']}>
+                            <div className={styles['iconCircle']}>
                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                             </div>
-                            <h2 className={styles.cardTitle}>Información del Cliente</h2>
+                            <h2 className={styles['cardTitle']}>Información del Cliente</h2>
                         </div>
 
-                        <div className={styles.customerGrid}>
+                        <div className={styles['customerGrid']}>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <CustomerSearch
                                     onSelect={(c) => setCustomer({
@@ -173,14 +173,14 @@ export default function SimpleTicketForm() {
                             )}
 
                             {customer?.id && (
-                                <div className={styles.customerSelected}>
-                                    <div className={styles.checkIcon}>
+                                <div className={styles['customerSelected']}>
+                                    <div className={styles['checkIcon']}>
                                         <span>✓</span>
                                     </div>
                                     <div>
-                                        <p className={styles.customerName}>{customer.name}</p>
+                                        <p className={styles['customerName']}>{customer.name}</p>
                                         {(customer.email || customer.phone || customer.nit) && (
-                                            <div className={styles.customerDetail}>
+                                            <div className={styles['customerDetail']}>
                                                 {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
                                                 {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
                                                 {customer.dpi && <span style={{ display: 'block' }}>DPI: {customer.dpi}</span>}
@@ -194,10 +194,10 @@ export default function SimpleTicketForm() {
                     </div>
 
                     {/* --- Devices Section Header --- */}
-                    <div className={styles.devicesHeader}>
+                    <div className={styles['devicesHeader']}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                            <h2 className={styles.cardTitle}>Dispositivos</h2>
-                            <span className={styles.deviceCount}>
+                            <h2 className={styles['cardTitle']}>Dispositivos</h2>
+                            <span className={styles['deviceCount']}>
                                 {devices.length}
                             </span>
                         </div>
@@ -214,16 +214,16 @@ export default function SimpleTicketForm() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {devices.map((device, index) => (
-                            <div key={index} className={`${styles.glassCard} ${styles.deviceCard}`} style={{ animationDelay: `${index * 100}ms`, marginBottom: 0 }}>
-                                <div className={styles.deviceHeader}>
-                                    <div className={styles.deviceNumber}>
+                            <div key={index} className={`${styles['glassCard']} ${styles['deviceCard']}`} style={{ animationDelay: `${index * 100}ms`, marginBottom: 0 }}>
+                                <div className={styles['deviceHeader']}>
+                                    <div className={styles['deviceNumber']}>
                                         #{index + 1}
                                     </div>
                                     {devices.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => removeDevice(index)}
-                                            className={styles.removeBtn}
+                                            className={styles['removeBtn']}
                                             title="Eliminar dispositivo"
                                         >
                                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -232,7 +232,7 @@ export default function SimpleTicketForm() {
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    <div className={styles.gridRow}>
+                                    <div className={styles['gridRow']}>
                                         <Input
                                             label="Problema Principal *"
                                             value={device.title}
@@ -265,7 +265,7 @@ export default function SimpleTicketForm() {
                                         />
                                     </div>
 
-                                    <div className={styles.extrasGrid}>
+                                    <div className={styles['extrasGrid']}>
                                         <Input
                                             label="🏷️ N° Serie / IMEI"
                                             value={device.serialNumber || ''}
@@ -294,11 +294,11 @@ export default function SimpleTicketForm() {
                     </div>
 
                     {/* Footer / Submit */}
-                    <div className={styles.footer}>
+                    <div className={styles['footer']}>
                         <Button
                             type="submit"
                             disabled={isPending || !customer || devices.some(d => !d.title || !d.description)}
-                            className={styles.submitBtn}
+                            className={styles['submitBtn']}
                             isLoading={isPending}
                             variant="primary"
                         >

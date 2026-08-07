@@ -104,13 +104,13 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
+                <div className={styles['headerContent']}>
                     <h1>Inventario</h1>
                     <p>Gestiona repuestos y control de stock</p>
                     {lowStockCount > 0 && (
-                        <p className={styles.lowStockWarning}>
+                        <p className={styles['lowStockWarning']}>
                             ⚠️ Hay {lowStockCount} producto(s) con stock bajo
                         </p>
                     )}
@@ -123,18 +123,18 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 </div>
             </div>
 
-            <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Total Items</span>
-                    <p className={styles.statValue}>{allPartsCount}</p>
+            <div className={styles['statsGrid']}>
+                <div className={styles['statCard']}>
+                    <span className={styles['statLabel']}>Total Items</span>
+                    <p className={styles['statValue']}>{allPartsCount}</p>
                 </div>
-                <div className={`${styles.statCard} ${lowStockCount > 0 ? styles.lowStock : ''}`}>
-                    <span className={styles.statLabel}>Stock Bajo</span>
-                    <p className={styles.statValue}>{lowStockCount}</p>
+                <div className={`${styles['statCard']} ${lowStockCount > 0 ? styles['lowStock'] : ''}`}>
+                    <span className={styles['statLabel']}>Stock Bajo</span>
+                    <p className={styles['statValue']}>{lowStockCount}</p>
                 </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Valor Inventario (Costo)</span>
-                    <p className={styles.statValue}>Q{totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}</p>
+                <div className={styles['statCard']}>
+                    <span className={styles['statLabel']}>Valor Inventario (Costo)</span>
+                    <p className={styles['statValue']}>Q{totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}</p>
                 </div>
             </div>
 

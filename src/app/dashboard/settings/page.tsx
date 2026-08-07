@@ -11,13 +11,13 @@ export default async function SettingsPage() {
     }
 
     return (
-        <div className={styles.dashboard}>
-            <header className={styles.header}>
+        <div className={styles['dashboard']}>
+            <header className={styles['header']}>
                 <h1>Configuración</h1>
             </header>
 
-            <div className={styles.statsGrid}>
-                <div className={styles.card}>
+            <div className={styles['statsGrid']}>
+                <div className={styles['card']}>
                     <h3>Información del Usuario</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p><strong>Nombre:</strong> {session.user.name || 'N/A'}</p>
@@ -26,14 +26,14 @@ export default async function SettingsPage() {
                     </div>
                 </div>
 
-                <div className={styles.card}>
+                <div className={styles['card']}>
                     <h3>Información del Tenant</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p><strong>Tenant ID:</strong> {session.user.tenantId}</p>
                     </div>
                 </div>
 
-                <Link href="/dashboard/settings/business" className={styles.card} style={{ textDecoration: 'none' }}>
+                <Link href="/dashboard/settings/business" className={styles['card']} style={{ textDecoration: 'none' }}>
                     <h3>Datos del Negocio</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p style={{ color: 'var(--text-secondary)' }}>
@@ -46,7 +46,7 @@ export default async function SettingsPage() {
                 </Link>
 
                 {session.user.role === 'ADMIN' && (
-                    <Link href="/dashboard/settings/service-templates" className={styles.card} style={{ textDecoration: 'none' }}>
+                    <Link href="/dashboard/settings/service-templates" className={styles['card']} style={{ textDecoration: 'none' }}>
                         <h3>Plantillas de Servicio</h3>
                         <div style={{ marginTop: '1rem' }}>
                             <p style={{ color: 'var(--text-secondary)' }}>

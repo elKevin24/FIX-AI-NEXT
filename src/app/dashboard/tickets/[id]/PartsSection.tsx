@@ -90,12 +90,12 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                     : null;
 
     return (
-        <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Repuestos Utilizados ({partsUsed.length})</h3>
+        <div className={styles['section']}>
+            <div className={styles['sectionHeader']}>
+                <h3 className={styles['sectionTitle']}>Repuestos Utilizados ({partsUsed.length})</h3>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? styles.cancelBtn : styles.createBtn}
+                    className={showAddForm ? styles['cancelBtn'] : styles['createBtn']}
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Repuesto'}
                 </button>
@@ -119,13 +119,13 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
 
                     {canApprove ? (
                         <>
-                            <div className={styles.actions} style={{ marginTop: '0.5rem' }}>
+                            <div className={styles['actions']} style={{ marginTop: '0.5rem' }}>
                                 <form action={approveAction}>
                                     <input type="hidden" name="ticketId" value={ticketId} />
                                     <button
                                         type="submit"
                                         disabled={isApproving}
-                                        className={styles.createBtn}
+                                        className={styles['createBtn']}
                                     >
                                         {isApproving ? 'Aprobando...' : 'Aprobar repuestos'}
                                     </button>
@@ -133,7 +133,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                 <button
                                     type="button"
                                     onClick={() => setShowRejectForm(!showRejectForm)}
-                                    className={showRejectForm ? styles.cancelBtn : styles.dangerBtn}
+                                    className={showRejectForm ? styles['cancelBtn'] : styles['dangerBtn']}
                                 >
                                     {showRejectForm ? 'Cancelar' : 'Rechazar'}
                                 </button>
@@ -142,8 +142,8 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                             {showRejectForm && (
                                 <form action={rejectAction} style={{ marginTop: '0.75rem' }}>
                                     <input type="hidden" name="ticketId" value={ticketId} />
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Motivo del rechazo</label>
+                                    <div className={styles['formGroup']}>
+                                        <label className={styles['label']}>Motivo del rechazo</label>
                                         <textarea
                                             name="reason"
                                             value={rejectReason}
@@ -152,13 +152,13 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                             placeholder="Ej: el cliente no autoriza el costo, prefiere otra opción..."
                                             required
                                             minLength={10}
-                                            className={styles.textarea}
+                                            className={styles['textarea']}
                                         />
                                     </div>
                                     <button
                                         type="submit"
                                         disabled={isRejecting || !isRejectReasonValid}
-                                        className={styles.dangerBtn}
+                                        className={styles['dangerBtn']}
                                     >
                                         {isRejecting ? 'Rechazando...' : 'Confirmar rechazo'}
                                     </button>
@@ -175,12 +175,12 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
 
             {/* Add Part Form */}
             {showAddForm && (
-                <form action={addAction} className={styles.inlineForm}>
+                <form action={addAction} className={styles['inlineForm']}>
                     <input type="hidden" name="ticketId" value={ticketId} />
 
-                    <div className={styles.gridForm}>
-                        <div className={styles.formGroup}>
-                            <label className={styles.label}>Repuesto</label>
+                    <div className={styles['gridForm']}>
+                        <div className={styles['formGroup']}>
+                            <label className={styles['label']}>Repuesto</label>
                             <select
                                 name="partId"
                                 value={selectedPartId}
@@ -189,7 +189,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                     setQuantity(1);
                                 }}
                                 required
-                                className={styles.select}
+                                className={styles['select']}
                             >
                                 <option value="">Seleccionar repuesto...</option>
                                 {availableParts.map(part => (
@@ -200,8 +200,8 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                             </select>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <label className={styles.label}>Cantidad</label>
+                        <div className={styles['formGroup']}>
+                            <label className={styles['label']}>Cantidad</label>
                             <input
                                 type="number"
                                 name="quantity"
@@ -211,10 +211,10 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                 max={maxQuantity}
                                 required
                                 disabled={!selectedPartId}
-                                className={styles.input}
+                                className={styles['input']}
                             />
                             {selectedPartId && (
-                                <p className={styles.textMuted} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                                <p className={styles['textMuted']} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
                                     Disponible: {maxQuantity}
                                 </p>
                             )}
@@ -223,18 +223,18 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                         <button
                             type="submit"
                             disabled={isAdding || !selectedPartId}
-                            className={styles.createBtn}
+                            className={styles['createBtn']}
                         >
                             {isAdding ? 'Agregando...' : 'Agregar'}
                         </button>
                     </div>
 
-                    <p className={styles.textMuted} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                    <p className={styles['textMuted']} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
                         El repuesto se agregará pendiente de aprobación del cliente y no descontará inventario hasta que sea aprobado.
                     </p>
 
                     {addState?.message && !addState.success && (
-                        <p className={styles.errorMessage}>
+                        <p className={styles['errorMessage']}>
                             {addState.message}
                         </p>
                     )}
@@ -243,15 +243,15 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
 
             {/* Parts List */}
             {partsUsed.length === 0 ? (
-                <div className={styles.emptyState}>
+                <div className={styles['emptyState']}>
                     No se han agregado repuestos a esta reparación.
                 </div>
             ) : (
                 <>
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
+                    <div className={styles['tableWrapper']}>
+                        <table className={styles['table']}>
                             <thead>
-                                <tr className={styles.tableHeaderRow}>
+                                <tr className={styles['tableHeaderRow']}>
                                     <th>Repuesto</th>
                                     <th>SKU</th>
                                     <th style={{ textAlign: 'center' }}>Cant.</th>
@@ -267,16 +267,16 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                     const unitPrice = priceOf(usage);
                                     const subtotal = unitPrice * usage.quantity;
                                     return (
-                                        <tr key={usage.id} className={styles.tableRow}>
+                                        <tr key={usage.id} className={styles['tableRow']}>
                                             <td><strong>{usage.part.name}</strong></td>
-                                            <td className={styles.textMuted}>{usage.part.sku || '-'}</td>
+                                            <td className={styles['textMuted']}>{usage.part.sku || '-'}</td>
                                             <td style={{ textAlign: 'center' }}><strong>{usage.quantity}</strong></td>
                                             <td style={{ textAlign: 'right' }}>Q{Number(usage.part.cost).toFixed(2)}</td>
                                             <td style={{ textAlign: 'right' }}>Q{unitPrice.toFixed(2)}</td>
                                             <td style={{ textAlign: 'right' }}><strong>Q{subtotal.toFixed(2)}</strong></td>
                                             <td style={{ textAlign: 'center' }}>
                                                 {usage.approved ? (
-                                                    <span className={styles.textSuccess} style={{ fontSize: '0.75rem', fontWeight: 600 }}>✓ Aprobado</span>
+                                                    <span className={styles['textSuccess']} style={{ fontSize: '0.75rem', fontWeight: 600 }}>✓ Aprobado</span>
                                                 ) : (
                                                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-warning-600, #b45309)' }}>⏳ Pendiente</span>
                                                 )}
@@ -287,7 +287,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                                     <button
                                                         type="submit"
                                                         disabled={isRemoving}
-                                                        className={styles.textDanger}
+                                                        className={styles['textDanger']}
                                                         style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
                                                     >
                                                         Eliminar
@@ -302,18 +302,18 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                     </div>
 
                     {/* Totals Summary */}
-                    <div className={styles.summaryCard}>
-                        <div className={styles.summaryItem}>
-                            <span className={styles.summaryLabel}>Costo Total</span>
-                            <span className={styles.summaryValue}>Q{totalCost.toFixed(2)}</span>
+                    <div className={styles['summaryCard']}>
+                        <div className={styles['summaryItem']}>
+                            <span className={styles['summaryLabel']}>Costo Total</span>
+                            <span className={styles['summaryValue']}>Q{totalCost.toFixed(2)}</span>
                         </div>
-                        <div className={styles.summaryItem}>
-                            <span className={styles.summaryLabel}>Precio Venta</span>
-                            <span className={`${styles.summaryValue} ${styles.textSuccess}`}>Q{totalPrice.toFixed(2)}</span>
+                        <div className={styles['summaryItem']}>
+                            <span className={styles['summaryLabel']}>Precio Venta</span>
+                            <span className={`${styles['summaryValue']} ${styles['textSuccess']}`}>Q{totalPrice.toFixed(2)}</span>
                         </div>
-                        <div className={styles.summaryItem} style={{ gridColumn: 'span 2', borderTop: '1px solid var(--color-border-light)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
-                            <span className={styles.summaryLabel}>Utilidad Estimada</span>
-                            <span className={`${styles.summaryValue} ${totalPrice > totalCost ? styles.textSuccess : styles.textDanger}`}>
+                        <div className={styles['summaryItem']} style={{ gridColumn: 'span 2', borderTop: '1px solid var(--color-border-light)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
+                            <span className={styles['summaryLabel']}>Utilidad Estimada</span>
+                            <span className={`${styles['summaryValue']} ${totalPrice > totalCost ? styles['textSuccess'] : styles['textDanger']}`}>
                                 Q{(totalPrice - totalCost).toFixed(2)} ({totalCost > 0 ? ((totalPrice - totalCost) / totalCost * 100).toFixed(1) : '0'}%)
                             </span>
                         </div>
@@ -322,7 +322,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
             )}
 
             {actionMessage && (
-                <p className={styles.errorMessage}>
+                <p className={styles['errorMessage']}>
                     {actionMessage}
                 </p>
             )}

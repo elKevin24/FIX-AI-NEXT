@@ -30,17 +30,17 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
                 <h1>Editar Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles.viewLink}>
+                <Link href="/dashboard/parts" className={styles['viewLink']}>
                     ← Volver
                 </Link>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                 {/* Main Form */}
-                <div className={styles.tableContainer} style={{ padding: '2rem' }}>
+                <div className={styles['tableContainer']} style={{ padding: '2rem' }}>
                     <form action={updateAction} className="flex flex-col gap-4">
                         <input type="hidden" name="partId" value={part.id} />
 
@@ -119,7 +119,7 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
                         <div className="flex gap-3 mt-4">
                             <button
                                 type="submit"
-                                className={styles.createBtn}
+                                className={styles['createBtn']}
                                 disabled={isUpdating}
                             >
                                 {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
@@ -137,7 +137,7 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
                 {/* Sidebar */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {/* Info Card */}
-                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
+                    <div className={styles['tableContainer']} style={{ padding: '1.5rem' }}>
                         <h3 style={{ marginBottom: '1rem' }}>Información</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
                             <div>
@@ -164,7 +164,7 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
 
                     {/* Delete Zone - Only for admins */}
                     {isAdmin && (
-                        <div className={styles.tableContainer} style={{ padding: '1.5rem', borderColor: '#fee2e2' }}>
+                        <div className={styles['tableContainer']} style={{ padding: '1.5rem', borderColor: '#fee2e2' }}>
                             <h3 style={{ color: '#dc2626', marginBottom: '1rem' }}>Zona de Peligro</h3>
 
                             {hasUsageRecords && (

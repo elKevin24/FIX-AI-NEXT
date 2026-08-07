@@ -46,29 +46,29 @@ export function ResolveTicketDialog({ ticketId, isOpen, onClose, onSuccess }: Re
         </>
       }
     >
-      <form id="resolve-ticket-form" action={action} className={styles.form}>
+      <form id="resolve-ticket-form" action={action} className={styles['form']}>
         <input type="hidden" name="ticketId" value={ticketId} />
         <input type="hidden" name="status" value="RESOLVED" />
         
-        <p className={styles.description}>
+        <p className={styles['description']}>
           Confirma que el trabajo ha sido completado exitosamente. Esto notificará al cliente para que pueda retirar su equipo.
         </p>
 
-        <div className={styles.fieldGroup}>
-          <label htmlFor="resolve-note" className={styles.label}>
+        <div className={styles['fieldGroup']}>
+          <label htmlFor="resolve-note" className={styles['label']}>
             Informe de Resolución *
           </label>
           <textarea
             id="resolve-note"
             name="note"
-            className={styles.textarea}
+            className={styles['textarea']}
             placeholder="Describe brevemente el trabajo realizado y el resultado final..."
             required
           />
         </div>
 
         {state?.message && !state.success && (
-          <div className={styles.errorBox}>
+          <div className={styles['errorBox']}>
             {state.message}
           </div>
         )}

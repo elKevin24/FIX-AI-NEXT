@@ -52,12 +52,12 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
     }, [removeState, router]);
 
     return (
-        <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
+        <div className={styles['section']}>
+            <div className={styles['sectionHeader']}>
+                <h3 className={styles['sectionTitle']}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? styles.cancelBtn : styles.createBtn}
+                    className={showAddForm ? styles['cancelBtn'] : styles['createBtn']}
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Servicio'}
                 </button>
@@ -65,18 +65,18 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
 
             {/* Add Service Form */}
             {showAddForm && (
-                <form action={addAction} className={styles.inlineForm}>
+                <form action={addAction} className={styles['inlineForm']}>
                     <input type="hidden" name="ticketId" value={ticketId} />
 
-                    <div className={styles.gridForm} style={{ gridTemplateColumns: '1fr auto' }}>
-                        <div className={styles.formGroup}>
-                            <label className={styles.label}>Servicio / Labor</label>
+                    <div className={styles['gridForm']} style={{ gridTemplateColumns: '1fr auto' }}>
+                        <div className={styles['formGroup']}>
+                            <label className={styles['label']}>Servicio / Labor</label>
                             <select
                                 name="serviceId"
                                 value={selectedServiceId}
                                 onChange={(e) => setSelectedServiceId(e.target.value)}
                                 required
-                                className={styles.select}
+                                className={styles['select']}
                             >
                                 <option value="">Seleccionar servicio...</option>
                                 {availableServices.map(service => (
@@ -90,14 +90,14 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                         <button
                             type="submit"
                             disabled={isAdding || !selectedServiceId}
-                            className={styles.createBtn}
+                            className={styles['createBtn']}
                         >
                             {isAdding ? 'Agregando...' : 'Agregar'}
                         </button>
                     </div>
 
                     {addState?.message && !addState.success && (
-                        <p className={styles.errorMessage}>
+                        <p className={styles['errorMessage']}>
                             {addState.message}
                         </p>
                     )}
@@ -106,15 +106,15 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
 
             {/* Services List */}
             {servicesUsed.length === 0 ? (
-                <div className={styles.emptyState}>
+                <div className={styles['emptyState']}>
                     No hay cargos de mano de obra registrados.
                 </div>
             ) : (
                 <>
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
+                    <div className={styles['tableWrapper']}>
+                        <table className={styles['table']}>
                             <thead>
-                                <tr className={styles.tableHeaderRow}>
+                                <tr className={styles['tableHeaderRow']}>
                                     <th>Descripción del Servicio</th>
                                     <th>Fecha Registro</th>
                                     <th style={{ textAlign: 'right' }}>Costo Labor</th>
@@ -123,9 +123,9 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                             </thead>
                             <tbody>
                                 {servicesUsed.map((usage) => (
-                                    <tr key={usage.id} className={styles.tableRow}>
+                                    <tr key={usage.id} className={styles['tableRow']}>
                                         <td><strong>{usage.name}</strong></td>
-                                        <td className={styles.textMuted}>{new Date(usage.createdAt).toLocaleDateString()}</td>
+                                        <td className={styles['textMuted']}>{new Date(usage.createdAt).toLocaleDateString()}</td>
                                         <td style={{ textAlign: 'right' }}><strong>Q{Number(usage.laborCost).toFixed(2)}</strong></td>
                                         <td style={{ textAlign: 'center' }}>
                                             <form action={removeAction}>
@@ -133,7 +133,7 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                                                 <button
                                                     type="submit"
                                                     disabled={isRemoving}
-                                                    className={styles.textDanger}
+                                                    className={styles['textDanger']}
                                                     style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
                                                 >
                                                     Eliminar
@@ -147,17 +147,17 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                     </div>
 
                     {/* Total Labor */}
-                    <div className={styles.summaryCard}>
-                        <div className={styles.summaryItem} style={{ gridColumn: 'span 2' }}>
-                            <span className={styles.summaryLabel}>Total Mano de Obra</span>
-                            <span className={`${styles.summaryValue} ${styles.textInfo}`}>Q{totalLaborCost.toFixed(2)}</span>
+                    <div className={styles['summaryCard']}>
+                        <div className={styles['summaryItem']} style={{ gridColumn: 'span 2' }}>
+                            <span className={styles['summaryLabel']}>Total Mano de Obra</span>
+                            <span className={`${styles['summaryValue']} ${styles['textInfo']}`}>Q{totalLaborCost.toFixed(2)}</span>
                         </div>
                     </div>
                 </>
             )}
 
             {removeState?.message && !removeState.success && (
-                <p className={styles.errorMessage}>
+                <p className={styles['errorMessage']}>
                     {removeState.message}
                 </p>
             )}

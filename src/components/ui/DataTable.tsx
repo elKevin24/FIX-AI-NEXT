@@ -38,22 +38,22 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className={styles.wrapper}>
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
+        <div className={styles['wrapper']}>
+            <div className={styles['tableContainer']}>
+                <table className={styles['table']}>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className={styles.headerRow}>
+                            <tr key={headerGroup.id} className={styles['headerRow']}>
                                 {headerGroup.headers.map((header) => {
                                     const meta = header.column.columnDef.meta as any;
                                     return (
                                         <th 
                                             key={header.id} 
-                                            className={`${styles.headerCell} ${meta?.className || ''}`}
+                                            className={`${styles['headerCell']} ${meta?.className || ''}`}
                                             onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                                             style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                                         >
-                                            <div className={styles.headerContent}>
+                                            <div className={styles['headerContent']}>
                                                 {flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
@@ -69,8 +69,8 @@ export function DataTable<TData, TValue>({
                     </thead>
                     <tbody>
                         {isLoading ? (
-                            <tr className={styles.loadingRow}>
-                                <td colSpan={columns.length} className={styles.emptyCell}>
+                            <tr className={styles['loadingRow']}>
+                                <td colSpan={columns.length} className={styles['emptyCell']}>
                                     Cargando datos...
                                 </td>
                             </tr>
@@ -78,13 +78,13 @@ export function DataTable<TData, TValue>({
                             table.getRowModel().rows.map((row) => (
                                 <tr 
                                     key={row.id} 
-                                    className={`${styles.row} ${onRowClick ? styles.clickableRow : ''}`}
+                                    className={`${styles['row']} ${onRowClick ? styles['clickableRow'] : ''}`}
                                     onClick={() => onRowClick?.(row.original)}
                                 >
                                     {row.getVisibleCells().map((cell) => {
                                         const meta = cell.column.columnDef.meta as any;
                                         return (
-                                            <td key={cell.id} className={`${styles.cell} ${meta?.className || ''}`}>
+                                            <td key={cell.id} className={`${styles['cell']} ${meta?.className || ''}`}>
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
                                         );
@@ -93,7 +93,7 @@ export function DataTable<TData, TValue>({
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className={styles.emptyCell}>
+                                <td colSpan={columns.length} className={styles['emptyCell']}>
                                     No hay resultados disponibles.
                                 </td>
                             </tr>

@@ -40,16 +40,16 @@ export default function SuggestedPartsList({
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h4 className={styles.title}>💡 Repuestos Sugeridos</h4>
-        <p className={styles.subtitle}>
+    <div className={styles['container']}>
+      <div className={styles['header']}>
+        <h4 className={styles['title']}>💡 Repuestos Sugeridos</h4>
+        <p className={styles['subtitle']}>
           Estos repuestos son opcionales y no se consumirán automáticamente.
           Puedes agregarlos manualmente si son necesarios.
         </p>
       </div>
 
-      <div className={styles.partsList}>
+      <div className={styles['partsList']}>
         {parts.map((part) => {
           const stockStatus = getPartStockStatus(
             part.stockAvailable,
@@ -63,36 +63,36 @@ export default function SuggestedPartsList({
           return (
             <div
               key={part.partId}
-              className={`${styles.partCard} ${
-                isAdded ? styles.partCardAdded : ''
+              className={`${styles['partCard']} ${
+                isAdded ? styles['partCardAdded'] : ''
               }`}
             >
-              <div className={styles.partInfo}>
-                <div className={styles.partName}>
+              <div className={styles['partInfo']}>
+                <div className={styles['partName']}>
                   {part.name}
                   {part.sku && (
-                    <span className={styles.partSku}>SKU: {part.sku}</span>
+                    <span className={styles['partSku']}>SKU: {part.sku}</span>
                   )}
                 </div>
-                <div className={styles.partDetails}>
-                  <span className={styles.quantity}>
+                <div className={styles['partDetails']}>
+                  <span className={styles['quantity']}>
                     Cantidad sugerida: {part.quantity}
                   </span>
-                  <span className={styles.price}>
+                  <span className={styles['price']}>
                     {formatCurrency(part.price * part.quantity)}
                   </span>
                 </div>
               </div>
 
-              <div className={styles.partActions}>
-                <div className={styles.badges}>
+              <div className={styles['partActions']}>
+                <div className={styles['badges']}>
                   <span
-                    className={`${styles.stockBadge} ${
+                    className={`${styles['stockBadge']} ${
                       stockStatus === 'insufficient'
-                        ? styles.stockInsufficient
+                        ? styles['stockInsufficient']
                         : stockStatus === 'low'
-                        ? styles.stockLow
-                        : styles.stockSufficient
+                        ? styles['stockLow']
+                        : styles['stockSufficient']
                     }`}
                   >
                     {stockStatus === 'insufficient' && '❌'}
@@ -106,11 +106,11 @@ export default function SuggestedPartsList({
                   type="button"
                   onClick={() => handleAddPart(part.partId, part.quantity)}
                   disabled={isDisabled}
-                  className={styles.addButton}
+                  className={styles['addButton']}
                 >
                   {isLoading ? (
                     <>
-                      <span className={styles.spinner} />
+                      <span className={styles['spinner']} />
                       Agregando...
                     </>
                   ) : isAdded ? (

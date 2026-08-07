@@ -110,9 +110,9 @@ export default function ThemeSwitcher() {
 
     return (
         <>
-            <div className={styles.themeSwitcher} ref={dropdownRef}>
+            <div className={styles['themeSwitcher']} ref={dropdownRef}>
                 <button
-                    className={styles.themeButton}
+                    className={styles['themeButton']}
                     onClick={() => {
                         if (!isOpen) {
                              const currentIndex = themes.findIndex(t => t.value === theme);
@@ -126,14 +126,14 @@ export default function ThemeSwitcher() {
                     aria-expanded={isOpen}
                     suppressHydrationWarning
                 >
-                    <span className={styles.icon} suppressHydrationWarning>
+                    <span className={styles['icon']} suppressHydrationWarning>
                         {currentTheme.icon}
                     </span>
-                    <span className={styles.label} suppressHydrationWarning>
+                    <span className={styles['label']} suppressHydrationWarning>
                         {currentTheme.label}
                     </span>
                     <svg
-                        className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
+                        className={`${styles['chevron']} ${isOpen ? styles['chevronOpen'] : ''}`}
                         width="16"
                         height="16"
                         viewBox="0 0 16 16"
@@ -156,7 +156,7 @@ export default function ThemeSwitcher() {
                         role="menu"
                         aria-orientation="vertical"
                         aria-label="Selección de tema"
-                        className={styles.dropdown}
+                        className={styles['dropdown']}
                         onKeyDown={handleKeyDown}
                     >
                         {themes.map((t, index) => (
@@ -167,16 +167,16 @@ export default function ThemeSwitcher() {
                                 }}
                                 role="menuitem"
                                 tabIndex={focusedIndex === index ? 0 : -1}
-                                className={`${styles.themeOption} ${t.value === theme ? styles.themeOptionActive : ''
+                                className={`${styles['themeOption']} ${t.value === theme ? styles['themeOptionActive'] : ''
                                     }`}
                                 onClick={() => handleThemeChange(t.value)}
                                 aria-current={t.value === theme ? 'true' : undefined}
                             >
-                                <span className={styles.optionIcon}>{t.icon}</span>
-                                <span className={styles.optionLabel}>{t.label}</span>
+                                <span className={styles['optionIcon']}>{t.icon}</span>
+                                <span className={styles['optionLabel']}>{t.label}</span>
                                 {t.value === theme && (
                                     <svg
-                                        className={styles.checkIcon}
+                                        className={styles['checkIcon']}
                                         width="16"
                                         height="16"
                                         viewBox="0 0 16 16"

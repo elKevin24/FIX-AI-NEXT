@@ -134,14 +134,14 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
+                <div className={styles['headerContent']}>
                     <h1>Tickets</h1>
                     <p>Gestiona las órdenes de servicio y su estado</p>
                 </div>
                 {isSuperAdmin && (
-                    <span className={styles.superAdminBadge}>
+                    <span className={styles['superAdminBadge']}>
                         👑 Super Admin
                     </span>
                 )}

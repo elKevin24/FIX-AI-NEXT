@@ -139,7 +139,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         </ul>
       </div>
 
-      <div className={styles.actions}>
+      <div className={styles['actions']}>
         <Button
           type="button"
           variant="secondary"

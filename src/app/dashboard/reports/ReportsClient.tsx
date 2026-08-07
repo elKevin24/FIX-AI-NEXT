@@ -41,30 +41,30 @@ export default function ReportsClient({ initialData }: Props) {
   const formatCurrency = (val: number) => `Q${Number(val).toLocaleString('es-GT', { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className={styles.reportsPage}>
-      <header className={styles.header}>
+    <div className={styles['reportsPage']}>
+      <header className={styles['header']}>
         <h1>Reportes y Estadísticas</h1>
-        <div className={styles.filters}>
-          <div className={styles.filterGroup}>
+        <div className={styles['filters']}>
+          <div className={styles['filterGroup']}>
             <label>Desde</label>
             <input 
               type="date" 
-              className={styles.input} 
+              className={styles['input']} 
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
-          <div className={styles.filterGroup}>
+          <div className={styles['filterGroup']}>
             <label>Hasta</label>
             <input 
               type="date" 
-              className={styles.input}
+              className={styles['input']}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
           <button 
-            className={styles.input} 
+            className={styles['input']} 
             style={{ 
                 marginTop: 'auto', 
                 cursor: 'pointer', 
@@ -82,26 +82,26 @@ export default function ReportsClient({ initialData }: Props) {
         </div>
       </header>
 
-      <div className={styles.grid}>
+      <div className={styles['grid']}>
         {/* Financial Overview */}
-        <div className={styles.card} style={{ gridColumn: 'span 2' }}>
-          <h2 className={styles.cardTitle}>Ingresos Totales</h2>
-          <div className={styles.statGrid} style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '2rem' }}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Facturación</span>
-              <span className={`${styles.statValue} ${styles.valueInvoice}`}>
+        <div className={styles['card']} style={{ gridColumn: 'span 2' }}>
+          <h2 className={styles['cardTitle']}>Ingresos Totales</h2>
+          <div className={styles['statGrid']} style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '2rem' }}>
+            <div className={styles['statItem']}>
+              <span className={styles['statLabel']}>Facturación</span>
+              <span className={`${styles['statValue']} ${styles['valueInvoice']}`}>
                 {formatCurrency(data.finances.invoiceRevenue)}
               </span>
             </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Ventas POS</span>
-              <span className={`${styles.statValue} ${styles.valuePos}`}>
+            <div className={styles['statItem']}>
+              <span className={styles['statLabel']}>Ventas POS</span>
+              <span className={`${styles['statValue']} ${styles['valuePos']}`}>
                 {formatCurrency(data.finances.posRevenue)}
               </span>
             </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total</span>
-              <span className={`${styles.statValue} ${styles.valueTotal}`}>
+            <div className={styles['statItem']}>
+              <span className={styles['statLabel']}>Total</span>
+              <span className={`${styles['statValue']} ${styles['valueTotal']}`}>
                 {formatCurrency(data.finances.totalRevenue)}
               </span>
             </div>
@@ -128,8 +128,8 @@ export default function ReportsClient({ initialData }: Props) {
         </div>
 
         {/* Ticket Volume by Status */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Estado de Tickets</h2>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Estado de Tickets</h2>
           <div style={{ height: 300 }}>
             <ResponsiveContainer width="99%" height="100%">
               <PieChart>
@@ -154,10 +154,10 @@ export default function ReportsClient({ initialData }: Props) {
         </div>
 
         {/* Top Selling Products */}
-        <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Top Ventas (POS)</h2>
-            <div className={styles.tableContainer} style={{ maxHeight: '300px' }}>
-                <table className={styles.table}>
+        <div className={styles['card']}>
+            <h2 className={styles['cardTitle']}>Top Ventas (POS)</h2>
+            <div className={styles['tableContainer']} style={{ maxHeight: '300px' }}>
+                <table className={styles['table']}>
                     <thead>
                         <tr>
                             <th>Producto</th>
@@ -183,16 +183,16 @@ export default function ReportsClient({ initialData }: Props) {
         </div>
 
         {/* Inventory Overview */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Inventario Global</h2>
-          <div className={styles.statGrid} style={{ height: '100%', alignContent: 'center' }}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Items Únicos</span>
-              <span className={styles.statValue}>{data.inventory.totalItems}</span>
+        <div className={styles['card']}>
+          <h2 className={styles['cardTitle']}>Inventario Global</h2>
+          <div className={styles['statGrid']} style={{ height: '100%', alignContent: 'center' }}>
+            <div className={styles['statItem']}>
+              <span className={styles['statLabel']}>Total Items Únicos</span>
+              <span className={styles['statValue']}>{data.inventory.totalItems}</span>
             </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Unidades en Stock</span>
-              <span className={styles.statValue}>{data.inventory.totalQuantity}</span>
+            <div className={styles['statItem']}>
+              <span className={styles['statLabel']}>Unidades en Stock</span>
+              <span className={styles['statValue']}>{data.inventory.totalQuantity}</span>
             </div>
           </div>
         </div>
@@ -200,10 +200,10 @@ export default function ReportsClient({ initialData }: Props) {
       </div>
 
       {/* Technician Productivity */}
-      <div className={styles.card} style={{ marginTop: '1.5rem' }}>
-        <h2 className={styles.cardTitle}>Productividad de Técnicos</h2>
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
+      <div className={styles['card']} style={{ marginTop: '1.5rem' }}>
+        <h2 className={styles['cardTitle']}>Productividad de Técnicos</h2>
+        <div className={styles['tableContainer']}>
+          <table className={styles['table']}>
             <thead>
               <tr>
                 <th>Técnico</th>
@@ -223,9 +223,9 @@ export default function ReportsClient({ initialData }: Props) {
                     <td style={{ textAlign: 'center' }}>{tech.active}</td>
                     <td style={{ textAlign: 'center' }}>{tech.total}</td>
                     <td style={{ width: '30%' }}>
-                        <div className={styles.progressContainer}>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ 
+                        <div className={styles['progressContainer']}>
+                            <div className={styles['progressBar']}>
+                                <div className={styles['progressFill']} style={{ 
                                     width: `${efficiency}%`, 
                                     backgroundColor: efficiency > 75 ? 'var(--color-success-500)' : efficiency > 40 ? 'var(--color-warning-500)' : 'var(--color-error-500)' 
                                 }} />

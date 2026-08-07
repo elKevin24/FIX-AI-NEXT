@@ -21,10 +21,10 @@ export default async function ServiceTemplatesPage() {
   // Solo ADMIN puede acceder a esta página
   if (session.user.role !== 'ADMIN') {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorCard}>
-          <h2 className={styles.errorTitle}>Acceso Denegado</h2>
-          <p className={styles.errorMessage}>
+      <div className={styles['container']}>
+        <div className={styles['errorCard']}>
+          <h2 className={styles['errorTitle']}>Acceso Denegado</h2>
+          <p className={styles['errorMessage']}>
             Solo los administradores pueden gestionar plantillas de servicio.
           </p>
           <Button as={Link} href="/dashboard" variant="primary">
@@ -38,15 +38,15 @@ export default async function ServiceTemplatesPage() {
   const templates = await getServiceTemplates();
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
+    <div className={styles['container']}>
+      <div className={styles['header']}>
+        <div className={styles['headerContent']}>
           <h1>Plantillas de Servicio</h1>
           <p>
             Gestiona plantillas para agilizar la creación de tickets
           </p>
         </div>
-        <div className={styles.headerActions}>
+        <div className={styles['headerActions']}>
           <Button as={Link} href="/dashboard/settings/service-templates/analytics" variant="secondary">
             📊 Analytics
           </Button>
