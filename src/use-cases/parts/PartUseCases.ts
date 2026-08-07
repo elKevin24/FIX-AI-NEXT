@@ -49,12 +49,7 @@ export class UpdatePartUseCase {
         });
 
         if (updatedPart.quantity <= updatedPart.minStock) {
-            const admins = await tenantDb.user.findMany({
-                where: { role: 'ADMIN' },
-                select: { id: true }
-            });
-            const adminIds = admins.map((a: { id: string }) => a.id);
-            await notifyLowStock(updatedPart.tenantId, updatedPart, adminIds);
+            await notifyLowStock(updatedPart.name, updatedPart.quantity, updatedPart.tenantId);
         }
 
         return updatedPart;
