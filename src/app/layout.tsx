@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app'),
+    metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'),
     title: "Multi-Tenant Workshop App",
     description: "Managed workshop system",
     icons: {
