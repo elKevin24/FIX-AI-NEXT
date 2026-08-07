@@ -34,10 +34,7 @@ export class RemovePartFromTicketUseCase {
                 where: { id: usageId }
             });
 
-            await tx.part.update({
-                where: { id: usage.partId },
-                data: { quantity: { increment: usage.quantity } }
-            });
+
         });
 
         return true;

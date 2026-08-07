@@ -38,12 +38,8 @@ export class UpdateTicketStatusUseCase {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
                          await tx.partUsage.delete({
-                             where: { id: usage.id, tenantId: existingTicket.tenantId }
+                             where: { id: usage.id }
                           });
-                        await tx.part.update({
-                            where: { id: usage.partId, tenantId: existingTicket.tenantId },
-                            data: { quantity: { increment: usage.quantity } }
-                        });
                      }
                  }
              }
