@@ -217,23 +217,23 @@ export default async function DashboardPage() {
     });
 
     return (
-        <div className={styles.dashboard}>
-            <header className={styles.header}>
+        <div className={styles['dashboard']}>
+            <header className={styles['header']}>
                 <div>
                     <h1>Dashboard</h1>
                     <p>Bienvenido de vuelta, {session?.user?.name || session?.user?.email}</p>
                 </div>
                 {isSuperAdmin && (
-                    <span className={styles.superAdminBadge}>👑 Super Admin</span>
+                    <span className={styles['superAdminBadge']}>👑 Super Admin</span>
                 )}
             </header>
 
-            <div className={styles.searchBar}>
+            <div className={styles['searchBar']}>
                 <GlobalSearch />
             </div>
 
             {/* Stats Grid */}
-            <div className={styles.statsGrid}>
+            <div className={styles['statsGrid']}>
                 <StatCard 
                     title="Tickets Activos"
                     value={activeTickets}
@@ -269,7 +269,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Financial Stats Grid */}
-            <div className={styles.statsGrid}>
+            <div className={styles['statsGrid']}>
                 <StatCard 
                     title="Ingresos Totales"
                     value={formatCurrency(totalIncome)}
@@ -305,19 +305,19 @@ export default async function DashboardPage() {
             </div>
 
             {/* Charts and Widgets Grid */}
-            <div className={styles.chartsGrid}>
+            <div className={styles['chartsGrid']}>
                 {/* Tickets by Status */}
-                <div className={styles.chartCard}>
-                    <h2 className={styles.chartTitle}>Tickets por Estado</h2>
+                <div className={styles['chartCard']}>
+                    <h2 className={styles['chartTitle']}>Tickets por Estado</h2>
                     <TicketsByStatusChart data={statusChartData} />
                 </div>
 
                 {/* Urgent Tickets */}
-                <div className={styles.chartCard}>
-                    <h2 className={styles.chartTitle}>
+                <div className={styles['chartCard']}>
+                    <h2 className={styles['chartTitle']}>
                         Tickets Urgentes
                         {urgentTickets.length > 0 && (
-                            <span className={styles.urgentBadge}>{urgentTickets.length}</span>
+                            <span className={styles['urgentBadge']}>{urgentTickets.length}</span>
                         )}
                     </h2>
                     <UrgentTicketsWidget tickets={urgentTickets} />
@@ -326,16 +326,16 @@ export default async function DashboardPage() {
 
             {/* Technician Metrics */}
             {technicianMetrics.length > 0 && (
-                <div className={styles.fullWidthCard}>
-                    <h2 className={styles.chartTitle}>Productividad por Técnico</h2>
+                <div className={styles['fullWidthCard']}>
+                    <h2 className={styles['chartTitle']}>Productividad por Técnico</h2>
                     <TechnicianMetrics data={technicianMetrics} />
                 </div>
             )}
 
             {/* Recent Tickets */}
             {recentTickets.length > 0 && (
-                <div className={styles.fullWidthCard}>
-                    <h2 className={styles.chartTitle}>Tickets Recientes</h2>
+                <div className={styles['fullWidthCard']}>
+                    <h2 className={styles['chartTitle']}>Tickets Recientes</h2>
                     <RecentTicketsTable data={recentTickets as any} />
                 </div>
             )}

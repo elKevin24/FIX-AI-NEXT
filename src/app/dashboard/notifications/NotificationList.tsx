@@ -46,56 +46,56 @@ export default function NotificationList({ initialNotifications, totalPages, cur
     };
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <span className={styles.pageInfo}>Mostrando página {currentPage} de {totalPages || 1}</span>
+        <div className={styles['container']}>
+            <div className={styles['header']}>
+                <span className={styles['pageInfo']}>Mostrando página {currentPage} de {totalPages || 1}</span>
                 <button 
                     onClick={handleMarkAllRead}
                     disabled={isPending || notifications.every(n => n.isRead)}
-                    className={styles.markAllBtn}
+                    className={styles['markAllBtn']}
                 >
                     Marcar todas como leídas
                 </button>
             </div>
 
-            <div className={styles.list}>
+            <div className={styles['list']}>
                 {notifications.length === 0 ? (
-                    <div className={styles.empty}>
+                    <div className={styles['empty']}>
                         No tienes notificaciones.
                     </div>
                 ) : (
                     notifications.map((notification) => (
                         <div 
                             key={notification.id} 
-                            className={`${styles.item} ${!notification.isRead ? styles.unread : ''}`}
+                            className={`${styles['item']} ${!notification.isRead ? styles['unread'] : ''}`}
                         >
-                            <div className={styles.itemContent}>
-                                <div className={styles.mainInfo}>
-                                    <div className={styles.titleRow}>
-                                        <span className={`${styles.title} ${getNotificationColor(notification.type, styles)}`}>
+                            <div className={styles['itemContent']}>
+                                <div className={styles['mainInfo']}>
+                                    <div className={styles['titleRow']}>
+                                        <span className={`${styles['title']} ${getNotificationColor(notification.type, styles)}`}>
                                             {notification.title}
                                         </span>
                                         {!notification.isRead && (
-                                            <span className={styles.newBadge}>
+                                            <span className={styles['newBadge']}>
                                                 Nueva
                                             </span>
                                         )}
                                     </div>
-                                    <p className={styles.message}>{notification.message}</p>
-                                    <div className={styles.meta}>
+                                    <p className={styles['message']}>{notification.message}</p>
+                                    <div className={styles['meta']}>
                                         <span>{new Date(notification.createdAt).toLocaleString()}</span>
                                         {notification.link && (
-                                            <Link href={notification.link} className={styles.link}>
+                                            <Link href={notification.link} className={styles['link']}>
                                                 Ver detalles
                                             </Link>
                                         )}
                                     </div>
                                 </div>
-                                <div className={styles.actions}>
+                                <div className={styles['actions']}>
                                     {!notification.isRead && (
                                         <button 
                                             onClick={() => handleMarkAsRead(notification.id)}
-                                            className={`${styles.iconBtn} ${styles.checkBtn}`}
+                                            className={`${styles['iconBtn']} ${styles['checkBtn']}`}
                                             title="Marcar como leída"
                                         >
                                             <CheckIcon />
@@ -103,7 +103,7 @@ export default function NotificationList({ initialNotifications, totalPages, cur
                                     )}
                                     <button 
                                         onClick={() => handleDelete(notification.id)}
-                                        className={`${styles.iconBtn} ${styles.trashBtn}`}
+                                        className={`${styles['iconBtn']} ${styles['trashBtn']}`}
                                         title="Eliminar"
                                     >
                                         <TrashIcon />
@@ -117,16 +117,16 @@ export default function NotificationList({ initialNotifications, totalPages, cur
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className={styles.pagination}>
+                <div className={styles['pagination']}>
                     <Link 
                         href={`/dashboard/notifications?page=${Math.max(1, currentPage - 1)}`}
-                        className={`${styles.pageLink} ${currentPage === 1 ? styles.disabledLink : ''}`}
+                        className={`${styles['pageLink']} ${currentPage === 1 ? styles['disabledLink'] : ''}`}
                     >
                         Anterior
                     </Link>
                     <Link 
                         href={`/dashboard/notifications?page=${Math.min(totalPages, currentPage + 1)}`}
-                        className={`${styles.pageLink} ${currentPage === totalPages ? styles.disabledLink : ''}`}
+                        className={`${styles['pageLink']} ${currentPage === totalPages ? styles['disabledLink'] : ''}`}
                     >
                         Siguiente
                     </Link>
@@ -138,10 +138,10 @@ export default function NotificationList({ initialNotifications, totalPages, cur
 
 function getNotificationColor(type: string, styles: any) {
     switch (type) {
-        case 'WARNING': return styles.typeWarning;
-        case 'ERROR': return styles.typeError;
-        case 'SUCCESS': return styles.typeSuccess;
-        default: return styles.typeInfo;
+        case 'WARNING': return styles['typeWarning'];
+        case 'ERROR': return styles['typeError'];
+        case 'SUCCESS': return styles['typeSuccess'];
+        default: return styles['typeInfo'];
     }
 }
 

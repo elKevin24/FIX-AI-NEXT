@@ -24,15 +24,15 @@ export function Textarea({
   const hasError = !!error;
 
   const textareaClasses = [
-    styles.textarea,
-    hasError ? styles.errorInput : '',
+    styles['textarea'],
+    hasError ? styles['errorInput'] : '',
     className
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={styles.group}>
+    <div className={styles['group']}>
       {label && (
-        <label htmlFor={textareaId} className={styles.label}>
+        <label htmlFor={textareaId} className={styles['label']}>
           {label}
         </label>
       )}
@@ -44,12 +44,12 @@ export function Textarea({
         {...props}
       />
       {hasError && (
-        <span id={errorId} className={`${styles.helper} ${styles.errorMessage}`}>
+        <span id={errorId} className={`${styles['helper']} ${styles['errorMessage']}`}>
           {error}
         </span>
       )}
       {!hasError && helper && (
-        <span id={helperId} className={styles.helper}>
+        <span id={helperId} className={styles['helper']}>
           {helper}
         </span>
       )}

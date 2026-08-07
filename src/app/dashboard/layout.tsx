@@ -52,9 +52,9 @@ export default async function DashboardLayout({
 
     return (
         <ToastProvider>
-            <div className={styles.container}>
+            <div className={styles['container']}>
                 <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-                <main className={styles.mainContent}>
+                <main className={styles['mainContent']}>
                     <TopNav />
                     {children}
                 </main>

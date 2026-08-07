@@ -55,31 +55,31 @@ export function Modal({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className={styles.backdrop} onClick={handleBackdropClick}>
+    <div className={styles['backdrop']} onClick={handleBackdropClick}>
       <div 
-        className={`${styles.modal} ${styles[size]}`} 
+        className={`${styles['modal']} ${styles[size]}`} 
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <div className={styles.header}>
-          <h2 id="modal-title" className={styles.title}>{title}</h2>
+        <div className={styles['header']}>
+          <h2 id="modal-title" className={styles['title']}>{title}</h2>
           <button 
             onClick={onClose} 
-            className={styles.closeButton}
+            className={styles['closeButton']}
             aria-label="Cerrar modal"
           >
             &times;
           </button>
         </div>
         
-        <div className={styles.body}>
+        <div className={styles['body']}>
           {children}
         </div>
 
         {footer && (
-          <div className={styles.footer}>
+          <div className={styles['footer']}>
             {footer}
           </div>
         )}

@@ -14,8 +14,13 @@ export default function ExportButton({ type, className = '' }: Props) {
         setLoading(true);
         try {
             const url = `/api/export/${type}?format=${format}`;
-            // Trigger download
-            window.location.href = url;
+            // Trigger download via anchor to avoid lint warning
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         } catch (e) {
             console.error(e);
             alert('Export failed');

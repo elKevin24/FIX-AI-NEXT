@@ -59,11 +59,11 @@ export default function DeleteUserButton({
       <button
         onClick={handleToggleActive}
         disabled={isLoading}
-        className={`${className || ''} ${styles.btnDelete}`}
+        className={`${className || ''} ${styles['btnDelete']}`}
         title={isLoading ? 'Procesando...' : 'Desactivar Usuario'}
       >
         {isLoading ? (
-          <span className={styles.spinner} />
+          <span className={styles['spinner']} />
         ) : (
           <>
             <BanIcon />
@@ -78,11 +78,11 @@ export default function DeleteUserButton({
     <button
       onClick={handleToggleActive}
       disabled={isLoading}
-      className={`${className || ''} ${styles.btnReactivate}`}
+      className={`${className || ''} ${styles['btnReactivate']}`}
       title={isLoading ? 'Procesando...' : 'Reactivar Usuario'}
     >
       {isLoading ? (
-        <span className={styles.spinner} />
+        <span className={styles['spinner']} />
       ) : (
         <>
           <CheckIcon />

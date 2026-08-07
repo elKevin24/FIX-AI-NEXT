@@ -77,10 +77,10 @@ export default function TicketSearchFilters() {
     ];
 
     return (
-        <div className={styles.gridContainer}>
+        <div className={styles['gridContainer']}>
             {/* Buscador (ocupa más espacio) */}
-            <div className={styles.searchItem}>
-                <label className={styles.searchLabel}>Búsqueda</label>
+            <div className={styles['searchItem']}>
+                <label className={styles['searchLabel']}>Búsqueda</label>
                 <SearchInputGroup
                     value={search}
                     onChange={setSearch}
@@ -92,7 +92,7 @@ export default function TicketSearchFilters() {
             </div>
 
             {/* Filtros */}
-            <div className={styles.filterItem}>
+            <div className={styles['filterItem']}>
                 <Select
                     label="Estado"
                     value={status}
@@ -100,7 +100,7 @@ export default function TicketSearchFilters() {
                     options={statusOptions}
                 />
             </div>
-            <div className={styles.filterItem}>
+            <div className={styles['filterItem']}>
                 <Select
                     label="Prioridad"
                     value={priority}
@@ -108,7 +108,7 @@ export default function TicketSearchFilters() {
                     options={priorityOptions}
                 />
             </div>
-            <div className={styles.filterItem}>
+            <div className={styles['filterItem']}>
                 <Select
                     label="Asignado a"
                     value={assignedTo}
@@ -122,7 +122,7 @@ export default function TicketSearchFilters() {
 
             {/* Botón Limpiar */}
             {(search || status || priority || assignedTo) && (
-                <div className={styles.actionItem}>
+                <div className={styles['actionItem']}>
                     <Button
                         variant="ghost"
                         onClick={handleClear}

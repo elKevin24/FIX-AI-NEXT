@@ -221,11 +221,11 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
     ], []);
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
+        <div className={styles['container']}>
+            <header className={styles['header']}>
                 <div>
                     <h1>Historial de Ventas</h1>
-                    <p className={styles.subtitle}>
+                    <p className={styles['subtitle']}>
                         {stats ? `${stats.salesCount} ventas · Total: ${formatCurrency(stats.totalSales)}` : ''}
                     </p>
                 </div>
@@ -237,33 +237,33 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                 </div>
             </header>
 
-            {error && <Alert variant="error" className={styles.alert}>{error}</Alert>}
-            {success && <Alert variant="success" className={styles.alert}>{success}</Alert>}
+            {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
+            {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}
 
             {/* Stats Cards */}
             {stats && (
-                <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                        <span className={styles.statLabel}>Total Ventas</span>
-                        <span className={styles.statValue}>{formatCurrency(stats.totalSales)}</span>
+                <div className={styles['statsGrid']}>
+                    <div className={styles['statCard']}>
+                        <span className={styles['statLabel']}>Total Ventas</span>
+                        <span className={styles['statValue']}>{formatCurrency(stats.totalSales)}</span>
                     </div>
-                    <div className={styles.statCard}>
-                        <span className={styles.statLabel}>Cantidad</span>
-                        <span className={styles.statValue}>{stats.salesCount}</span>
+                    <div className={styles['statCard']}>
+                        <span className={styles['statLabel']}>Cantidad</span>
+                        <span className={styles['statValue']}>{stats.salesCount}</span>
                     </div>
-                    <div className={styles.statCard}>
-                        <span className={styles.statLabel}>IVA Recaudado</span>
-                        <span className={styles.statValue}>{formatCurrency(stats.totalTax)}</span>
+                    <div className={styles['statCard']}>
+                        <span className={styles['statLabel']}>IVA Recaudado</span>
+                        <span className={styles['statValue']}>{formatCurrency(stats.totalTax)}</span>
                     </div>
-                    <div className={styles.statCard}>
-                        <span className={styles.statLabel}>Descuentos</span>
-                        <span className={styles.statValue}>{formatCurrency(stats.totalDiscount)}</span>
+                    <div className={styles['statCard']}>
+                        <span className={styles['statLabel']}>Descuentos</span>
+                        <span className={styles['statValue']}>{formatCurrency(stats.totalDiscount)}</span>
                     </div>
                 </div>
             )}
 
             {/* Filters */}
-            <div className={styles.filters}>
+            <div className={styles['filters']}>
                 <Input
                     placeholder="Buscar por número o cliente..."
                     value={search}
@@ -272,7 +272,7 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as POSSaleStatus | '')}
-                    className={styles.select}
+                    className={styles['select']}
                 >
                     <option value="">Todos los estados</option>
                     <option value={POSSaleStatus.COMPLETED}>Completadas</option>
@@ -290,44 +290,44 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
 
             {/* Sale Detail Modal */}
             {selectedSale && !showVoidModal && (
-                <div className={styles.modalOverlay} onClick={() => setSelectedSale(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
+                <div className={styles['modalOverlay']} onClick={() => setSelectedSale(null)}>
+                    <div className={styles['modal']} onClick={e => e.stopPropagation()}>
+                        <div className={styles['modalHeader']}>
                             <h2>Venta {selectedSale.saleNumber}</h2>
-                            <button className={styles.modalClose} onClick={() => setSelectedSale(null)}>
+                            <button className={styles['modalClose']} onClick={() => setSelectedSale(null)}>
                                 &times;
                             </button>
                         </div>
-                        <div className={styles.modalBody}>
-                            <div className={styles.detailSection}>
+                        <div className={styles['modalBody']}>
+                            <div className={styles['detailSection']}>
                                 <h3>Información General</h3>
-                                <div className={styles.detailGrid}>
+                                <div className={styles['detailGrid']}>
                                     <div>
-                                        <span className={styles.detailLabel}>Fecha</span>
+                                        <span className={styles['detailLabel']}>Fecha</span>
                                         <span>{formatDate(selectedSale.createdAt)}</span>
                                     </div>
                                     <div>
-                                        <span className={styles.detailLabel}>Estado</span>
+                                        <span className={styles['detailLabel']}>Estado</span>
                                         {getStatusBadge(selectedSale.status)}
                                     </div>
                                     <div>
-                                        <span className={styles.detailLabel}>Cliente</span>
+                                        <span className={styles['detailLabel']}>Cliente</span>
                                         <span>{selectedSale.customerName}</span>
                                     </div>
                                     <div>
-                                        <span className={styles.detailLabel}>NIT</span>
+                                        <span className={styles['detailLabel']}>NIT</span>
                                         <span>{selectedSale.customerNIT || 'C/F'}</span>
                                     </div>
                                     <div>
-                                        <span className={styles.detailLabel}>Vendedor</span>
+                                        <span className={styles['detailLabel']}>Vendedor</span>
                                         <span>{selectedSale.createdBy?.name || selectedSale.createdBy?.email}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className={styles.detailSection}>
+                            <div className={styles['detailSection']}>
                                 <h3>Productos</h3>
-                                <table className={styles.itemsTable}>
+                                <table className={styles['itemsTable']}>
                                     <thead>
                                         <tr>
                                             <th>Producto</th>
@@ -349,9 +349,9 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                                 </table>
                             </div>
 
-                            <div className={styles.detailSection}>
+                            <div className={styles['detailSection']}>
                                 <h3>Totales</h3>
-                                <div className={styles.totalsGrid}>
+                                <div className={styles['totalsGrid']}>
                                     <div>
                                         <span>Subtotal</span>
                                         <span>{formatCurrency(selectedSale.subtotal)}</span>
@@ -366,24 +366,24 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                                         <span>IVA ({selectedSale.taxRate}%)</span>
                                         <span>{formatCurrency(selectedSale.taxAmount)}</span>
                                     </div>
-                                    <div className={styles.totalRow}>
+                                    <div className={styles['totalRow']}>
                                         <span>Total</span>
                                         <span>{formatCurrency(selectedSale.total)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className={styles.detailSection}>
+                            <div className={styles['detailSection']}>
                                 <h3>Pagos</h3>
-                                <div className={styles.paymentsList}>
+                                <div className={styles['paymentsList']}>
                                     {selectedSale.payments.map((payment, idx) => (
-                                        <div key={idx} className={styles.paymentRow}>
+                                        <div key={idx} className={styles['paymentRow']}>
                                             <span>{getPaymentMethodLabel(payment.paymentMethod)}</span>
                                             <span>{formatCurrency(payment.amount)}</span>
                                         </div>
                                     ))}
                                     {selectedSale.changeGiven > 0 && (
-                                        <div className={styles.changeRow}>
+                                        <div className={styles['changeRow']}>
                                             <span>Cambio</span>
                                             <span>{formatCurrency(selectedSale.changeGiven)}</span>
                                         </div>
@@ -392,13 +392,13 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                             </div>
 
                             {selectedSale.notes && (
-                                <div className={styles.detailSection}>
+                                <div className={styles['detailSection']}>
                                     <h3>Notas</h3>
-                                    <p className={styles.notes}>{selectedSale.notes}</p>
+                                    <p className={styles['notes']}>{selectedSale.notes}</p>
                                 </div>
                             )}
                         </div>
-                        <div className={styles.modalFooter}>
+                        <div className={styles['modalFooter']}>
                             <Button variant="outline" onClick={() => setSelectedSale(null)}>
                                 Cerrar
                             </Button>
@@ -409,33 +409,33 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
 
             {/* Void Modal */}
             {showVoidModal && selectedSale && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <div className={styles.modalHeader}>
+                <div className={styles['modalOverlay']}>
+                    <div className={styles['modal']}>
+                        <div className={styles['modalHeader']}>
                             <h2>Anular Venta</h2>
-                            <button className={styles.modalClose} onClick={() => {
+                            <button className={styles['modalClose']} onClick={() => {
                                 setShowVoidModal(false);
                                 setVoidReason('');
                             }}>
                                 &times;
                             </button>
                         </div>
-                        <div className={styles.modalBody}>
-                            <p className={styles.voidWarning}>
+                        <div className={styles['modalBody']}>
+                            <p className={styles['voidWarning']}>
                                 Está a punto de anular la venta <strong>{selectedSale.saleNumber}</strong>.
                                 Esto restaurará el inventario y registrará un egreso en la caja si hubo pagos en efectivo.
                             </p>
-                            <div className={styles.voidField}>
+                            <div className={styles['voidField']}>
                                 <label>Razón de anulación *</label>
                                 <textarea
                                     value={voidReason}
                                     onChange={(e) => setVoidReason(e.target.value)}
                                     placeholder="Ingrese la razón..."
-                                    className={styles.voidTextarea}
+                                    className={styles['voidTextarea']}
                                 />
                             </div>
                         </div>
-                        <div className={styles.modalFooter}>
+                        <div className={styles['modalFooter']}>
                             <Button
                                 variant="outline"
                                 onClick={() => {

@@ -65,12 +65,12 @@ export function AddAvailabilityDialog({ userId, isOpen, onClose, onSuccess }: Ad
         </>
       }
     >
-      <form id="add-availability-form" action={action} style={styles.form}>
+      <form id="add-availability-form" action={action} style={styles['form']}>
         <input type="hidden" name="userId" value={userId} />
         
-        <div style={styles.fieldGroup}>
-            <label htmlFor="reason" style={styles.label}>Motivo *</label>
-            <select name="reason" id="reason" style={styles.select} required defaultValue="">
+        <div style={styles['fieldGroup']}>
+            <label htmlFor="reason" style={styles['label']}>Motivo *</label>
+            <select name="reason" id="reason" style={styles['select']} required defaultValue="">
                 <option value="" disabled>Seleccione un motivo...</option>
                 {REASON_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -79,23 +79,23 @@ export function AddAvailabilityDialog({ userId, isOpen, onClose, onSuccess }: Ad
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div style={styles.fieldGroup}>
-                <label htmlFor="startDate" style={styles.label}>Desde *</label>
-                <input type="date" name="startDate" id="startDate" style={styles.input} required />
+            <div style={styles['fieldGroup']}>
+                <label htmlFor="startDate" style={styles['label']}>Desde *</label>
+                <input type="date" name="startDate" id="startDate" style={styles['input']} required />
             </div>
-            <div style={styles.fieldGroup}>
-                <label htmlFor="endDate" style={styles.label}>Hasta *</label>
-                <input type="date" name="endDate" id="endDate" style={styles.input} required />
+            <div style={styles['fieldGroup']}>
+                <label htmlFor="endDate" style={styles['label']}>Hasta *</label>
+                <input type="date" name="endDate" id="endDate" style={styles['input']} required />
             </div>
         </div>
 
-        <div style={styles.fieldGroup}>
-            <label htmlFor="notes" style={styles.label}>Notas adicionales</label>
-            <textarea name="notes" id="notes" style={styles.textarea} placeholder="Detalles opcionales..."></textarea>
+        <div style={styles['fieldGroup']}>
+            <label htmlFor="notes" style={styles['label']}>Notas adicionales</label>
+            <textarea name="notes" id="notes" style={styles['textarea']} placeholder="Detalles opcionales..."></textarea>
         </div>
 
         {state?.message && !state.success && (
-          <div style={styles.errorBox}>
+          <div style={styles['errorBox']}>
             {state.message}
             {state.errors && (
                 <ul style={{ marginTop: '0.5rem', paddingLeft: '1rem' }}>

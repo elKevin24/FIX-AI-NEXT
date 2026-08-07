@@ -49,24 +49,24 @@ export function CancelTicketDialog({ ticketId, isOpen, onClose, onSuccess }: Can
         </>
       }
     >
-      <form id="cancel-ticket-form" action={action} className={styles.form}>
+      <form id="cancel-ticket-form" action={action} className={styles['form']}>
         <input type="hidden" name="ticketId" value={ticketId} />
         <input type="hidden" name="status" value="CANCELLED" />
         
-        <div className={styles.warningBox}>
-          <p className={styles.warningText}>
+        <div className={styles['warningBox']}>
+          <p className={styles['warningText']}>
             ⚠️ Advertencia: Al cancelar este ticket, cualquier repuesto asignado y no utilizado será devuelto automáticamente al inventario.
           </p>
         </div>
 
-        <div className={styles.fieldGroup}>
-          <label htmlFor="cancel-reason" className={styles.label}>
+        <div className={styles['fieldGroup']}>
+          <label htmlFor="cancel-reason" className={styles['label']}>
             Motivo de la cancelación * (mínimo 10 caracteres)
           </label>
           <textarea
             id="cancel-reason"
             name="note"
-            className={styles.textarea}
+            className={styles['textarea']}
             placeholder="Ej: Cliente rechazó el presupuesto / Equipo irreparable..."
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -80,7 +80,7 @@ export function CancelTicketDialog({ ticketId, isOpen, onClose, onSuccess }: Can
         </div>
 
         {state?.message && !state.success && (
-          <div className={styles.errorBox}>
+          <div className={styles['errorBox']}>
             {state.message}
           </div>
         )}

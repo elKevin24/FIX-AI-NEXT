@@ -95,7 +95,7 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
     };
 
     return (
-        <div className={styles.container} ref={wrapperRef}>
+        <div className={styles['container']} ref={wrapperRef}>
             <Input
                 label="Buscar Cliente"
                 placeholder="Nombre, Teléfono o Email..."
@@ -108,26 +108,26 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
             />
             
             {isOpen && query.length >= 2 && (
-                <div className={styles.dropdown}>
+                <div className={styles['dropdown']}>
                     {loading ? (
-                        <div className={styles.loading}>
+                        <div className={styles['loading']}>
                             <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>🔍</span>
                             Buscando...
                         </div>
                     ) : results.length > 0 ? (
-                        <ul className={styles.list}>
+                        <ul className={styles['list']}>
                             {results.map((customer) => (
                                 <li 
                                     key={customer.id}
                                     onClick={() => handleSelect(customer)}
-                                    className={styles.listItem}
+                                    className={styles['listItem']}
                                 >
-                                    <div className={styles.avatar}>
+                                    <div className={styles['avatar']}>
                                         {getInitials(customer.name)}
                                     </div>
-                                    <div className={styles.itemContent}>
-                                        <div className={styles.itemName}>{customer.name}</div>
-                                        <div className={styles.itemDetail}>
+                                    <div className={styles['itemContent']}>
+                                        <div className={styles['itemName']}>{customer.name}</div>
+                                        <div className={styles['itemDetail']}>
                                             {customer.phone && (
                                                 <span title="Teléfono">📱 {customer.phone}</span>
                                             )}
@@ -142,22 +142,22 @@ export default function CustomerSearch({ onSelect, selectedCustomer }: CustomerS
                             ))}
                             <li 
                                 onClick={handleCreateNew}
-                                className={styles.createItem}
+                                className={styles['createItem']}
                             >
                                 <span style={{ marginRight: '0.5rem' }}>✨</span>
                                 Crear &ldquo;{query}&rdquo; como nuevo
                             </li>
                         </ul>
                     ) : (
-                        <div className={styles.notFound}>
+                        <div className={styles['notFound']}>
                             <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤔</div>
-                            <p className={styles.notFoundText}>No encontramos a &ldquo;{query}&rdquo;</p>
+                            <p className={styles['notFoundText']}>No encontramos a &ldquo;{query}&rdquo;</p>
                             <Button 
                                 type="button"
                                 variant="outline" 
                                 size="sm" 
                                 onClick={handleCreateNew}
-                                className={styles.useButton}
+                                className={styles['useButton']}
                             >
                                 Crear Nuevo Cliente
                             </Button>

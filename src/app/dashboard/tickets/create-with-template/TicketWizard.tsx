@@ -149,54 +149,54 @@ export default function TicketWizard() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.wizard}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>✨ Nuevo Ticket - Asistente</h1>
-          <p className={styles.subtitle}>
+    <div className={styles['container']}>
+      <div className={styles['wizard']}>
+        <div className={styles['header']}>
+          <h1 className={styles['title']}>✨ Nuevo Ticket - Asistente</h1>
+          <p className={styles['subtitle']}>
             Crea tickets rápidamente con plantillas predefinidas o manualmente
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className={styles.steps}>
-          <div className={`${styles.step} ${step >= 1 ? styles.stepActive : ''}`}>
-            <div className={styles.stepNumber}>1</div>
+        <div className={styles['steps']}>
+          <div className={`${styles['step']} ${step >= 1 ? styles['stepActive'] : ''}`}>
+            <div className={styles['stepNumber']}>1</div>
             <span>Plantilla</span>
           </div>
-          <div className={styles.stepLine} />
-          <div className={`${styles.step} ${step >= 2 ? styles.stepActive : ''}`}>
-            <div className={styles.stepNumber}>2</div>
+          <div className={styles['stepLine']} />
+          <div className={`${styles['step']} ${step >= 2 ? styles['stepActive'] : ''}`}>
+            <div className={styles['stepNumber']}>2</div>
             <span>Cliente</span>
           </div>
-          <div className={styles.stepLine} />
-          <div className={`${styles.step} ${step >= 3 ? styles.stepActive : ''}`}>
-            <div className={styles.stepNumber}>3</div>
+          <div className={styles['stepLine']} />
+          <div className={`${styles['step']} ${step >= 3 ? styles['stepActive'] : ''}`}>
+            <div className={styles['stepNumber']}>3</div>
             <span>Detalles</span>
           </div>
         </div>
 
         {error && (
-          <Alert variant="error" className={styles.alert}>
+          <Alert variant="error" className={styles['alert']}>
             {error}
           </Alert>
         )}
 
         {success && (
-          <Alert variant="success" className={styles.alert}>
+          <Alert variant="success" className={styles['alert']}>
             ✅ Ticket creado exitosamente. Redirigiendo...
           </Alert>
         )}
 
         {/* Step 1: Template Selection */}
         {step === 1 && (
-          <div className={styles.stepContent}>
+          <div className={styles['stepContent']}>
             <TemplateSelector
               selectedTemplate={selectedTemplate}
               onSelect={handleTemplateChange}
             />
 
-            <div className={styles.actions}>
+            <div className={styles['actions']}>
               <Button
                 onClick={() => setStep(2)}
                 variant="primary"
@@ -211,9 +211,9 @@ export default function TicketWizard() {
 
         {/* Step 2: Customer Selection */}
         {step === 2 && (
-          <div className={styles.stepContent}>
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>👤 Información del Cliente</h2>
+          <div className={styles['stepContent']}>
+            <div className={styles['card']}>
+              <h2 className={styles['cardTitle']}>👤 Información del Cliente</h2>
 
               <CustomerSearch
                 onSelect={(c) =>
@@ -230,11 +230,11 @@ export default function TicketWizard() {
               />
 
               {customer && !customer.id && (
-                <div className={styles.newCustomerFields}>
-                  <p className={styles.newCustomerHint}>
+                <div className={styles['newCustomerFields']}>
+                  <p className={styles['newCustomerHint']}>
                     Completando estos campos se creará un cliente nuevo
                   </p>
-                  <div className={styles.grid2}>
+                  <div className={styles['grid2']}>
                     <Input
                       label="📧 Email (opcional)"
                       type="email"
@@ -276,7 +276,7 @@ export default function TicketWizard() {
               )}
             </div>
 
-            <div className={styles.actions}>
+            <div className={styles['actions']}>
               <Button onClick={() => setStep(1)} variant="secondary" size="lg">
                 ← Atrás
               </Button>
@@ -294,11 +294,11 @@ export default function TicketWizard() {
 
         {/* Step 3: Ticket Details */}
         {step === 3 && (
-          <div className={styles.stepContent}>
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>🔧 Detalles del Ticket</h2>
+          <div className={styles['stepContent']}>
+            <div className={styles['card']}>
+              <h2 className={styles['cardTitle']}>🔧 Detalles del Ticket</h2>
 
-              <div className={styles.grid2}>
+              <div className={styles['grid2']}>
                 <Select
                   label="Tipo de Dispositivo"
                   options={DEVICE_TYPE_OPTIONS}
@@ -332,7 +332,7 @@ export default function TicketWizard() {
                 onChange={(e) => setDescription(e.target.value)}
               />
 
-              <div className={styles.grid2}>
+              <div className={styles['grid2']}>
                 <Input
                   label="Número de Serie (opcional)"
                   type="text"
@@ -368,20 +368,20 @@ export default function TicketWizard() {
                 <>
                   {/* Required Parts Section */}
                   {selectedTemplate.defaultParts.filter(dp => dp.required).length > 0 && (
-                    <div className={styles.requiredPartsInfo}>
-                      <h3 className={styles.requiredPartsTitle}>
+                    <div className={styles['requiredPartsInfo']}>
+                      <h3 className={styles['requiredPartsTitle']}>
                         ✅ Repuestos Requeridos (se consumirán automáticamente)
                       </h3>
-                      <ul className={styles.partsList}>
+                      <ul className={styles['partsList']}>
                         {selectedTemplate.defaultParts
                           .filter(dp => dp.required)
                           .map((dp) => (
-                            <li key={dp.id} className={styles.requiredPartItem}>
-                              <span className={styles.partName}>{dp.part.name}</span>
-                              <span className={styles.partQty}>
+                            <li key={dp.id} className={styles['requiredPartItem']}>
+                              <span className={styles['partName']}>{dp.part.name}</span>
+                              <span className={styles['partQty']}>
                                 Cantidad: {dp.quantity}
                               </span>
-                              <span className={styles.partStock}>
+                              <span className={styles['partStock']}>
                                 Stock: {dp.part.quantity}
                               </span>
                             </li>
@@ -415,7 +415,7 @@ export default function TicketWizard() {
               )}
             </div>
 
-            <div className={styles.actions}>
+            <div className={styles['actions']}>
               <Button onClick={() => setStep(2)} variant="secondary" size="lg">
                 ← Atrás
               </Button>

@@ -43,7 +43,7 @@ export async function POST(
     // Upload to Vercel Blob
     const blob = await put(`tickets/${session.user.tenantId}/${ticketId}/${file.name}`, file, {
       access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      token: process.env['BLOB_READ_WRITE_TOKEN'],
     });
 
     // Save to DB
@@ -113,7 +113,7 @@ export async function DELETE(
         if (attachment.url) {
             try {
                 await del(attachment.url, {
-                    token: process.env.BLOB_READ_WRITE_TOKEN
+                    token: process.env['BLOB_READ_WRITE_TOKEN']
                 });
             } catch (blobError) {
                 console.error('Blob delete error:', blobError);

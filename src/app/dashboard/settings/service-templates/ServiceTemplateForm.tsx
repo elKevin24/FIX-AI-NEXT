@@ -104,16 +104,16 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.container}>
+    <form onSubmit={handleSubmit} className={styles['container']}>
       {error && (
-        <div className={styles.errorMessage}>
+        <div className={styles['errorMessage']}>
           {error}
         </div>
       )}
 
       {/* Nombre */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Nombre de la Plantilla *
         </label>
         <input
@@ -121,36 +121,36 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className={styles.input}
+          className={styles['input']}
           placeholder="Ej: Mantenimiento Básico PC"
         />
       </div>
 
       {/* Categoría */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Categoría *
         </label>
-        <div className={styles.categoryGrid}>
+        <div className={styles['categoryGrid']}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
               type="button"
               onClick={() => handleCategoryChange(cat.value as ServiceCategory)}
-              className={`${styles.categoryBtn} ${
-                formData.category === cat.value ? styles.active : ''
+              className={`${styles['categoryBtn']} ${
+                formData.category === cat.value ? styles['active'] : ''
               }`}
             >
-              <div className={styles.categoryIcon}>{cat.icon}</div>
-              <div className={styles.categoryLabel}>{cat.label}</div>
+              <div className={styles['categoryIcon']}>{cat.icon}</div>
+              <div className={styles['categoryLabel']}>{cat.label}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Título Default */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Título Default para Tickets *
         </label>
         <input
@@ -158,17 +158,17 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
           required
           value={formData.defaultTitle}
           onChange={(e) => setFormData({ ...formData, defaultTitle: e.target.value })}
-          className={styles.input}
+          className={styles['input']}
           placeholder="Ej: Mantenimiento preventivo de PC"
         />
-        <p className={styles.helpText}>
+        <p className={styles['helpText']}>
           Este será el título que se usará al crear tickets con esta plantilla
         </p>
       </div>
 
       {/* Descripción/Checklist */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Descripción / Checklist *
         </label>
         <textarea
@@ -176,23 +176,23 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
           value={formData.defaultDescription}
           onChange={(e) => setFormData({ ...formData, defaultDescription: e.target.value })}
           rows={10}
-          className={`${styles.textarea} ${styles.input}`}
+          className={`${styles['textarea']} ${styles['input']}`}
           placeholder="Checklist de mantenimiento:&#10;- Limpieza interna de polvo&#10;- Revisión de ventiladores&#10;- Aplicación de pasta térmica&#10;- ..."
         />
-        <p className={styles.helpText}>
+        <p className={styles['helpText']}>
           Usa viñetas (-) para crear un checklist
         </p>
       </div>
 
       {/* Prioridad Default */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Prioridad Default *
         </label>
         <select
           value={formData.defaultPriority}
           onChange={(e) => setFormData({ ...formData, defaultPriority: e.target.value })}
-          className={styles.select}
+          className={styles['select']}
         >
           {PRIORITIES.map((priority) => (
             <option key={priority} value={priority}>
@@ -203,8 +203,8 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
       </div>
 
       {/* Duración Estimada */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Duración Estimada (minutos)
         </label>
         <input
@@ -218,10 +218,10 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
               estimatedDuration: e.target.value ? parseInt(e.target.value) : 0,
             })
           }
-          className={styles.input}
+          className={styles['input']}
           placeholder="60"
         />
-        <p className={styles.helpText}>
+        <p className={styles['helpText']}>
           {formData.estimatedDuration && formData.estimatedDuration >= 60
             ? `≈ ${Math.floor(formData.estimatedDuration / 60)}h ${
                 formData.estimatedDuration % 60
@@ -231,8 +231,8 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
       </div>
 
       {/* Costo de Mano de Obra */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>
+      <div className={styles['formGroup']}>
+        <label className={styles['label']}>
           Costo de Mano de Obra ($)
         </label>
         <input
@@ -246,31 +246,31 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
               laborCost: e.target.value ? parseFloat(e.target.value) : 0,
             })
           }
-          className={styles.input}
+          className={styles['input']}
           placeholder="350.00"
         />
       </div>
 
       {/* Color e Icono */}
-      <div className={styles.gridTwo}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Color</label>
+      <div className={styles['gridTwo']}>
+        <div className={styles['formGroup']}>
+          <label className={styles['label']}>Color</label>
           <input
             type="color"
             value={formData.color}
             onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-            className={styles.input}
+            className={styles['input']}
             style={{ height: '3rem', padding: '0.25rem' }}
           />
         </div>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Icono</label>
+        <div className={styles['formGroup']}>
+          <label className={styles['label']}>Icono</label>
           <input
             type="text"
             maxLength={10}
             value={formData.icon}
             onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-            className={styles.input}
+            className={styles['input']}
             placeholder="🔧"
             style={{ fontSize: '1.5rem', textAlign: 'center' }}
           />
@@ -278,31 +278,31 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
       </div>
 
       {/* Estado Activo */}
-      <div className={styles.checkboxGroup}>
+      <div className={styles['checkboxGroup']}>
         <input
           type="checkbox"
           id="isActive"
           checked={formData.isActive}
           onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-          className={styles.checkbox}
+          className={styles['checkbox']}
         />
-        <label htmlFor="isActive" className={styles.label} style={{ marginBottom: 0 }}>
+        <label htmlFor="isActive" className={styles['label']} style={{ marginBottom: 0 }}>
           Plantilla activa (visible para crear tickets)
         </label>
       </div>
 
       {/* Vista Previa */}
-      <div className={styles.previewCard}>
-        <h3 className={styles.label}>Vista Previa</h3>
+      <div className={styles['previewCard']}>
+        <h3 className={styles['label']}>Vista Previa</h3>
         <div
-          className={styles.previewInner}
+          className={styles['previewInner']}
           style={{ borderLeftColor: formData.color }}
         >
-          <div className={styles.previewContent}>
-            <span className={styles.previewIcon}>{formData.icon}</span>
+          <div className={styles['previewContent']}>
+            <span className={styles['previewIcon']}>{formData.icon}</span>
             <div>
-              <div className={styles.previewTitle}>{formData.name || 'Nombre de plantilla'}</div>
-              <div className={styles.previewSubtitle}>
+              <div className={styles['previewTitle']}>{formData.name || 'Nombre de plantilla'}</div>
+              <div className={styles['previewSubtitle']}>
                 {formData.defaultTitle || 'Título default'}
               </div>
             </div>
@@ -311,18 +311,18 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
       </div>
 
       {/* Botones */}
-      <div className={styles.actions}>
+      <div className={styles['actions']}>
         <button
           type="submit"
           disabled={loading}
-          className={styles.submitBtn}
+          className={styles['submitBtn']}
         >
           {loading ? 'Guardando...' : initialData ? 'Actualizar Plantilla' : 'Crear Plantilla'}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className={styles.cancelBtn}
+          className={styles['cancelBtn']}
         >
           Cancelar
         </button>
