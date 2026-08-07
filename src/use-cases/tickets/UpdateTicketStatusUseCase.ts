@@ -38,7 +38,7 @@ export class UpdateTicketStatusUseCase {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
                          await tx.partUsage.delete({
-                             where: { id: usage.id }
+                             where: { id: usage.id, ticketId: existingTicket.id }
                           });
                      }
                  }
