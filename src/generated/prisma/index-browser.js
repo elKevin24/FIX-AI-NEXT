@@ -248,6 +248,10 @@ exports.Prisma.PurchaseItemScalarFieldEnum = {
 exports.Prisma.PartUsageScalarFieldEnum = {
   id: 'id',
   quantity: 'quantity',
+  approved: 'approved',
+  approvedAt: 'approvedAt',
+  approvedById: 'approvedById',
+  priceAtProposal: 'priceAtProposal',
   ticketId: 'ticketId',
   partId: 'partId',
   createdAt: 'createdAt'
@@ -666,6 +670,8 @@ exports.AuditAction = exports.$Enums.AuditAction = {
   TICKET_DELETED: 'TICKET_DELETED',
   TICKET_STATUS_CHANGED: 'TICKET_STATUS_CHANGED',
   TICKET_ASSIGNED: 'TICKET_ASSIGNED',
+  PARTS_APPROVED: 'PARTS_APPROVED',
+  PARTS_REJECTED: 'PARTS_REJECTED',
   CONFIG_CHANGED: 'CONFIG_CHANGED',
   TENANT_CONFIG_CHANGED: 'TENANT_CONFIG_CHANGED',
   EXPORT_DATA: 'EXPORT_DATA',

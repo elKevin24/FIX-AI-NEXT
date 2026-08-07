@@ -23,6 +23,8 @@ import { DeleteTicketUseCase } from '@/use-cases/tickets/DeleteTicketUseCase';
 import { AddTicketNoteUseCase } from '@/use-cases/tickets/AddTicketNoteUseCase';
 import { DeleteTicketNoteUseCase } from '@/use-cases/tickets/DeleteTicketNoteUseCase';
 import { AddPartToTicketUseCase } from '@/use-cases/tickets/AddPartToTicketUseCase';
+import { ApproveTicketPartsUseCase } from '@/use-cases/tickets/ApproveTicketPartsUseCase';
+import { RejectTicketPartsUseCase } from '@/use-cases/tickets/RejectTicketPartsUseCase';
 import { RemovePartFromTicketUseCase } from '@/use-cases/tickets/RemovePartFromTicketUseCase';
 import { AddServiceToTicketUseCase } from '@/use-cases/tickets/AddServiceToTicketUseCase';
 import { RemoveServiceFromTicketUseCase } from '@/use-cases/tickets/RemoveServiceFromTicketUseCase';
@@ -486,6 +488,81 @@ export async function addPartToTicket(
         return {
             success: false,
             message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo agregar el repuesto.',
+        };
+    }
+}
+
+/**
+ * Approve the customer-authorized parts of a ticket (Server Action).
+ * The stock is decremented atomically by the DB trigger on approval.
+ */
+export async function approveTicketParts(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { success: false, message: 'No autorizado' };
+    }
+
+    const ticketId = formData.get('ticketId') as string;
+
+    if (!ticketId) {
+        return { success: false, message: 'Datos inválidos' };
+    }
+
+    try {
+        await ApproveTicketPartsUseCase.execute({
+            ticketId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            email: session.user.email,
+        });
+
+        return { success: true, message: 'Repuestos aprobados. Se continúa con la reparación.' };
+    } catch (error) {
+        console.error('Failed to approve ticket parts:', error);
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudieron aprobar los repuestos.',
+        };
+    }
+}
+
+/**
+ * Reject the pending parts of a ticket (Server Action).
+ */
+export async function rejectTicketParts(
+    prevState: ActionState | null,
+    formData: FormData,
+): Promise<ActionState> {
+    const session = await auth();
+    if (!session?.user?.tenantId) {
+        return { success: false, message: 'No autorizado' };
+    }
+
+    const ticketId = formData.get('ticketId') as string;
+    const reason = formData.get('reason') as string;
+
+    if (!ticketId || !reason) {
+        return { success: false, message: 'Datos inválidos' };
+    }
+
+    try {
+        await RejectTicketPartsUseCase.execute({
+            ticketId,
+            reason,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            email: session.user.email,
+        });
+
+        return { success: true, message: 'Repuestos rechazados por el cliente. Ticket rechazado.' };
+    } catch (error) {
+        console.error('Failed to reject ticket parts:', error);
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error de base de datos: No se pudieron rechazar los repuestos.',
         };
     }
 }

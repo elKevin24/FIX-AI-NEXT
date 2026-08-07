@@ -98,6 +98,7 @@ model User {
   assignedTickets      Ticket[]
   createdTickets       Ticket[]                   @relation("TicketCreatedBy")
   updatedTickets       Ticket[]                   @relation("TicketUpdatedBy")
+  partUsagesApproved   PartUsage[]                @relation("PartUsageApprovedBy")
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
 
@@ -266,14 +267,20 @@ model PurchaseItem {
 }
 
 model PartUsage {
-  id        String   @id @default(uuid()) @db.Uuid
-  quantity  Int
-  ticketId  String   @db.Uuid
-  partId    String   @db.Uuid
-  createdAt DateTime @default(now())
-  part      Part     @relation(fields: [partId], references: [id])
-  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  id              String    @id @default(uuid()) @db.Uuid
+  quantity        Int
+  approved        Boolean   @default(false)
+  approvedAt      DateTime? @db.Timestamptz
+  approvedById    String?   @db.Uuid
+  priceAtProposal Decimal   @default(0) @db.Decimal(10, 2)
+  ticketId        String    @db.Uuid
+  partId          String    @db.Uuid
+  createdAt       DateTime  @default(now())
+  approvedBy      User?     @relation("PartUsageApprovedBy", fields: [approvedById], references: [id])
+  part            Part      @relation(fields: [partId], references: [id])
+  ticket          Ticket    @relation(fields: [ticketId], references: [id])
 
+  @@index([approved])
   @@map("part_usages")
 }
 
@@ -857,6 +864,8 @@ enum AuditAction {
   TICKET_DELETED
   TICKET_STATUS_CHANGED
   TICKET_ASSIGNED
+  PARTS_APPROVED
+  PARTS_REJECTED
   CONFIG_CHANGED
   TENANT_CONFIG_CHANGED
   EXPORT_DATA

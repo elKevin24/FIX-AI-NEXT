@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
-import { addPartToTicket, removePartFromTicket } from '@/lib/actions';
+import { addPartToTicket, removePartFromTicket, approveTicketParts, rejectTicketParts } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import styles from '../tickets.module.css';
 
@@ -18,6 +18,8 @@ interface PartUsage {
     id: string;
     quantity: number;
     createdAt: Date;
+    approved: boolean;
+    priceAtProposal?: any;
     part: Part;
 }
 
@@ -25,15 +27,27 @@ interface Props {
     ticketId: string;
     partsUsed: PartUsage[];
     availableParts: Part[];
+    ticketStatus: string;
+    canApprove: boolean;
 }
 
-export default function PartsSection({ ticketId, partsUsed, availableParts }: Props) {
+export default function PartsSection({ ticketId, partsUsed, availableParts, ticketStatus, canApprove }: Props) {
     const router = useRouter();
     const [addState, addAction, isAdding] = useActionState(addPartToTicket, null);
     const [removeState, removeAction, isRemoving] = useActionState(removePartFromTicket, null);
+    const [approveState, approveAction, isApproving] = useActionState(approveTicketParts, null);
+    const [rejectState, rejectAction, isRejecting] = useActionState(rejectTicketParts, null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [selectedPartId, setSelectedPartId] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [showRejectForm, setShowRejectForm] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const isRejectReasonValid = rejectReason.trim().length >= 10;
+
+    const pendingParts = partsUsed.filter(u => !u.approved);
+    const hasPendingParts = pendingParts.length > 0;
+
+    const priceOf = (usage: PartUsage) => Number(usage.priceAtProposal ?? usage.part.price);
 
     // Calculate total cost
     const totalCost = partsUsed.reduce((sum, usage) => {
@@ -41,7 +55,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
     }, 0);
 
     const totalPrice = partsUsed.reduce((sum, usage) => {
-        return sum + (Number(usage.part.price) * usage.quantity);
+        return sum + (priceOf(usage) * usage.quantity);
     }, 0);
 
     // Refresh on success
@@ -57,13 +71,23 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
     }, [addState, router]);
 
     useEffect(() => {
-        if (removeState?.success) {
+        if (removeState?.success || approveState?.success || rejectState?.success) {
             router.refresh();
         }
-    }, [removeState, router]);
+    }, [removeState, approveState, rejectState, router]);
 
     const selectedPart = availableParts.find(p => p.id === selectedPartId);
     const maxQuantity = selectedPart?.quantity || 0;
+
+    const actionMessage = addState?.message && !addState.success
+        ? addState.message
+        : (approveState?.message && !approveState.success)
+            ? approveState.message
+            : (rejectState?.message && !rejectState.success)
+                ? rejectState.message
+                : (removeState?.message && !removeState.success)
+                    ? removeState.message
+                    : null;
 
     return (
         <div className={styles.section}>
@@ -76,6 +100,78 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
                     {showAddForm ? 'Cancelar' : '+ Agregar Repuesto'}
                 </button>
             </div>
+
+            {/* Pending Approval Banner */}
+            {hasPendingParts && (
+                <div style={{
+                    backgroundColor: 'var(--color-warning-50, #fffbeb)',
+                    border: '1px solid var(--color-warning-300, #fcd34d)',
+                    borderRadius: '8px',
+                    padding: '1rem 1.25rem',
+                    marginBottom: '1rem',
+                }}>
+                    <p style={{ fontWeight: 700, margin: '0 0 0.25rem', fontSize: '0.9rem' }}>
+                        ⏳ Repuestos pendientes de aprobación del cliente
+                    </p>
+                    <p style={{ margin: '0 0 0.75rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+                        El cliente debe autorizar estos repuestos antes de descontar inventario y facturar.
+                    </p>
+
+                    {canApprove ? (
+                        <>
+                            <div className={styles.actions} style={{ marginTop: '0.5rem' }}>
+                                <form action={approveAction}>
+                                    <input type="hidden" name="ticketId" value={ticketId} />
+                                    <button
+                                        type="submit"
+                                        disabled={isApproving}
+                                        className={styles.createBtn}
+                                    >
+                                        {isApproving ? 'Aprobando...' : 'Aprobar repuestos'}
+                                    </button>
+                                </form>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowRejectForm(!showRejectForm)}
+                                    className={showRejectForm ? styles.cancelBtn : styles.dangerBtn}
+                                >
+                                    {showRejectForm ? 'Cancelar' : 'Rechazar'}
+                                </button>
+                            </div>
+
+                            {showRejectForm && (
+                                <form action={rejectAction} style={{ marginTop: '0.75rem' }}>
+                                    <input type="hidden" name="ticketId" value={ticketId} />
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Motivo del rechazo</label>
+                                        <textarea
+                                            name="reason"
+                                            value={rejectReason}
+                                            onChange={(e) => setRejectReason(e.target.value)}
+                                            rows={3}
+                                            placeholder="Ej: el cliente no autoriza el costo, prefiere otra opción..."
+                                            required
+                                            minLength={10}
+                                            className={styles.textarea}
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={isRejecting || !isRejectReasonValid}
+                                        className={styles.dangerBtn}
+                                    >
+                                        {isRejecting ? 'Rechazando...' : 'Confirmar rechazo'}
+                                    </button>
+                                </form>
+                            )}
+                        </>
+                    ) : (
+                        <p style={{ margin: 0, fontSize: '0.8125rem', fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
+                            Solo un administrador puede registrar la aprobación del cliente.
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* Add Part Form */}
             {showAddForm && (
@@ -133,6 +229,10 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
                         </button>
                     </div>
 
+                    <p className={styles.textMuted} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                        El repuesto se agregará pendiente de aprobación del cliente y no descontará inventario hasta que sea aprobado.
+                    </p>
+
                     {addState?.message && !addState.success && (
                         <p className={styles.errorMessage}>
                             {addState.message}
@@ -158,20 +258,29 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
                                     <th style={{ textAlign: 'right' }}>Costo U.</th>
                                     <th style={{ textAlign: 'right' }}>Precio U.</th>
                                     <th style={{ textAlign: 'right' }}>Subtotal</th>
+                                    <th style={{ textAlign: 'center' }}>Estado</th>
                                     <th style={{ textAlign: 'center' }}>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {partsUsed.map((usage) => {
-                                    const subtotal = Number(usage.part.price) * usage.quantity;
+                                    const unitPrice = priceOf(usage);
+                                    const subtotal = unitPrice * usage.quantity;
                                     return (
                                         <tr key={usage.id} className={styles.tableRow}>
                                             <td><strong>{usage.part.name}</strong></td>
                                             <td className={styles.textMuted}>{usage.part.sku || '-'}</td>
                                             <td style={{ textAlign: 'center' }}><strong>{usage.quantity}</strong></td>
                                             <td style={{ textAlign: 'right' }}>Q{Number(usage.part.cost).toFixed(2)}</td>
-                                            <td style={{ textAlign: 'right' }}>Q{Number(usage.part.price).toFixed(2)}</td>
+                                            <td style={{ textAlign: 'right' }}>Q{unitPrice.toFixed(2)}</td>
                                             <td style={{ textAlign: 'right' }}><strong>Q{subtotal.toFixed(2)}</strong></td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {usage.approved ? (
+                                                    <span className={styles.textSuccess} style={{ fontSize: '0.75rem', fontWeight: 600 }}>✓ Aprobado</span>
+                                                ) : (
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-warning-600, #b45309)' }}>⏳ Pendiente</span>
+                                                )}
+                                            </td>
                                             <td style={{ textAlign: 'center' }}>
                                                 <form action={removeAction}>
                                                     <input type="hidden" name="usageId" value={usage.id} />
@@ -212,9 +321,9 @@ export default function PartsSection({ ticketId, partsUsed, availableParts }: Pr
                 </>
             )}
 
-            {removeState?.message && !removeState.success && (
+            {actionMessage && (
                 <p className={styles.errorMessage}>
-                    {removeState.message}
+                    {actionMessage}
                 </p>
             )}
         </div>
