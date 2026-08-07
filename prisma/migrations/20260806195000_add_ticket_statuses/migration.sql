@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "TicketStatus" ADD VALUE 'WAITING_APPROVAL';
+ALTER TYPE "TicketStatus" ADD VALUE 'REJECTED';

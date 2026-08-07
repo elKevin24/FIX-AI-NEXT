@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
             status: {
               in: [
                 TicketStatus.OPEN,
+                TicketStatus.WAITING_APPROVAL,
                 TicketStatus.IN_PROGRESS,
                 TicketStatus.WAITING_FOR_PARTS,
               ],
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest) {
                 status: {
                   in: [
                     TicketStatus.OPEN,
+                    TicketStatus.WAITING_APPROVAL,
                     TicketStatus.IN_PROGRESS,
                     TicketStatus.WAITING_FOR_PARTS,
                   ],

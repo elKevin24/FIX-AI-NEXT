@@ -24,12 +24,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.4.2
- * Query Engine version: 94a226be1cf2967af2541cca5529f0f7ba866919
+ * Prisma Client JS version: 7.9.1
+ * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
  */
 Prisma.prismaVersion = {
-  client: "7.4.2",
-  engine: "94a226be1cf2967af2541cca5529f0f7ba866919"
+  client: "7.9.1",
+  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -626,11 +626,13 @@ exports.TechnicianStatus = exports.$Enums.TechnicianStatus = {
 
 exports.TicketStatus = exports.$Enums.TicketStatus = {
   OPEN: 'OPEN',
+  WAITING_APPROVAL: 'WAITING_APPROVAL',
   IN_PROGRESS: 'IN_PROGRESS',
   WAITING_FOR_PARTS: 'WAITING_FOR_PARTS',
   RESOLVED: 'RESOLVED',
   CLOSED: 'CLOSED',
-  CANCELLED: 'CANCELLED'
+  CANCELLED: 'CANCELLED',
+  REJECTED: 'REJECTED'
 };
 
 exports.TicketPriority = exports.$Enums.TicketPriority = {
