@@ -190,11 +190,13 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 export const TicketStatus: {
   OPEN: 'OPEN',
+  WAITING_APPROVAL: 'WAITING_APPROVAL',
   IN_PROGRESS: 'IN_PROGRESS',
   WAITING_FOR_PARTS: 'WAITING_FOR_PARTS',
   RESOLVED: 'RESOLVED',
   CLOSED: 'CLOSED',
-  CANCELLED: 'CANCELLED'
+  CANCELLED: 'CANCELLED',
+  REJECTED: 'REJECTED'
 };
 
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
@@ -479,7 +481,7 @@ export class PrismaClient<
    * Read more in our [docs](https://pris.ly/d/client).
    */
 
-  constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
+  constructor(optionsArg ?: Prisma.PrismaClientConstructorArgs<ClientOptions>);
   $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
 
   /**
@@ -552,7 +554,7 @@ export class PrismaClient<
    * 
    * Read more in our [docs](https://www.prisma.io/docs/orm/prisma-client/queries/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
@@ -929,8 +931,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 7.4.2
-   * Query Engine version: 94a226be1cf2967af2541cca5529f0f7ba866919
+   * Prisma Client JS version: 7.9.1
+   * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
    */
   export type PrismaVersion = {
     client: string
@@ -1065,6 +1067,19 @@ export namespace Prisma {
   };
 
   /**
+   * Resolved type of the argument passed to the `PrismaClient` constructor.
+   *
+   * When called without a narrower options type (the common case), this resolves
+   * to `PrismaClientOptions` directly, which produces a clear TypeScript error
+   * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
+   * the argument is missing or incomplete. When the user supplies a narrower
+   * options type (e.g. via a literal), it falls back to `Subset` to keep
+   * filtering out unknown properties.
+   */
+  export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
+    [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
+
+  /**
    * SelectSubset
    * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
    * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -1096,7 +1111,7 @@ export namespace Prisma {
   type XOR<T, U> =
     T extends object ?
     U extends object ?
-      (Without<T, U> & U) | (Without<U, T> & T)
+      ((Without<T, U> & U) | (Without<U, T> & T)) & object
     : U : T
 
 
@@ -3800,11 +3815,26 @@ export namespace Prisma {
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
     /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
+     * 
+     * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
+     * 
+     * Learn more: https://pris.ly/d/driver-adapters
+     * 
+     * @example
+     * ```ts
+     * import { PrismaPg } from '@prisma/adapter-pg'
+     * import { PrismaClient } from './generated/prisma/client'
+     * 
+     * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+     * const prisma = new PrismaClient({ adapter })
+     * ```
      */
     adapter?: runtime.SqlDriverAdapterFactory
     /**
-     * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+     * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
+     * 
+     * Learn more: https://pris.ly/d/accelerate
      */
     accelerateUrl?: string
     /**
@@ -5807,6 +5837,11 @@ export namespace Prisma {
      * Skip the first `n` Tenants.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tenants.
+     */
     distinct?: TenantScalarFieldEnum | TenantScalarFieldEnum[]
   }
 
@@ -7681,6 +7716,11 @@ export namespace Prisma {
      * Skip the first `n` Users.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Users.
+     */
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
   }
 
@@ -9621,6 +9661,11 @@ export namespace Prisma {
      * Skip the first `n` Customers.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Customers.
+     */
     distinct?: CustomerScalarFieldEnum | CustomerScalarFieldEnum[]
   }
 
@@ -11124,6 +11169,11 @@ export namespace Prisma {
      * Skip the first `n` Tickets.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tickets.
+     */
     distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
   }
 
@@ -12491,6 +12541,11 @@ export namespace Prisma {
      * Skip the first `n` TicketAttachments.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TicketAttachments.
+     */
     distinct?: TicketAttachmentScalarFieldEnum | TicketAttachmentScalarFieldEnum[]
   }
 
@@ -13754,6 +13809,11 @@ export namespace Prisma {
      * Skip the first `n` Parts.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Parts.
+     */
     distinct?: PartScalarFieldEnum | PartScalarFieldEnum[]
   }
 
@@ -15112,6 +15172,11 @@ export namespace Prisma {
      * Skip the first `n` PurchaseOrders.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PurchaseOrders.
+     */
     distinct?: PurchaseOrderScalarFieldEnum | PurchaseOrderScalarFieldEnum[]
   }
 
@@ -16240,6 +16305,11 @@ export namespace Prisma {
      * Skip the first `n` PurchaseItems.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PurchaseItems.
+     */
     distinct?: PurchaseItemScalarFieldEnum | PurchaseItemScalarFieldEnum[]
   }
 
@@ -17340,6 +17410,11 @@ export namespace Prisma {
      * Skip the first `n` PartUsages.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PartUsages.
+     */
     distinct?: PartUsageScalarFieldEnum | PartUsageScalarFieldEnum[]
   }
 
@@ -18506,6 +18581,11 @@ export namespace Prisma {
      * Skip the first `n` AuditLogs.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AuditLogs.
+     */
     distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
   }
 
@@ -19617,6 +19697,11 @@ export namespace Prisma {
      * Skip the first `n` TicketNotes.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TicketNotes.
+     */
     distinct?: TicketNoteScalarFieldEnum | TicketNoteScalarFieldEnum[]
   }
 
@@ -20886,6 +20971,11 @@ export namespace Prisma {
      * Skip the first `n` ServiceTemplates.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceTemplates.
+     */
     distinct?: ServiceTemplateScalarFieldEnum | ServiceTemplateScalarFieldEnum[]
   }
 
@@ -22109,6 +22199,11 @@ export namespace Prisma {
      * Skip the first `n` TemplateDefaultParts.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TemplateDefaultParts.
+     */
     distinct?: TemplateDefaultPartScalarFieldEnum | TemplateDefaultPartScalarFieldEnum[]
   }
 
@@ -23222,6 +23317,11 @@ export namespace Prisma {
      * Skip the first `n` TicketServices.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TicketServices.
+     */
     distinct?: TicketServiceScalarFieldEnum | TicketServiceScalarFieldEnum[]
   }
 
@@ -24267,6 +24367,11 @@ export namespace Prisma {
      * Skip the first `n` TechnicianSpecializations.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TechnicianSpecializations.
+     */
     distinct?: TechnicianSpecializationScalarFieldEnum | TechnicianSpecializationScalarFieldEnum[]
   }
 
@@ -25377,6 +25482,11 @@ export namespace Prisma {
      * Skip the first `n` TechnicianUnavailabilities.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TechnicianUnavailabilities.
+     */
     distinct?: TechnicianUnavailabilityScalarFieldEnum | TechnicianUnavailabilityScalarFieldEnum[]
   }
 
@@ -26495,6 +26605,11 @@ export namespace Prisma {
      * Skip the first `n` Notifications.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notifications.
+     */
     distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
   }
 
@@ -27943,6 +28058,11 @@ export namespace Prisma {
      * Skip the first `n` Invoices.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
     distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
   }
 
@@ -29190,6 +29310,11 @@ export namespace Prisma {
      * Skip the first `n` Payments.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Payments.
+     */
     distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
   }
 
@@ -30450,6 +30575,11 @@ export namespace Prisma {
      * Skip the first `n` CashRegisters.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CashRegisters.
+     */
     distinct?: CashRegisterScalarFieldEnum | CashRegisterScalarFieldEnum[]
   }
 
@@ -31696,6 +31826,11 @@ export namespace Prisma {
      * Skip the first `n` CashTransactions.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CashTransactions.
+     */
     distinct?: CashTransactionScalarFieldEnum | CashTransactionScalarFieldEnum[]
   }
 
@@ -32965,6 +33100,11 @@ export namespace Prisma {
      * Skip the first `n` TenantSettings.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TenantSettings.
+     */
     distinct?: TenantSettingsScalarFieldEnum | TenantSettingsScalarFieldEnum[]
   }
 
@@ -34070,6 +34210,11 @@ export namespace Prisma {
      * Skip the first `n` InvoiceHistories.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InvoiceHistories.
+     */
     distinct?: InvoiceHistoryScalarFieldEnum | InvoiceHistoryScalarFieldEnum[]
   }
 
@@ -35440,6 +35585,11 @@ export namespace Prisma {
      * Skip the first `n` POSSales.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of POSSales.
+     */
     distinct?: POSSaleScalarFieldEnum | POSSaleScalarFieldEnum[]
   }
 
@@ -36690,6 +36840,11 @@ export namespace Prisma {
      * Skip the first `n` POSSaleItems.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of POSSaleItems.
+     */
     distinct?: POSSaleItemScalarFieldEnum | POSSaleItemScalarFieldEnum[]
   }
 
@@ -37795,6 +37950,11 @@ export namespace Prisma {
      * Skip the first `n` POSSalePayments.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of POSSalePayments.
+     */
     distinct?: POSSalePaymentScalarFieldEnum | POSSalePaymentScalarFieldEnum[]
   }
 
@@ -39098,6 +39258,11 @@ export namespace Prisma {
      * Skip the first `n` POSQuotations.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of POSQuotations.
+     */
     distinct?: POSQuotationScalarFieldEnum | POSQuotationScalarFieldEnum[]
   }
 
@@ -40281,6 +40446,11 @@ export namespace Prisma {
      * Skip the first `n` POSQuotationItems.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of POSQuotationItems.
+     */
     distinct?: POSQuotationItemScalarFieldEnum | POSQuotationItemScalarFieldEnum[]
   }
 
@@ -41605,6 +41775,11 @@ export namespace Prisma {
      * Skip the first `n` CreditNotes.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CreditNotes.
+     */
     distinct?: CreditNoteScalarFieldEnum | CreditNoteScalarFieldEnum[]
   }
 
@@ -42784,6 +42959,11 @@ export namespace Prisma {
      * Skip the first `n` CreditNoteItems.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CreditNoteItems.
+     */
     distinct?: CreditNoteItemScalarFieldEnum | CreditNoteItemScalarFieldEnum[]
   }
 
@@ -43924,6 +44104,11 @@ export namespace Prisma {
      * Skip the first `n` SessionLogs.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessionLogs.
+     */
     distinct?: SessionLogScalarFieldEnum | SessionLogScalarFieldEnum[]
   }
 
@@ -45046,6 +45231,11 @@ export namespace Prisma {
      * Skip the first `n` UserPresences.
      */
     skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserPresences.
+     */
     distinct?: UserPresenceScalarFieldEnum | UserPresenceScalarFieldEnum[]
   }
 

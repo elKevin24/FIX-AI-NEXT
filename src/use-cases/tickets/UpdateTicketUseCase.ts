@@ -60,24 +60,25 @@ export class UpdateTicketUseCase {
         updateData.updatedById = userId;
 
         await tenantDb.$transaction(async (tx: any) => {
-             const txTenantDb = getTenantPrisma(existingTicket.tenantId, userId, tx);
+             // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
+             // We must apply the tenant constraint manually.
 
              if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
-                         await txTenantDb.partUsage.delete({
-                             where: { id: usage.id }
+                         await tx.partUsage.delete({
+                             where: { id: usage.id, ticketId: existingTicket.id }
                          });
                      }
                  }
              }
 
-             await txTenantDb.ticket.update({
-                 where: { id: ticketId },
+             await tx.ticket.update({
+                 where: { id: ticketId, tenantId: existingTicket.tenantId },
                  data: updateData,
              });
 
-             await txTenantDb.auditLog.create({
+             await tx.auditLog.create({
                 data: {
                     action: assignedToId && assignedToId !== existingTicket.assignedToId ? 'TICKET_ASSIGNED' : 'TICKET_UPDATED',
                     module: 'TICKETS',
@@ -87,8 +88,7 @@ export class UpdateTicketUseCase {
                         newStatus: status,
                         assignedToId,
                     }),
-                    user: { connect: { id: userId } },
-                    tenant: { connect: { id: existingTicket.tenantId } },
+                    userId,
                     entityType: 'Ticket',
                     entityId: existingTicket.id,
                 }

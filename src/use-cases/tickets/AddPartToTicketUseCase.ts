@@ -53,8 +53,7 @@ export class AddPartToTicketUseCase {
                     action: 'TICKET_UPDATED',
                     module: 'TICKETS',
                     details: JSON.stringify({ ticketId, partId, quantity, type: 'PART_ADDED', newQuantity: part.quantity - quantity }),
-                    user: { connect: { id: userId } },
-                    tenant: { connect: { id: ticket.tenantId } },
+                    userId,
                     entityType: 'Ticket',
                     entityId: ticketId,
                 }

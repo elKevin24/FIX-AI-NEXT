@@ -97,8 +97,7 @@ export class CreateTicketUseCase {
                     action: 'TICKET_CREATED',
                     module: 'TICKETS',
                     details: JSON.stringify({ id: newTicket.id, title: newTicket.title }),
-                    user: { connect: { id: userId } },
-                    tenant: { connect: { id: tenantId } },
+                    userId,
                     entityType: 'Ticket',
                     entityId: newTicket.id,
                 }

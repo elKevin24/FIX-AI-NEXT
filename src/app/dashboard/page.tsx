@@ -21,11 +21,13 @@ enum TicketPriority {
 
 enum TicketStatus {
   OPEN = 'OPEN',
+  WAITING_APPROVAL = 'WAITING_APPROVAL',
   IN_PROGRESS = 'IN_PROGRESS',
   WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
   RESOLVED = 'RESOLVED',
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
 }
 
 export default async function DashboardPage() {
@@ -52,11 +54,11 @@ export default async function DashboardPage() {
         financialStats,
         posStats,
     ] = await Promise.all([
-        // Active tickets (OPEN + IN_PROGRESS)
+        // Active tickets (OPEN + WAITING_APPROVAL + IN_PROGRESS)
         tenantPrisma.ticket.count({
             where: {
                 tenantId, // Explicitly kept as count() is not intercepted by current wrapper
-                status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] },
+                status: { in: [TicketStatus.OPEN, TicketStatus.WAITING_APPROVAL, TicketStatus.IN_PROGRESS] },
             },
         }),
         // Tickets waiting for parts
@@ -93,7 +95,7 @@ export default async function DashboardPage() {
             where: {
                 // tenantId auto-injected by findMany wrapper
                 priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
-                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
+                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED] },
             },
             include: {
                 customer: {
@@ -185,7 +187,7 @@ export default async function DashboardPage() {
         ).length;
 
         const inProgress = tech.assignedTickets.filter((t: any) =>
-            t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
+            t.status === TicketStatus.OPEN || t.status === TicketStatus.WAITING_APPROVAL || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
         ).length;
 
         // Calculate average days to complete

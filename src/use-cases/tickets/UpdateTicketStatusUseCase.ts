@@ -59,8 +59,7 @@ export class UpdateTicketStatusUseCase {
                     action: 'TICKET_STATUS_CHANGED',
                     module: 'TICKETS',
                     details: JSON.stringify({ id: existingTicket.id, oldStatus: existingTicket.status, newStatus: status }),
-                    user: { connect: { id: userId } },
-                    tenant: { connect: { id: tenantId } },
+                    userId,
                     entityType: 'Ticket',
                     entityId: existingTicket.id,
                 }
