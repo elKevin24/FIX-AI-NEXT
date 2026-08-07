@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ServiceCategory } from '@/generated/prisma';
+import { ServiceCategory } from '@prisma/client';
 import { createServiceTemplate, updateServiceTemplate } from '@/lib/service-template-actions';
 import styles from './ServiceTemplateForm.module.css';
 

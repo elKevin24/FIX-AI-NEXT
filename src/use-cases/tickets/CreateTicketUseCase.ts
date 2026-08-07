@@ -2,6 +2,7 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { notifyLowStock, notifyTicketCreated } from '@/lib/ticket-notifications';
 import { CreateTicketInput } from '@/lib/schemas';
+import { NotFoundError, ValidationError, BusinessRuleError, AuthorizationError } from '@/lib/errors';
 
 export interface CreateTicketParams {
     ticketData: CreateTicketInput;
@@ -50,7 +51,7 @@ export class CreateTicketUseCase {
 
         if (!customer) {
             if (!customerName) {
-                 throw new Error('Nombre de cliente requerido para crear uno nuevo.');
+                 throw new ValidationError('Nombre de cliente requerido para crear uno nuevo.', 'customerName');
             }
 
             customer = await tenantDb.customer.create({
@@ -108,13 +109,13 @@ export class CreateTicketUseCase {
                     const part = await tx.part.findUnique({ where: { id: partItem.partId } });
 
                     if (!part) {
-                        throw new Error(`Repuesto no encontrado: ${partItem.partId}`);
+                        throw new NotFoundError('Repuesto', partItem.partId);
                     }
                     if (part.tenantId !== tenantId) {
-                        throw new Error('No autorizado');
+                        throw new AuthorizationError('No autorizado para acceder a este repuesto');
                     }
                     if (part.quantity < partItem.quantity) {
-                        throw new Error(`Stock insuficiente para '${part.name}'. Disponibles: ${part.quantity}, Solicitados: ${partItem.quantity}`);
+                        throw new BusinessRuleError(`Stock insuficiente para '${part.name}'. Disponibles: ${part.quantity}, Solicitados: ${partItem.quantity}`);
                     }
 
                     await tx.partUsage.create({

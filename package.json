@@ -27,7 +27,8 @@
     "neon:studio": "npx prisma studio",
     "test:notifications": "npx tsx scripts/test-notifications.ts",
     "create:maintenance-templates": "npx tsx scripts/create-maintenance-templates.ts",
-    "seed:service-templates": "npx tsx scripts/seed-all-service-templates.ts"
+    "seed:service-templates": "npx tsx scripts/seed-all-service-templates.ts",
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

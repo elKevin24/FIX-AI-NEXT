@@ -4,8 +4,8 @@ import { requireTenantSession, assertNotViewer } from '@/lib/auth-context';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { PaymentMethod, POSSaleStatus } from '@/generated/prisma';
-import { Prisma } from '@/generated/prisma';
+import { PaymentMethod, POSSaleStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { getTaxRate } from './tenant-settings-actions';
 import { CreatePOSSaleSchema } from '@/lib/schemas';
 
