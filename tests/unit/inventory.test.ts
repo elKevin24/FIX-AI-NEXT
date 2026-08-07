@@ -51,6 +51,9 @@ function makeTx(overrides: Record<string, any> = {}) {
       findUnique: vi.fn(),
       delete: vi.fn().mockResolvedValue({ id: 'usage-1' }),
     },
+    auditLog: {
+      create: vi.fn().mockResolvedValue({ id: 'log-1' }),
+    },
     user: {
       findMany: vi.fn().mockResolvedValue([{ id: 'admin-1' }]),
     },
