@@ -4,6 +4,7 @@ import { sendEmail } from './email-service';
 import { TicketCreatedEmail } from '@/emails/TicketCreated';
 import { TicketStatusChangedEmail } from '@/emails/TicketStatusChanged';
 import { TechnicianAssignedEmail } from '@/emails/TechnicianAssigned';
+import { LowStockEmail } from '@/emails/LowStock';
 
 // --- Types ---
 
@@ -151,6 +152,9 @@ export async function notifyLowStock(partName: string, currentQuantity: number, 
         where: {
             tenantId,
             role: 'ADMIN'
+        },
+        include: {
+            tenant: { select: { name: true } }
         }
     });
 
@@ -163,5 +167,17 @@ export async function notifyLowStock(partName: string, currentQuantity: number, 
             message: `El repuesto "${partName}" tiene solo ${currentQuantity} unidades disponibles.`,
             link: '/dashboard/parts'
         });
+
+        if (admin.email) {
+            await sendEmail({
+                to: admin.email,
+                subject: `[FIX-AI] Alerta de stock bajo: ${partName}`,
+                react: LowStockEmail({
+                    partName,
+                    currentQuantity,
+                    tenantName: admin.tenant?.name || 'Mi taller',
+                })
+            });
+        }
     }
 }
