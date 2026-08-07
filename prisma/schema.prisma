@@ -32,6 +32,7 @@ model Tenant {
   purchaseOrders   PurchaseOrder[]
   serviceTemplates ServiceTemplate[]
   settings         TenantSettings?
+  ticketSequences  TicketSequence[]
   tickets          Ticket[]
   users            User[]
 
@@ -182,6 +183,16 @@ model Ticket {
   @@index([createdById])
   @@index([updatedById])
   @@map("tickets")
+}
+
+model TicketSequence {
+  tenantId  String @map("tenant_id") @db.Uuid
+  year      Int
+  lastValue Int    @default(0) @map("last_value")
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([tenantId, year])
+  @@map("ticket_sequences")
 }
 
 model TicketAttachment {
