@@ -7,12 +7,18 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { CreateTicketSchema, CreateBatchTicketsSchema, UpdateTicketSchema } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
-import { createNotification } from '@/lib/notifications';
-import { notifyLowStock, notifyTicketCreated } from '@/lib/ticket-notifications';
+import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
 import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
 import { UpdateTicketUseCase } from '@/use-cases/tickets/UpdateTicketUseCase';
 import { UpdateTicketStatusUseCase } from '@/use-cases/tickets/UpdateTicketStatusUseCase';
+import { DeleteTicketUseCase } from '@/use-cases/tickets/DeleteTicketUseCase';
+import { AddTicketNoteUseCase } from '@/use-cases/tickets/AddTicketNoteUseCase';
+import { DeleteTicketNoteUseCase } from '@/use-cases/tickets/DeleteTicketNoteUseCase';
+import { AddPartToTicketUseCase } from '@/use-cases/tickets/AddPartToTicketUseCase';
+import { RemovePartFromTicketUseCase } from '@/use-cases/tickets/RemovePartFromTicketUseCase';
+import { AddServiceToTicketUseCase } from '@/use-cases/tickets/AddServiceToTicketUseCase';
+import { RemoveServiceFromTicketUseCase } from '@/use-cases/tickets/RemoveServiceFromTicketUseCase';
 
 /**
  * Get ticket by ID for public status check
@@ -383,20 +389,11 @@ export async function deleteTicket(prevState: any, formData: FormData) {
     }
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const existingTicket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId }
+        await DeleteTicketUseCase.execute({
+            ticketId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
         });
-
-        if (!existingTicket) {
-            return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        await tenantDb.ticket.delete({
-            where: { id: ticketId },
-        });
-
     } catch (error) {
         console.error('Failed to delete ticket:', error);
         return { success: false, message: 'Error de base de datos: No se pudo eliminar el ticket.' };
@@ -426,43 +423,15 @@ export async function addTicketNote(prevState: any, formData: FormData) {
     }
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const ticket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId }
+        await AddTicketNoteUseCase.execute({
+            ticketId,
+            content,
+            isInternal,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
         });
-
-        if (!ticket) {
-            return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        await tenantDb.ticketNote.create({
-            data: {
-                content: content.trim(),
-                isInternal,
-                ticketId,
-                authorId: session.user.id,
-            }
-        });
-
-        await tenantDb.ticket.update({
-            where: { id: ticketId },
-            data: { updatedAt: new Date() }
-        });
-
-        if (ticket.assignedToId && ticket.assignedToId !== session.user.id) {
-            await createNotification({
-                userId: ticket.assignedToId,
-                tenantId: session.user.tenantId,
-                type: 'INFO',
-                title: 'Nueva Nota en Ticket',
-                message: `Nueva nota en ticket #${ticket.id.slice(0, 8)}: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-                link: `/dashboard/tickets/${ticketId}`
-            });
-        }
 
         return { success: true, message: 'Nota agregada correctamente' };
-
     } catch (error) {
         console.error('Failed to add note:', error);
         return { success: false, message: 'Error de base de datos: No se pudo agregar la nota.' };
@@ -484,40 +453,21 @@ export async function deleteTicketNote(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de nota requerido' };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-    const isAdmin = session.user.role === 'ADMIN';
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const note = await tenantDb.ticketNote.findUnique({
-            where: { id: noteId },
-            include: {
-                ticket: {
-                    select: { tenantId: true }
-                }
-            }
-        });
-
-        if (!note) {
-            return { success: false, message: 'Nota no encontrada' };
-        }
-
-        const isAuthor = note.authorId === session.user.id;
-        const isSameTenant = note.ticket.tenantId === session.user.tenantId;
-
-        if (!isSuperAdmin && !isAuthor && !(isAdmin && isSameTenant)) {
-            return { success: false, message: 'No autorizado para eliminar esta nota' };
-        }
-
-        await tenantDb.ticketNote.delete({
-            where: { id: noteId }
+        await DeleteTicketNoteUseCase.execute({
+            noteId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            role: session.user.role,
+            email: session.user.email,
         });
 
         return { success: true, message: 'Nota eliminada' };
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete note:', error);
+        if (error?.message?.includes('No autorizado')) {
+            return { success: false, message: error.message };
+        }
         return { success: false, message: 'Error de base de datos: No se pudo eliminar la nota.' };
     }
 }
@@ -539,68 +489,17 @@ export async function addPartToTicket(prevState: any, formData: FormData) {
         return { success: false, message: 'Datos inválidos' };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-        await tenantDb.$transaction(async (tx: any) => {
-            const ticket = await tx.ticket.findUnique({ where: { id: ticketId } });
-            if (!ticket) {
-                throw new Error('Ticket no encontrado');
-            }
-
-            if (!isSuperAdmin && ticket.tenantId !== session.user.tenantId) {
-                throw new Error('No autorizado');
-            }
-
-            const part = await tx.part.findUnique({ where: { id: partId } });
-            
-            if (!part) {
-                throw new Error('Repuesto no encontrado');
-            }
-
-            if (!isSuperAdmin && part.tenantId !== session.user.tenantId) {
-                throw new Error('No autorizado');
-            }
-
-            if (part.quantity < quantity) {
-                 throw new Error(`Stock insuficiente. Disponible: ${part.quantity}, Solicitado: ${quantity}`);
-            }
-
-            await tx.partUsage.create({
-                data: {
-                    ticketId,
-                    partId,
-                    quantity,
-                }
-            });
-
-            await tx.part.update({
-                where: { id: partId },
-                data: { quantity: { decrement: quantity } }
-            });
-
-            const updatedPart = await tx.part.findUnique({
-                where: { id: partId },
-                select: { id: true, name: true, quantity: true, minStock: true, tenantId: true }
-            });
-
-            if (updatedPart && updatedPart.quantity <= updatedPart.minStock) {
-                const admins = await tx.user.findMany({
-                    where: {
-                        tenantId: updatedPart.tenantId,
-                        role: 'ADMIN',
-                    },
-                    select: { id: true }
-                });
-
-                const adminIds = admins.map((a: { id: string }) => a.id);
-                await notifyLowStock(updatedPart.tenantId, updatedPart, adminIds);
-            }
+        await AddPartToTicketUseCase.execute({
+            ticketId,
+            partId,
+            quantity,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            email: session.user.email,
         });
 
         return { success: true, message: 'Repuesto agregado al ticket' };
-
     } catch (error: any) {
         console.error('Failed to add part to ticket:', error);
         return { success: false, message: error.message || 'Error de base de datos: No se pudo agregar el repuesto.' };
@@ -622,39 +521,15 @@ export async function removePartFromTicket(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de uso requerido' };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-        await tenantDb.$transaction(async (tx: any) => {
-            const usage = await tx.partUsage.findUnique({
-                where: { id: usageId },
-                include: {
-                    ticket: { select: { tenantId: true } },
-                    part: { select: { tenantId: true } },
-                }
-            });
-
-            if (!usage) {
-                throw new Error('Uso de repuesto no encontrado');
-            }
-
-            if (!isSuperAdmin && usage.ticket.tenantId !== session.user.tenantId) {
-                throw new Error('No autorizado');
-            }
-
-            await tx.partUsage.delete({
-                where: { id: usageId }
-            });
-
-            await tx.part.update({
-                where: { id: usage.partId },
-                data: { quantity: { increment: usage.quantity } }
-            });
+        await RemovePartFromTicketUseCase.execute({
+            usageId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            email: session.user.email,
         });
 
         return { success: true, message: 'Repuesto removido del ticket' };
-
     } catch (error: any) {
         console.error('Failed to remove part from ticket:', error);
         return { success: false, message: error.message || 'Error de base de datos: No se pudo remover el repuesto.' };
@@ -678,46 +553,17 @@ export async function addServiceToTicket(prevState: any, formData: FormData) {
     }
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const ticket = await tenantDb.ticket.findUnique({
-            where: { id: ticketId },
-        });
-
-        if (!ticket) {
-            return { success: false, message: 'Ticket no encontrado' };
-        }
-
-        if (ticket.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para editar este ticket' };
-        }
-
-        const service = await tenantDb.serviceTemplate.findUnique({
-            where: { id: serviceId },
-        });
-
-        if (!service) {
-            return { success: false, message: 'Servicio no encontrado' };
-        }
-
-        if (service.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'Servicio no pertenece a este tenant' };
-        }
-
-        await tenantDb.ticketService.create({
-            data: {
-                ticketId,
-                serviceId,
-                name: service.name,
-                laborCost: service.laborCost || 0,
-            }
+        await AddServiceToTicketUseCase.execute({
+            ticketId,
+            serviceId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
         });
 
         return { success: true, message: 'Servicio agregado al ticket' };
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to add service to ticket:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo agregar el servicio.' };
+        return { success: false, message: error.message || 'Error de base de datos: No se pudo agregar el servicio.' };
     }
 }
 
@@ -733,29 +579,15 @@ export async function removeServiceFromTicket(prevState: any, formData: FormData
     const serviceUsageId = formData.get('serviceUsageId') as string;
 
     try {
-        const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        const usage = await tenantDb.ticketService.findUnique({
-            where: { id: serviceUsageId },
-            include: { ticket: true }
-        });
-
-        if (!usage) {
-            return { success: false, message: 'Servicio no encontrado en el ticket' };
-        }
-
-        if (usage.ticket.tenantId !== session.user.tenantId) {
-            return { success: false, message: 'No autorizado para editar este ticket' };
-        }
-
-        await tenantDb.ticketService.delete({
-            where: { id: serviceUsageId }
+        await RemoveServiceFromTicketUseCase.execute({
+            serviceUsageId,
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
         });
 
         return { success: true, message: 'Servicio eliminado del ticket' };
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to remove service from ticket:', error);
-        return { success: false, message: 'Error de base de datos: No se pudo eliminar el servicio.' };
+        return { success: false, message: error.message || 'Error de base de datos: No se pudo eliminar el servicio.' };
     }
 }
