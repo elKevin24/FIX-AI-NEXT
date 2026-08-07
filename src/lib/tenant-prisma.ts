@@ -1,51 +1,69 @@
 import { prisma } from "./prisma";
 
-/**
- * List of models that have a tenantId field and should be scoped.
- */
 const MODELS_WITH_TENANT = [
-    'User',
-    'Customer',
-    'Ticket',
-    'Part',
-    'PurchaseOrder',
-    'AuditLog',
-    'ServiceTemplate',
-    'Notification',
-    'Invoice',
-    'Payment',
-    'CashRegister',
-    'CashTransaction',
-    'TenantSettings',
-    'POSSale',
-    'POSQuotation',
-    'CreditNote'
-];
+    'user', 'customer', 'ticket', 'part', 'purchaseOrder',
+    'auditLog', 'serviceTemplate', 'notification', 'invoice',
+    'payment', 'cashRegister', 'cashTransaction', 'tenantSettings',
+    'pOSSale', 'pOSQuotation', 'creditNote'
+] as const;
 
-/**
- * Models that have a `createdById` field usable for audit trail.
- */
 const MODELS_WITH_CREATED_BY = [
-    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
-    'ServiceTemplate', 'Invoice', 'CashTransaction',
-    'POSSale', 'POSQuotation', 'CreditNote'
-];
+    'user', 'customer', 'ticket', 'part', 'purchaseOrder',
+    'serviceTemplate', 'invoice', 'cashTransaction',
+    'pOSSale', 'pOSQuotation', 'creditNote'
+] as const;
 
-/**
- * Models that have an `updatedById` field usable for audit trail.
- */
 const MODELS_WITH_UPDATED_BY = [
-    'User', 'Customer', 'Ticket', 'Part', 'PurchaseOrder',
-    'ServiceTemplate', 'Invoice'
-];
+    'user', 'customer', 'ticket', 'part', 'purchaseOrder',
+    'serviceTemplate', 'invoice'
+] as const;
 
-/**
- * Returns a Prisma client extension that enforces tenant isolation.
- * 
- * @param tenantId The ID of the tenant to scope queries to.
- * @returns A tenant-scoped Prisma client.
- */
-export function getTenantPrisma(tenantId: string, userId?: string, clientArg: any = prisma) {
+type ModelName = typeof MODELS_WITH_TENANT[number];
+
+function hasTenantId(model: string): model is ModelName {
+    return MODELS_WITH_TENANT.includes(model as ModelName);
+}
+
+function hasCreatedBy(model: ModelName): boolean {
+    return (MODELS_WITH_CREATED_BY as readonly string[]).includes(model);
+}
+
+function hasUpdatedBy(model: ModelName): boolean {
+    return (MODELS_WITH_UPDATED_BY as readonly string[]).includes(model);
+}
+
+function addTenantId(data: Record<string, unknown>, tenantId: string): void {
+    data.tenantId = tenantId;
+}
+
+function addAuditFields(data: Record<string, unknown>, userId: string, model: ModelName): void {
+    if (hasCreatedBy(model)) {
+        data.createdById = userId;
+    }
+    if (hasUpdatedBy(model)) {
+        data.updatedById = userId;
+    }
+}
+
+async function verifyOwnership(
+    model: ModelName,
+    args: { where?: Record<string, unknown> },
+    tenantId: string
+): Promise<void> {
+    const { where } = args;
+    const record = await (prisma[model] as any).findFirst({
+        where: { ...where, tenantId },
+        select: { id: true }
+    });
+
+    if (!record) {
+        const error = new Error('Record not found or unauthorized.');
+        (error as any).code = 'P2025';
+        throw error;
+    }
+}
+
+export function getTenantPrisma(tenantId: string, userId?: string) {
     if (!tenantId) {
         throw new Error('tenantId es requerido para aislar la base de datos');
     }
@@ -53,27 +71,25 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
         throw new Error('userId es requerido para la auditoría');
     }
 
-    return clientArg.$extends({
+    return prisma.$extends({
         query: {
             $allModels: {
                 async findMany({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
                 },
                 async findFirst({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
                 },
                 async findUnique({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         const { where, ...rest } = args;
-                        // findUnique doesn't support additional filters in 'where' easily without
-                        // unique constraints, so we convert to findFirst.
-                        return (prisma as any)[model].findFirst({
+                        return (prisma[model] as any).findFirst({
                             where: { ...where, tenantId },
                             ...rest,
                         });
@@ -81,125 +97,78 @@ export function getTenantPrisma(tenantId: string, userId?: string, clientArg: an
                     return query(args);
                 },
                 async create({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
-                        (args.data as any).tenantId = tenantId;
+                    if (hasTenantId(model)) {
+                        addTenantId(args.data, tenantId);
                         if (userId) {
-                            if (MODELS_WITH_CREATED_BY.includes(model)) {
-                                (args.data as any).createdById = userId;
-                            }
-                            if (MODELS_WITH_UPDATED_BY.includes(model)) {
-                                (args.data as any).updatedById = userId;
-                            }
+                            addAuditFields(args.data, userId, model);
                         }
                     }
-                    
-                    const result = await query(args);
-                    return result;
+                    return query(args);
                 },
                 async createMany({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         if (Array.isArray(args.data)) {
-                            args.data = args.data.map((item: any) => {
-                                const enriched: any = { ...item, tenantId };
+                            args.data = args.data.map((item: Record<string, unknown>) => {
+                                const enriched = { ...item };
+                                addTenantId(enriched, tenantId);
                                 if (userId) {
-                                    if (MODELS_WITH_CREATED_BY.includes(model)) {
-                                        enriched.createdById = userId;
-                                    }
-                                    if (MODELS_WITH_UPDATED_BY.includes(model)) {
-                                        enriched.updatedById = userId;
-                                    }
+                                    addAuditFields(enriched, userId, model);
                                 }
                                 return enriched;
                             });
                         } else {
-                            (args.data as any).tenantId = tenantId;
+                            addTenantId(args.data, tenantId);
                             if (userId) {
-                                if (MODELS_WITH_CREATED_BY.includes(model)) {
-                                    (args.data as any).createdById = userId;
-                                }
-                                if (MODELS_WITH_UPDATED_BY.includes(model)) {
-                                    (args.data as any).updatedById = userId;
-                                }
+                                addAuditFields(args.data, userId, model);
                             }
                         }
                     }
-                    
-                    const result = await query(args);
-                    return result;
+                    return query(args);
                 },
                 async update({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
-                        const { where } = args;
-                        
-                        // 1. Verify ownership
-                        const record = await (prisma as any)[model].findFirst({
-                            where: { ...where, tenantId },
-                            select: { id: true } 
-                        });
-
-                        if (!record) {
-                            const error = new Error('Record to update not found or unauthorized.');
-                            (error as any).code = 'P2025';
-                            throw error;
-                        }
-
-                        // 2. Add metadata
-                        if (userId && args.data && MODELS_WITH_UPDATED_BY.includes(model)) {
+                    if (hasTenantId(model)) {
+                        await verifyOwnership(model, args, tenantId);
+                        if (userId && args.data && hasUpdatedBy(model)) {
                             args.data.updatedById = userId;
                         }
                     }
-
-                    // 3. Perform Update
-                    const result = await query(args);
-                    return result;
+                    return query(args);
                 },
                 async delete({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
-                        const { where } = args;
-                        const record = await (prisma as any)[model].findFirst({
-                            where: { ...where, tenantId },
-                            select: { id: true }
-                        });
-
-                        if (!record) {
-                            const error = new Error('Record to delete not found or unauthorized.');
-                            (error as any).code = 'P2025';
-                            throw error;
-                        }
+                    if (hasTenantId(model)) {
+                        await verifyOwnership(model, args, tenantId);
                     }
-
-                    const result = await query(args);
-                    return result;
+                    return query(args);
                 },
                 async count({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
                 },
                 async aggregate({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
                 },
                 async groupBy({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
                 },
                 async updateMany({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
-                        if (userId && args.data && MODELS_WITH_UPDATED_BY.includes(model)) {
+                        if (userId && args.data && hasUpdatedBy(model)) {
                             args.data.updatedById = userId;
                         }
                     }
                     return query(args);
                 },
                 async deleteMany({ args, query, model }: any) {
-                    if (MODELS_WITH_TENANT.includes(model)) {
+                    if (hasTenantId(model)) {
                         args.where = { ...args.where, tenantId };
                     }
                     return query(args);
