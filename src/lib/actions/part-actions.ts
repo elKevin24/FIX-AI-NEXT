@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { CreatePartSchema, UpdatePartSchema } from '@/lib/schemas';
+import { isSuperAdmin } from '@/lib/authz';
 import { CreatePartUseCase, UpdatePartUseCase, DeletePartUseCase } from '@/use-cases/parts/PartUseCases';
 
 /**
@@ -66,10 +67,10 @@ export async function updatePart(prevState: any, formData: FormData) {
         return { success: false, message: validatedFields.error.errors[0].message };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const superAdmin = isSuperAdmin(session.user);
 
     try {
-        await UpdatePartUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id, isSuperAdmin);
+        await UpdatePartUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id, superAdmin);
     } catch (error) {
         console.error('Failed to update part:', error);
         return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el repuesto.' };
@@ -97,10 +98,10 @@ export async function deletePart(prevState: any, formData: FormData) {
         return { success: false, message: 'ID de repuesto requerido' };
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const superAdmin = isSuperAdmin(session.user);
 
     try {
-        await DeletePartUseCase.execute(partId, session.user.tenantId, session.user.id, isSuperAdmin);
+        await DeletePartUseCase.execute(partId, session.user.tenantId, session.user.id, superAdmin);
     } catch (error) {
         console.error('Failed to delete part:', error);
         return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el repuesto.' };
