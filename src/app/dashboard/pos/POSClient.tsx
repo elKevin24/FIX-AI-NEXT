@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentMethod } from '@prisma/client';
 import { createPOSSale, getPartsForPOS } from '@/lib/pos-actions';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { useElementSize } from '@/hooks/useElementSize';
+import { useVirtualWindow } from '@/hooks/useVirtualWindow';
 import styles from './pos.module.css';
 
 // ============================================================================
@@ -63,6 +65,9 @@ export default function POSClient({
     currency,
 }: POSClientProps) {
     const router = useRouter();
+    const productSearchRef = useRef<HTMLInputElement>(null);
+    const productsViewportRef = useRef<HTMLDivElement>(null);
+    const cartViewportRef = useRef<HTMLDivElement>(null);
 
     // State
     const [parts, setParts] = useState<Part[]>(initialParts);
@@ -82,15 +87,40 @@ export default function POSClient({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    const deferredSearchProduct = useDeferredValue(searchProduct);
+    const productsViewportSize = useElementSize(productsViewportRef);
+
     // Filtered parts
     const filteredParts = useMemo(() => {
-        if (!searchProduct.trim()) return parts;
-        const search = searchProduct.toLowerCase();
+        if (!deferredSearchProduct.trim()) return parts;
+        const search = deferredSearchProduct.toLowerCase();
         return parts.filter(
             p => p.name.toLowerCase().includes(search) ||
                 (p.sku && p.sku.toLowerCase().includes(search))
         );
-    }, [parts, searchProduct]);
+    }, [parts, deferredSearchProduct]);
+
+    const productColumns = Math.max(1, Math.min(4, Math.floor((productsViewportSize.width || 0) / 220) || 1));
+
+    const productRows = useMemo(() => {
+        const rows: Part[][] = [];
+        for (let index = 0; index < filteredParts.length; index += productColumns) {
+            rows.push(filteredParts.slice(index, index + productColumns));
+        }
+        return rows;
+    }, [filteredParts, productColumns]);
+
+    const virtualProductRows = useVirtualWindow(productRows, productsViewportRef, {
+        itemHeight: 176,
+        overscan: 4,
+        enabled: productRows.length > 16,
+    });
+
+    const virtualCartItems = useVirtualWindow(cart, cartViewportRef, {
+        itemHeight: 88,
+        overscan: 4,
+        enabled: cart.length > 8,
+    });
 
     // Filtered customers
     const filteredCustomers = useMemo(() => {
@@ -182,6 +212,45 @@ export default function POSClient({
         setSuccess(null);
     };
 
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement;
+            const isTyping = Boolean(
+                target &&
+                (target.tagName === 'INPUT' ||
+                    target.tagName === 'TEXTAREA' ||
+                    target.tagName === 'SELECT' ||
+                    target.isContentEditable)
+            );
+
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                productSearchRef.current?.focus();
+                return;
+            }
+
+            if (event.key === '/' && !isTyping) {
+                event.preventDefault();
+                productSearchRef.current?.focus();
+                return;
+            }
+
+            if (event.key === 'F9' && cart.length > 0) {
+                event.preventDefault();
+                setShowPaymentModal(true);
+                return;
+            }
+
+            if (event.key === 'Escape' && showPaymentModal) {
+                event.preventDefault();
+                setShowPaymentModal(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [cart.length, showPaymentModal]);
+
     // Select customer
     const selectCustomer = (customer: Customer) => {
         setSelectedCustomer(customer);
@@ -266,6 +335,7 @@ export default function POSClient({
                 <div className={styles['headerActions']}>
                     <Button
                         variant="outline"
+                        type="button"
                         onClick={() => router.push('/dashboard/pos/history')}
                     >
                         Historial
@@ -284,34 +354,53 @@ export default function POSClient({
                             placeholder="Buscar producto por nombre o SKU..."
                             value={searchProduct}
                             onChange={(e) => setSearchProduct(e.target.value)}
+                            ref={productSearchRef}
+                            aria-label="Buscar producto por nombre o SKU"
                         />
                     </div>
 
-                    <div className={styles['productsGrid']}>
+                    <div className={styles['productsViewport']} ref={productsViewportRef}>
                         {filteredParts.length === 0 ? (
                             <div className={styles['emptyProducts']}>
                                 <p>No se encontraron productos</p>
                             </div>
                         ) : (
-                            filteredParts.map(part => (
-                                <button
-                                    key={part.id}
-                                    className={styles['productCard']}
-                                    onClick={() => addToCart(part)}
-                                    disabled={part.quantity <= 0}
-                                >
-                                    <div className={styles['productName']}>{part.name}</div>
-                                    {part.sku && (
-                                        <div className={styles['productSku']}>{part.sku}</div>
-                                    )}
-                                    <div className={styles['productPrice']}>
-                                        {formatCurrency(part.price)}
+                            <div
+                                className={styles['virtualRows']}
+                                style={{
+                                    paddingTop: `${virtualProductRows.paddingTop}px`,
+                                    paddingBottom: `${virtualProductRows.paddingBottom}px`,
+                                }}
+                            >
+                                {virtualProductRows.visibleItems.map((row, rowIndex) => (
+                                    <div
+                                        key={`row-${virtualProductRows.startIndex + rowIndex}`}
+                                        className={styles['productRow']}
+                                        style={{ gridTemplateColumns: `repeat(${productColumns}, minmax(0, 1fr))` }}
+                                    >
+                                        {row.map((part) => (
+                                            <button
+                                                key={part.id}
+                                                type="button"
+                                                className={styles['productCard']}
+                                                onClick={() => addToCart(part)}
+                                                disabled={part.quantity <= 0}
+                                            >
+                                                <div className={styles['productName']}>{part.name}</div>
+                                                {part.sku && (
+                                                    <div className={styles['productSku']}>{part.sku}</div>
+                                                )}
+                                                <div className={styles['productPrice']}>
+                                                    {formatCurrency(part.price)}
+                                                </div>
+                                                <div className={styles['productStock']}>
+                                                    Stock: {part.quantity}
+                                                </div>
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className={styles['productStock']}>
-                                        Stock: {part.quantity}
-                                    </div>
-                                </button>
-                            ))
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -332,6 +421,7 @@ export default function POSClient({
                                     <button
                                         key={customer.id}
                                         className={styles['customerOption']}
+                                        type="button"
                                         onClick={() => selectCustomer(customer)}
                                     >
                                         <span>{customer.name}</span>
@@ -344,11 +434,14 @@ export default function POSClient({
                             <div className={styles['selectedCustomer']}>
                                 <span>{customerName}</span>
                                 <span>NIT: {customerNIT}</span>
-                                <button onClick={() => {
+                                <button
+                                    type="button"
+                                    onClick={() => {
                                     setSelectedCustomer(null);
                                     setCustomerName('Consumidor Final');
                                     setCustomerNIT('C/F');
-                                }}>
+                                }}
+                                >
                                     &times;
                                 </button>
                             </div>
@@ -356,7 +449,7 @@ export default function POSClient({
                     </div>
 
                     {/* Cart Items */}
-                    <div className={styles['cartItems']}>
+                    <div className={styles['cartItemsViewport']} ref={cartViewportRef}>
                         {cart.length === 0 ? (
                             <div className={styles['emptyCart']}>
                                 <p>Carrito vacío</p>
@@ -365,40 +458,51 @@ export default function POSClient({
                                 </p>
                             </div>
                         ) : (
-                            cart.map(item => (
-                                <div key={item.partId} className={styles['cartItem']}>
-                                    <div className={styles['cartItemInfo']}>
-                                        <span className={styles['cartItemName']}>{item.name}</span>
-                                        <span className={styles['cartItemPrice']}>
-                                            {formatCurrency(item.unitPrice)}
-                                        </span>
+                            <div
+                                className={styles['cartVirtualList']}
+                                style={{
+                                    paddingTop: `${virtualCartItems.paddingTop}px`,
+                                    paddingBottom: `${virtualCartItems.paddingBottom}px`,
+                                }}
+                            >
+                                {virtualCartItems.visibleItems.map((item) => (
+                                    <div key={item.partId} className={styles['cartItem']}>
+                                        <div className={styles['cartItemInfo']}>
+                                            <span className={styles['cartItemName']}>{item.name}</span>
+                                            <span className={styles['cartItemPrice']}>
+                                                {formatCurrency(item.unitPrice)}
+                                            </span>
+                                        </div>
+                                        <div className={styles['cartItemActions']}>
+                                            <button
+                                                type="button"
+                                                className={styles['qtyBtn']}
+                                                onClick={() => updateQuantity(item.partId, item.quantity - 1)}
+                                            >
+                                                -
+                                            </button>
+                                            <span className={styles['qtyValue']}>{item.quantity}</span>
+                                            <button
+                                                type="button"
+                                                className={styles['qtyBtn']}
+                                                onClick={() => updateQuantity(item.partId, item.quantity + 1)}
+                                            >
+                                                +
+                                            </button>
+                                            <span className={styles['cartItemTotal']}>
+                                                {formatCurrency(item.unitPrice * item.quantity)}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className={styles['removeBtn']}
+                                                onClick={() => removeFromCart(item.partId)}
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className={styles['cartItemActions']}>
-                                        <button
-                                            className={styles['qtyBtn']}
-                                            onClick={() => updateQuantity(item.partId, item.quantity - 1)}
-                                        >
-                                            -
-                                        </button>
-                                        <span className={styles['qtyValue']}>{item.quantity}</span>
-                                        <button
-                                            className={styles['qtyBtn']}
-                                            onClick={() => updateQuantity(item.partId, item.quantity + 1)}
-                                        >
-                                            +
-                                        </button>
-                                        <span className={styles['cartItemTotal']}>
-                                            {formatCurrency(item.unitPrice * item.quantity)}
-                                        </span>
-                                        <button
-                                            className={styles['removeBtn']}
-                                            onClick={() => removeFromCart(item.partId)}
-                                        >
-                                            &times;
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
+                                ))}
+                            </div>
                         )}
                     </div>
 
@@ -451,6 +555,7 @@ export default function POSClient({
                     <div className={styles['cartActions']}>
                         <Button
                             variant="outline"
+                            type="button"
                             onClick={clearCart}
                             disabled={cart.length === 0}
                         >
@@ -458,6 +563,7 @@ export default function POSClient({
                         </Button>
                         <Button
                             variant="primary"
+                            type="button"
                             onClick={() => setShowPaymentModal(true)}
                             disabled={cart.length === 0}
                         >
@@ -475,6 +581,7 @@ export default function POSClient({
                             <h2>Procesar Pago</h2>
                             <button
                                 className={styles['modalClose']}
+                                type="button"
                                 onClick={() => setShowPaymentModal(false)}
                             >
                                 &times;
@@ -529,6 +636,7 @@ export default function POSClient({
                                             </span>
                                             <button
                                                 className={styles['removePaymentBtn']}
+                                                type="button"
                                                 onClick={() => removePayment(payment.id)}
                                             >
                                                 &times;
@@ -553,12 +661,14 @@ export default function POSClient({
                         <div className={styles['modalFooter']}>
                             <Button
                                 variant="outline"
+                                type="button"
                                 onClick={() => setShowPaymentModal(false)}
                             >
                                 Cancelar
                             </Button>
                             <Button
                                 variant="primary"
+                                type="button"
                                 onClick={processSale}
                                 disabled={isSubmitting || totalPaid < total}
                                 isLoading={isSubmitting}
@@ -628,6 +738,7 @@ function PaymentForm({ remainingAmount, onAdd }: PaymentFormProps) {
             )}
             <Button
                 variant="secondary"
+                type="button"
                 onClick={handleAdd}
                 disabled={amount <= 0}
             >

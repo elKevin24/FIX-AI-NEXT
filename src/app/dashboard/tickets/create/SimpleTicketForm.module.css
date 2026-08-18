@@ -101,6 +101,50 @@
     /* Reduced gap */
 }
 
+.stepper {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.stepChip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stepChipActive {
+    background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+    border-color: var(--color-primary-700);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.stepChip:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.stepChipNumber {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 0.75rem;
+}
+
 /* Glass Card - Compacta */
 .glassCard {
     background: var(--color-surface);
@@ -281,6 +325,37 @@
     /* Simplified */
 }
 
+.summaryCard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: linear-gradient(180deg, var(--color-bg-secondary), var(--color-surface));
+    border: 1px solid var(--color-border-light);
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.summaryLabel {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.25rem;
+}
+
+.summaryValue {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.summaryNotes {
+    display: grid;
+    gap: 0.5rem;
+}
+
 /* Footer Actions */
 .footer {
     position: sticky;
@@ -290,6 +365,20 @@
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
+}
+
+.footerNav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.footerHint {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
 }
 
 .submitBtn {
@@ -393,6 +482,17 @@
 
     .footer {
         justify-content: flex-end;
+    }
+
+    .stepper {
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .summaryCard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        padding: 1rem;
     }
 
     .submitBtn {

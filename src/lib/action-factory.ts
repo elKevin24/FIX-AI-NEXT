@@ -3,10 +3,14 @@ import {
     IPartRepository,
     IUserRepository,
     ITicketRepository,
+    IInvoiceRepository,
+    ICashRegisterRepository,
     PrismaCustomerRepository,
     PrismaPartRepository,
     PrismaUserRepository,
     PrismaTicketRepository,
+    PrismaInvoiceRepository,
+    PrismaCashRegisterRepository,
 } from './repositories';
 
 export interface ActionRepositories {
@@ -14,6 +18,8 @@ export interface ActionRepositories {
     partRepo: IPartRepository;
     userRepo: IUserRepository;
     ticketRepo: ITicketRepository;
+    invoiceRepo: IInvoiceRepository;
+    cashRegisterRepo: ICashRegisterRepository;
 }
 
 /**
@@ -26,5 +32,7 @@ export function createActionRepositories(tenantId: string, userId?: string): Act
         partRepo: new PrismaPartRepository(tenantId, userId),
         userRepo: new PrismaUserRepository(tenantId, userId),
         ticketRepo: new PrismaTicketRepository(tenantId, userId),
+        invoiceRepo: new PrismaInvoiceRepository(tenantId, userId),
+        cashRegisterRepo: new PrismaCashRegisterRepository(tenantId, userId),
     };
 }

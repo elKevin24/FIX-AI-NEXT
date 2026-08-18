@@ -6,6 +6,7 @@ import { InvoiceStatus, PaymentMethod } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
 import { getTaxRate } from './tenant-settings-actions';
+import { createActionRepositories } from '@/lib/action-factory';
 import { GenerateInvoiceSchema, RegisterPaymentSchema } from '@/lib/schemas';
 
 // ============================================================================
@@ -66,34 +67,46 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   const data = validatedFields.data;
 
   // Verificar que el ticket existe y está cerrado
-  const ticket = await db.ticket.findUnique({
-    where: { id: data.ticketId },
-    include: {
-      customer: true,
-      partsUsed: {
-        include: {
-          part: true,
-        },
-      },
-      serviceTemplate: true,
-      services: true,
-      invoice: true, // Check if already has invoice
-    },
-  });
+  const ticketRepo = createActionRepositories(tenantId, userId).ticketRepo;
+  const ticket = await ticketRepo.findById(data.ticketId) as any;
+  const ticketWithRelations = ticket ? {
+    ...ticket,
+    customer: ticket.customer,
+    partsUsed: ticket.partsUsed ?? [],
+    serviceTemplate: ticket.serviceTemplate ?? null,
+    services: ticket.services ?? [],
+    invoice: ticket.invoice ?? null,
+  } : null;
 
-  if (!ticket) {
+  if (ticketWithRelations) {
+    const ticketDetails = await db.ticket.findUnique({
+      where: { id: data.ticketId },
+      include: {
+        customer: true,
+        partsUsed: { include: { part: true } },
+        serviceTemplate: true,
+        services: true,
+        invoice: true,
+      },
+    });
+    Object.assign(ticketWithRelations, ticketDetails || {});
+  }
+
+  const ticketRecord = ticketWithRelations ?? null;
+
+  if (!ticketRecord) {
     throw new Error('Ticket no encontrado');
   }
 
-  if (ticket.tenantId !== tenantId) {
+  if (ticketRecord.tenantId !== tenantId) {
     throw new Error('No autorizado');
   }
 
-  if (ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED') {
+  if (ticketRecord.status !== 'CLOSED' && ticketRecord.status !== 'RESOLVED') {
     throw new Error('El ticket debe estar cerrado o resuelto para generar factura');
   }
 
-  if (ticket.invoice) {
+  if (ticketRecord.invoice) {
     throw new Error('Este ticket ya tiene una factura generada');
   }
 
@@ -103,10 +116,10 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
 
   // 1. Mano de obra (suma de servicios individuales o fallback a plantilla)
   let laborCost = 0;
-  if (ticket.services && ticket.services.length > 0) {
-    laborCost = ticket.services.reduce((sum: number, service: any) => sum + Number(service.laborCost), 0);
-  } else if (ticket.serviceTemplate?.laborCost) {
-    laborCost = Number(ticket.serviceTemplate.laborCost);
+  if (ticketRecord.services && ticketRecord.services.length > 0) {
+    laborCost = ticketRecord.services.reduce((sum: number, service: any) => sum + Number(service.laborCost), 0);
+  } else if (ticketRecord.serviceTemplate?.laborCost) {
+    laborCost = Number(ticketRecord.serviceTemplate.laborCost);
   }
 
   // 2. Costo de partes (precio de venta).
@@ -115,7 +128,7 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   let partsCost = 0;
   let partsMarkup = 0;
 
-  for (const partUsage of ticket.partsUsed) {
+  for (const partUsage of ticketRecord.partsUsed) {
     if (partUsage.approved === false) continue;
 
     const unitPrice = Number(partUsage.priceAtProposal ?? partUsage.part.price);
@@ -143,7 +156,8 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   // GENERAR NÚMERO DE FACTURA
   // ========================================================================
 
-  const lastInvoice = await db.invoice.findFirst({
+  const invoiceRepo = createActionRepositories(tenantId, userId).invoiceRepo;
+  const lastInvoice = await invoiceRepo.findFirst({
     where: { tenantId },
     orderBy: { createdAt: 'desc' },
     select: { invoiceNumber: true },
@@ -160,7 +174,7 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
       invoiceNumber,
       status: InvoiceStatus.PENDING,
       ticketId: ticket.id,
-      customerId: ticket.customerId,
+      customerId: ticketRecord.customerId,
 
       // Desglose financiero
       laborCost: new Prisma.Decimal(laborCost),
@@ -173,10 +187,10 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
       total: new Prisma.Decimal(total),
 
       // Información del cliente (snapshot)
-      customerName: ticket.customer.name,
-      customerNIT: ticket.customer.nit || undefined,
-      customerDPI: ticket.customer.dpi || undefined,
-      customerAddress: ticket.customer.address || undefined,
+      customerName: ticketRecord.customer.name,
+      customerNIT: ticketRecord.customer.nit || undefined,
+      customerDPI: ticketRecord.customer.dpi || undefined,
+      customerAddress: ticketRecord.customer.address || undefined,
 
       // Notas
       notes: data.notes,
@@ -195,7 +209,7 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   });
 
   revalidatePath('/dashboard/invoices');
-  revalidatePath(`/dashboard/tickets/${ticket.id}`);
+  revalidatePath(`/dashboard/tickets/${ticketRecord.id}`);
 
   return invoice;
 }

@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { createActionRepositories } from '@/lib/action-factory';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import {
@@ -56,9 +57,10 @@ export async function openCashRegister(data: CashRegisterData) {
   const validData = validatedFields.data;
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const cashRegisterRepo = createActionRepositories(session.user.tenantId, session.user.id).cashRegisterRepo;
 
   // Verificar que no hay otra caja abierta con el mismo nombre
-  const existingOpen = await db.cashRegister.findFirst({
+  const existingOpen = await cashRegisterRepo.findFirst({
     where: {
       tenantId: session.user.tenantId,
       name: validData.name,
@@ -72,16 +74,14 @@ export async function openCashRegister(data: CashRegisterData) {
     );
   }
 
-  const cashRegister = await db.cashRegister.create({
-    data: {
-      name: validData.name,
-      isOpen: true,
-      openedAt: new Date(),
-      openingBalance: new Prisma.Decimal(validData.openingBalance),
-      tenantId: session.user.tenantId,
-      openedById: session.user.id,
-    },
-  });
+  const cashRegister = await cashRegisterRepo.create({
+    name: validData.name,
+    isOpen: true,
+    openedAt: new Date(),
+    openingBalance: new Prisma.Decimal(validData.openingBalance),
+    tenantId: session.user.tenantId,
+    openedById: session.user.id,
+  } as any);
 
   revalidatePath('/dashboard/cash-register');
 

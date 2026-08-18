@@ -1,4 +1,6 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { createActionRepositories } from '@/lib/action-factory';
+import { ITicketRepository } from '@/lib/repositories';
 import { CreateTicketInput } from '@/lib/schemas';
 
 export interface TicketCreationData extends CreateTicketInput {
@@ -31,54 +33,52 @@ export interface AssignedTo {
 }
 
 export class TicketCreator {
+    private readonly ticketRepo: ITicketRepository;
+
     constructor(
         private readonly tenantId: string,
-        private readonly userId: string
-    ) {}
+        private readonly userId: string,
+        ticketRepo?: ITicketRepository
+    ) {
+        this.ticketRepo = ticketRepo ?? createActionRepositories(this.tenantId, this.userId).ticketRepo;
+    }
 
     async create(ticketData: TicketCreationData): Promise<CreatedTicket> {
-        const tenantDb = getTenantPrisma(this.tenantId, this.userId);
-        
-        const newTicket = await tenantDb.ticket.create({
-            data: {
-                title: ticketData.title,
-                description: ticketData.description,
-                customerId: ticketData.customerId,
-                status: ticketData.status || 'OPEN',
-                priority: ticketData.priority || 'MEDIUM',
-                tenantId: this.tenantId,
-                deviceType: ticketData.deviceType,
-                deviceModel: ticketData.deviceModel,
-                serialNumber: ticketData.serialNumber,
-                accessories: ticketData.accessories,
-                checkInNotes: ticketData.checkInNotes,
-                createdById: this.userId,
-                updatedById: this.userId,
-            },
-            include: {
-                customer: true,
-                assignedTo: true,
-            }
-        });
+        const newTicket = await this.ticketRepo.create({
+            title: ticketData.title,
+            description: ticketData.description,
+            customerId: ticketData.customerId,
+            status: ticketData.status || 'OPEN',
+            priority: ticketData.priority || 'MEDIUM',
+            tenantId: this.tenantId,
+            deviceType: ticketData.deviceType,
+            deviceModel: ticketData.deviceModel,
+            serialNumber: ticketData.serialNumber,
+            accessories: ticketData.accessories,
+            checkInNotes: ticketData.checkInNotes,
+            createdById: this.userId,
+            updatedById: this.userId,
+        } as any);
 
+        const t: any = newTicket;
         return {
-            id: newTicket.id,
-            ticketNumber: newTicket.ticketNumber,
-            title: newTicket.title,
-            status: newTicket.status,
-            tenantId: newTicket.tenantId,
-            customerId: newTicket.customerId,
-            deviceType: newTicket.deviceType,
-            deviceModel: newTicket.deviceModel,
-            assignedToId: newTicket.assignedToId,
+            id: t.id,
+            ticketNumber: t.ticketNumber,
+            title: t.title,
+            status: t.status,
+            tenantId: t.tenantId,
+            customerId: t.customerId,
+            deviceType: t.deviceType,
+            deviceModel: t.deviceModel,
+            assignedToId: t.assignedToId,
             customer: {
-                id: newTicket.customer.id,
-                name: newTicket.customer.name,
-                email: newTicket.customer.email,
+                id: t.customer?.id || t.customerId,
+                name: t.customer?.name || '',
+                email: t.customer?.email || null,
             },
-            assignedTo: newTicket.assignedTo ? {
-                name: newTicket.assignedTo.name,
-                email: newTicket.assignedTo.email,
+            assignedTo: t.assignedTo ? {
+                name: t.assignedTo.name,
+                email: t.assignedTo.email,
             } : null,
         };
     }

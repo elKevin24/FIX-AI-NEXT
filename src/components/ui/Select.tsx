@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId } from 'react';
+import React, { forwardRef, useId } from 'react';
 import styles from './Form.module.css';
 
 export interface SelectOption {
@@ -16,7 +16,8 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   placeholder?: string;
 }
 
-export function Select({
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
+{
   label,
   error,
   helper,
@@ -25,7 +26,8 @@ export function Select({
   className = '',
   id,
   ...props
-}: SelectProps) {
+},
+ref) {
   const generatedId = useId();
   const selectId = id || generatedId;
   const helperId = `${selectId}-helper`;
@@ -48,6 +50,7 @@ export function Select({
       <div className={styles['selectWrapper']}>
         <select
           id={selectId}
+          ref={ref}
           className={selectClasses}
           aria-invalid={hasError}
           aria-describedby={hasError ? errorId : helper ? helperId : undefined}
@@ -77,4 +80,6 @@ export function Select({
       )}
     </div>
   );
-}
+});
+
+Select.displayName = 'Select';

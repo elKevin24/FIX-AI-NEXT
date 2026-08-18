@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useDeferredValue, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -15,6 +15,7 @@ import {
     getQuotationById,
 } from '@/lib/quotation-actions';
 import { QuotationStatus, PaymentMethod } from '@prisma/client';
+import { useVirtualWindow } from '@/hooks/useVirtualWindow';
 import styles from './quotations.module.css';
 
 // Types
@@ -77,12 +78,14 @@ export function QuotationsClient({
 }: Props) {
     const router = useRouter();
     const { addToast } = useToast();
+    const itemsViewportRef = useRef<HTMLDivElement>(null);
 
     // State
     const [quotations] = useState(initialQuotations);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<QuotationStatus | ''>('');
     const [loading, setLoading] = useState(false);
+    const [createStep, setCreateStep] = useState(1);
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -100,6 +103,7 @@ export function QuotationsClient({
     const [globalDiscount, setGlobalDiscount] = useState(0);
     const [validDays, setValidDays] = useState(15);
     const [notes, setNotes] = useState('');
+    const deferredProductSearch = useDeferredValue(productSearch);
 
     // Convert form state
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -122,8 +126,8 @@ export function QuotationsClient({
 
     // Product search results
     const productResults = useMemo(() => {
-        if (!productSearch) return [];
-        const term = productSearch.toLowerCase();
+        if (!deferredProductSearch) return [];
+        const term = deferredProductSearch.toLowerCase();
         return parts
             .filter(
                 (p) =>
@@ -131,7 +135,13 @@ export function QuotationsClient({
                     (p.sku && p.sku.toLowerCase().includes(term))
             )
             .slice(0, 10);
-    }, [parts, productSearch]);
+    }, [parts, deferredProductSearch]);
+
+    const virtualCartItems = useVirtualWindow(cartItems, itemsViewportRef, {
+        itemHeight: 68,
+        overscan: 4,
+        enabled: cartItems.length > 8,
+    });
 
     // Calculate totals
     const { subtotal, discountAmount, tax, total } = useMemo(() => {
@@ -200,6 +210,7 @@ export function QuotationsClient({
     };
 
     const resetForm = () => {
+        setCreateStep(1);
         setSelectedCustomerId('');
         setCustomerName('');
         setCustomerPhone('');
@@ -318,6 +329,16 @@ export function QuotationsClient({
         }
     };
 
+    const openCreateModal = () => {
+        resetForm();
+        setShowCreateModal(true);
+    };
+
+    const closeCreateModal = () => {
+        setShowCreateModal(false);
+        resetForm();
+    };
+
     const openConvertModal = (quotation: QuotationDetail) => {
         setSelectedQuotation(quotation);
         setPayments([{ method: 'CASH', amount: quotation.total }]);
@@ -420,7 +441,7 @@ export function QuotationsClient({
                     <p>Gestión de cotizaciones y propuestas</p>
                 </div>
                 <div className={styles['actions']}>
-                    <Button onClick={() => setShowCreateModal(true)}>
+                    <Button type="button" onClick={openCreateModal}>
                         + Nueva Cotización
                     </Button>
                 </div>
@@ -538,6 +559,7 @@ export function QuotationsClient({
                                         <div className={styles['actionsCell']}>
                                             <button
                                                 className={styles['actionBtn']}
+                                                type="button"
                                                 onClick={() => handleViewDetail(q)}
                                             >
                                                 Ver
@@ -545,6 +567,7 @@ export function QuotationsClient({
                                             {q.status === 'DRAFT' && (
                                                 <button
                                                     className={`${styles['actionBtn']} ${styles['primary']}`}
+                                                    type="button"
                                                     onClick={() =>
                                                         handleStatusChange(q.id, 'SENT')
                                                     }
@@ -555,6 +578,7 @@ export function QuotationsClient({
                                             {q.status === 'ACCEPTED' && (
                                                 <button
                                                     className={`${styles['actionBtn']} ${styles['success']}`}
+                                                    type="button"
                                                     onClick={() => handleViewDetail(q)}
                                                 >
                                                     Convertir
@@ -571,285 +595,347 @@ export function QuotationsClient({
 
             {/* Create Modal */}
             {showCreateModal && (
-                <div className={styles['modalOverlay']} onClick={() => setShowCreateModal(false)}>
+                <div className={styles['modalOverlay']} onClick={closeCreateModal}>
                     <div className={styles['modal']} onClick={(e) => e.stopPropagation()}>
                         <div className={styles['modalHeader']}>
                             <h2>Nueva Cotización</h2>
                             <button
                                 className={styles['closeBtn']}
-                                onClick={() => setShowCreateModal(false)}
+                                onClick={closeCreateModal}
+                                type="button"
                             >
                                 ×
                             </button>
                         </div>
-                        <div className={styles['modalBody']}>
-                            {/* Customer Selection */}
-                            <div className={styles['formGrid']}>
-                                <div className={styles['formGroup']}>
-                                    <label>Cliente Registrado</label>
-                                    <select
-                                        value={selectedCustomerId}
-                                        onChange={(e) => {
-                                            setSelectedCustomerId(e.target.value);
-                                            if (e.target.value) {
-                                                const customer = customers.find(
-                                                    (c) => c.id === e.target.value
-                                                );
-                                                if (customer) {
-                                                    setCustomerName(customer.name);
-                                                    setCustomerEmail(customer.email || '');
-                                                    setCustomerPhone(customer.phone || '');
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        <option value="">-- Consumidor Final --</option>
-                                        {customers.map((c) => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className={styles['formGroup']}>
-                                    <label>Nombre</label>
-                                    <input
-                                        type="text"
-                                        value={customerName}
-                                        onChange={(e) => setCustomerName(e.target.value)}
-                                        placeholder="Consumidor Final"
-                                        disabled={!!selectedCustomerId}
-                                    />
-                                </div>
-                                <div className={styles['formGroup']}>
-                                    <label>Teléfono</label>
-                                    <input
-                                        type="tel"
-                                        value={customerPhone}
-                                        onChange={(e) => setCustomerPhone(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles['formGroup']}>
-                                    <label>Email</label>
-                                    <input
-                                        type="email"
-                                        value={customerEmail}
-                                        onChange={(e) => setCustomerEmail(e.target.value)}
-                                    />
-                                </div>
-                            </div>
 
-                            {/* Product Search */}
-                            <div className={styles['productSearch']}>
-                                <input
-                                    type="text"
-                                    placeholder="Buscar producto por nombre o SKU..."
-                                    value={productSearch}
-                                    onChange={(e) => setProductSearch(e.target.value)}
-                                    className={styles['productSearchInput']}
-                                />
-                                {productResults.length > 0 && (
-                                    <div className={styles['productResults']}>
-                                        {productResults.map((part) => (
-                                            <div
-                                                key={part.id}
-                                                className={styles['productResult']}
-                                                onClick={() => addToCart(part)}
-                                            >
-                                                <div className={styles['productResultInfo']}>
-                                                    <span className={styles['productResultName']}>
-                                                        {part.name}
-                                                    </span>
-                                                    <span className={styles['productResultSku']}>
-                                                        {part.sku} • Stock: {part.quantity}
-                                                    </span>
-                                                </div>
-                                                <span className={styles['productResultPrice']}>
-                                                    {formatCurrency(part.price)}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Items Table */}
-                            <div className={styles['itemsSection']}>
-                                <h3>Productos</h3>
-                                <table className={styles['itemsTable']}>
-                                    <thead>
-                                        <tr>
-                                            <th>Producto</th>
-                                            <th>Cant.</th>
-                                            <th>Precio</th>
-                                            <th>Desc. %</th>
-                                            <th>Subtotal</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {cartItems.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={6} className={styles['noItems']}>
-                                                    Busca y agrega productos
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            cartItems.map((item: any) => {
-                                                const itemSubtotal =
-                                                    item.unitPrice * item.quantity;
-                                                const itemDiscount =
-                                                    itemSubtotal * (item.discount / 100);
-                                                return (
-                                                    <tr key={item.partId}>
-                                                        <td>
-                                                            <div>{item.name}</div>
-                                                            <small>{item.sku}</small>
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="number"
-                                                                min="1"
-                                                                value={item.quantity}
-                                                                onChange={(e) =>
-                                                                    updateCartItem(
-                                                                        item.partId,
-                                                                        'quantity',
-                                                                        parseInt(e.target.value) ||
-                                                                            1
-                                                                    )
-                                                                }
-                                                                className={styles['itemInput']}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                step="0.01"
-                                                                value={item.unitPrice}
-                                                                onChange={(e) =>
-                                                                    updateCartItem(
-                                                                        item.partId,
-                                                                        'unitPrice',
-                                                                        parseFloat(
-                                                                            e.target.value
-                                                                        ) || 0
-                                                                    )
-                                                                }
-                                                                className={styles['itemInput']}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                max="100"
-                                                                value={item.discount}
-                                                                onChange={(e) =>
-                                                                    updateCartItem(
-                                                                        item.partId,
-                                                                        'discount',
-                                                                        parseFloat(
-                                                                            e.target.value
-                                                                        ) || 0
-                                                                    )
-                                                                }
-                                                                className={styles['itemInput']}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            {formatCurrency(
-                                                                itemSubtotal - itemDiscount
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            <button
-                                                                className={styles['removeItemBtn']}
-                                                                onClick={() =>
-                                                                    removeFromCart(item.partId)
-                                                                }
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Options */}
-                            <div className={styles['formGrid']}>
-                                <div className={styles['formGroup']}>
-                                    <label>Descuento Global (%)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        value={globalDiscount}
-                                        onChange={(e) =>
-                                            setGlobalDiscount(parseFloat(e.target.value) || 0)
-                                        }
-                                    />
-                                </div>
-                                <div className={styles['formGroup']}>
-                                    <label>Válida por (días)</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={validDays}
-                                        onChange={(e) =>
-                                            setValidDays(parseInt(e.target.value) || 15)
-                                        }
-                                    />
-                                </div>
-                                <div className={`${styles['formGroup']} ${styles['full']}`}>
-                                    <label>Notas</label>
-                                    <textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        rows={2}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Totals */}
-                            <div className={styles['totalsSection']}>
-                                <div className={styles['totalsBox']}>
-                                    <div className={styles['totalsRow']}>
-                                        <span>Subtotal:</span>
-                                        <span>{formatCurrency(subtotal)}</span>
-                                    </div>
-                                    {discountAmount > 0 && (
-                                        <div className={styles['totalsRow']}>
-                                            <span>Descuento:</span>
-                                            <span>-{formatCurrency(discountAmount)}</span>
-                                        </div>
-                                    )}
-                                    <div className={styles['totalsRow']}>
-                                        <span>IVA ({taxRate}%):</span>
-                                        <span>{formatCurrency(tax)}</span>
-                                    </div>
-                                    <div className={`${styles['totalsRow']} ${styles['total']}`}>
-                                        <span>Total:</span>
-                                        <span>{formatCurrency(total)}</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className={styles['createStepper']} aria-label="Progreso de la cotización">
+                            {[
+                                { number: 1, label: 'Cliente' },
+                                { number: 2, label: 'Productos' },
+                                { number: 3, label: 'Resumen' },
+                            ].map((item) => (
+                                <button
+                                    key={item.number}
+                                    type="button"
+                                    className={`${styles['stepChip']} ${createStep >= item.number ? styles['stepChipActive'] : ''}`}
+                                    onClick={() => {
+                                        if (item.number < createStep) setCreateStep(item.number);
+                                    }}
+                                    disabled={item.number > createStep}
+                                    aria-current={createStep === item.number ? 'step' : undefined}
+                                >
+                                    <span className={styles['stepChipNumber']}>{item.number}</span>
+                                    <span>{item.label}</span>
+                                </button>
+                            ))}
                         </div>
+
+                        <div className={styles['modalBody']}>
+                            {createStep === 1 && (
+                                <div className={styles['formGrid']}>
+                                    <div className={styles['formGroup']}>
+                                        <label>Cliente Registrado</label>
+                                        <select
+                                            value={selectedCustomerId}
+                                            onChange={(e) => {
+                                                setSelectedCustomerId(e.target.value);
+                                                if (e.target.value) {
+                                                    const customer = customers.find(
+                                                        (c) => c.id === e.target.value
+                                                    );
+                                                    if (customer) {
+                                                        setCustomerName(customer.name);
+                                                        setCustomerEmail(customer.email || '');
+                                                        setCustomerPhone(customer.phone || '');
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <option value="">-- Consumidor Final --</option>
+                                            {customers.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className={styles['formGroup']}>
+                                        <label>Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={customerName}
+                                            onChange={(e) => setCustomerName(e.target.value)}
+                                            placeholder="Consumidor Final"
+                                            disabled={!!selectedCustomerId}
+                                        />
+                                    </div>
+                                    <div className={styles['formGroup']}>
+                                        <label>Teléfono</label>
+                                        <input
+                                            type="tel"
+                                            value={customerPhone}
+                                            onChange={(e) => setCustomerPhone(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles['formGroup']}>
+                                        <label>Email</label>
+                                        <input
+                                            type="email"
+                                            value={customerEmail}
+                                            onChange={(e) => setCustomerEmail(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {createStep === 2 && (
+                                <>
+                                    <div className={styles['productSearch']}>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar producto por nombre o SKU..."
+                                            value={productSearch}
+                                            onChange={(e) => setProductSearch(e.target.value)}
+                                            className={styles['productSearchInput']}
+                                        />
+                                        {productResults.length > 0 && (
+                                            <div className={styles['productResults']}>
+                                                {productResults.map((part) => (
+                                                    <button
+                                                        key={part.id}
+                                                        type="button"
+                                                        className={styles['productResult']}
+                                                        onClick={() => addToCart(part)}
+                                                    >
+                                                        <div className={styles['productResultInfo']}>
+                                                            <span className={styles['productResultName']}>
+                                                                {part.name}
+                                                            </span>
+                                                            <span className={styles['productResultSku']}>
+                                                                {part.sku} • Stock: {part.quantity}
+                                                            </span>
+                                                        </div>
+                                                        <span className={styles['productResultPrice']}>
+                                                            {formatCurrency(part.price)}
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className={styles['itemsSection']}>
+                                        <h3>Productos</h3>
+                                        <div className={styles['itemsTableViewport']} ref={itemsViewportRef}>
+                                            <table className={styles['itemsTable']}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Producto</th>
+                                                        <th>Cant.</th>
+                                                        <th>Precio</th>
+                                                        <th>Desc. %</th>
+                                                        <th>Subtotal</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {cartItems.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan={6} className={styles['noItems']}>
+                                                                Busca y agrega productos
+                                                            </td>
+                                                        </tr>
+                                                    ) : (
+                                                        <>
+                                                            {virtualCartItems.paddingTop > 0 && (
+                                                                <tr aria-hidden="true" className={styles['spacerRow']}>
+                                                                    <td colSpan={6} style={{ height: `${virtualCartItems.paddingTop}px`, padding: 0, border: 0 }} />
+                                                                </tr>
+                                                            )}
+                                                            {virtualCartItems.visibleItems.map((item: any) => {
+                                                                const itemSubtotal = item.unitPrice * item.quantity;
+                                                                const itemDiscount = itemSubtotal * (item.discount / 100);
+                                                                return (
+                                                                    <tr key={item.partId}>
+                                                                        <td>
+                                                                            <div>{item.name}</div>
+                                                                            <small>{item.sku}</small>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input
+                                                                                type="number"
+                                                                                min="1"
+                                                                                value={item.quantity}
+                                                                                onChange={(e) =>
+                                                                                    updateCartItem(
+                                                                                        item.partId,
+                                                                                        'quantity',
+                                                                                        parseInt(e.target.value) ||
+                                                                                            1
+                                                                                    )
+                                                                                }
+                                                                                className={styles['itemInput']}
+                                                                            />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input
+                                                                                type="number"
+                                                                                min="0"
+                                                                                step="0.01"
+                                                                                value={item.unitPrice}
+                                                                                onChange={(e) =>
+                                                                                    updateCartItem(
+                                                                                        item.partId,
+                                                                                        'unitPrice',
+                                                                                        parseFloat(
+                                                                                            e.target.value
+                                                                                        ) || 0
+                                                                                    )
+                                                                                }
+                                                                                className={styles['itemInput']}
+                                                                            />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input
+                                                                                type="number"
+                                                                                min="0"
+                                                                                max="100"
+                                                                                value={item.discount}
+                                                                                onChange={(e) =>
+                                                                                    updateCartItem(
+                                                                                        item.partId,
+                                                                                        'discount',
+                                                                                        parseFloat(
+                                                                                            e.target.value
+                                                                                        ) || 0
+                                                                                    )
+                                                                                }
+                                                                                className={styles['itemInput']}
+                                                                            />
+                                                                        </td>
+                                                                        <td>
+                                                                            {formatCurrency(itemSubtotal - itemDiscount)}
+                                                                        </td>
+                                                                        <td>
+                                                                            <button
+                                                                                className={styles['removeItemBtn']}
+                                                                                onClick={() => removeFromCart(item.partId)}
+                                                                                type="button"
+                                                                            >
+                                                                                ×
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                            {virtualCartItems.paddingBottom > 0 && (
+                                                                <tr aria-hidden="true" className={styles['spacerRow']}>
+                                                                    <td colSpan={6} style={{ height: `${virtualCartItems.paddingBottom}px`, padding: 0, border: 0 }} />
+                                                                </tr>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {createStep === 3 && (
+                                <>
+                                    <div className={styles['formGrid']}>
+                                        <div className={styles['formGroup']}>
+                                            <label>Descuento Global (%)</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                value={globalDiscount}
+                                                onChange={(e) =>
+                                                    setGlobalDiscount(parseFloat(e.target.value) || 0)
+                                                }
+                                            />
+                                        </div>
+                                        <div className={styles['formGroup']}>
+                                            <label>Válida por (días)</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={validDays}
+                                                onChange={(e) =>
+                                                    setValidDays(parseInt(e.target.value) || 15)
+                                                }
+                                            />
+                                        </div>
+                                        <div className={`${styles['formGroup']} ${styles['full']}`}>
+                                            <label>Notas</label>
+                                            <textarea
+                                                value={notes}
+                                                onChange={(e) => setNotes(e.target.value)}
+                                                rows={2}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className={styles['totalsSection']}>
+                                        <div className={styles['totalsBox']}>
+                                            <div className={styles['totalsRow']}>
+                                                <span>Subtotal:</span>
+                                                <span>{formatCurrency(subtotal)}</span>
+                                            </div>
+                                            {discountAmount > 0 && (
+                                                <div className={styles['totalsRow']}>
+                                                    <span>Descuento:</span>
+                                                    <span>-{formatCurrency(discountAmount)}</span>
+                                                </div>
+                                            )}
+                                            <div className={styles['totalsRow']}>
+                                                <span>IVA ({taxRate}%):</span>
+                                                <span>{formatCurrency(tax)}</span>
+                                            </div>
+                                            <div className={`${styles['totalsRow']} ${styles['total']}`}>
+                                                <span>Total:</span>
+                                                <span>{formatCurrency(total)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
                         <div className={styles['modalFooter']}>
-                            <Button
-                                variant="secondary"
-                                onClick={() => setShowCreateModal(false)}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button onClick={handleCreateQuotation} disabled={loading}>
-                                {loading ? 'Guardando...' : 'Crear Cotización'}
-                            </Button>
+                            {createStep > 1 ? (
+                                <Button variant="secondary" type="button" onClick={() => setCreateStep((step) => step - 1)}>
+                                    Atrás
+                                </Button>
+                            ) : (
+                                <Button variant="secondary" type="button" onClick={closeCreateModal}>
+                                    Cancelar
+                                </Button>
+                            )}
+
+                            {createStep < 3 ? (
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        if (createStep === 1) {
+                                            setCreateStep(2);
+                                            return;
+                                        }
+                                        if (cartItems.length > 0) {
+                                            setCreateStep(3);
+                                        }
+                                    }}
+                                    disabled={createStep === 2 && cartItems.length === 0}
+                                >
+                                    Continuar
+                                </Button>
+                            ) : (
+                                <Button onClick={handleCreateQuotation} disabled={loading} type="button">
+                                    {loading ? 'Guardando...' : 'Crear Cotización'}
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -864,6 +950,7 @@ export function QuotationsClient({
                             <button
                                 className={styles['closeBtn']}
                                 onClick={() => setShowDetailModal(false)}
+                                type="button"
                             >
                                 ×
                             </button>
@@ -1000,17 +1087,19 @@ export function QuotationsClient({
                         <div className={styles['modalFooter']}>
                             {selectedQuotation.status === 'DRAFT' && (
                                 <>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => handleDelete(selectedQuotation.id)}
-                                        disabled={loading}
-                                    >
-                                        Eliminar
-                                    </Button>
-                                    <Button
-                                        onClick={() =>
-                                            handleStatusChange(selectedQuotation.id, 'SENT')
-                                        }
+                            <Button
+                                variant="secondary"
+                                type="button"
+                                onClick={() => handleDelete(selectedQuotation.id)}
+                                disabled={loading}
+                            >
+                                Eliminar
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() =>
+                                    handleStatusChange(selectedQuotation.id, 'SENT')
+                                }
                                         disabled={loading}
                                     >
                                         Marcar como Enviada
@@ -1019,11 +1108,12 @@ export function QuotationsClient({
                             )}
                             {selectedQuotation.status === 'SENT' && (
                                 <>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() =>
-                                            handleStatusChange(
-                                                selectedQuotation.id,
+                            <Button
+                                variant="secondary"
+                                type="button"
+                                onClick={() =>
+                                    handleStatusChange(
+                                        selectedQuotation.id,
                                                 'REJECTED'
                                             )
                                         }
@@ -1031,10 +1121,11 @@ export function QuotationsClient({
                                     >
                                         Rechazada
                                     </Button>
-                                    <Button
-                                        onClick={() =>
-                                            handleStatusChange(
-                                                selectedQuotation.id,
+                            <Button
+                                type="button"
+                                onClick={() =>
+                                    handleStatusChange(
+                                        selectedQuotation.id,
                                                 'ACCEPTED'
                                             )
                                         }
@@ -1046,6 +1137,7 @@ export function QuotationsClient({
                             )}
                             {selectedQuotation.status === 'ACCEPTED' && (
                                 <Button
+                                    type="button"
                                     onClick={() => openConvertModal(selectedQuotation)}
                                     disabled={loading}
                                 >
@@ -1054,6 +1146,7 @@ export function QuotationsClient({
                             )}
                             <Button
                                 variant="secondary"
+                                type="button"
                                 onClick={() => handleDuplicate(selectedQuotation.id)}
                                 disabled={loading}
                             >
@@ -1076,6 +1169,7 @@ export function QuotationsClient({
                             <button
                                 className={styles['closeBtn']}
                                 onClick={() => setShowConvertModal(false)}
+                                type="button"
                             >
                                 ×
                             </button>
@@ -1114,6 +1208,7 @@ export function QuotationsClient({
                                                         ? styles['active']
                                                         : ''
                                                 }`}
+                                                type="button"
                                                 onClick={() => setSelectedPaymentMethod(method)}
                                             >
                                                 {method === 'CASH'
@@ -1124,7 +1219,7 @@ export function QuotationsClient({
                                             </button>
                                         )
                                     )}
-                                    <Button variant="secondary" onClick={addPayment}>
+                                    <Button variant="secondary" type="button" onClick={addPayment}>
                                         + Agregar
                                     </Button>
                                 </div>
@@ -1169,6 +1264,7 @@ export function QuotationsClient({
                                             )}
                                             <button
                                                 className={styles['removePaymentBtn']}
+                                                type="button"
                                                 onClick={() => removePayment(index)}
                                             >
                                                 ×
@@ -1211,11 +1307,12 @@ export function QuotationsClient({
                         <div className={styles['modalFooter']}>
                             <Button
                                 variant="secondary"
+                                type="button"
                                 onClick={() => setShowConvertModal(false)}
                             >
                                 Cancelar
                             </Button>
-                            <Button onClick={handleConvertToSale} disabled={loading}>
+                            <Button type="button" onClick={handleConvertToSale} disabled={loading}>
                                 {loading ? 'Procesando...' : 'Confirmar Venta'}
                             </Button>
                         </div>

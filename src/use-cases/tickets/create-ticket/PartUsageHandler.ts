@@ -1,4 +1,6 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { createActionRepositories } from '@/lib/action-factory';
+import { IPartRepository } from '@/lib/repositories';
 import { NotFoundError, AuthorizationError, BusinessRuleError } from '@/lib/errors';
 
 export interface PartItem {
@@ -12,22 +14,24 @@ export interface LowStockAlert {
 }
 
 export class PartUsageHandler {
+    private readonly partRepo: IPartRepository;
+
     constructor(
         private readonly tenantId: string,
-        private readonly userId: string
-    ) {}
+        private readonly userId: string,
+        partRepo?: IPartRepository
+    ) {
+        this.partRepo = partRepo ?? createActionRepositories(this.tenantId, this.userId).partRepo;
+    }
 
     async processInitialParts(
         ticketId: string,
         initialParts: PartItem[]
     ): Promise<LowStockAlert[]> {
-        const tenantDb = getTenantPrisma(this.tenantId, this.userId);
         const lowStockAlerts: LowStockAlert[] = [];
 
         for (const partItem of initialParts) {
-            const part = await tenantDb.part.findUnique({ 
-                where: { id: partItem.partId } 
-            });
+            const part = await this.partRepo.findById(partItem.partId);
 
             if (!part) {
                 throw new NotFoundError('Repuesto', partItem.partId);
@@ -41,7 +45,8 @@ export class PartUsageHandler {
                 );
             }
 
-            await tenantDb.partUsage.create({
+            const db = getTenantPrisma(this.tenantId, this.userId);
+            await db.partUsage.create({
                 data: {
                     ticketId,
                     partId: partItem.partId,

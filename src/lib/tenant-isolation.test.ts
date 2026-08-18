@@ -8,6 +8,12 @@ const mockPrisma = vi.hoisted(() => ({
       query: ext.query,
     };
   }),
+  Ticket: {
+    findFirst: vi.fn(),
+  },
+  Customer: {
+    findFirst: vi.fn(),
+  },
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
@@ -86,6 +92,43 @@ describe('Tenant Isolation', () => {
 
     expect(fakeQuery).toHaveBeenCalledWith({
       where: { status: 'OPEN', tenantId: 't-1' },
+    });
+  });
+
+  it('overrides tenantId in update queries to the current tenant', async () => {
+    const db = getTestDb('tenant-current', 'user-1');
+    const queryFn = (db.query.$allModels as any).update;
+
+    mockPrisma.Ticket.findFirst.mockResolvedValue({ id: 'ticket-1' });
+    const fakeQuery = vi.fn().mockResolvedValue({ id: 'ticket-1' });
+
+    await queryFn({
+      model: 'Ticket',
+      args: { where: { id: 'ticket-1', tenantId: 'tenant-evil' }, data: { status: 'CLOSED' } },
+      query: fakeQuery,
+    });
+
+    expect(fakeQuery).toHaveBeenCalledWith({
+      where: { id: 'ticket-1', tenantId: 'tenant-current' },
+      data: { status: 'CLOSED', updatedById: 'user-1' },
+    });
+  });
+
+  it('overrides tenantId in delete queries to the current tenant', async () => {
+    const db = getTestDb('tenant-current', 'user-1');
+    const queryFn = (db.query.$allModels as any).delete;
+
+    mockPrisma.Ticket.findFirst.mockResolvedValue({ id: 'ticket-1' });
+    const fakeQuery = vi.fn().mockResolvedValue({ id: 'ticket-1' });
+
+    await queryFn({
+      model: 'Ticket',
+      args: { where: { id: 'ticket-1', tenantId: 'tenant-evil' } },
+      query: fakeQuery,
+    });
+
+    expect(fakeQuery).toHaveBeenCalledWith({
+      where: { id: 'ticket-1', tenantId: 'tenant-current' },
     });
   });
 });
