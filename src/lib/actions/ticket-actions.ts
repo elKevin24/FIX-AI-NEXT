@@ -199,6 +199,7 @@ export async function createBatchTickets(
                                 serialNumber: ticket.serialNumber,
                                 accessories: ticket.accessories,
                                 checkInNotes: ticket.checkInNotes,
+                                priority: ticket.priority,
                                 createdById: session.user.id,
                                 updatedById: session.user.id,
                             },

@@ -7,6 +7,7 @@ import { createPOSSale, getPartsForPOS } from '@/lib/pos-actions';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { useToast } from '@/context/ToastContext';
 import { useElementSize } from '@/hooks/useElementSize';
 import { useVirtualWindow } from '@/hooks/useVirtualWindow';
 import styles from './pos.module.css';
@@ -65,7 +66,10 @@ export default function POSClient({
     currency,
 }: POSClientProps) {
     const router = useRouter();
+    const { addToast } = useToast();
     const productSearchRef = useRef<HTMLInputElement>(null);
+    const customerSearchRef = useRef<HTMLInputElement>(null);
+    const paymentModalRef = useRef<HTMLDivElement>(null);
     const productsViewportRef = useRef<HTMLDivElement>(null);
     const cartViewportRef = useRef<HTMLDivElement>(null);
 
@@ -229,13 +233,19 @@ export default function POSClient({
                 return;
             }
 
-            if (event.key === '/' && !isTyping) {
+            if ((event.key === '/' && !isTyping) || event.key === 'F2') {
                 event.preventDefault();
                 productSearchRef.current?.focus();
                 return;
             }
 
-            if (event.key === 'F9' && cart.length > 0) {
+            if (event.key === 'F4') {
+                event.preventDefault();
+                customerSearchRef.current?.focus();
+                return;
+            }
+
+            if ((event.key === 'F8' || ((event.ctrlKey || event.metaKey) && event.key === 'Enter')) && cart.length > 0) {
                 event.preventDefault();
                 setShowPaymentModal(true);
                 return;
@@ -250,6 +260,20 @@ export default function POSClient({
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [cart.length, showPaymentModal]);
+
+    useEffect(() => {
+        if (showPaymentModal) {
+            paymentModalRef.current?.focus();
+        }
+    }, [showPaymentModal]);
+
+    useEffect(() => {
+        if (error) addToast(error, 'ERROR');
+    }, [addToast, error]);
+
+    useEffect(() => {
+        if (success) addToast(success, 'SUCCESS');
+    }, [addToast, success]);
 
     // Select customer
     const selectCustomer = (customer: Customer) => {
@@ -343,8 +367,8 @@ export default function POSClient({
                 </div>
             </header>
 
-            {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
-            {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}
+            {error && <div role="alert"><Alert variant="error" className={styles['alert']}>{error}</Alert></div>}
+            {success && <div role="status"><Alert variant="success" className={styles['alert']}>{success}</Alert></div>}
 
             <div className={styles['posLayout']}>
                 {/* Products Grid */}
@@ -385,6 +409,7 @@ export default function POSClient({
                                                 className={styles['productCard']}
                                                 onClick={() => addToCart(part)}
                                                 disabled={part.quantity <= 0}
+                                                aria-label={`Agregar ${part.name} al carrito`}
                                             >
                                                 <div className={styles['productName']}>{part.name}</div>
                                                 {part.sku && (
@@ -414,6 +439,8 @@ export default function POSClient({
                             placeholder="Buscar cliente..."
                             value={searchCustomer}
                             onChange={(e) => setSearchCustomer(e.target.value)}
+                            ref={customerSearchRef}
+                            aria-label="Buscar o cambiar cliente"
                         />
                         {searchCustomer && filteredCustomers.length > 0 && (
                             <div className={styles['customerDropdown']}>
@@ -423,6 +450,7 @@ export default function POSClient({
                                         className={styles['customerOption']}
                                         type="button"
                                         onClick={() => selectCustomer(customer)}
+                                        aria-label={`Seleccionar cliente ${customer.name}`}
                                     >
                                         <span>{customer.name}</span>
                                         {customer.nit && <span className={styles['customerNit']}>{customer.nit}</span>}
@@ -441,6 +469,7 @@ export default function POSClient({
                                     setCustomerName('Consumidor Final');
                                     setCustomerNIT('C/F');
                                 }}
+                                    aria-label="Quitar cliente seleccionado"
                                 >
                                     &times;
                                 </button>
@@ -478,6 +507,7 @@ export default function POSClient({
                                                 type="button"
                                                 className={styles['qtyBtn']}
                                                 onClick={() => updateQuantity(item.partId, item.quantity - 1)}
+                                                aria-label={`Reducir cantidad de ${item.name}`}
                                             >
                                                 -
                                             </button>
@@ -486,6 +516,7 @@ export default function POSClient({
                                                 type="button"
                                                 className={styles['qtyBtn']}
                                                 onClick={() => updateQuantity(item.partId, item.quantity + 1)}
+                                                aria-label={`Aumentar cantidad de ${item.name}`}
                                             >
                                                 +
                                             </button>
@@ -496,6 +527,7 @@ export default function POSClient({
                                                 type="button"
                                                 className={styles['removeBtn']}
                                                 onClick={() => removeFromCart(item.partId)}
+                                                aria-label={`Quitar ${item.name} del carrito`}
                                             >
                                                 &times;
                                             </button>
@@ -566,6 +598,7 @@ export default function POSClient({
                             type="button"
                             onClick={() => setShowPaymentModal(true)}
                             disabled={cart.length === 0}
+                            aria-keyshortcuts="F8 Control+Enter"
                         >
                             Cobrar {formatCurrency(total)}
                         </Button>
@@ -576,19 +609,34 @@ export default function POSClient({
             {/* Payment Modal */}
             {showPaymentModal && (
                 <div className={styles['modalOverlay']}>
-                    <div className={styles['modal']}>
+                    <div
+                        className={styles['modal']}
+                        ref={paymentModalRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="payment-modal-title"
+                        tabIndex={-1}
+                    >
                         <div className={styles['modalHeader']}>
-                            <h2>Procesar Pago</h2>
+                            <h2 id="payment-modal-title">Procesar Pago</h2>
                             <button
                                 className={styles['modalClose']}
                                 type="button"
                                 onClick={() => setShowPaymentModal(false)}
+                                aria-label="Cerrar modal de cobro"
                             >
                                 &times;
                             </button>
                         </div>
 
-                        <div className={styles['modalBody']}>
+                        <div className={styles['modalBody']} aria-busy={isSubmitting}>
+                            {isSubmitting && (
+                                <div className={styles['loadingSkeleton']} role="status" aria-label="Procesando venta">
+                                    <span className={styles['skeletonLine']} />
+                                    <span className={styles['skeletonLine']} />
+                                    <span className={`${styles['skeletonLine']} ${styles['skeletonLineShort']}`} />
+                                </div>
+                            )}
                             {/* Payment Summary */}
                             <div className={styles['paymentSummary']}>
                                 <div className={styles['summaryRow']}>
@@ -638,6 +686,7 @@ export default function POSClient({
                                                 className={styles['removePaymentBtn']}
                                                 type="button"
                                                 onClick={() => removePayment(payment.id)}
+                                                aria-label={`Quitar pago de ${getPaymentMethodLabel(payment.paymentMethod)}`}
                                             >
                                                 &times;
                                             </button>

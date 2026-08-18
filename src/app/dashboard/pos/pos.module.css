@@ -123,6 +123,20 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.productCard:focus-visible,
+.customerOption:focus-visible,
+.qtyBtn:focus-visible,
+.removeBtn:focus-visible,
+.selectedCustomer button:focus-visible,
+.modalClose:focus-visible,
+.removePaymentBtn:focus-visible,
+.discountSelect:focus-visible,
+.methodSelect:focus-visible,
+.notesInput:focus-visible {
+    outline: 3px solid var(--color-primary-500, #2563eb);
+    outline-offset: 3px;
+}
+
 .productCard:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -441,6 +455,10 @@
     overflow: hidden;
 }
 
+.modal:focus {
+    outline: none;
+}
+
 .modalHeader {
     display: flex;
     justify-content: space-between;
@@ -468,6 +486,33 @@
     padding: 1.5rem;
     overflow-y: auto;
     flex: 1;
+}
+
+.loadingSkeleton {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.skeletonLine {
+    display: block;
+    height: 1rem;
+    border-radius: 0.375rem;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.skeletonLineShort {
+    width: 62%;
+}
+
+@keyframes skeleton-shimmer {
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeletonLine { animation: none; }
 }
 
 .modalFooter {
