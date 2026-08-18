@@ -74,7 +74,7 @@ export function WorkloadSummary({ summary }: WorkloadSummaryProps) {
         </div>
 
         <div className={styles['progressBarContainer']}>
-          <div className={styles['progressBar']}>
+          <div className={styles['progressBar']} role="progressbar" aria-label="Overall technician capacity utilization" aria-valuemin={0} aria-valuemax={100} aria-valuenow={summary.overallUtilization}>
             <div
               className={`${styles['progressFill']} ${utilizationClass}`}
               style={{ width: `${summary.overallUtilization}%` }}

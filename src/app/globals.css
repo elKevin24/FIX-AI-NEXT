@@ -47,7 +47,7 @@
   --color-success-400: hsl(145, 70%, 55%);
   --color-success-500: hsl(145, 70%, 40%);
   /* Darkened */
-  --color-success-600: hsl(145, 80%, 30%);
+  --color-success-600: hsl(145, 80%, 29%);
   --color-success-700: hsl(145, 85%, 20%);
   --color-success-800: hsl(145, 90%, 15%);
 
@@ -92,7 +92,7 @@
   --color-gray-100: hsl(210, 20%, 95%);
   --color-gray-200: hsl(210, 15%, 90%);
   --color-gray-300: hsl(210, 15%, 80%);
-  --color-gray-400: hsl(210, 15%, 60%);
+  --color-gray-400: hsl(210, 15%, 59%);
   /* Signif. darker for borders (3:1) */
   --color-gray-500: hsl(210, 15%, 45%);
   /* Accessible tertiary text */
@@ -118,6 +118,16 @@
   --color-text-inverse: hsl(0, 0%, 100%);
   --color-text-link: var(--color-primary-600);
   /* Ratio > 4.5:1 */
+
+  /* Semantic foregrounds for filled actions. Themes may change the inverse
+     foreground without components needing hard-coded colour overrides. */
+  --color-on-primary: var(--color-text-inverse);
+  --color-on-success: var(--color-text-inverse);
+  --color-on-warning: var(--color-warning-900);
+  --color-on-danger: var(--color-text-inverse);
+  --color-on-progress-low: hsl(210, 30%, 10%);
+  --color-on-progress-medium: var(--color-warning-900);
+  --color-on-progress-high: var(--color-text-inverse);
 
   /* Border Colors - UI Boundaries (Sutiles y minimalistas) */
   --color-border-light: var(--color-gray-200);

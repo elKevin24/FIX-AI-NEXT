@@ -90,7 +90,7 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
     <div className={styles['card']}>
       <div className={styles['header']}>
         <div className={styles['technicianInfo']}>
-          <div className={styles['avatar']}>
+          <div className={styles['avatar']} aria-hidden="true">
             {(technician.name || technician.email).charAt(0).toUpperCase()}
           </div>
           <div>
@@ -122,7 +122,7 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
             {technician.currentWorkload} / {technician.maxConcurrentTickets}
           </span>
         </div>
-        <div className={styles['progressBar']}>
+        <div className={styles['progressBar']} role="progressbar" aria-label={`Workload for ${technician.name || technician.email}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={technician.utilizationPercent}>
           <div
             className={`${styles['progressFill']} ${getUtilizationClass()}`}
             style={{ width: `${technician.utilizationPercent}%` }}
@@ -192,15 +192,18 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
 
       <div className={styles['actions']}>
         <button
+          type="button"
           onClick={() => setShowTickets(!showTickets)}
           className={styles['actionButton']}
+          aria-expanded={showTickets}
+          aria-controls={`technician-tickets-${technician.id}`}
         >
           {showTickets ? '▲ Hide Tickets' : `▼ View Tickets (${technician.tickets.length})`}
         </button>
       </div>
 
       {showTickets && technician.tickets.length > 0 && (
-        <div className={styles['ticketsList']}>
+        <div id={`technician-tickets-${technician.id}`} className={styles['ticketsList']}>
           {technician.tickets.map((ticket) => (
             <a
               key={ticket.id}

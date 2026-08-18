@@ -8,9 +8,10 @@ export interface BadgeProps {
 }
 
 export function Badge({ variant = 'gray', children, className = '' }: BadgeProps) {
+  const variantClass = `badge${variant.charAt(0).toUpperCase()}${variant.slice(1)}`;
   const classes = [
-    styles['base'],
-    styles[variant],
+    styles['badge'],
+    styles[variantClass],
     className
   ].filter(Boolean).join(' ');
   
