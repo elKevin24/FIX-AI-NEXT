@@ -9,19 +9,72 @@
     width: 100%;
 }
 
-.inventoryFilters { margin-bottom: 1.5rem; }
-.inventoryFilterSection, .inventoryAdvancedFilters { padding: 1rem; border: 1px solid var(--color-border-medium); border-radius: 0.75rem; background: var(--color-surface); }
-.inventoryAdvancedFilters { margin-top: 0.75rem; }
-.filterHeading { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: 0.75rem; }
-.filterHeading h2 { margin: 0; color: var(--color-text-primary); font-size: 1rem; }
-.filterHeading span, .inventoryAdvancedFilters summary { color: var(--color-text-secondary); font-size: 0.8125rem; font-weight: 600; }
-.inventoryAdvancedFilters summary { cursor: pointer; }
-.inventoryAdvancedFilters summary:focus-visible { outline: 3px solid var(--color-primary-500); outline-offset: 3px; border-radius: 0.25rem; }
-.inventoryFilterGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; align-items: end; padding-top: 0.75rem; }
-.stockToggle { display: flex; min-height: 2.5rem; align-items: center; gap: 0.5rem; color: var(--color-text-primary); font-size: 0.875rem; font-weight: 600; }
+/* ========== PARTS FILTERS - Glass Card ========== */
+.inventoryFilters { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.inventoryFilterSection {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border-light);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--shadow-sm);
+}
+
+.filterHeading {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  margin-bottom: 0.75rem; color: var(--color-text-primary); font-weight: 700;
+}
+.filterHeading h2 { margin: 0; font-size: 0.95rem; letter-spacing: -0.01em; }
+.filterHeading span { color: var(--color-text-tertiary); font-size: 0.8125rem; font-weight: 500; }
+
+.inventoryFilterGrid {
+  display: grid; gap: 0.75rem 1rem; align-items: end; width: 100%;
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .inventoryFilterGrid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1024px) {
+  .inventoryFilterGrid { display: flex; flex-direction: row; align-items: flex-end; gap: 1rem; }
+  .inventoryFilterGrid > *:first-child { flex: 2; min-width: 240px; }
+}
+
+.stockToggle {
+  display: flex; min-height: 2.5rem; align-items: center; gap: 0.5rem;
+  color: var(--color-text-primary); font-size: 0.875rem; font-weight: 600;
+  white-space: nowrap;
+}
 .stockToggle input { width: 1.125rem; height: 1.125rem; accent-color: var(--color-primary-600); }
-.activeFilterBadges { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.75rem; }
-.activeFilterBadge { border-radius: 999px; padding: 0.25rem 0.625rem; background: var(--color-primary-100); color: var(--color-primary-800); font-size: 0.8125rem; font-weight: 700; }
+
+/* ========== ADVANCED FILTERS ========== */
+.inventoryAdvancedFilters {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border-light);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--shadow-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+.inventoryAdvancedFilters summary {
+  cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--color-text-primary);
+  list-style: none; padding: 0.25rem 0;
+}
+.inventoryAdvancedFilters summary::-webkit-details-marker { display: none; }
+.inventoryAdvancedFilters summary:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; border-radius: 0.25rem; }
+
+/* ========== ACTIVE FILTER BADGES ========== */
+.activeFilterBadges {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem;
+}
+.activeFilterBadge {
+  border-radius: 999px; padding: 0.25rem 0.625rem;
+  background: var(--color-primary-50); color: var(--color-primary-700);
+  border: 1px solid var(--color-primary-200); font-size: 0.75rem; font-weight: 700;
+}
 
 /* ========== HEADER ========== */
 

@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { isSuperAdmin } from '@/lib/authz';
 import TicketSearchFilters from './TicketSearchFilters';
 import { Button } from '@/components/ui';
+import ExportButton from '@/components/ui/ExportButton';
 import styles from './tickets.module.css';
 import TicketsClient from './TicketsClient';
 
@@ -162,10 +163,8 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                         👑 Super Admin
                     </span>
                 )}
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button as="a" href="/api/export/tickets" variant="secondary">
-                        📥 Exportar CSV
-                    </Button>
+                <div className={styles['headerActions']}>
+                    <ExportButton type="tickets" />
                     <Button as={Link} href="/dashboard/tickets/create" variant="primary">
                         + Nuevo Ticket
                     </Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { Button } from '@/components/ui';
 import styles from './WorkloadDashboard.module.css';
 import { TechnicianCard } from './TechnicianCard';
 import { WorkloadSummary } from './WorkloadSummary';
@@ -109,8 +110,8 @@ export function WorkloadDashboard() {
   if (loading) {
     return (
       <div className={styles['container']}>
-        <div className={styles['loading']}>
-          <div className={styles['spinner']}></div>
+        <div className={styles['loading']} role="status" aria-live="polite">
+          <div className={styles['spinner']} aria-hidden="true"></div>
           <p>Loading workload data...</p>
         </div>
       </div>
@@ -120,11 +121,11 @@ export function WorkloadDashboard() {
   if (error) {
     return (
       <div className={styles['container']}>
-        <div className={styles['error']}>
+        <div className={styles['error']} role="alert">
           <p>Error: {error}</p>
-          <button onClick={fetchWorkload} className={styles['retryButton']}>
+          <Button type="button" variant="danger" onClick={fetchWorkload}>
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -167,20 +168,22 @@ export function WorkloadDashboard() {
           <h1>Technician Workload</h1>
           <p>Monitor and manage technician capacity and assignments</p>
         </div>
-        <button onClick={fetchWorkload} className={styles['refreshButton']}>
+        <Button type="button" variant="secondary" onClick={fetchWorkload}>
           🔄 Refresh
-        </button>
+        </Button>
       </header>
 
       <WorkloadSummary summary={data.summary} />
 
       <div className={styles['controls']}>
         <div className={styles['filterGroup']}>
-          <label>Filter:</label>
+          <label htmlFor="workload-status-filter">Filter:</label>
           <select
+            id="workload-status-filter"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className={styles['select']}
+            aria-label="Filter technicians by availability"
           >
             <option value="all">All Technicians</option>
             <option value="available">Available Only</option>
@@ -190,11 +193,13 @@ export function WorkloadDashboard() {
         </div>
 
         <div className={styles['filterGroup']}>
-          <label>Sort by:</label>
+          <label htmlFor="workload-sort">Sort by:</label>
           <select
+            id="workload-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             className={styles['select']}
+            aria-label="Sort technicians"
           >
             <option value="utilization">Utilization</option>
             <option value="workload">Workload</option>

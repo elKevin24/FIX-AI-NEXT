@@ -125,14 +125,20 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                         (error as any).code = 'P2025';
                         throw error;
                     }
-                    const data = { ...(args?.data ?? {}), updatedById: userId };
+                    const data = {
+                        ...(args?.data ?? {}),
+                        ...(userId && hasUpdatedBy(model) && { updatedById: userId }),
+                    };
                     return query({ ...args, where, data });
                 },
 
                 async updateMany({ model, args, query }: { model: string; args: any; query: any }) {
                     if (!isTenantModel(model)) return query(args);
                     const where = { ...(args?.where ?? {}), tenantId };
-                    const data = { ...(args?.data ?? {}), updatedById: userId };
+                    const data = {
+                        ...(args?.data ?? {}),
+                        ...(userId && hasUpdatedBy(model) && { updatedById: userId }),
+                    };
                     return query({ ...args, where, data });
                 },
 

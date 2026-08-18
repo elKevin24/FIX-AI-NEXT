@@ -262,7 +262,10 @@ export default function POSClient({
         <div className={styles['container']}>
             {/* Header */}
             <header className={styles['header']}>
-                <h1>Punto de Venta</h1>
+                <div className={styles['headerContent']}>
+                    <h1>Punto de Venta</h1>
+                    <p>Registra ventas directas a clientes</p>
+                </div>
                 <div className={styles['headerActions']}>
                     <Button
                         variant="outline"
@@ -273,12 +276,34 @@ export default function POSClient({
                 </div>
             </header>
 
+            {/* Stats Bar */}
+            <div className={styles['statsBar']}>
+                <div className={styles['statsBarItem']}>
+                    Productos: <span className={styles['statsBarValue']}>{parts.length}</span>
+                </div>
+                {cart.length > 0 && (
+                    <>
+                        <div className={styles['statsBarItem']}>
+                            En carrito: <span className={styles['statsBarValue']}>{cart.length}</span>
+                        </div>
+                        <div className={styles['statsBarItem']}>
+                            Total: <span className={styles['statsBarValue']}>{formatCurrency(total)}</span>
+                        </div>
+                    </>
+                )}
+            </div>
+
             {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
             {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}
 
             <div className={styles['posLayout']}>
                 {/* Products Grid */}
                 <div className={styles['productsSection']}>
+                    <div className={styles['sectionTitle']}>
+                        <h2>Productos</h2>
+                        <span>{filteredParts.length} disponible{filteredParts.length !== 1 ? 's' : ''}</span>
+                    </div>
+
                     <div className={styles['searchBar']}>
                         <Input
                             placeholder="Buscar producto por nombre o SKU..."
@@ -299,6 +324,7 @@ export default function POSClient({
                                     className={styles['productCard']}
                                     onClick={() => addToCart(part)}
                                     disabled={part.quantity <= 0}
+                                    aria-label={`${part.name}, ${formatCurrency(part.price)}, Stock: ${part.quantity}`}
                                 >
                                     <div className={styles['productName']}>{part.name}</div>
                                     {part.sku && (
@@ -307,7 +333,7 @@ export default function POSClient({
                                     <div className={styles['productPrice']}>
                                         {formatCurrency(part.price)}
                                     </div>
-                                    <div className={styles['productStock']}>
+                                    <div className={`${styles['productStock']} ${part.quantity <= 5 ? styles['low'] : ''}`}>
                                         Stock: {part.quantity}
                                     </div>
                                 </button>
@@ -318,7 +344,10 @@ export default function POSClient({
 
                 {/* Cart Section */}
                 <div className={styles['cartSection']}>
-                    {/* Customer Selector */}
+                    <div className={styles['sectionTitle']}>
+                        <h2>Carrito</h2>
+                        {cart.length > 0 && <span>{cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}</span>}
+                    </div>
                     <div className={styles['customerSection']}>
                         <label className={styles['label']}>Cliente</label>
                         <Input
@@ -344,11 +373,14 @@ export default function POSClient({
                             <div className={styles['selectedCustomer']}>
                                 <span>{customerName}</span>
                                 <span>NIT: {customerNIT}</span>
-                                <button onClick={() => {
-                                    setSelectedCustomer(null);
-                                    setCustomerName('Consumidor Final');
-                                    setCustomerNIT('C/F');
-                                }}>
+                                <button
+                                    onClick={() => {
+                                        setSelectedCustomer(null);
+                                        setCustomerName('Consumidor Final');
+                                        setCustomerNIT('C/F');
+                                    }}
+                                    aria-label={`Eliminar cliente ${customerName}`}
+                                >
                                     &times;
                                 </button>
                             </div>
@@ -377,13 +409,15 @@ export default function POSClient({
                                         <button
                                             className={styles['qtyBtn']}
                                             onClick={() => updateQuantity(item.partId, item.quantity - 1)}
+                                            aria-label={`Reducir cantidad de ${item.name}`}
                                         >
                                             -
                                         </button>
-                                        <span className={styles['qtyValue']}>{item.quantity}</span>
+                                        <span className={styles['qtyValue']} aria-label={`Cantidad: ${item.quantity}`}>{item.quantity}</span>
                                         <button
                                             className={styles['qtyBtn']}
                                             onClick={() => updateQuantity(item.partId, item.quantity + 1)}
+                                            aria-label={`Aumentar cantidad de ${item.name}`}
                                         >
                                             +
                                         </button>
@@ -393,6 +427,7 @@ export default function POSClient({
                                         <button
                                             className={styles['removeBtn']}
                                             onClick={() => removeFromCart(item.partId)}
+                                            aria-label={`Eliminar ${item.name} del carrito`}
                                         >
                                             &times;
                                         </button>
@@ -417,6 +452,7 @@ export default function POSClient({
                                     value={discountType}
                                     onChange={(e) => setDiscountType(e.target.value as 'amount' | 'percent')}
                                     className={styles['discountSelect']}
+                                    aria-label="Tipo de descuento"
                                 >
                                     <option value="amount">Q</option>
                                     <option value="percent">%</option>
@@ -426,7 +462,7 @@ export default function POSClient({
                     )}
 
                     {/* Totals */}
-                    <div className={styles['totals']}>
+                    <div className={styles['totals']} role="region" aria-label="Resumen de totales">
                         <div className={styles['totalRow']}>
                             <span>Subtotal</span>
                             <span>{formatCurrency(subtotal)}</span>
@@ -450,8 +486,13 @@ export default function POSClient({
                     {/* Actions */}
                     <div className={styles['cartActions']}>
                         <Button
-                            variant="outline"
-                            onClick={clearCart}
+                            variant="ghost"
+                            onClick={() => {
+                                if (cart.length === 0) return;
+                                if (confirm('¿Limpiar el carrito? Se perderán todos los items.')) {
+                                    clearCart();
+                                }
+                            }}
                             disabled={cart.length === 0}
                         >
                             Limpiar
@@ -476,6 +517,7 @@ export default function POSClient({
                             <button
                                 className={styles['modalClose']}
                                 onClick={() => setShowPaymentModal(false)}
+                                aria-label="Cerrar modal de pago"
                             >
                                 &times;
                             </button>
@@ -530,6 +572,7 @@ export default function POSClient({
                                             <button
                                                 className={styles['removePaymentBtn']}
                                                 onClick={() => removePayment(payment.id)}
+                                                aria-label={`Eliminar pago ${getPaymentMethodLabel(payment.paymentMethod)} de ${formatCurrency(payment.amount)}`}
                                             >
                                                 &times;
                                             </button>
@@ -603,6 +646,7 @@ function PaymentForm({ remainingAmount, onAdd }: PaymentFormProps) {
                     value={method}
                     onChange={(e) => setMethod(e.target.value as PaymentMethod)}
                     className={styles['methodSelect']}
+                    aria-label="Método de pago"
                 >
                     <option value={PaymentMethod.CASH}>Efectivo</option>
                     <option value={PaymentMethod.CARD}>Tarjeta</option>
