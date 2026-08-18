@@ -41,10 +41,14 @@
 @media (min-width: 768px) {
     .container {
         flex-direction: row;
+        height: 100vh;
+        overflow: hidden;
     }
 
     .mainContent {
         padding: 0 2rem 2rem 2rem; /* Eliminado padding superior */
+        height: 100vh;
+        overflow-y: auto;
     }
 }
 

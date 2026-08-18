@@ -4,6 +4,7 @@ import TicketDetailView from './TicketDetailView';
 import { getTicketTimeline } from '@/lib/timeline';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { serializeDecimal } from '@/lib/utils';
+import { isSuperAdmin } from '@/lib/authz';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -18,7 +19,7 @@ export default async function TicketDetailPage({ params }: Props) {
     }
 
     const { tenantId, id: userId, role } = session.user;
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
     const isAdmin = role === 'ADMIN';
 
     // 1. Get DB Context
@@ -131,7 +132,7 @@ export default async function TicketDetailPage({ params }: Props) {
             availableUsers={data.availableUsers}
             availableParts={data.serializedParts}
             availableServices={data.serializedServices}
-            isSuperAdmin={isSuperAdmin}
+            isSuperAdmin={isSuperAdminUser}
             isAdmin={isAdmin}
             currentUserId={userId}
             timelineEvents={data.timelineEvents}

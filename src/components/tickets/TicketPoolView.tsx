@@ -197,22 +197,22 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
             </div>
             <div className={styles['workloadStat']}>
               <span className={styles['workloadLabel']}>Utilización</span>
-              <span className={styles['workloadValue']}>{workload.utilizationPercent}%</span>
+              <span className={styles['workloadValue']}>{workload.utilizationPercent ?? 0}%</span>
             </div>
           </div>
           <div className={styles['progressBar']}>
             <div
               className={`${styles['progressFill']} ${
-                workload.utilizationPercent <= 60
+                (workload.utilizationPercent ?? 0) <= 60
                   ? styles['utilizationLow']
-                  : workload.utilizationPercent <= 85
+                  : (workload.utilizationPercent ?? 0) <= 85
                   ? styles['utilizationMedium']
                   : styles['utilizationHigh']
               }`}
-              style={{ width: `${workload.utilizationPercent}%` }}
+              style={{ width: `${workload.utilizationPercent ?? 0}%` }}
             />
           </div>
-          {!workload.isAvailable && (
+          {(!workload.isAvailable && workload.availableSlots === 0) && (
             <div className={styles['warningMessage']}>
               ⚠️ No puedes tomar más tickets. {workload.status !== 'AVAILABLE' ? 'Estado: ' + workload.status : 'Capacidad completa'}
             </div>

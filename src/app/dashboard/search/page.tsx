@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { isSuperAdmin } from '@/lib/authz';
 import { redirect } from 'next/navigation';
 import styles from '../tickets/tickets.module.css';
 import Link from 'next/link';
@@ -17,8 +18,8 @@ export default async function SearchPage({ searchParams }: Props) {
         redirect('/login');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
-    const tenantFilter = isSuperAdmin ? {} : { tenantId: session.user.tenantId };
+    const superAdmin = isSuperAdmin(session.user);
+    const tenantFilter = superAdmin ? {} : { tenantId: session.user.tenantId };
 
     // Check if query is a valid UUID
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
@@ -81,7 +82,7 @@ export default async function SearchPage({ searchParams }: Props) {
         <div className={styles['container']}>
             <div className={styles['header']}>
                 <h1>Resultados de Búsqueda</h1>
-                {isSuperAdmin && (
+                {superAdmin && (
                     <span className={styles['superAdminBadge']}>
                         👑 Super Admin
                     </span>
