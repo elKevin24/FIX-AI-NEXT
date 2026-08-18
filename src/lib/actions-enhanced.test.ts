@@ -99,8 +99,8 @@ describe.skip('Enhanced Ticket Creation Flow', () => {
         const tickets = await prisma.ticket.findMany({ where: { tenantId }, include: { customer: true } });
 
         expect(customers.length).toBe(1); // Should still be only 1 customer
-        expect(tickets[0].customer.email).toBe('unique@client.com');
-        expect(tickets[0].customer.name).toBe('Existing Client'); // Should keep original name
+        expect(tickets[0]?.customer?.email).toBe('unique@client.com');
+        expect(tickets[0]?.customer?.name).toBe('Existing Client'); // Should keep original name
     });
 
     it('should consume stock when initialParts provided', async () => {

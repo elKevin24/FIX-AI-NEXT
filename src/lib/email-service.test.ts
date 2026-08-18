@@ -10,10 +10,10 @@ beforeEach(() => {
 
 describe('email-service provider resolution', () => {
   it('usa modo log cuando no hay proveedor configurado', async () => {
-    delete process.env.SMTP_HOST;
-    delete process.env.SMTP_USER;
-    delete process.env.RESEND_API_KEY;
-    delete process.env.EMAIL_PROVIDER;
+    delete process.env['SMTP_HOST'];
+    delete process.env['SMTP_USER'];
+    delete process.env['RESEND_API_KEY'];
+    delete process.env['EMAIL_PROVIDER'];
 
     const { sendEmail: logSend } = await import('@/lib/email-service');
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -24,9 +24,9 @@ describe('email-service provider resolution', () => {
   });
 
   it('prioriza EMAIL_PROVIDER=log aunque haya SMTP', async () => {
-    process.env.SMTP_HOST = 'smtp.gmail.com';
-    process.env.SMTP_USER = 'x@gmail.com';
-    process.env.EMAIL_PROVIDER = 'log';
+    process.env['SMTP_HOST'] = 'smtp.gmail.com';
+    process.env['SMTP_USER'] = 'x@gmail.com';
+    process.env['EMAIL_PROVIDER'] = 'log';
 
     const { sendEmail: logSend } = await import('@/lib/email-service');
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});

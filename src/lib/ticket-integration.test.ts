@@ -349,21 +349,21 @@ describe('Ticket Integration — Full Workshops', () => {
 
   async function getLastTicketId(): Promise<string> {
     const keys = Array.from(state.tickets.keys());
-    return keys[keys.length - 1];
+    return keys[keys.length - 1] || '';
   }
 
   async function createTicket(data: Record<string, any>) {
     const mod = await loadActions();
     const fd = buildFormData({
-      title: data.title || 'Test Ticket',
-      description: data.description || 'Test description',
-      priority: data.priority || 'MEDIUM',
-      deviceType: data.deviceType || 'Laptop',
-      deviceModel: data.deviceModel || 'XPS 15',
-      customerName: data.customerName || 'Carlos López',
-      customerId: data.customerId || CUST,
-      initialParts: data.initialParts || [],
-      ...data.extra,
+      title: data['title'] || 'Test Ticket',
+      description: data['description'] || 'Test description',
+      priority: data['priority'] || 'MEDIUM',
+      deviceType: data['deviceType'] || 'Laptop',
+      deviceModel: data['deviceModel'] || 'XPS 15',
+      customerName: data['customerName'] || 'Carlos López',
+      customerId: data['customerId'] || CUST,
+      initialParts: data['initialParts'] || [],
+      ...data['extra'],
     });
     try {
       return await mod.createTicket(null, fd);
@@ -534,10 +534,10 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-03d: author can delete own note', async () => {
       const result = await createTicket({ title: 'Delete own note' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       await addTicketNote(ticketId, 'To be deleted');
-      const noteId = Array.from(state.ticketNotes.keys())[0];
+      const noteId = Array.from(state.ticketNotes.keys())[0]!;
 
       const r = await deleteTicketNote(noteId);
       expect(r.success).toBe(true);
@@ -546,10 +546,10 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-03e: non-author non-admin cannot delete note', async () => {
       const result = await createTicket({ title: 'Cross-user delete' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       await addTicketNote(ticketId, 'Admin note');
-      const noteId = Array.from(state.ticketNotes.keys())[0];
+      const noteId = Array.from(state.ticketNotes.keys())[0]!;
 
       vi.mocked(auth).mockResolvedValue(techSession as any);
       const r = await deleteTicketNote(noteId);
@@ -563,7 +563,7 @@ describe('Ticket Integration — Full Workshops', () => {
   describe('TK-04: Parts (Inventory)', () => {
     it('TK-04a: add part to ticket decrements stock', async () => {
       const result = await createTicket({ title: 'Part usage' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       const r = await addPartToTicket(ticketId, PART1, 2);
       expect(r.success).toBe(true);
@@ -573,7 +573,7 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-04b: reject part with insufficient stock', async () => {
       const result = await createTicket({ title: 'Stock fail' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       const r = await addPartToTicket(ticketId, PART3, 1);
       expect(r.success).toBe(false);
@@ -582,7 +582,7 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-04c: reject part with zero quantity', async () => {
       const result = await createTicket({ title: 'Zero qty' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       const r = await addPartToTicket(ticketId, PART1, 0);
       expect(r.success).toBe(false);
@@ -590,7 +590,7 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-04d: reject non-existent part', async () => {
       const result = await createTicket({ title: 'Missing part' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       const r = await addPartToTicket(ticketId, '00000000-0000-0000-0000-000000009999', 1);
       expect(r.success).toBe(false);
@@ -598,12 +598,12 @@ describe('Ticket Integration — Full Workshops', () => {
 
     it('TK-04e: remove part from ticket restores stock', async () => {
       const result = await createTicket({ title: 'Remove part' });
-      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0];
+      const ticketId = result.ticketId || Array.from(state.tickets.keys())[0]!;
 
       await addPartToTicket(ticketId, PART1, 3);
       expect(state.parts.get(PART1)?.quantity).toBe(7);
 
-      const usageId = Array.from(state.partUsages.keys())[0];
+      const usageId = Array.from(state.partUsages.keys())[0]!;
       const r = await removePartFromTicket(usageId);
       expect(r.success).toBe(true);
       expect(state.parts.get(PART1)?.quantity).toBe(10);

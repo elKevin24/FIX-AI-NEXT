@@ -179,15 +179,15 @@ export async function getQuotations(filters?: {
     const where: Record<string, unknown> = {};
 
     if (filters?.status) {
-        where.status = filters.status;
+        where['status'] = filters.status;
     }
 
     if (filters?.customerId) {
-        where.customerId = filters.customerId;
+        where['customerId'] = filters.customerId;
     }
 
     if (filters?.search) {
-        where.OR = [
+        where['OR'] = [
             { quotationNumber: { contains: filters.search, mode: 'insensitive' } },
             { customerName: { contains: filters.search, mode: 'insensitive' } },
             { customer: { name: { contains: filters.search, mode: 'insensitive' } } },
@@ -195,9 +195,9 @@ export async function getQuotations(filters?: {
     }
 
     if (filters?.startDate || filters?.endDate) {
-        where.createdAt = {} as Record<string, Date>;
-        if (filters.startDate) (where.createdAt as Record<string, Date>).gte = filters.startDate;
-        if (filters.endDate) (where.createdAt as Record<string, Date>).lte = filters.endDate;
+        where['createdAt'] = {} as Record<string, Date>;
+        if (filters.startDate) (where['createdAt'] as Record<string, Date>)['gte'] = filters.startDate;
+        if (filters.endDate) (where['createdAt'] as Record<string, Date>)['lte'] = filters.endDate;
     }
 
     const quotations = await db.pOSQuotation.findMany({

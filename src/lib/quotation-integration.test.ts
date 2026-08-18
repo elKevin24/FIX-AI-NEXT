@@ -157,7 +157,7 @@ describe('Quotation Integration — Full Workflows', () => {
 
     const list = await getQuotations();
     expect(list).toHaveLength(1);
-    expect(list[0].status).toBe('DRAFT');
+    expect(list[0]!.status).toBe('DRAFT');
 
     await updateQuotationStatus(qId, 'SENT' as any);
     expect(state.quotations.get(qId)?.status).toBe('SENT');
@@ -271,9 +271,9 @@ describe('Quotation Integration — Full Workflows', () => {
     const q2 = await createQuotation({ customerName: 'B', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
     const q3 = await createQuotation({ customerName: 'C', items: [{ partId: 'part-1', quantity: 1, unitPrice: 10, discount: 0 }], validDays: 15, globalDiscount: 0 });
 
-    const num1 = parseInt(q1.data.quotationNumber.split('-')[2]);
-    const num2 = parseInt(q2.data.quotationNumber.split('-')[2]);
-    const num3 = parseInt(q3.data.quotationNumber.split('-')[2]);
+    const num1 = parseInt(q1.data.quotationNumber.split('-')[2] as string);
+    const num2 = parseInt(q2.data.quotationNumber.split('-')[2] as string);
+    const num3 = parseInt(q3.data.quotationNumber.split('-')[2] as string);
     expect(num2).toBe(num1 + 1);
     expect(num3).toBe(num2 + 1);
   });
@@ -285,7 +285,7 @@ describe('Quotation Integration — Full Workflows', () => {
 
     const drafts = await getQuotations({ status: 'DRAFT' as any });
     expect(drafts).toHaveLength(1);
-    expect(drafts[0].customerName).toBe('Alpha');
+    expect(drafts[0]!.customerName).toBe('Alpha');
   });
 
   it('COT-11: getQuotationById returns full details with items', async () => {
@@ -299,6 +299,6 @@ describe('Quotation Integration — Full Workflows', () => {
     const detail = await getQuotationById(created.data.id);
     expect(detail.customerName).toBe('Detail Test');
     expect(detail.items).toHaveLength(1);
-    expect(detail.items[0].quantity).toBe(3);
+    expect(detail.items[0]!.quantity).toBe(3);
   });
 });

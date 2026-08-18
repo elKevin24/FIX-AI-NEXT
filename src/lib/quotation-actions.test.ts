@@ -124,7 +124,7 @@ describe('quotation-actions', () => {
       mockDb.pOSQuotation.findMany.mockResolvedValue([mockQuotation]);
       const result = await getQuotations();
       expect(result).toHaveLength(1);
-      expect(result[0].quotationNumber).toBe('COT-2025-00001');
+      expect(result[0]!.quotationNumber).toBe('COT-2025-00001');
     });
 
     it('filters by status', async () => {
@@ -136,7 +136,7 @@ describe('quotation-actions', () => {
 
     it('filters by search', async () => {
       await getQuotations({ search: 'Juan' });
-      const call = mockDb.pOSQuotation.findMany.mock.calls[0][0];
+      const call = mockDb.pOSQuotation.findMany.mock.calls[0]![0];
       expect(call.where.OR).toBeDefined();
     });
 
@@ -144,7 +144,7 @@ describe('quotation-actions', () => {
       const start = new Date('2025-01-01');
       const end = new Date('2025-01-31');
       await getQuotations({ startDate: start, endDate: end });
-      const call = mockDb.pOSQuotation.findMany.mock.calls[0][0];
+      const call = mockDb.pOSQuotation.findMany.mock.calls[0]![0];
       expect(call.where.createdAt).toBeDefined();
     });
 

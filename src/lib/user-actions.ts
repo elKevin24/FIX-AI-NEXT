@@ -314,13 +314,13 @@ export async function updateUser(
       updatedById: actorId,
     };
 
-    if (email) updateData.email = email;
-    if (firstName) updateData.firstName = firstName;
-    if (lastName) updateData.lastName = lastName;
+    if (email) updateData['email'] = email;
+    if (firstName) updateData['firstName'] = firstName;
+    if (lastName) updateData['lastName'] = lastName;
     if (firstName || lastName) {
-      updateData.name = `${firstName || targetUser.firstName || ''} ${lastName || targetUser.lastName || ''}`.trim();
+      updateData['name'] = `${firstName || targetUser.firstName || ''} ${lastName || targetUser.lastName || ''}`.trim();
     }
-    if (role) updateData.role = role;
+    if (role) updateData['role'] = role;
 
     // 9. Actualizar usuario
     const updatedUser = await getTenantPrisma(tenantId, session.user.id).user.update({
@@ -814,15 +814,15 @@ export async function getUsers(options?: {
     };
 
     if (!options?.includeInactive) {
-      whereClause.isActive = true;
+      whereClause['isActive'] = true;
     }
 
     if (options?.role) {
-      whereClause.role = options.role;
+      whereClause['role'] = options.role;
     }
 
     if (options?.search) {
-      whereClause.OR = [
+      whereClause['OR'] = [
         { email: { contains: options.search, mode: 'insensitive' } },
         { firstName: { contains: options.search, mode: 'insensitive' } },
         { lastName: { contains: options.search, mode: 'insensitive' } },

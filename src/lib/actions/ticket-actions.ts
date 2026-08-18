@@ -160,7 +160,7 @@ export async function createBatchTickets(
             return {
                 success: false,
                 message: 'Error de validación de tickets',
-                errors: { tickets: [validated.error.errors[0].message] },
+                errors: { tickets: [validated.error?.errors[0]?.message || 'Error de validación'] },
             };
         }
         ticketsData = validated.data;
@@ -246,15 +246,15 @@ export async function updateTicket(
     const rawData: Record<string, unknown> = Object.fromEntries(formData);
 
     // Normalize empty strings to null/undefined for optional fields
-    if (rawData.assignedToId === '') rawData.assignedToId = null;
-    if (rawData.priority === '') rawData.priority = null;
-    if (rawData.status === '') rawData.status = undefined;
-    if (rawData.deviceType === '') rawData.deviceType = null;
-    if (rawData.deviceModel === '') rawData.deviceModel = null;
-    if (rawData.serialNumber === '') rawData.serialNumber = null;
-    if (rawData.accessories === '') rawData.accessories = null;
-    if (rawData.checkInNotes === '') rawData.checkInNotes = null;
-    if (rawData.cancellationReason === '') rawData.cancellationReason = null;
+    if (rawData['assignedToId'] === '') rawData['assignedToId'] = null;
+    if (rawData['priority'] === '') rawData['priority'] = null;
+    if (rawData['status'] === '') rawData['status'] = undefined;
+    if (rawData['deviceType'] === '') rawData['deviceType'] = null;
+    if (rawData['deviceModel'] === '') rawData['deviceModel'] = null;
+    if (rawData['serialNumber'] === '') rawData['serialNumber'] = null;
+    if (rawData['accessories'] === '') rawData['accessories'] = null;
+    if (rawData['checkInNotes'] === '') rawData['checkInNotes'] = null;
+    if (rawData['cancellationReason'] === '') rawData['cancellationReason'] = null;
 
     const validatedFields = UpdateTicketSchema.safeParse(rawData);
 

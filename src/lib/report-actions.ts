@@ -157,7 +157,7 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
   const historyMap = new Map<string, { date: string, invoice: number, pos: number }>();
   
   const addToHistory = (date: Date, type: 'invoice' | 'pos', amount: number) => {
-      const key = date.toISOString().split('T')[0];
+      const key = date.toISOString().split('T')[0] as string;
       if (!historyMap.has(key)) {
           historyMap.set(key, { date: key, invoice: 0, pos: 0 });
       }
