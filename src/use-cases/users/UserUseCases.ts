@@ -1,14 +1,16 @@
-import { getTenantPrisma } from '@/lib/tenant-prisma';
 import bcrypt from 'bcryptjs';
 import { CreateUserInput, UpdateUserInput } from '@/lib/schemas';
+import { IUserRepository, PrismaUserRepository } from '@/lib/repositories';
 
 export class CreateUserUseCase {
-    static async execute(data: CreateUserInput, tenantId: string, userId: string) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
-        
-        const existingUser = await tenantDb.user.findUnique({
-            where: { email: data.email }
-        });
+    static async execute(
+        data: CreateUserInput,
+        tenantId: string,
+        userId: string,
+        repo?: IUserRepository
+    ) {
+        const userRepo = repo || new PrismaUserRepository(tenantId, userId);
+        const existingUser = await userRepo.findByEmail(data.email);
 
         if (existingUser) {
             throw new Error('El usuario ya existe');
@@ -16,34 +18,32 @@ export class CreateUserUseCase {
 
         const hashedPassword = await bcrypt.hash(data.password, 10);
 
-        return await tenantDb.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: hashedPassword,
-                role: data.role,
-                tenantId: tenantId,
-            }
+        return await userRepo.create({
+            name: data.name,
+            email: data.email,
+            password: hashedPassword,
+            role: data.role,
+            tenantId: tenantId,
         });
     }
 }
 
 export class UpdateUserUseCase {
-    static async execute(data: UpdateUserInput, tenantId: string, userId: string) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
-
-        const existingUser = await tenantDb.user.findUnique({
-            where: { id: data.userId }
-        });
+    static async execute(
+        data: UpdateUserInput,
+        tenantId: string,
+        userId: string,
+        repo?: IUserRepository
+    ) {
+        const userRepo = repo || new PrismaUserRepository(tenantId, userId);
+        const existingUser = await userRepo.findById(data.userId);
 
         if (!existingUser) {
             throw new Error('Usuario no encontrado');
         }
 
         if (data.email !== existingUser.email) {
-             const emailTaken = await tenantDb.user.findFirst({
-                 where: { email: data.email }
-             });
+             const emailTaken = await userRepo.findByEmail(data.email);
              if (emailTaken) {
                  throw new Error('Ya existe un usuario con este email');
              }
@@ -62,31 +62,29 @@ export class UpdateUserUseCase {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
 
-        return await tenantDb.user.update({
-            where: { id: data.userId },
-            data: updateData,
-        });
+        return await userRepo.update(data.userId, updateData);
     }
 }
 
 export class DeleteUserUseCase {
-    static async execute(targetUserId: string, tenantId: string, currentUserId: string) {
+    static async execute(
+        targetUserId: string,
+        tenantId: string,
+        currentUserId: string,
+        repo?: IUserRepository
+    ) {
         if (targetUserId === currentUserId) {
-            throw new Error('No puedes eliminar tu propia cuenta');
+            throw new Error('No puedes eliminar tu propio usuario');
         }
 
-        const tenantDb = getTenantPrisma(tenantId, currentUserId);
+        const userRepo = repo || new PrismaUserRepository(tenantId, currentUserId);
 
-        const existingUser = await tenantDb.user.findUnique({
-            where: { id: targetUserId }
-        });
+        const existingUser = await userRepo.findById(targetUserId);
 
         if (!existingUser) {
             throw new Error('Usuario no encontrado');
         }
 
-        return await tenantDb.user.delete({
-            where: { id: targetUserId },
-        });
+        return await userRepo.delete(targetUserId);
     }
 }

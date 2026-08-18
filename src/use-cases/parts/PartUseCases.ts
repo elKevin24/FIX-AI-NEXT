@@ -1,32 +1,38 @@
-import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreatePartInput, UpdatePartInput } from '@/lib/schemas';
 import { notifyLowStock } from '@/lib/ticket-notifications';
+import { IPartRepository, PrismaPartRepository } from '@/lib/repositories';
 
 export class CreatePartUseCase {
-    static async execute(data: CreatePartInput, tenantId: string, userId: string) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
-        return await tenantDb.part.create({
-            data: {
-                name: data.name,
-                sku: data.sku || null,
-                quantity: data.quantity,
-                cost: data.cost,
-                price: data.price,
-                tenantId: tenantId,
-                createdById: userId,
-                updatedById: userId,
-            }
+    static async execute(
+        data: CreatePartInput,
+        tenantId: string,
+        userId: string,
+        repo?: IPartRepository
+    ) {
+        const partRepo = repo || new PrismaPartRepository(tenantId, userId);
+        return await partRepo.create({
+            name: data.name,
+            sku: data.sku || null,
+            quantity: data.quantity,
+            cost: data.cost,
+            price: data.price,
+            tenantId: tenantId,
+            createdById: userId,
+            updatedById: userId,
         });
     }
 }
 
 export class UpdatePartUseCase {
-    static async execute(data: UpdatePartInput, tenantId: string, userId: string, isSuperAdmin: boolean) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
-
-        const existingPart = await tenantDb.part.findUnique({
-            where: { id: data.partId }
-        });
+    static async execute(
+        data: UpdatePartInput,
+        tenantId: string,
+        userId: string,
+        isSuperAdmin: boolean,
+        repo?: IPartRepository
+    ) {
+        const partRepo = repo || new PrismaPartRepository(tenantId, userId);
+        const existingPart = await partRepo.findById(data.partId);
 
         if (!existingPart) {
             throw new Error('Repuesto no encontrado');
@@ -36,16 +42,13 @@ export class UpdatePartUseCase {
             throw new Error('No autorizado para editar este repuesto');
         }
 
-        const updatedPart = await tenantDb.part.update({
-            where: { id: data.partId },
-            data: {
-                name: data.name,
-                sku: data.sku || null,
-                quantity: data.quantity,
-                cost: data.cost,
-                price: data.price,
-                updatedById: userId,
-            },
+        const updatedPart = await partRepo.update(data.partId, {
+            name: data.name,
+            sku: data.sku || null,
+            quantity: data.quantity,
+            cost: data.cost,
+            price: data.price,
+            updatedById: userId,
         });
 
         if (updatedPart.quantity <= updatedPart.minStock) {
@@ -57,13 +60,15 @@ export class UpdatePartUseCase {
 }
 
 export class DeletePartUseCase {
-    static async execute(partId: string, tenantId: string, userId: string, isSuperAdmin: boolean) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
-
-        const existingPart = await tenantDb.part.findUnique({
-            where: { id: partId },
-            include: { usages: { select: { id: true } } }
-        });
+    static async execute(
+        partId: string,
+        tenantId: string,
+        userId: string,
+        isSuperAdmin: boolean,
+        repo?: IPartRepository
+    ) {
+        const partRepo = repo || new PrismaPartRepository(tenantId, userId);
+        const existingPart = await partRepo.findByIdWithUsages(partId);
 
         if (!existingPart) {
             throw new Error('Repuesto no encontrado');
@@ -73,12 +78,10 @@ export class DeletePartUseCase {
             throw new Error('No autorizado para eliminar este repuesto');
         }
 
-        if (existingPart.usages.length > 0) {
-            throw new Error(`No se puede eliminar: el repuesto tiene ${existingPart.usages.length} registro(s) de uso`);
+        if (existingPart.usages && existingPart.usages.length > 0) {
+            throw new Error(`No se puede eliminar: el repuesto tiene ${existingPart.usages.length} registro(s) de uso asociados`);
         }
 
-        return await tenantDb.part.delete({
-            where: { id: partId },
-        });
+        return await partRepo.delete(partId);
     }
 }

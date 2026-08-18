@@ -49,6 +49,6 @@ describe('PartUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {
 
         await expect(
             DeletePartUseCase.execute('part-1', 'tenant-1', 'user-1', false, mockRepo)
-        ).rejects.toThrow('el repuesto tiene 1 registro(s) de uso');
+        ).rejects.toThrow('el repuesto tiene 1 registro(s) de uso asociados');
     });
 });
