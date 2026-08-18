@@ -1,13 +1,15 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { QuotationExportSchema } from '@/lib/schemas';
+import { QuotationStatus } from '@prisma/client';
 
 async function* makeQuotationsIterator(
   tenantId: string,
   userId: string,
   startDate?: string,
   endDate?: string,
-  status?: string
+  status?: QuotationStatus
 ) {
   const db = getTenantPrisma(tenantId, userId);
   const BATCH_SIZE = 1000;
@@ -24,7 +26,7 @@ async function* makeQuotationsIterator(
       where: {
         ...(startDate && { createdAt: { gte: new Date(startDate) } }),
         ...(endDate && { createdAt: { lte: new Date(endDate + 'T23:59:59.999Z') } }),
-        ...(status && { status: status as any }),
+        ...(status && { status: status as QuotationStatus }),
       },
       select: {
         id: true,
@@ -64,7 +66,7 @@ async function* makeQuotationsIterator(
   }
 }
 
-function iteratorToStream(iterator: any) {
+function iteratorToStream(iterator: AsyncGenerator<string>) {
   return new ReadableStream({
     async pull(controller) {
       const { value, done } = await iterator.next();
@@ -84,9 +86,21 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
-  const startDate = searchParams.get('startDate') || undefined;
-  const endDate = searchParams.get('endDate') || undefined;
-  const status = searchParams.get('status') || undefined;
+  const raw = {
+    startDate: searchParams.get('startDate') || undefined,
+    endDate: searchParams.get('endDate') || undefined,
+    status: searchParams.get('status') || undefined,
+  };
+
+  const parsed = QuotationExportSchema.safeParse(raw);
+  if (!parsed.success) {
+    return new Response(
+      JSON.stringify({ error: 'Parámetros inválidos', details: parsed.error.flatten().fieldErrors }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const { startDate, endDate, status } = parsed.data;
 
   const iterator = makeQuotationsIterator(
     session.user.tenantId,

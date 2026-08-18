@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { Prisma } from '@prisma/client';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
@@ -13,6 +14,9 @@ import PaginationControls from '@/components/ui/PaginationControls';
 interface PartsPageProps {
     searchParams: Promise<{
         search?: string;
+        lowStock?: string;
+        category?: string;
+        location?: string;
         page?: string;
     }>;
 }
@@ -25,7 +29,8 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     }
 
     const params = await searchParams;
-    const { search, page } = params;
+    const { search, lowStock, category, location, page } = params;
+    const onlyLowStock = lowStock === 'true';
     const tenantId = session.user.tenantId;
     const db = getTenantPrisma(tenantId, session.user.id);
 
@@ -48,6 +53,9 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 sku % ${search} OR
                 category ILIKE ${'%' + search + '%'} 
               )
+              ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
+              ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
+              ${onlyLowStock ? Prisma.sql`AND quantity <= "minStock"` : Prisma.empty}
         `;
         totalItems = countResult[0]?.total || 0;
 
@@ -61,21 +69,34 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 sku % ${search} OR
                 category ILIKE ${'%' + search + '%'} 
               )
+              ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
+              ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
+              ${onlyLowStock ? Prisma.sql`AND quantity <= "minStock"` : Prisma.empty}
             ORDER BY similarity(name, ${search}) DESC
             LIMIT ${pageSize} OFFSET ${offset};
         `;
     } else {
-        // 1. Conteo Total
-        totalItems = await db.part.count();
-
-        // 2. Lista Paginada
-        parts = await db.part.findMany({
-            orderBy: {
-                updatedAt: 'desc',
-            },
-            take: pageSize,
-            skip: offset,
-        });
+        const where = {
+            ...(category ? { category: { contains: category, mode: 'insensitive' as const } } : {}),
+            ...(location ? { location: { contains: location, mode: 'insensitive' as const } } : {}),
+        };
+        if (onlyLowStock) {
+            const lowStockParts = await db.$queryRaw<any[]>`
+                SELECT * FROM parts WHERE "tenantId" = ${tenantId}
+                ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
+                ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
+                AND quantity <= "minStock" ORDER BY "updatedAt" DESC LIMIT ${pageSize} OFFSET ${offset}`;
+            const countResult = await db.$queryRaw<any[]>`
+                SELECT COUNT(*)::int as total FROM parts WHERE "tenantId" = ${tenantId}
+                ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
+                ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
+                AND quantity <= "minStock"`;
+            parts = lowStockParts;
+            totalItems = countResult[0]?.total || 0;
+        } else {
+            totalItems = await db.part.count({ where });
+            parts = await db.part.findMany({ where, orderBy: { updatedAt: 'desc' }, take: pageSize, skip: offset });
+        }
     }
 
     // Calcular estadísticas (SIEMPRE sobre el total global, no paginado)

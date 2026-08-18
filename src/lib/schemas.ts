@@ -335,6 +335,24 @@ export const UpdateSLASettingsSchema = z.object({
   path: ['slaWarningPercent'],
 });
 
+// ============================================================================
+// QUOTATION EXPORT SCHEMAS
+// ============================================================================
+
+export const QuotationExportSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  status: z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELLED']).optional(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
+  path: ['endDate'],
+});
+
 export const UpdateTenantSettingsSchema = z.object({
   businessName: z.string().min(1, 'El nombre del negocio es requerido').nullable().optional(),
   businessNIT: z.string().nullable().optional(),

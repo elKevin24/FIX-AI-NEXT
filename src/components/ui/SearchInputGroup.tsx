@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Ref } from 'react';
 import styles from './SearchInputGroup.module.css';
 
 interface SearchInputGroupProps {
@@ -12,6 +12,8 @@ interface SearchInputGroupProps {
     isLoading?: boolean;
     error?: boolean;
     disabled?: boolean;
+    inputRef?: Ref<HTMLInputElement>;
+    ariaLabel?: string;
 }
 
 export default function SearchInputGroup({
@@ -23,6 +25,8 @@ export default function SearchInputGroup({
     isLoading = false,
     error = false,
     disabled = false,
+    inputRef,
+    ariaLabel = 'Buscar',
 }: SearchInputGroupProps) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && !disabled && !isLoading) {
@@ -49,11 +53,14 @@ export default function SearchInputGroup({
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     disabled={disabled || isLoading}
+                    ref={inputRef}
+                    aria-label={ariaLabel}
                 />
                 <button
                     type="submit"
                     className={styles['searchButton']}
                     disabled={disabled || isLoading}
+                    aria-label={buttonText}
                 >
                     {isLoading ? 'Buscando...' : buttonText}
                 </button>
