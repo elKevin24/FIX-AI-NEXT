@@ -21,22 +21,24 @@ import styles from './quotations.module.css';
 type Part = {
     id: string;
     name: string;
-    sku: string;
+    sku: string | null;
     price: number;
     quantity: number;
+    category?: string | null;
 };
 
 type Customer = {
     id: string;
     name: string;
-    email: string | null;
+    email?: string | null;
     phone: string | null;
+    nit?: string | null;
 };
 
 type CartItem = {
     partId: string;
     name: string;
-    sku: string;
+    sku: string | null;
     quantity: number;
     unitPrice: number;
     discount: number;
@@ -126,7 +128,7 @@ export function QuotationsClient({
             .filter(
                 (p) =>
                     p.name.toLowerCase().includes(term) ||
-                    p.sku.toLowerCase().includes(term)
+                    (p.sku && p.sku.toLowerCase().includes(term))
             )
             .slice(0, 10);
     }, [parts, productSearch]);
@@ -400,12 +402,14 @@ export function QuotationsClient({
     };
 
     const formatCurrency = (amount: number) => `Q${amount.toFixed(2)}`;
-    const formatDate = (date: Date) =>
-        new Date(date).toLocaleDateString('es-GT', {
+    const formatDate = (date: Date | string | null | undefined) => {
+        if (!date) return '-';
+        return new Date(date).toLocaleDateString('es-GT', {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
         });
+    };
 
     return (
         <div className={styles['container']}>

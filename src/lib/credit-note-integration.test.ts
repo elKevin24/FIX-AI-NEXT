@@ -355,8 +355,9 @@ describe('Credit Note Integration — Full Workflows', () => {
     expect(sale.items).toHaveLength(2);
 
     const kbItem = sale.items.find((i: any) => i.partId === 'part-1');
-    expect(kbItem.availableForReturn).toBe(3);
-    expect(kbItem.returnedQuantity).toBe(0);
+    expect(kbItem).toBeDefined();
+    expect(kbItem!.availableForReturn).toBe(3);
+    expect(kbItem!.returnedQuantity).toBe(0);
   });
 
   it('CN-13: getPOSSaleForReturn reflects already returned quantities', async () => {
@@ -369,8 +370,9 @@ describe('Credit Note Integration — Full Workflows', () => {
 
     const sale = await getPOSSaleForReturn('sale-1');
     const kbItem = sale.items.find((i: any) => i.partId === 'part-1');
-    expect(kbItem.returnedQuantity).toBe(1);
-    expect(kbItem.availableForReturn).toBe(2);
+    expect(kbItem).toBeDefined();
+    expect(kbItem!.returnedQuantity).toBe(1);
+    expect(kbItem!.availableForReturn).toBe(2);
   });
 
   it('CN-14: full lifecycle create → process → verify stats', async () => {
