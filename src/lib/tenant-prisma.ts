@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from "./prisma";
 
 const TENANTED_MODELS = new Set([
-    'Ticket', 'Customer', 'Part', 'Invoice', 'POSSale', 'Sale', 'POSSaleItem',
+    'Ticket', 'Customer', 'Part', 'Invoice', 'POSSale',
     'Payment', 'Notification', 'CashTransaction', 'PurchaseOrder',
     'AuditLog', 'ServiceTemplate', 'CashRegister', 'TenantSettings',
     'POSQuotation', 'CreditNote', 'User'

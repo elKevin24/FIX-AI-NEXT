@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { getAuditLogs } from "@/lib/audit-actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 
 export default async function AuditLogsPage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -22,13 +23,15 @@ export default async function AuditLogsPage(props: {
     });
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Audit Logs</h1>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                    Total: {total} registros
-                </div>
-            </div>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+            <PageHeader
+                title="Audit Logs"
+                actions={
+                    <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        Total: {total} registros
+                    </div>
+                }
+            />
 
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>

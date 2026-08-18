@@ -4,6 +4,7 @@ import { getServiceTemplates } from '@/lib/service-template-actions';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { ServiceTemplateList } from './ServiceTemplateList';
+import PageHeader from '@/components/PageHeader';
 import styles from './service-templates.module.css';
 
 export const metadata = {
@@ -39,22 +40,20 @@ export default async function ServiceTemplatesPage() {
 
   return (
     <div className={styles['container']}>
-      <div className={styles['header']}>
-        <div className={styles['headerContent']}>
-          <h1>Plantillas de Servicio</h1>
-          <p>
-            Gestiona plantillas para agilizar la creación de tickets
-          </p>
-        </div>
-        <div className={styles['headerActions']}>
-          <Button as={Link} href="/dashboard/settings/service-templates/analytics" variant="secondary">
-            📊 Analytics
-          </Button>
-          <Button as={Link} href="/dashboard/settings/service-templates/create" variant="primary">
-            + Nueva Plantilla
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Plantillas de Servicio"
+        subtitle="Gestiona plantillas para agilizar la creación de tickets"
+        actions={
+          <>
+            <Button as={Link} href="/dashboard/settings/service-templates/analytics" variant="secondary">
+              📊 Analytics
+            </Button>
+            <Button as={Link} href="/dashboard/settings/service-templates/create" variant="primary">
+              + Nueva Plantilla
+            </Button>
+          </>
+        }
+      />
 
       <ServiceTemplateList templates={templates} />
     </div>

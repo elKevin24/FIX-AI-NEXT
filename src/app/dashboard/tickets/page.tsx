@@ -8,6 +8,7 @@ import { isSuperAdmin } from '@/lib/authz';
 import TicketSearchFilters from './TicketSearchFilters';
 import { Button } from '@/components/ui';
 import ExportButton from '@/components/ui/ExportButton';
+import PageHeader from '@/components/PageHeader';
 import styles from './tickets.module.css';
 import TicketsClient from './TicketsClient';
 
@@ -153,23 +154,19 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <div className={styles['headerContent']}>
-                    <h1>Tickets</h1>
-                    <p>Gestiona las órdenes de servicio y su estado</p>
-                </div>
-                {isSuperAdminUser && (
-                    <span className={styles['superAdminBadge']}>
-                        👑 Super Admin
-                    </span>
-                )}
-                <div className={styles['headerActions']}>
-                    <ExportButton type="tickets" />
-                    <Button as={Link} href="/dashboard/tickets/create" variant="primary">
-                        + Nuevo Ticket
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Tickets"
+                subtitle="Gestiona las órdenes de servicio y su estado"
+                superAdmin={isSuperAdminUser}
+                actions={
+                    <>
+                        <ExportButton type="tickets" />
+                        <Button as={Link} href="/dashboard/tickets/create" variant="primary">
+                            + Nuevo Ticket
+                        </Button>
+                    </>
+                }
+            />
 
             <Suspense fallback={<div>Cargando filtros...</div>}>
                 <TicketSearchFilters />

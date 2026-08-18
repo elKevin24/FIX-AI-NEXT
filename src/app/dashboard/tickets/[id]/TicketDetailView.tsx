@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { updateTicket, deleteTicket, addTicketNote, deleteTicketNote } from '@/lib/actions';
 import { generateInvoiceFromTicket } from '@/lib/invoice-actions';
 import styles from '../tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -158,19 +159,23 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
     return (
         <div className={styles['container']}>
             {/* Header */}
-            <div className={styles['header']}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Link href="/dashboard/tickets" className={styles['viewLink']}>
-                        &larr; Volver
-                    </Link>
-                    <h1>Ticket #{ticket.id.slice(0, 8)}</h1>
-                </div>
-                {isSuperAdmin && (
-                    <span className={styles['superAdminBadge']}>
-                        Tenant: {ticket.tenant.name}
+            <PageHeader
+                title={
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Link href="/dashboard/tickets" className={styles['viewLink']}>
+                            &larr; Volver
+                        </Link>
+                        Ticket #{ticket.id.slice(0, 8)}
                     </span>
-                )}
-            </div>
+                }
+                actions={
+                    isSuperAdmin ? (
+                        <span className={styles['superAdminBadge']}>
+                            Tenant: {ticket.tenant.name}
+                        </span>
+                    ) : undefined
+                }
+            />
 
             {/* Workflow Actions (New) */}
             <TicketWorkflowActions 

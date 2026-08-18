@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
+import PageHeader from '@/components/PageHeader';
 import styles from './parts.module.css';
 import PartsClient from './PartsClient';
 import PartSearchFilters from './PartSearchFilters';
@@ -126,23 +127,27 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <div className={styles['headerContent']}>
-                    <h1>Inventario</h1>
-                    <p>Gestiona repuestos y control de stock</p>
-                    {lowStockCount > 0 && (
-                        <p className={styles['lowStockWarning']}>
-                            ⚠️ Hay {lowStockCount} producto(s) con stock bajo
-                        </p>
-                    )}
-                </div>
-                <div className="flex gap-2 items-center">
-                    <ExportButton type="parts" />
-                    <Button as={Link} href="/dashboard/parts/create" variant="primary">
-                        + Nuevo Repuesto
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Inventario"
+                subtitle={
+                    <>
+                        Gestiona repuestos y control de stock
+                        {lowStockCount > 0 && (
+                            <span className={styles['lowStockWarning']}>
+                                ⚠️ Hay {lowStockCount} producto(s) con stock bajo
+                            </span>
+                        )}
+                    </>
+                }
+                actions={
+                    <>
+                        <ExportButton type="parts" />
+                        <Button as={Link} href="/dashboard/parts/create" variant="primary">
+                            + Nuevo Repuesto
+                        </Button>
+                    </>
+                }
+            />
 
             <div className={styles['statsGrid']}>
                 <div className={styles['statCard']}>

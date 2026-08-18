@@ -8,6 +8,7 @@ import CustomersClient from './CustomersClient';
 import CustomerSearchFilters from './CustomerSearchFilters';
 
 import PaginationControls from '@/components/ui/PaginationControls';
+import PageHeader from '@/components/PageHeader';
 
 interface CustomersPageProps {
   searchParams: Promise<{
@@ -106,15 +107,15 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
   return (
     <div className={styles['container']}>
-      <div className={styles['header']}>
-        <div className={styles['headerContent']}>
-          <h1>Clientes</h1>
-          <p>Gestiona la base de datos de clientes y su historial</p>
-        </div>
-        <Button as={Link} href="/dashboard/customers/create" variant="primary">
-          + Nuevo Cliente
-        </Button>
-      </div>
+      <PageHeader
+        title="Clientes"
+        subtitle="Gestiona la base de datos de clientes y su historial"
+        actions={
+          <Button as={Link} href="/dashboard/customers/create" variant="primary">
+            + Nuevo Cliente
+          </Button>
+        }
+      />
 
       <CustomerSearchFilters />
 

@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { isSuperAdmin } from '@/lib/authz';
 import { redirect } from 'next/navigation';
 import styles from '../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 
 interface Props {
@@ -80,14 +81,10 @@ export default async function SearchPage({ searchParams }: Props) {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h1>Resultados de Búsqueda</h1>
-                {superAdmin && (
-                    <span className={styles['superAdminBadge']}>
-                        👑 Super Admin
-                    </span>
-                )}
-            </div>
+            <PageHeader
+                title="Resultados de Búsqueda"
+                superAdmin={superAdmin}
+            />
 
             <div style={{ marginBottom: '1.5rem', color: '#666' }}>
                 {query ? (

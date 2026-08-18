@@ -4,6 +4,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect, notFound } from 'next/navigation';
 import AvailabilityList from '@/components/technicians/AvailabilityList';
 import AvailabilityPageClient from './AvailabilityPageClient'; // Client wrapper for the Add Dialog
+import PageHeader from '@/components/PageHeader';
 
 export default async function AvailabilityPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -34,27 +35,23 @@ export default async function AvailabilityPage(props: { params: Promise<{ id: st
     });
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                        Disponibilidad: {targetUser.name || targetUser.email}
-                    </h1>
-                    <p style={{ color: '#64748b' }}>
-                        Estado actual: 
-                        <span style={{ 
-                            marginLeft: '0.5rem', 
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <PageHeader
+                title={`Disponibilidad: ${targetUser.name || targetUser.email}`}
+                subtitle={
+                    <span>
+                        Estado actual:{' '}
+                        <span style={{
+                            marginLeft: '0.5rem',
                             fontWeight: 'bold',
-                            color: targetUser.status === 'AVAILABLE' ? '#16a34a' : '#ef4444' 
+                            color: targetUser.status === 'AVAILABLE' ? '#16a34a' : '#ef4444'
                         }}>
                             {targetUser.status}
                         </span>
-                    </p>
-                </div>
-                
-                {/* Client Component for "Add Absence" Button & Dialog */}
-                <AvailabilityPageClient userId={targetUserId} />
-             </div>
+                    </span>
+                }
+                actions={<AvailabilityPageClient userId={targetUserId} />}
+            />
 
              <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                  <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>

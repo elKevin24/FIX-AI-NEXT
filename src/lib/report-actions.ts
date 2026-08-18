@@ -16,8 +16,11 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     throw new Error('Solo los administradores pueden generar reportes');
   }
 
-  // Validación Zod de fechas
-  const validatedDates = DateRangeSchema.parse({ startDate, endDate });
+  // Validación Zod de fechas (convertir Date → ISO string para el schema)
+  const validatedDates = DateRangeSchema.parse({
+    startDate: startDate?.toISOString(),
+    endDate: endDate?.toISOString(),
+  });
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const tenantId = session.user.tenantId;

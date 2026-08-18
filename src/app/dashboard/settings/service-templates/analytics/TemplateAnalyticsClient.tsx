@@ -19,6 +19,7 @@ import {
   Line,
 } from 'recharts';
 import styles from './analytics.module.css';
+import PageHeader from '@/components/PageHeader';
 
 interface Props {
   initialData: TemplateAnalytics;
@@ -101,45 +102,44 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
   return (
     <div className={styles['container']}>
       {/* Header */}
-      <header className={styles['header']}>
-        <div className={styles['headerLeft']}>
-          <Link href="/dashboard/settings/service-templates" className={styles['backLink']}>
-            ← Volver a Plantillas
-          </Link>
-          <h1>Analytics de Plantillas</h1>
-          <p className={styles['subtitle']}>
-            Métricas y estadísticas de uso de tus plantillas de servicio
-          </p>
-        </div>
-
-        <div className={styles['filters']}>
-          <div className={styles['filterGroup']}>
-            <label>Desde</label>
-            <input
-              type="date"
-              className={styles['input']}
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className={styles['filterGroup']}>
-            <label>Hasta</label>
-            <input
-              type="date"
-              className={styles['input']}
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-          <button
-            className={styles['updateButton']}
-            onClick={handleUpdate}
-            disabled={isPending}
-          >
-            {isPending ? 'Cargando...' : 'Actualizar'}
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        title="Analytics de Plantillas"
+        subtitle="Métricas y estadísticas de uso de tus plantillas de servicio"
+        actions={
+          <>
+            <Link href="/dashboard/settings/service-templates" className={styles['backLink']}>
+              ← Volver a Plantillas
+            </Link>
+            <div className={styles['filters']}>
+              <div className={styles['filterGroup']}>
+                <label>Desde</label>
+                <input
+                  type="date"
+                  className={styles['input']}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className={styles['filterGroup']}>
+                <label>Hasta</label>
+                <input
+                  type="date"
+                  className={styles['input']}
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <button
+                className={styles['updateButton']}
+                onClick={handleUpdate}
+                disabled={isPending}
+              >
+                {isPending ? 'Cargando...' : 'Actualizar'}
+              </button>
+            </div>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className={styles['summaryGrid']}>

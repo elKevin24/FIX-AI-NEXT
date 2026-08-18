@@ -1,6 +1,7 @@
 
 import { getAllMyNotifications } from '@/lib/notifications';
 import NotificationList from './NotificationList';
+import PageHeader from '@/components/PageHeader';
 import styles from './notifications.module.css';
 
 export default async function NotificationsPage({
@@ -14,9 +15,7 @@ export default async function NotificationsPage({
 
   return (
     <div className={styles['container']}>
-      <div className={styles['header']}>
-        <h1>Notificaciones</h1>
-      </div>
+      <PageHeader title="Notificaciones" />
       <NotificationList 
         initialNotifications={notifications} 
         totalPages={totalPages} 

@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react';
 import { updatePart, deletePart } from '@/lib/actions';
 import Link from 'next/link';
 import styles from '../../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 
 interface Part {
     id: string;
@@ -31,12 +32,14 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h1>Editar Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles['viewLink']}>
-                    ← Volver
-                </Link>
-            </div>
+            <PageHeader
+                title="Editar Repuesto"
+                actions={
+                    <Link href="/dashboard/parts" className={styles['viewLink']}>
+                        ← Volver
+                    </Link>
+                }
+            />
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                 {/* Main Form */}

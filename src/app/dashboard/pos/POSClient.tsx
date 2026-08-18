@@ -7,6 +7,7 @@ import { createPOSSale, getPartsForPOS } from '@/lib/pos-actions';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import PageHeader from '@/components/PageHeader';
 import styles from './pos.module.css';
 
 // ============================================================================
@@ -261,20 +262,18 @@ export default function POSClient({
     return (
         <div className={styles['container']}>
             {/* Header */}
-            <header className={styles['header']}>
-                <div className={styles['headerContent']}>
-                    <h1>Punto de Venta</h1>
-                    <p>Registra ventas directas a clientes</p>
-                </div>
-                <div className={styles['headerActions']}>
+            <PageHeader
+                title="Punto de Venta"
+                subtitle="Registra ventas directas a clientes"
+                actions={
                     <Button
                         variant="outline"
                         onClick={() => router.push('/dashboard/pos/history')}
                     >
                         Historial
                     </Button>
-                </div>
-            </header>
+                }
+            />
 
             {/* Stats Bar */}
             <div className={styles['statsBar']}>

@@ -18,6 +18,7 @@ import {
 } from '@/lib/quotation-actions';
 import { QuotationStatus, PaymentMethod } from '@prisma/client';
 import styles from './quotations.module.css';
+import PageHeader from '@/components/PageHeader';
 
 // ============================================================================
 // TYPES
@@ -457,17 +458,15 @@ export function QuotationsClient({
             </div>
 
             {/* Header */}
-            <div className={styles['header']}>
-                <div className={styles['titleSection']}>
-                    <h1>Cotizaciones</h1>
-                    <p>Gestión de cotizaciones y propuestas</p>
-                </div>
-                <div className={styles['actions']}>
+            <PageHeader
+                title="Cotizaciones"
+                subtitle="Gestión de cotizaciones y propuestas"
+                actions={
                     <Button onClick={() => setShowCreateModal(true)}>
                         + Nueva Cotización
                     </Button>
-                </div>
-            </div>
+                }
+            />
 
             {/* Stats */}
             <div className={styles['statsGrid']}>
