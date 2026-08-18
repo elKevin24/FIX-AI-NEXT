@@ -2,6 +2,7 @@ import { Part } from '@prisma/client';
 
 export interface IPartRepository {
     findById(id: string): Promise<Part | null>;
+    findByIdWithUsages(id: string): Promise<(Part & { usages: { id: string }[] }) | null>;
     findMany(filters: PartFilters): Promise<Part[]>;
     findLowStock(tenantId: string): Promise<Part[]>;
     create(data: PartCreateInput): Promise<Part>;

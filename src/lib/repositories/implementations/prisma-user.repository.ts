@@ -16,9 +16,10 @@ export class PrismaUserRepository implements IUserRepository {
         return this.db.user.findUnique({ where: { id } });
     }
 
-    async findByEmail(email: string, tenantId: string) {
+    async findByEmail(email: string, tenantId?: string) {
+        const targetTenantId = tenantId || this.tenantId;
         return this.db.user.findFirst({
-            where: { email, tenantId }
+            where: { email, tenantId: targetTenantId }
         });
     }
 

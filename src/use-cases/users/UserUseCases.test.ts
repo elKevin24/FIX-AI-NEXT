@@ -9,6 +9,7 @@ describe('UserUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {
         findMany: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        updateStatus: vi.fn(),
         delete: vi.fn(),
         count: vi.fn(),
     };

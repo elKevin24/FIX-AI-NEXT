@@ -46,7 +46,7 @@ export class UpdateTicketStatusUseCase {
                  }
              }
 
-             const updateData: Prisma.TicketUpdateInput = { status, updatedById: userId };
+             const updateData: any = { status, updatedBy: { connect: { id: userId } } };
              if (status === 'CANCELLED' && note) {
                  updateData.cancellationReason = note;
              }
@@ -62,6 +62,7 @@ export class UpdateTicketStatusUseCase {
                     module: 'TICKETS',
                     details: JSON.stringify({ id: existingTicket.id, oldStatus: existingTicket.status, newStatus: status }),
                     userId,
+                    tenantId: existingTicket.tenantId,
                     entityType: 'Ticket',
                     entityId: existingTicket.id,
                 }

@@ -7,8 +7,10 @@ describe('PartUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {
         findById: vi.fn(),
         findByIdWithUsages: vi.fn(),
         findMany: vi.fn(),
+        findLowStock: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        updateStock: vi.fn(),
         delete: vi.fn(),
     };
 
