@@ -30,13 +30,14 @@ export interface ActionRepositories {
  * Enables dependency injection and simplified testing without tight coupling to Prisma.
  */
 export function createActionRepositories(tenantId: string, userId?: string): ActionRepositories {
+    const safeUserId = userId ?? '';
     return {
-        customerRepo: new PrismaCustomerRepository(tenantId, userId),
-        partRepo: new PrismaPartRepository(tenantId, userId),
-        userRepo: new PrismaUserRepository(tenantId, userId),
-        ticketRepo: new PrismaTicketRepository(tenantId, userId),
-        invoiceRepo: new PrismaInvoiceRepository(tenantId, userId),
-        cashRegisterRepo: new PrismaCashRegisterRepository(tenantId, userId),
+        customerRepo: new PrismaCustomerRepository(tenantId, safeUserId),
+        partRepo: new PrismaPartRepository(tenantId, safeUserId),
+        userRepo: new PrismaUserRepository(tenantId, safeUserId),
+        ticketRepo: new PrismaTicketRepository(tenantId, safeUserId),
+        invoiceRepo: new PrismaInvoiceRepository(tenantId, safeUserId),
+        cashRegisterRepo: new PrismaCashRegisterRepository(tenantId, safeUserId),
         auditLogRepo: new PrismaAuditLogRepository(tenantId),
     };
 }

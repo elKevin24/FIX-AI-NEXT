@@ -4,7 +4,7 @@ export { UserRole };
 
 export interface IUserRepository {
     findById(id: string): Promise<User | null>;
-    findByEmail(email: string, tenantId: string): Promise<User | null>;
+    findByEmail(email: string, tenantId?: string): Promise<User | null>;
     findMany(filters: UserFilters): Promise<User[]>;
     create(data: UserCreateInput): Promise<User>;
     update(id: string, data: UserUpdateInput): Promise<User>;
@@ -32,8 +32,8 @@ export interface UserCreateInput {
     tenantId: string;
     isActive?: boolean;
     passwordMustChange?: boolean;
-    createdById: string;
-    updatedById: string;
+    createdById?: string;
+    updatedById?: string;
 }
 
 export interface UserUpdateInput {
@@ -45,5 +45,5 @@ export interface UserUpdateInput {
     isActive?: boolean;
     passwordMustChange?: boolean;
     password?: string | null;
-    updatedById: string;
+    updatedById?: string;
 }

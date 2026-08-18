@@ -15,6 +15,13 @@ export class PrismaPartRepository implements IPartRepository {
         return this.db.part.findUnique({ where: { id } });
     }
 
+    async findByIdWithUsages(id: string) {
+        return this.db.part.findUnique({
+            where: { id },
+            include: { usages: { select: { id: true } } }
+        });
+    }
+
     async findMany(filters: PartFilters) {
         const { tenantId, search, category, lowStock, page = 1, limit = 20 } = filters;
         

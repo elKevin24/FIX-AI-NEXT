@@ -15,6 +15,17 @@ export class PrismaCustomerRepository implements ICustomerRepository {
         return this.db.customer.findUnique({ where: { id } });
     }
 
+    async findByIdWithTickets(id: string) {
+        return this.db.customer.findUnique({
+            where: { id },
+            include: { tickets: { select: { id: true } } }
+        });
+    }
+
+    async findFirst(params: { where: { email?: string; phone?: string; name?: string } }) {
+        return this.db.customer.findFirst({ where: params.where });
+    }
+
     async findByEmail(email: string, tenantId: string) {
         return this.db.customer.findFirst({
             where: { email, tenantId }
