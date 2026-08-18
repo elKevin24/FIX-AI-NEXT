@@ -902,7 +902,7 @@ export function QuotationsClient({
                                     </div>
                                     <div className={styles['detailRow']}>
                                         <label>Válida hasta:</label>
-                                        <span>{formatDate(selectedQuotation.validUntil)}</span>
+                                         <span>{selectedQuotation.validUntil ? formatDate(selectedQuotation.validUntil) : 'N/A'}</span>
                                     </div>
                                     <div className={styles['detailRow']}>
                                         <label>Creada por:</label>

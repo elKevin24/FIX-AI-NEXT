@@ -41,7 +41,7 @@ function computeNextSequentialNumber(lastNumber: string | null | undefined, pref
   if (!lastNumber) return `${prefix}-${'0001'}`;
 
   const parts = lastNumber.split('-');
-  const sequenceDigits = parseInt(parts[parts.length - 1], 10);
+  const sequenceDigits = parseInt(parts[parts.length - 1] || '0', 10);
   const next = isNaN(sequenceDigits) ? 1 : sequenceDigits + 1;
 
   return `${prefix}-${String(next).padStart(paddingLength, '0')}`;

@@ -28,7 +28,7 @@ export default function ReportsClient({ initialData }: Props) {
 
   const handleUpdate = () => {
     startTransition(async () => {
-      const newData = await getReportData(new Date(startDate), new Date(endDate));
+      const newData = await getReportData(new Date(startDate || ''), new Date(endDate || ''));
       setData(newData);
     });
   };
