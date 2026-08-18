@@ -304,19 +304,19 @@ export async function getCreditNotes(filters?: {
     const where: Record<string, unknown> = {};
 
     if (filters?.status) {
-        where.status = filters.status;
+        where['status'] = filters.status;
     }
 
     if (filters?.search) {
-        where.OR = [
+        where['OR'] = [
             { creditNoteNumber: { contains: filters.search, mode: 'insensitive' } },
         ];
     }
 
     if (filters?.startDate || filters?.endDate) {
-        where.createdAt = {} as Record<string, Date>;
-        if (filters.startDate) (where.createdAt as Record<string, Date>).gte = filters.startDate;
-        if (filters.endDate) (where.createdAt as Record<string, Date>).lte = filters.endDate;
+        where['createdAt'] = {} as Record<string, Date>;
+        if (filters.startDate) (where['createdAt'] as Record<string, Date>)['gte'] = filters.startDate;
+        if (filters.endDate) (where['createdAt'] as Record<string, Date>)['lte'] = filters.endDate;
     }
 
     const creditNotes = await db.creditNote.findMany({

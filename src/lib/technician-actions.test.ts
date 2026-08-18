@@ -93,8 +93,8 @@ describe('Technician Availability Actions', () => {
      const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
      const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
      
-     const startStr = yesterday.toISOString().split('T')[0];
-     const endStr = tomorrow.toISOString().split('T')[0];
+     const startStr = yesterday.toISOString().split('T')[0] as string;
+     const endStr = tomorrow.toISOString().split('T')[0] as string;
 
      const formData = new FormData();
      formData.append('userId', '123e4567-e89b-12d3-a456-426614174002');

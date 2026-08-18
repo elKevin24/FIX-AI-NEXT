@@ -91,7 +91,7 @@ describe('Report Actions', () => {
     ]);
     expect(result.finances.totalRevenue).toBe(1200);
     expect(result.inventory.topSelling).toHaveLength(1);
-    expect(result.inventory.topSelling[0].name).toBe('Part A');
-    expect(result.inventory.topSelling[0].total).toBe(20);
+    expect(result.inventory.topSelling[0]!.name).toBe('Part A');
+    expect(result.inventory.topSelling[0]!.total).toBe(20);
   });
 });

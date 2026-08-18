@@ -340,7 +340,7 @@ describe('Credit Note Integration — Full Workflows', () => {
     seedSale();
     const results = await searchSalesForReturn('Lucía');
     expect(results).toHaveLength(1);
-    expect(results[0].saleNumber).toBe('POS-2025-00001');
+    expect(results[0]!.saleNumber).toBe('POS-2025-00001');
   });
 
   it('CN-11: search returns empty for short query', async () => {
@@ -355,8 +355,8 @@ describe('Credit Note Integration — Full Workflows', () => {
     expect(sale.items).toHaveLength(2);
 
     const kbItem = sale.items.find((i: any) => i.partId === 'part-1');
-    expect(kbItem.availableForReturn).toBe(3);
-    expect(kbItem.returnedQuantity).toBe(0);
+    expect(kbItem!.availableForReturn).toBe(3);
+    expect(kbItem!.returnedQuantity).toBe(0);
   });
 
   it('CN-13: getPOSSaleForReturn reflects already returned quantities', async () => {
@@ -369,8 +369,8 @@ describe('Credit Note Integration — Full Workflows', () => {
 
     const sale = await getPOSSaleForReturn('sale-1');
     const kbItem = sale.items.find((i: any) => i.partId === 'part-1');
-    expect(kbItem.returnedQuantity).toBe(1);
-    expect(kbItem.availableForReturn).toBe(2);
+    expect(kbItem!.returnedQuantity).toBe(1);
+    expect(kbItem!.availableForReturn).toBe(2);
   });
 
   it('CN-14: full lifecycle create → process → verify stats', async () => {
@@ -392,7 +392,7 @@ describe('Credit Note Integration — Full Workflows', () => {
 
     const list = await getCreditNotes();
     expect(list).toHaveLength(1);
-    expect(list[0].status).toBe('PENDING');
+    expect(list[0]!.status).toBe('PENDING');
 
     await processRefund({ creditNoteId: created.data.id, refundMethod: 'TRANSFER' as any });
 
