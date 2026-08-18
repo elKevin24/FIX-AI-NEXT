@@ -115,7 +115,7 @@ describe('NotificationBell', () => {
       fireEvent.click(screen.getByLabelText('Notificaciones'));
     });
     const markBtns = screen.getAllByTitle('Marcar como leída');
-    await act(async () => { fireEvent.click(markBtns[0]); });
+    await act(async () => { fireEvent.click(markBtns[0]!); });
     expect(mockMarkAsRead).toHaveBeenCalledWith('1');
   });
 

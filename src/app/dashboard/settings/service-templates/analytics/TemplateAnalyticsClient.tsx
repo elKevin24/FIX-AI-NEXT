@@ -64,7 +64,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
 
   const handleUpdate = () => {
     startTransition(async () => {
-      const newData = await getTemplateAnalytics(new Date(startDate), new Date(endDate));
+      const newData = await getTemplateAnalytics(new Date(startDate || ''), new Date(endDate || ''));
       setData(newData);
     });
   };
@@ -80,7 +80,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
     });
 
   const formatMonthLabel = (month: string) => {
-    const [year, m] = month.split('-');
+    const [year = '2026', m = '1'] = (month || '').split('-');
     const date = new Date(parseInt(year), parseInt(m) - 1);
     return date.toLocaleDateString('es-GT', { month: 'short', year: '2-digit' });
   };

@@ -69,7 +69,7 @@ export async function checkSLA(tenantId?: string) {
                          title: ticket.title,
                          status,
                          timeRemaining: msToTime(end - now),
-                         ticketLink: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard/tickets/${ticket.id}`
+                         ticketLink: `${process.env['NEXTAUTH_URL'] || 'http://localhost:3000'}/dashboard/tickets/${ticket.id}`
                      })
                  });
                  emailsSent++;

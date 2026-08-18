@@ -9,7 +9,7 @@ import { headers, cookies } from "next/headers";
 function getIp(headersList: Headers): string {
   const forwardedFor = headersList.get("x-forwarded-for");
   if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim();
+    return (forwardedFor.split(",")[0] || "127.0.0.1").trim();
   }
   return "127.0.0.1";
 }

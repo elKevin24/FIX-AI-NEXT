@@ -73,7 +73,9 @@ export default function ThemeSwitcher() {
             case 'Enter':
             case ' ':
                 e.preventDefault();
-                handleThemeChange(themes[focusedIndex].value);
+                if (themes[focusedIndex]) {
+                    handleThemeChange(themes[focusedIndex]!.value);
+                }
                 break;
             case 'Escape':
                 e.preventDefault();
@@ -127,10 +129,10 @@ export default function ThemeSwitcher() {
                     suppressHydrationWarning
                 >
                     <span className={styles['icon']} suppressHydrationWarning>
-                        {currentTheme.icon}
+                        {currentTheme?.icon}
                     </span>
                     <span className={styles['label']} suppressHydrationWarning>
-                        {currentTheme.label}
+                        {currentTheme?.label}
                     </span>
                     <svg
                         className={`${styles['chevron']} ${isOpen ? styles['chevronOpen'] : ''}`}

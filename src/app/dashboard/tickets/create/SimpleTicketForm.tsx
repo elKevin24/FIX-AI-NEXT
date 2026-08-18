@@ -16,9 +16,9 @@ interface Customer {
 }
 
 interface Device {
-    title: string;
-    description: string;
-    deviceType: string;
+    title?: string;
+    description?: string;
+    deviceType?: string;
     deviceModel?: string;
     serialNumber?: string;
     accessories?: string;

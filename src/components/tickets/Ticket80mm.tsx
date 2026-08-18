@@ -51,7 +51,7 @@ const formatCurrency = (amount: number | string): string => {
  * Obtiene la clase CSS del badge de estado
  */
 const getStatusBadgeClass = (status: string): string => {
-    const statusMap: Record<string, string> = {
+    const statusMap: Record<string, string | undefined> = {
         // Spanish enum values
         ABIERTO: styles['statusOpen'],
         EN_PROCESO: styles['statusInProgress'],
@@ -67,22 +67,22 @@ const getStatusBadgeClass = (status: string): string => {
         CLOSED: styles['statusClosed'],
         CANCELLED: styles['statusCancelled'],
     };
-    return `${styles['statusBadge']} ${statusMap[status] || styles['statusOpen']}`;
+    return `${styles['statusBadge'] ?? ''} ${statusMap[status] || styles['statusOpen'] || ''}`;
 };
 
 /**
  * Obtiene la clase CSS del badge de prioridad
  */
 const getPriorityBadgeClass = (priority: string | null): string => {
-    if (!priority) return `${styles['priorityBadge']} ${styles['priorityMedium']}`;
+    if (!priority) return `${styles['priorityBadge'] ?? ''} ${styles['priorityMedium'] ?? ''}`;
 
-    const priorityMap: Record<string, string> = {
+    const priorityMap: Record<string, string | undefined> = {
         LOW: styles['priorityLow'],
         MEDIUM: styles['priorityMedium'],
         HIGH: styles['priorityHigh'],
         URGENT: styles['priorityUrgent'],
     };
-    return `${styles['priorityBadge']} ${priorityMap[priority] || styles['priorityMedium']}`;
+    return `${styles['priorityBadge'] ?? ''} ${priorityMap[priority] || styles['priorityMedium'] || ''}`;
 };
 
 /**

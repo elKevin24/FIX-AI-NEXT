@@ -21,8 +21,8 @@ export default async function QuotationsPage() {
         <QuotationsClient
             initialQuotations={quotations}
             stats={stats}
-            parts={parts}
-            customers={customers}
+            parts={parts as any}
+            customers={customers as any}
             taxRate={settings?.taxRate ? Number(settings.taxRate) : 12}
         />
     );

@@ -52,11 +52,11 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
         }
         if (user.name) {
             const parts = user.name.split(' ');
-            return parts.length > 1
-                ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-                : user.name[0].toUpperCase();
+            return parts.length > 1 && parts[0] && parts[1]
+                ? `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+                : (user.name[0] ?? '').toUpperCase();
         }
-        return user.email[0].toUpperCase();
+        return (user.email?.[0] ?? 'U').toUpperCase();
     };
 
     const columns: ColumnDef<UserData>[] = [
