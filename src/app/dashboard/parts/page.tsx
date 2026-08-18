@@ -4,6 +4,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import styles from './parts.module.css';
 import PartsClient from './PartsClient';
 import PartSearchFilters from './PartSearchFilters';
@@ -117,6 +118,10 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 </div>
                 <div className="flex gap-2 items-center">
                     <ExportButton type="parts" />
+                    <CsvExportButton
+                      url="/api/export/inventory"
+                      filename="inventario.csv"
+                    />
                     <Button as={Link} href="/dashboard/parts/create" variant="primary">
                         + Nuevo Repuesto
                     </Button>

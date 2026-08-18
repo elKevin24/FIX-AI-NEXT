@@ -6,4 +6,6 @@ export * from './prisma-user.repository';
 export * from './prisma-ticket.repository';
 export * from './implementations/prisma-invoice.repository';
 export * from './implementations/prisma-cash-register.repository';
+export * from './implementations/prisma-audit-log.repository';
+export * from './interfaces/audit-log.repository.interface';
 export * from './container';

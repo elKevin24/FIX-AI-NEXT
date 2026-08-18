@@ -4,6 +4,41 @@ Registro de cambios y nuevas funcionalidades implementadas en el proyecto.
 
 ---
 
+## [Sprint 2026-08-17] - Multi-Tenant Isolation & Concurrency Safety 🔐
+
+### 🔒 Seguridad Multi-Tenant
+
+#### 1. Aislamiento Centralizado de Tenant en Capa Prisma
+**Descripción**: Sistema centralizado para garantizar que ningún `tenantId` pueda filtrarse entre inquilinos, incluso cuando se pasan valores maliciosos en `where` de `update`/`delete`.
+
+**Cambios Clave**:
+- `src/lib/tenant-prisma.ts`: Extension de Prisma que inyecta automáticamente `tenantId` en:
+  - Todas las operaciones de lectura (`findMany`, `findFirst`, `findUnique`, `count`, `aggregate`, `groupBy`)
+  - Operaciones de escritura (`create`, `createMany`, `update`, `updateMany`, `delete`, `deleteMany`)
+  - Sanitización de `where` en `update` y `delete` para prevenir inyección de `tenantId` malicioso
+  - Validación previa de autorización mediante búsqueda segura del registro
+
+#### 2. Atomicidad en Reserva de Inventario
+**Descripción**: Garantiza que bajo concurrencia extrema (múltiples workers consumiendo el último stock simultáneamente), solo UNO logre la transacción.
+
+**Cambios Clave**:
+- `src/lib/inventory-atomic.ts`: Función `reserveInventoryForTenant()` que usa condición atómica:
+  - `where: { id, tenantId, quantity: { gte: quantity } }` como guarda antes de decrementar
+  - Permite que Postgres/Neon aplique aislamiento `SERIALIZABLE` a nivel de transacción
+  - Evita race conditions en stock compartido
+
+### ✅ Tests de Regresión
+- `src/lib/tenant-isolation.test.ts`: Valida que intentos de override de `tenantId` en `where` fallan
+- `src/lib/inventory-concurrency.test.ts`: Simula 10 workers concurrentes contra 1 unidad de stock
+- `tests/integration/neon-concurrency.integration.test.ts`: **Nuevo** - Prueba real contra Neon/Postgres con:
+  - Guard automático: omitida si `DATABASE_URL` es `localhost` o ausente (safe para CI/CD)
+  - 10 workers con `Prisma.TransactionIsolationLevel.Serializable`
+  - Validación: solo 1 éxito, 9 fallos por serialización
+
+**Resultado**: 10 tests pasados | 1 suite omitida cuando no hay DB real
+
+---
+
 ## [Sprint 2026-02-01] - Flujo de Trabajo Avanzado y Disponibilidad de Técnicos
 
 ### ✨ Nuevas Funcionalidades

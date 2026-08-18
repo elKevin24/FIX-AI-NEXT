@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { getReportData } from '@/lib/report-actions';
 import styles from './reports.module.css';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
@@ -79,6 +80,16 @@ export default function ReportsClient({ initialData }: Props) {
           >
             {isPending ? 'Cargando...' : 'Actualizar'}
           </button>
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
+            <CsvExportButton
+              url="/api/export/inventory"
+              filename="inventario.csv"
+            />
+            <CsvExportButton
+              url={`/api/export/sales?startDate=${startDate}&endDate=${endDate}`}
+              filename="ventas.csv"
+            />
+          </div>
         </div>
       </header>
 
