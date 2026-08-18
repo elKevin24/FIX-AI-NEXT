@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { DataTable } from '@/components/ui/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import ExportButton from '@/components/ui/ExportButton';
+import PageHeader from '@/components/PageHeader';
 import styles from './history.module.css';
 
 // ... (Types remain the same)
@@ -222,20 +223,18 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
 
     return (
         <div className={styles['container']}>
-            <header className={styles['header']}>
-                <div>
-                    <h1>Historial de Ventas</h1>
-                    <p className={styles['subtitle']}>
-                        {stats ? `${stats.salesCount} ventas · Total: ${formatCurrency(stats.totalSales)}` : ''}
-                    </p>
-                </div>
-                <div className="flex gap-2 items-center">
-                    <ExportButton type="pos-sales" />
-                    <Button variant="primary" onClick={() => router.push('/dashboard/pos')}>
-                        Nueva Venta
-                    </Button>
-                </div>
-            </header>
+            <PageHeader
+                title="Historial de Ventas"
+                subtitle={stats ? `${stats.salesCount} ventas · Total: ${formatCurrency(stats.totalSales)}` : ''}
+                actions={
+                    <>
+                        <ExportButton type="pos-sales" />
+                        <Button variant="primary" onClick={() => router.push('/dashboard/pos')}>
+                            Nueva Venta
+                        </Button>
+                    </>
+                }
+            />
 
             {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
             {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}

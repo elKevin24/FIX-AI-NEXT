@@ -11,6 +11,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
 import Link from 'next/link';
+import PageHeader from '@/components/PageHeader';
 import styles from './page.module.css';
 
 interface Props {
@@ -105,15 +106,15 @@ export default async function Ticket80mmPage({ params }: Props) {
 
     return (
         <main className={styles['container']}>
-            <div className={styles['header']}>
-                <Link href={`/dashboard/tickets/${id}`} className={styles['backButton']}>
-                    ← Volver al Ticket
-                </Link>
-                <h1 className={styles['title']}>Ticket 80mm - Orden de Servicio</h1>
-                <p className={styles['subtitle']}>
-                    Formato optimizado para impresión térmica y compartir
-                </p>
-            </div>
+            <PageHeader
+                title="Ticket 80mm - Orden de Servicio"
+                subtitle="Formato optimizado para impresión térmica y compartir"
+                actions={
+                    <Link href={`/dashboard/tickets/${id}`} className={styles['backButton']}>
+                        ← Volver al Ticket
+                    </Link>
+                }
+            />
 
             <div className={styles['content']}>
                 <TicketActions

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui';
+import PageHeader from '@/components/PageHeader';
 import styles from './WorkloadDashboard.module.css';
 import { TechnicianCard } from './TechnicianCard';
 import { WorkloadSummary } from './WorkloadSummary';
@@ -163,15 +164,15 @@ export function WorkloadDashboard() {
 
   return (
     <div className={styles['container']}>
-      <header className={styles['header']}>
-        <div>
-          <h1>Technician Workload</h1>
-          <p>Monitor and manage technician capacity and assignments</p>
-        </div>
-        <Button type="button" variant="secondary" onClick={fetchWorkload}>
-          🔄 Refresh
-        </Button>
-      </header>
+      <PageHeader
+        title="Technician Workload"
+        subtitle="Monitor and manage technician capacity and assignments"
+        actions={
+          <Button type="button" variant="secondary" onClick={fetchWorkload}>
+            🔄 Refresh
+          </Button>
+        }
+      />
 
       <WorkloadSummary summary={data.summary} />
 

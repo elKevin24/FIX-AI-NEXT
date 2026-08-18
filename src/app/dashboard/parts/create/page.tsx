@@ -4,18 +4,21 @@ import { useActionState } from 'react';
 import { createPart } from '@/lib/actions';
 import Link from 'next/link';
 import styles from '../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 
 export default function CreatePartPage() {
     const [state, formAction, isPending] = useActionState(createPart, null);
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h1>Nuevo Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles['viewLink']}>
-                    ← Volver
-                </Link>
-            </div>
+            <PageHeader
+                title="Nuevo Repuesto"
+                actions={
+                    <Link href="/dashboard/parts" className={styles['viewLink']}>
+                        ← Volver
+                    </Link>
+                }
+            />
 
             <div className={styles['tableContainer']} style={{ maxWidth: '600px', padding: '2rem' }}>
                 <form action={formAction} className="flex flex-col gap-4">

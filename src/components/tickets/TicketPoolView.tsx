@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Session } from 'next-auth';
+import PageHeader from '@/components/PageHeader';
 import styles from './TicketPoolView.module.css';
 
 interface Customer {
@@ -163,17 +164,15 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
 
   return (
     <div className={styles['container']}>
-      <header className={styles['header']}>
-        <div>
-          <h1 className={styles['title']}>Pool de Tickets Disponibles</h1>
-          <p className={styles['subtitle']}>
-            Tickets sin asignar ordenados por prioridad
-          </p>
-        </div>
-        <button onClick={fetchData} className={styles['refreshButton']}>
-          🔄 Actualizar
-        </button>
-      </header>
+      <PageHeader
+        title="Pool de Tickets Disponibles"
+        subtitle="Tickets sin asignar ordenados por prioridad"
+        actions={
+          <button onClick={fetchData} className={styles['refreshButton']}>
+            🔄 Actualizar
+          </button>
+        }
+      />
 
       {/* Workload Info */}
       {workload && (

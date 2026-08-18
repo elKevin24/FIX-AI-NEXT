@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { ServiceTemplateForm } from '../ServiceTemplateForm';
+import PageHeader from '@/components/PageHeader';
 import styles from './create.module.css';
 
 export default async function CreateServiceTemplatePage() {
@@ -18,12 +19,10 @@ export default async function CreateServiceTemplatePage() {
 
   return (
     <div className={styles['container']}>
-      <div className={styles['header']}>
-        <h1 className={styles['title']}>Nueva Plantilla de Servicio</h1>
-        <p className={styles['subtitle']}>
-          Crea una plantilla para estandarizar tus servicios más comunes.
-        </p>
-      </div>
+      <PageHeader
+        title="Nueva Plantilla de Servicio"
+        subtitle="Crea una plantilla para estandarizar tus servicios más comunes."
+      />
       <div className={styles['card']}>
         <ServiceTemplateForm />
       </div>

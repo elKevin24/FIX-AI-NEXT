@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createBatchTickets } from '@/lib/actions';
 import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
+import PageHeader from '@/components/PageHeader';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
 import TemplateSelector, { ServiceTemplate } from '@/components/tickets/TemplateSelector';
 import styles from './SimpleTicketForm.module.css';
@@ -134,15 +135,15 @@ export default function SimpleTicketForm() {
             </div>
 
             <div className={styles['content']}>
-                <div className={styles['header']}>
-                    <div className={styles['headerContent']}>
-                        <h1 className={styles['title']}>Nuevo Ticket</h1>
-                        <p className={styles['subtitle']}>Registra una nueva orden de servicio para reparación o mantenimiento</p>
-                    </div>
-                    <Button as="a" href="/dashboard/tickets" variant="secondary" size="sm">
-                        ← Volver
-                    </Button>
-                </div>
+                <PageHeader
+                    title="Nuevo Ticket"
+                    subtitle="Registra una nueva orden de servicio para reparación o mantenimiento"
+                    actions={
+                        <Button as="a" href="/dashboard/tickets" variant="secondary" size="sm">
+                            ← Volver
+                        </Button>
+                    }
+                />
 
                 {error && (
                     <div style={{ marginBottom: '1.5rem' }}>

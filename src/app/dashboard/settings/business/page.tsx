@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantSettings } from '@/lib/tenant-settings-actions';
 import BusinessSettingsForm from './BusinessSettingsForm';
+import PageHeader from '@/components/PageHeader';
 import styles from './business.module.css';
 
 export default async function BusinessSettingsPage() {
@@ -15,12 +16,10 @@ export default async function BusinessSettingsPage() {
 
     return (
         <div className={styles['container']}>
-            <header className={styles['header']}>
-                <h1>Configuración del Negocio</h1>
-                <p className={styles['subtitle']}>
-                    Configura los datos de tu negocio que aparecerán en facturas, recibos y otros documentos.
-                </p>
-            </header>
+            <PageHeader
+                title="Configuración del Negocio"
+                subtitle="Configura los datos de tu negocio que aparecerán en facturas, recibos y otros documentos."
+            />
 
             <BusinessSettingsForm initialSettings={settings} />
         </div>

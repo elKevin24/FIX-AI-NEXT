@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { getReportData } from '@/lib/report-actions';
+import PageHeader from '@/components/PageHeader';
 import styles from './reports.module.css';
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -42,45 +43,47 @@ export default function ReportsClient({ initialData }: Props) {
 
   return (
     <div className={styles['reportsPage']}>
-      <header className={styles['header']}>
-        <h1>Reportes y Estadísticas</h1>
-        <div className={styles['filters']}>
-          <div className={styles['filterGroup']}>
-            <label>Desde</label>
-            <input 
-              type="date" 
+      <PageHeader
+        title="Reportes y Estadísticas"
+        actions={
+          <div className={styles['filters']}>
+            <div className={styles['filterGroup']}>
+              <label>Desde</label>
+              <input 
+                type="date" 
+                className={styles['input']} 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className={styles['filterGroup']}>
+              <label>Hasta</label>
+              <input 
+                type="date" 
+                className={styles['input']}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+            <button 
               className={styles['input']} 
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+              style={{ 
+                  marginTop: 'auto', 
+                  cursor: 'pointer', 
+                  backgroundColor: 'var(--color-primary-600)', 
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: 600,
+                  opacity: isPending ? 0.7 : 1
+              }}
+              onClick={handleUpdate}
+              disabled={isPending}
+            >
+              {isPending ? 'Cargando...' : 'Actualizar'}
+            </button>
           </div>
-          <div className={styles['filterGroup']}>
-            <label>Hasta</label>
-            <input 
-              type="date" 
-              className={styles['input']}
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-          <button 
-            className={styles['input']} 
-            style={{ 
-                marginTop: 'auto', 
-                cursor: 'pointer', 
-                backgroundColor: 'var(--color-primary-600)', 
-                color: 'white',
-                border: 'none',
-                fontWeight: 600,
-                opacity: isPending ? 0.7 : 1
-            }}
-            onClick={handleUpdate}
-            disabled={isPending}
-          >
-            {isPending ? 'Cargando...' : 'Actualizar'}
-          </button>
-        </div>
-      </header>
+        }
+      />
 
       <div className={styles['grid']}>
         {/* Financial Overview */}

@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { updateUser, deleteUser } from '@/lib/actions';
 import styles from '../../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -32,12 +33,14 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h1>Editar Usuario</h1>
-                <Link href="/dashboard/users" className={styles['viewLink']}>
-                    &larr; Volver a usuarios
-                </Link>
-            </div>
+            <PageHeader
+                title="Editar Usuario"
+                actions={
+                    <Link href="/dashboard/users" className={styles['viewLink']}>
+                        &larr; Volver a usuarios
+                    </Link>
+                }
+            />
 
             {isSuperAdmin && (
                 <div className={styles['superAdminBadge']} style={{ width: 'fit-content', marginBottom: '1rem' }}>

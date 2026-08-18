@@ -10,6 +10,7 @@ import SuggestedPartsList from '@/components/tickets/SuggestedPartsList';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { createBatchTickets } from '@/lib/actions';
+import PageHeader from '@/components/PageHeader';
 import styles from './TicketWizard.module.css';
 
 interface Customer {
@@ -151,12 +152,10 @@ export default function TicketWizard() {
   return (
     <div className={styles['container']}>
       <div className={styles['wizard']}>
-        <div className={styles['header']}>
-          <h1 className={styles['title']}>✨ Nuevo Ticket - Asistente</h1>
-          <p className={styles['subtitle']}>
-            Crea tickets rápidamente con plantillas predefinidas o manualmente
-          </p>
-        </div>
+        <PageHeader
+          title="✨ Nuevo Ticket - Asistente"
+          subtitle="Crea tickets rápidamente con plantillas predefinidas o manualmente"
+        />
 
         {/* Progress Steps */}
         <div className={styles['steps']}>

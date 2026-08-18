@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { updateCustomer, deleteCustomer } from '@/lib/actions';
 import styles from '../../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -38,12 +39,14 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h1>Editar Cliente</h1>
-                <Link href="/dashboard/customers" className={styles['viewLink']}>
-                    &larr; Volver a clientes
-                </Link>
-            </div>
+            <PageHeader
+                title="Editar Cliente"
+                actions={
+                    <Link href="/dashboard/customers" className={styles['viewLink']}>
+                        &larr; Volver a clientes
+                    </Link>
+                }
+            />
 
             {isSuperAdmin && (
                 <div className={styles['superAdminBadge']} style={{ width: 'fit-content', marginBottom: '1rem' }}>

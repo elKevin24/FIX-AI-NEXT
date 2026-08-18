@@ -4,6 +4,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import UsersClient from './UsersClient';
+import PageHeader from '@/components/PageHeader';
 import styles from './users.module.css';
 import { hasPermission } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
@@ -64,17 +65,17 @@ export default async function UsersPage() {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['header']}>
-                <div className={styles['headerContent']}>
-                    <h1>Usuarios</h1>
-                    <p>Gestiona el equipo del tenant</p>
-                </div>
-                {canCreate && (
-                    <Button as={Link} href="/dashboard/users/create" variant="primary">
-                        + Nuevo Usuario
-                    </Button>
-                )}
-            </div>
+            <PageHeader
+                title="Usuarios"
+                subtitle="Gestiona el equipo del tenant"
+                actions={
+                    canCreate && (
+                        <Button as={Link} href="/dashboard/users/create" variant="primary">
+                            + Nuevo Usuario
+                        </Button>
+                    )
+                }
+            />
 
             <UsersClient
                 data={users}

@@ -45,6 +45,8 @@ dev.log
 # Playwright
 /playwright-report/
 /test-results/
+# Ignorar solo la carpeta de Playwright MCP
+.playwright-mcp/
 
 # Temp / utility scripts
 check-db.ts

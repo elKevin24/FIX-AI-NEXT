@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { openCashRegister, closeCashRegister, registerCashTransaction } from '@/lib/cash-register-actions';
+import PageHeader from '@/components/PageHeader';
 import styles from './cash-register.module.css';
 
 interface CashRegisterClientProps {
@@ -96,16 +97,16 @@ export default function CashRegisterClient({ initialOpenRegister }: CashRegister
 
   return (
     <div className={styles['container']}>
-      <header className={styles['header']}>
-        <div className={styles['headerContent']}>
-          <h1>Caja Registradora</h1>
-          <p>Control de ingresos, egresos y arqueo de caja.</p>
-        </div>
-        <div className={`${styles['statusIndicator']} ${openRegister ? styles['status_OPEN'] : styles['status_CLOSED']}`}>
-          {openRegister && <div className={styles['pulse']} />}
-          {openRegister ? 'CAJA ABIERTA' : 'CAJA CERRADA'}
-        </div>
-      </header>
+      <PageHeader
+        title="Caja Registradora"
+        subtitle="Control de ingresos, egresos y arqueo de caja."
+        actions={
+          <div className={`${styles['statusIndicator']} ${openRegister ? styles['status_OPEN'] : styles['status_CLOSED']}`}>
+            {openRegister && <div className={styles['pulse']} />}
+            {openRegister ? 'CAJA ABIERTA' : 'CAJA CERRADA'}
+          </div>
+        }
+      />
 
 {error && (
         <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '1rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid #fecaca' }}>

@@ -6,7 +6,7 @@ import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
 import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
-import GlobalSearch from '@/components/GlobalSearch';
+import PageHeader from '@/components/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
@@ -219,20 +219,12 @@ export default async function DashboardPage() {
 
     return (
         <div className={styles['dashboard']}>
-            <header className={styles['header']}>
-                <div className={styles['headerTitleContainer']}>
-                    <h1>Dashboard</h1>
-                    <p>Bienvenido de vuelta, {session?.user?.name || session?.user?.email}</p>
-                </div>
-                
-                <div className={styles['searchBar']}>
-                    <GlobalSearch />
-                </div>
-
-                {isSuperAdminUser && (
-                    <span className={styles['superAdminBadge']}>👑 Super Admin</span>
-                )}
-            </header>
+            <PageHeader
+                title="Dashboard"
+                subtitle={`Bienvenido de vuelta, ${session?.user?.name || session?.user?.email}`}
+                search
+                superAdmin={isSuperAdminUser}
+            />
 
             {/* Stats Grid */}
             <div className={styles['statsGrid']}>

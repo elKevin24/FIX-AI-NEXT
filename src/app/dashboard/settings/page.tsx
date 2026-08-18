@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import PageHeader from '@/components/PageHeader';
 import styles from '../page.module.css';
 
 export default async function SettingsPage() {
@@ -12,9 +13,7 @@ export default async function SettingsPage() {
 
     return (
         <div className={styles['dashboard']}>
-            <header className={styles['header']}>
-                <h1>Configuración</h1>
-            </header>
+            <PageHeader title="Configuración" />
 
             <div className={styles['statsGrid']}>
                 <div className={styles['card']}>
