@@ -218,7 +218,7 @@ export default function CashRegisterClient({ initialOpenRegister }: CashRegister
             <form onSubmit={handleOpen}>
               <div className={styles['formGroup']}>
                 <label>Saldo Inicial (Efectivo)</label>
-                <input type="number" step="0.01" required className={styles['input']} value={openingBalance} onChange={(e) => setOpeningBalance(e.target.value)} placeholder="0.00" />
+                <input name="initialAmount" type="number" step="0.01" required className={styles['input']} value={openingBalance} onChange={(e) => setOpeningBalance(e.target.value)} placeholder="0.00" />
               </div>
               <button type="submit" disabled={loading} className={`${styles['btn']} ${styles['btnPrimary']}`}>
                 {loading ? 'Abriendo...' : 'Abrir Caja'}

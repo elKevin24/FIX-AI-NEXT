@@ -67,7 +67,7 @@ export class InternalError extends DomainError {
     readonly code = 'INTERNAL_ERROR';
     readonly statusCode = 500;
 
-    constructor(message = 'Error interno del servidor', public readonly cause?: Error) {
+    constructor(message = 'Error interno del servidor', override readonly cause?: Error) {
         super(message);
     }
 }
