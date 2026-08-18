@@ -28,6 +28,8 @@
     "test:notifications": "npx tsx scripts/test-notifications.ts",
     "create:maintenance-templates": "npx tsx scripts/create-maintenance-templates.ts",
     "seed:service-templates": "npx tsx scripts/seed-all-service-templates.ts",
+    "check:types": "npx tsc --noEmit",
+    "check:all": "npx tsc --noEmit && npm run lint && npm run test && npm run build",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
