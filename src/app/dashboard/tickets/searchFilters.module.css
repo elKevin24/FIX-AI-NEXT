@@ -3,6 +3,19 @@
    Perfect Alignment Guaranteed
    ======================================== */
 
+.filters { margin-bottom: 1rem; }
+.filterSection, .advancedFilters { padding: 1rem; border: 1px solid var(--color-border-medium); border-radius: 0.75rem; background: var(--color-surface); }
+.advancedFilters { margin-top: 0.75rem; }
+.sectionHeading, .advancedFilters summary { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; color: var(--color-text-primary); font-weight: 700; }
+.sectionHeading { margin-bottom: 0.75rem; }
+.sectionHeading h2 { margin: 0; font-size: 1rem; }
+.sectionHeading span, .advancedFilters summary span { color: var(--color-text-secondary); font-size: 0.8125rem; font-weight: 500; }
+.advancedFilters summary { cursor: pointer; }
+.advancedFilters summary:focus-visible { outline: 3px solid var(--color-primary-500); outline-offset: 3px; border-radius: 0.25rem; }
+.advancedGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; padding-top: 1rem; }
+.activeFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+.filterBadge { border-radius: 999px; padding: 0.25rem 0.625rem; background: var(--color-primary-100); color: var(--color-primary-800); font-size: 0.8125rem; font-weight: 700; }
+
 .gridContainer {
   display: grid;
   gap: 0.5rem 1rem;

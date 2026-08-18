@@ -92,7 +92,7 @@ describe('GET /api/export/quotations', () => {
     expect(lines[1]).toContain('Carlos López');
   });
 
-  it('passes filters to query', async () => {
+  it('passes valid filters to query', async () => {
     (auth as any).mockResolvedValue(SESSION);
     const db = makeDb();
     (getTenantPrisma as any).mockReturnValue(db);
@@ -101,7 +101,6 @@ describe('GET /api/export/quotations', () => {
     const req = new NextRequest(url);
     const res = await GET(req);
 
-    // Consume the stream to trigger the iterator
     const reader = res.body!.getReader();
     while (true) {
       const { done } = await reader.read();
@@ -115,5 +114,57 @@ describe('GET /api/export/quotations', () => {
         }),
       })
     );
+  });
+
+  it('returns 400 for invalid status parameter', async () => {
+    (auth as any).mockResolvedValue(SESSION);
+
+    const url = 'http://localhost/api/export/quotations?status=INVALID_STATUS';
+    const req = new NextRequest(url);
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Parámetros inválidos');
+  });
+
+  it('returns 400 for invalid date format', async () => {
+    (auth as any).mockResolvedValue(SESSION);
+
+    const url = 'http://localhost/api/export/quotations?startDate=not-a-date';
+    const req = new NextRequest(url);
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when endDate is before startDate', async () => {
+    (auth as any).mockResolvedValue(SESSION);
+
+    const url = 'http://localhost/api/export/quotations?startDate=2026-12-31&endDate=2026-01-01';
+    const req = new NextRequest(url);
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('accepts all valid statuses', async () => {
+    (auth as any).mockResolvedValue(SESSION);
+    const db = makeDb();
+    (getTenantPrisma as any).mockReturnValue(db);
+
+    const statuses = ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELLED'];
+    for (const status of statuses) {
+      vi.clearAllMocks();
+      (auth as any).mockResolvedValue(SESSION);
+      const freshDb = makeDb();
+      (getTenantPrisma as any).mockReturnValue(freshDb);
+
+      const url = `http://localhost/api/export/quotations?status=${status}`;
+      const req = new NextRequest(url);
+      const res = await GET(req);
+
+      expect(res.status).not.toBe(400);
+    }
   });
 });
