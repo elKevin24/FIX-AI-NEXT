@@ -3,6 +3,7 @@ import { checkSLA } from './sla-actions';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
 import { createNotification } from '@/lib/notifications';
+import { createActionRepositories } from '@/lib/action-factory';
 import { ZodError } from 'zod';
 
 vi.mock('@/lib/prisma', () => ({
@@ -13,6 +14,9 @@ vi.mock('@/lib/prisma', () => ({
 }));
 vi.mock('@/lib/email-service', () => ({ sendEmail: vi.fn() }));
 vi.mock('@/lib/notifications', () => ({ createNotification: vi.fn() }));
+vi.mock('@/lib/action-factory', () => ({
+    createActionRepositories: vi.fn()
+}));
 
 describe('sla-actions', () => {
     beforeEach(() => {
@@ -43,21 +47,158 @@ describe('sla-actions', () => {
             tenantId: tenantMock.id,
             status: 'OPEN',
             createdAt: past,
-            dueDate: overDue, // Already past, so % used > 100% -> CRITICAL
+            dueDate: overDue,
             title: 'Test Ticket',
+            assignedToId: 'tech-1',
             assignedTo: { id: 'tech-1', email: 'tech@test.com' }
+        };
+
+        const mockAuditLogRepo = {
+            logAction: vi.fn().mockResolvedValue({
+                id: 'audit-1',
+                action: 'TICKET_STATUS_CHANGED',
+                module: 'TICKETS',
+                details: 'SLA CRITICAL breach detected',
+                userId: 'tech-1',
+                tenantId: tenantMock.id,
+                entityType: 'Ticket',
+                entityId: 'ticket-1',
+                createdAt: now
+            })
+        };
+
+        const mockRepos = {
+            customerRepo: {},
+            partRepo: {},
+            userRepo: {},
+            ticketRepo: {},
+            invoiceRepo: {},
+            cashRegisterRepo: {},
+            auditLogRepo: mockAuditLogRepo,
         };
 
         (prisma.tenant.findMany as any).mockResolvedValue([tenantMock]);
         (prisma.ticket.findMany as any).mockResolvedValue([ticketMock]);
+        (createActionRepositories as any).mockReturnValue(mockRepos);
 
         const result = await checkSLA();
 
         expect(result.checksRun).toBe(1);
         expect(result.notificationsSent).toBe(1);
         expect(result.emailsSent).toBe(1);
+        expect(result.auditLogsCreated).toBe(1);
 
         expect(sendEmail).toHaveBeenCalled();
         expect(createNotification).toHaveBeenCalled();
+        expect(mockAuditLogRepo.logAction).toHaveBeenCalledWith(
+            expect.objectContaining({
+                action: 'TICKET_STATUS_CHANGED',
+                module: 'TICKETS',
+                tenantId: tenantMock.id,
+                entityType: 'Ticket',
+                entityId: 'ticket-1',
+            })
+        );
+    });
+
+    it('checkSLA procesa tickets WARNING sin lanzar error', async () => {
+        const tenantMock = {
+            id: 'b6f4c3a2-d9e1-4567-b890-a2b3c4d5e6f7',
+            settings: {
+                slaWarningPercent: 80,
+                slaCriticalPercent: 95,
+                slaEmailEnabled: true,
+                slaInAppEnabled: true
+            }
+        };
+
+        const now = new Date();
+        const past = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3);
+        const future = new Date(now.getTime() + 1000 * 60 * 60 * 24);
+
+        const ticketMock = {
+            id: 'ticket-warning',
+            tenantId: tenantMock.id,
+            status: 'IN_PROGRESS',
+            createdAt: past,
+            dueDate: future,
+            title: 'Warning Ticket',
+            assignedToId: 'tech-1',
+            assignedTo: { id: 'tech-1', email: 'tech@test.com' }
+        };
+
+        const mockAuditLogRepo = {
+            logAction: vi.fn().mockResolvedValue({ id: 'audit-1' })
+        };
+
+        const mockRepos = {
+            customerRepo: {},
+            partRepo: {},
+            userRepo: {},
+            ticketRepo: {},
+            invoiceRepo: {},
+            cashRegisterRepo: {},
+            auditLogRepo: mockAuditLogRepo,
+        };
+
+        (prisma.tenant.findMany as any).mockResolvedValue([tenantMock]);
+        (prisma.ticket.findMany as any).mockResolvedValue([ticketMock]);
+        (createActionRepositories as any).mockReturnValue(mockRepos);
+
+        const result = await checkSLA();
+
+        expect(result.checksRun).toBe(1);
+        expect(result.auditLogsCreated).toBeGreaterThanOrEqual(0);
+        expect(createActionRepositories).toHaveBeenCalledWith(tenantMock.id);
+    });
+
+    it('checkSLA maneja errores en logAction sin lanzar excepción', async () => {
+        const tenantMock = {
+            id: 'b6f4c3a2-d9e1-4567-b890-a2b3c4d5e6f7',
+            settings: {
+                slaWarningPercent: 80,
+                slaCriticalPercent: 100,
+                slaEmailEnabled: false,
+                slaInAppEnabled: false
+            }
+        };
+
+        const now = new Date();
+        const past = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3);
+        const overDue = new Date(now.getTime() - 1000 * 60 * 60 * 24);
+
+        const ticketMock = {
+            id: 'ticket-1',
+            tenantId: tenantMock.id,
+            status: 'OPEN',
+            createdAt: past,
+            dueDate: overDue,
+            title: 'Test Ticket',
+            assignedToId: 'tech-1',
+            assignedTo: { id: 'tech-1', email: 'tech@test.com' }
+        };
+
+        const mockAuditLogRepo = {
+            logAction: vi.fn().mockRejectedValue(new Error('Audit log error'))
+        };
+
+        const mockRepos = {
+            customerRepo: {},
+            partRepo: {},
+            userRepo: {},
+            ticketRepo: {},
+            invoiceRepo: {},
+            cashRegisterRepo: {},
+            auditLogRepo: mockAuditLogRepo,
+        };
+
+        (prisma.tenant.findMany as any).mockResolvedValue([tenantMock]);
+        (prisma.ticket.findMany as any).mockResolvedValue([ticketMock]);
+        (createActionRepositories as any).mockReturnValue(mockRepos);
+
+        // Should not throw even if audit logging fails
+        const result = await checkSLA();
+        expect(result.checksRun).toBe(1);
+        expect(result.auditLogsCreated).toBe(0); // Error prevented logging
     });
 });

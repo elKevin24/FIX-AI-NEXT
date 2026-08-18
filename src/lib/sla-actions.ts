@@ -1,9 +1,11 @@
 
-import { prisma } from '@/lib/prisma';
+import { createActionRepositories, ActionRepositories } from '@/lib/action-factory';
 import { sendEmail } from '@/lib/email-service';
 import { createNotification } from '@/lib/notifications';
 import SLABreachEmail from '@/emails/SLABreach'; 
 import { SLACheckSchema } from '@/lib/schemas';
+import { prisma } from '@/lib/prisma';
+import { AuditAction, AuditModule } from '@prisma/client';
 
 export async function checkSLA(tenantId?: string) {
     console.log('Starting SLA Check...');
@@ -18,11 +20,15 @@ export async function checkSLA(tenantId?: string) {
     let checksRun = 0;
     let notificationsSent = 0;
     let emailsSent = 0;
+    let auditLogsCreated = 0;
 
     for (const tenant of tenants) {
         if (!tenant.settings) continue;
         
         const { slaWarningPercent, slaCriticalPercent, slaEmailEnabled, slaInAppEnabled } = tenant.settings;
+        
+        // Inject dependencies for this tenant
+        const repos = createActionRepositories(tenant.id);
         
         const tickets = await prisma.ticket.findMany({
             where: {
@@ -59,6 +65,16 @@ export async function checkSLA(tenantId?: string) {
             
             if (!status) continue;
             
+            // Log to audit trail when SLA threshold is breached
+            const auditLogged = await logSLABreach(
+                repos,
+                ticket,
+                status,
+                percentUsed,
+                tenant.id
+            );
+            if (auditLogged) auditLogsCreated++;
+            
             // Send Email
             if (slaEmailEnabled && ticket.assignedTo?.email) {
                  await sendEmail({
@@ -90,8 +106,41 @@ export async function checkSLA(tenantId?: string) {
         }
     }
     
-    console.log(`SLA Check Complete: ${checksRun} checked, ${emailsSent} emails, ${notificationsSent} notifications.`);
-    return { checksRun, notificationsSent, emailsSent };
+    console.log(`SLA Check Complete: ${checksRun} checked, ${emailsSent} emails, ${notificationsSent} notifications, ${auditLogsCreated} audit logs.`);
+    return { checksRun, notificationsSent, emailsSent, auditLogsCreated };
+}
+
+async function logSLABreach(
+    repos: ActionRepositories,
+    ticket: any,
+    status: 'WARNING' | 'CRITICAL',
+    percentUsed: number,
+    tenantId: string
+): Promise<boolean> {
+    try {
+        await repos.auditLogRepo.logAction({
+            action: status === 'CRITICAL' ? AuditAction.TICKET_STATUS_CHANGED : AuditAction.TICKET_UPDATED,
+            module: AuditModule.TICKETS,
+            details: `SLA ${status} breach detected. Ticket at ${Math.round(percentUsed)}% of allowed time.`,
+            userId: ticket.assignedToId || undefined,
+            tenantId,
+            entityType: 'Ticket',
+            entityId: ticket.id,
+            metadata: {
+                ticketId: ticket.id,
+                ticketNumber: ticket.id.slice(0, 8),
+                title: ticket.title,
+                slaStatus: status,
+                percentUsed: Math.round(percentUsed),
+                dueDate: ticket.dueDate?.toISOString(),
+            },
+            success: true,
+        });
+        return true;
+    } catch (error) {
+        console.error('Error logging SLA breach to audit trail:', error);
+        return false;
+    }
 }
 
 function msToTime(duration: number) {
