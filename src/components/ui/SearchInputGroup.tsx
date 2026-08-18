@@ -35,15 +35,8 @@ export default function SearchInputGroup({
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!disabled && !isLoading) {
-            onSearch();
-        }
-    };
-
     return (
-        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+        <div style={{ width: '100%' }}>
             <div className={`${styles['searchGroup']} ${error ? styles['error'] : ''}`}>
                 <input
                     type="text"
@@ -57,14 +50,15 @@ export default function SearchInputGroup({
                     aria-label={ariaLabel}
                 />
                 <button
-                    type="submit"
+                    type="button"
                     className={styles['searchButton']}
                     disabled={disabled || isLoading}
                     aria-label={buttonText}
+                    onClick={() => { if (!disabled && !isLoading) onSearch(); }}
                 >
                     {isLoading ? 'Buscando...' : buttonText}
                 </button>
             </div>
-        </form>
+        </div>
     );
 }

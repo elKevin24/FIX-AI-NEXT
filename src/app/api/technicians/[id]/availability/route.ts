@@ -59,13 +59,21 @@ export async function GET(
       );
     }
 
+    const currentWorkload = technician._count.assignedTickets;
+    const maxConcurrentTickets = technician.maxConcurrentTickets || 5;
+    const availableSlots = Math.max(0, maxConcurrentTickets - currentWorkload);
+    const utilizationPercent = maxConcurrentTickets > 0 
+      ? Math.min(100, Math.round((currentWorkload / maxConcurrentTickets) * 100))
+      : 0;
+    const isAvailable = technician.status === 'AVAILABLE' && availableSlots > 0;
+
     return NextResponse.json({
       ...technician,
-      currentWorkload: technician._count.assignedTickets,
-      availableSlots: Math.max(
-        0,
-        technician.maxConcurrentTickets - technician._count.assignedTickets
-      ),
+      currentWorkload,
+      maxConcurrentTickets,
+      availableSlots,
+      utilizationPercent,
+      isAvailable,
     });
   } catch (error) {
     console.error('Error fetching technician availability:', error);

@@ -1,22 +1,25 @@
 .themeSwitcher {
     position: relative;
-    display: inline-block;
+    display: block;
+    width: 100%;
 }
 
 .themeButton {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-2);
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-size: 0.9rem;
+    font-weight: 600;
     color: var(--color-text-primary);
     background: var(--color-surface);
     border: 1px solid var(--color-border-medium);
-    border-radius: var(--radius-base);
+    border-radius: 0.75rem;
     cursor: pointer;
     transition: all var(--transition-fast);
-    min-width: 150px;
+    box-sizing: border-box;
 }
 
 .themeButton:hover {
@@ -45,11 +48,11 @@
 
 .dropdown {
     position: absolute;
-    top: calc(100% + var(--spacing-1));
-    /* Cambiado de bottom a top - abre hacia abajo */
+    bottom: calc(100% + var(--spacing-1));
+    /* Abre hacia arriba en el sidebar para no cortarse */
+    left: 0;
     right: 0;
-    /* Alineado a la derecha */
-    min-width: 200px;
+    width: 100%;
     background: var(--color-surface);
     border: 1px solid var(--color-border-medium);
     border-radius: var(--radius-base);

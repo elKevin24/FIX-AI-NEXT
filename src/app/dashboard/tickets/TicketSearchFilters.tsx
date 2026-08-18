@@ -66,26 +66,36 @@ export default function TicketSearchFilters() {
     const hasFilters = Boolean(search || status || priority || assignedTo || dateFrom || dateTo || deviceType);
     return (
         <form className={styles['filters']} onSubmit={(event) => { event.preventDefault(); updateFilters(); }} aria-label="Filtros de tickets">
-            <section className={styles['filterSection']} aria-labelledby="ticket-primary-filters">
-                <div className={styles['sectionHeading']}><h2 id="ticket-primary-filters">Búsqueda principal</h2><span>3 filtros</span></div>
-                <div className={styles['gridContainer']}>
-                    <div className={styles['searchItem']}>
-                        <label className={styles['searchLabel']}>Término de búsqueda</label>
-                        <SearchInputGroup value={search} onChange={setSearch} onSearch={updateFilters} placeholder="Buscar por ID, título o cliente..." buttonText="Buscar" isLoading={isPending} inputRef={searchRef} ariaLabel="Buscar tickets por ID, título o cliente" />
+            <div className={styles['filtersCard']}>
+                <section className={styles['filterSection']} aria-labelledby="ticket-primary-filters">
+                    <div className={styles['sectionHeading']}>
+                        <h2 id="ticket-primary-filters">Búsqueda de Tickets</h2>
+                        <span>Filtros rápidos</span>
                     </div>
-                    <div className={styles['filterItem']}><Select label="Estado" value={status} onChange={(e) => setStatus(e.target.value)} options={statusOptions} aria-label="Filtrar por estado" /></div>
-                    <div className={styles['filterItem']}><Select label="Prioridad" value={priority} onChange={(e) => setPriority(e.target.value)} options={priorityOptions} aria-label="Filtrar por prioridad" /></div>
-                </div>
-            </section>
-            <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
-                <summary>Filtros avanzados <span>Fechas, técnico y dispositivo</span></summary>
-                <div className={styles['advancedGrid']}>
-                    <Input label="Desde" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} aria-label="Fecha inicial" />
-                    <Input label="Hasta" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} aria-label="Fecha final" />
-                    <Input label="Técnico asignado" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nombre o correo" aria-label="Filtrar por técnico asignado" />
-                    <Select label="Tipo de dispositivo" value={deviceType} onChange={(e) => setDeviceType(e.target.value)} aria-label="Filtrar por tipo de dispositivo" options={deviceOptions} />
-                </div>
-            </details>
+                    <div className={styles['gridContainer']}>
+                        <div className={styles['searchItem']}>
+                            <label className={styles['searchLabel']}>Término de búsqueda</label>
+                            <SearchInputGroup value={search} onChange={setSearch} onSearch={updateFilters} placeholder="Buscar por ID, título o cliente..." buttonText="Buscar" isLoading={isPending} inputRef={searchRef} ariaLabel="Buscar tickets por ID, título o cliente" />
+                        </div>
+                        <div className={styles['filterItem']}><Select label="Estado" value={status} onChange={(e) => setStatus(e.target.value)} options={statusOptions} aria-label="Filtrar por estado" /></div>
+                        <div className={styles['filterItem']}><Select label="Prioridad" value={priority} onChange={(e) => setPriority(e.target.value)} options={priorityOptions} aria-label="Filtrar por prioridad" /></div>
+                    </div>
+                </section>
+                
+                <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
+                    <summary>
+                        <span>⚙️ Más Filtros</span>
+                        <span>Fechas, técnico y dispositivo</span>
+                    </summary>
+                    <div className={styles['advancedGrid']}>
+                        <Input label="Desde" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} aria-label="Fecha inicial" />
+                        <Input label="Hasta" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} aria-label="Fecha final" />
+                        <Input label="Técnico asignado" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nombre o correo" aria-label="Filtrar por técnico asignado" />
+                        <Select label="Tipo de dispositivo" value={deviceType} onChange={(e) => setDeviceType(e.target.value)} aria-label="Filtrar por tipo de dispositivo" options={deviceOptions} />
+                    </div>
+                </details>
+            </div>
+
             {hasFilters && <div className={styles['activeFilters']} aria-label="Filtros activos">
                 {search && <span className={styles['filterBadge']}>Búsqueda: {search}</span>}{status && <span className={styles['filterBadge']}>Estado: {status}</span>}{priority && <span className={styles['filterBadge']}>Prioridad: {priority}</span>}{assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}{deviceType && <span className={styles['filterBadge']}>Equipo: {deviceType}</span>}
                 <Button variant="ghost" type="button" onClick={handleClear} disabled={isPending}>Limpiar filtros</Button>

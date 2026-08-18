@@ -21,7 +21,7 @@
     "db:seed": "npx prisma db seed",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
-    "neon:migrate": "npx prisma migrate deploy",
+    "neon:migrate": "bash scripts/neon-migrate-retry.sh",
     "neon:seed": "npx prisma db seed",
     "neon:superadmin": "npx tsx scripts/seed-superadmin.ts",
     "neon:studio": "npx prisma studio",

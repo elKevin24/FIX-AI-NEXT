@@ -13,6 +13,60 @@ import {
   AddPartToTemplateSchema,
   UpdateTemplateDefaultPartSchema
 } from './schemas';
+import { TemplateStockValidation } from './template-utils';
+
+/**
+ * Validate if there's sufficient stock for all required parts in a template
+ */
+export async function validateTemplateStock(
+  templateId: string,
+  tenantId: string
+): Promise<TemplateStockValidation> {
+  const db = getTenantPrisma(tenantId, 'system');
+
+  const template = await db.serviceTemplate.findUnique({
+    where: { id: templateId },
+    include: {
+      defaultParts: {
+        where: { required: true },
+        include: {
+          part: {
+            select: {
+              id: true,
+              name: true,
+              quantity: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!template) {
+    return {
+      valid: false,
+      missingParts: [],
+    };
+  }
+
+  const missingParts: TemplateStockValidation['missingParts'] = [];
+
+  for (const defaultPart of template.defaultParts) {
+    if (defaultPart.part.quantity < defaultPart.quantity) {
+      missingParts.push({
+        partId: defaultPart.partId,
+        partName: defaultPart.part.name,
+        required: defaultPart.quantity,
+        available: defaultPart.part.quantity,
+      });
+    }
+  }
+
+  return {
+    valid: missingParts.length === 0,
+    missingParts,
+  };
+}
 
 // ============================================================================
 // TYPES
@@ -62,6 +116,23 @@ function convertPriorityToEnum(priority: string): TicketPriority {
 // GET ALL TEMPLATES
 // ============================================================================
 
+// Helper to serialize template with Decimals to plain numbers
+function serializeTemplate(template: any) {
+  if (!template) return template;
+  return {
+    ...template,
+    laborCost: template.laborCost ? Number(template.laborCost) : null,
+    defaultParts: template.defaultParts?.map((dp: any) => ({
+      ...dp,
+      part: dp.part ? {
+        ...dp.part,
+        price: dp.part.price ? Number(dp.part.price) : 0,
+        cost: dp.part.cost ? Number(dp.part.cost) : null,
+      } : dp.part,
+    })),
+  };
+}
+
 export async function getServiceTemplates() {
   const session = await auth();
   if (!session?.user?.tenantId) {
@@ -89,7 +160,7 @@ export async function getServiceTemplates() {
     ],
   });
 
-  return templates;
+  return templates.map(serializeTemplate);
 }
 
 // ============================================================================
@@ -121,7 +192,7 @@ export async function getActiveServiceTemplates() {
     ],
   });
 
-  return templates;
+  return templates.map(serializeTemplate);
 }
 
 // ============================================================================
@@ -163,7 +234,7 @@ export async function getServiceTemplate(id: string) {
      throw new Error('Acceso denegado');
   }
 
-  return template;
+  return serializeTemplate(template);
 }
 
 // ============================================================================

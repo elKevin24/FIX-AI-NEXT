@@ -36,12 +36,12 @@ interface TemplateSelectorProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  MAINTENANCE: '🔧 Mantenimiento',
-  REPAIR: '🔨 Reparación',
-  UPGRADE: '⬆️ Actualización',
-  DIAGNOSTIC: '🔍 Diagnóstico',
-  INSTALLATION: '💿 Instalación',
-  CONSULTATION: '💬 Consultoría',
+  MAINTENANCE: 'Mantenimiento',
+  REPAIR: 'Reparación',
+  UPGRADE: 'Actualización',
+  DIAGNOSTIC: 'Diagnóstico',
+  INSTALLATION: 'Instalación',
+  CONSULTATION: 'Consultoría',
 };
 
 export default function TemplateSelector({
@@ -149,54 +149,44 @@ export default function TemplateSelector({
 
   return (
     <div className={styles['container']}>
-      <div className={styles['header']}>
-        <h3 className={styles['title']}>
-          ✨ Selecciona una Plantilla (Opcional)
-        </h3>
-        <p className={styles['subtitle']}>
-          Las plantillas pre-configuran el ticket con título, descripción y
-          partes recomendadas
-        </p>
-      </div>
+      {/* Search Bar & Category Filter in single compact row */}
+      <div className={styles['toolbar']}>
+        <div className={styles['searchContainer']}>
+          <input
+            type="text"
+            placeholder="🔍 Buscar plantilla..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles['searchInput']}
+          />
+        </div>
 
-      {/* Search Bar */}
-      <div className={styles['searchContainer']}>
-        <input
-          type="text"
-          placeholder="🔍 Buscar plantillas por nombre..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={styles['searchInput']}
-        />
-      </div>
-
-      {/* Category Filter */}
-      <div className={styles['categories']}>
-        <button
-          type="button"
-          onClick={() => setSelectedCategory(null)}
-          className={`${styles['categoryChip']} ${
-            !selectedCategory ? styles['categoryChipActive'] : ''
-          }`}
-        >
-          Todas ({templates.length})
-        </button>
-        {categories.map((category) => (
+        <div className={styles['categories']}>
           <button
-            key={category}
             type="button"
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => setSelectedCategory(null)}
             className={`${styles['categoryChip']} ${
-              selectedCategory === category ? styles['categoryChipActive'] : ''
+              !selectedCategory ? styles['categoryChipActive'] : ''
             }`}
           >
-            {CATEGORY_LABELS[category] || category} (
-            {templates.filter((t) => t.category === category).length})
+            Todas ({templates.length})
           </button>
-        ))}
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+              className={`${styles['categoryChip']} ${
+                selectedCategory === category ? styles['categoryChipActive'] : ''
+              }`}
+            >
+              {CATEGORY_LABELS[category] || category}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Template Grid */}
+      {/* Template Grid - Compact */}
       <div className={styles['grid']}>
         {/* Option: No Template (Manual) */}
         <button
@@ -206,13 +196,12 @@ export default function TemplateSelector({
             !selectedTemplate ? styles['templateCardSelected'] : ''
           }`}
         >
-          <div className={styles['templateIcon']}>✏️</div>
-          <div className={styles['templateInfo']}>
-            <h4 className={styles['templateName']}>Sin Plantilla</h4>
-            <p className={styles['templateCategory']}>Creación manual</p>
-            <p className={styles['templateDescription']}>
-              Completa todos los campos manualmente
-            </p>
+          <div className={styles['templateHeader']}>
+            <span className={styles['templateIcon']}>✏️</span>
+            <div className={styles['templateInfo']}>
+              <span className={styles['templateName']}>Creación Manual</span>
+              <span className={styles['templateCategory']}>Sin plantilla</span>
+            </div>
           </div>
         </button>
 
@@ -229,40 +218,19 @@ export default function TemplateSelector({
             }`}
             style={
               {
-                '--template-color': template.color || '#3B82F6',
+                '--template-color': template.color || '#3b82f6',
               } as React.CSSProperties
             }
           >
-            <div className={styles['templateIcon']}>
-              {template.icon || '🔧'}
-            </div>
-            <div className={styles['templateInfo']}>
-              <h4 className={styles['templateName']}>{template.name}</h4>
-              <p className={styles['templateCategory']}>
-                {CATEGORY_LABELS[template.category] || template.category}
-              </p>
-              <p className={styles['templateDescription']}>
-                {template.defaultTitle}
-              </p>
-              {template.defaultParts.length > 0 && (
-                <div className={styles['templateParts']}>
-                  <span className={styles['partsCount']}>
-                    {template.defaultParts.length} parte(s)
-                  </span>
-                  {template.defaultParts.some((p) => p.required) && (
-                    <span className={styles['requiredBadge']}>Requiere stock</span>
-                  )}
-                </div>
-              )}
-              {template.estimatedDuration && (
-                <span className={styles['duration']}>
-                  ⏱️ ~{Math.round(template.estimatedDuration / 60)}h
+            <div className={styles['templateHeader']}>
+              <span className={styles['templateIcon']}>{template.icon || '🔧'}</span>
+              <div className={styles['templateInfo']}>
+                <span className={styles['templateName']}>{template.name}</span>
+                <span className={styles['templateCategory']}>
+                  {CATEGORY_LABELS[template.category] || template.category} {template.estimatedDuration ? `• ~${Math.round(template.estimatedDuration / 60)}h` : ''}
                 </span>
-              )}
+              </div>
             </div>
-            {selectedTemplate?.id === template.id && (
-              <div className={styles['checkmark']}>✓</div>
-            )}
           </button>
         ))}
       </div>

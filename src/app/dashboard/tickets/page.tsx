@@ -4,6 +4,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
 import { Prisma } from '@prisma/client';
+import { isSuperAdmin } from '@/lib/authz';
 import TicketSearchFilters from './TicketSearchFilters';
 import { Button } from '@/components/ui';
 import styles from './tickets.module.css';
@@ -41,8 +42,8 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     const pageSize = 20;
     const offset = (currentPage - 1) * pageSize;
 
-    // Super Admin: adminkev@example.com puede ver TODO
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    // Super Admin: evaluación centralizada y segura
+    const isSuperAdminUser = isSuperAdmin(session.user);
     const tenantId = session.user.tenantId;
 
     // Construir el where clause base para filtros estándar
@@ -58,7 +59,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
     if (search && search.trim().length >= 2) {
         // BÚSQUEDA INTELIGENTE (Fuzzy Search con Trigramas)
-        const db = isSuperAdmin ? prisma : getTenantPrisma(tenantId!);
+        const db = isSuperAdminUser ? prisma : getTenantPrisma(tenantId!);
         
         // 1. Obtener conteo total para paginación
         // Nota: Es una estimación rápida o conteo exacto de la query filtrada
@@ -68,7 +69,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
             LEFT JOIN customers c ON t."customerId" = c.id
             LEFT JOIN users u ON t."assignedToId" = u.id
             WHERE 1=1
-              ${isSuperAdmin ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
+              ${isSuperAdminUser ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
               ${status ? Prisma.sql`AND t.status = ${status}::"TicketStatus"` : Prisma.empty}
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               ${assignedTo ? Prisma.sql`AND (u.name ILIKE ${'%' + assignedTo + '%'} OR u.email ILIKE ${'%' + assignedTo + '%'})` : Prisma.empty}
@@ -95,7 +96,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
             LEFT JOIN customers c ON t."customerId" = c.id
             LEFT JOIN users u ON t."assignedToId" = u.id
             WHERE 1=1
-              ${isSuperAdmin ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
+              ${isSuperAdminUser ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
               ${status ? Prisma.sql`AND t.status = ${status}::"TicketStatus"` : Prisma.empty}
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
               ${assignedTo ? Prisma.sql`AND (u.name ILIKE ${'%' + assignedTo + '%'} OR u.email ILIKE ${'%' + assignedTo + '%'})` : Prisma.empty}
@@ -125,7 +126,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         // 1. Conteo
         // Si no es superadmin, getTenantPrisma ya filtra, pero findMany necesita where explicito si usamos el cliente raw, 
         // pero aquí usamos la abstracción
-        if (isSuperAdmin) {
+        if (isSuperAdminUser) {
              totalItems = await prisma.ticket.count({ where });
              tickets = await prisma.ticket.findMany({
                 where,
@@ -156,7 +157,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                     <h1>Tickets</h1>
                     <p>Gestiona las órdenes de servicio y su estado</p>
                 </div>
-                {isSuperAdmin && (
+                {isSuperAdminUser && (
                     <span className={styles['superAdminBadge']}>
                         👑 Super Admin
                     </span>
@@ -175,7 +176,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                 <TicketSearchFilters />
             </Suspense>
 
-            <TicketsClient data={tickets as any} isSuperAdmin={isSuperAdmin} />
+            <TicketsClient data={tickets as any} isSuperAdmin={isSuperAdminUser} />
 
             <PaginationControls
                 currentPage={currentPage}

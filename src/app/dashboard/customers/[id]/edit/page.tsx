@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
+import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import EditCustomerForm from './EditCustomerForm';
 
@@ -16,13 +17,13 @@ export default async function EditCustomerPage({ params }: Props) {
         redirect('/login');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
     const isAdmin = session.user.role === 'ADMIN';
     const tenantId = session.user.tenantId;
 
     let customer;
 
-    if (isSuperAdmin) {
+    if (isSuperAdminUser) {
         customer = await prisma.customer.findUnique({
             where: { id },
             select: {
@@ -82,7 +83,7 @@ export default async function EditCustomerPage({ params }: Props) {
     return (
         <EditCustomerForm
             customer={customer}
-            isSuperAdmin={isSuperAdmin}
+            isSuperAdmin={isSuperAdminUser}
             isAdmin={isAdmin}
         />
     );

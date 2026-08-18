@@ -11,8 +11,8 @@ import {
   formatCurrency,
   CATEGORY_CONFIG,
   getCategoryConfig,
-  validateTemplateStock,
 } from './template-utils';
+import { validateTemplateStock } from './service-template-actions';
 import { getTenantPrisma } from './tenant-prisma';
 
 describe('template-utils', () => {

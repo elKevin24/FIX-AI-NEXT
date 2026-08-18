@@ -24,8 +24,20 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     box-shadow: var(--shadow-lg);
-    overflow-y: auto;
-    overflow-x: visible;
+    overflow: hidden;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: 4px;
 }
 
 .sidebar.open {
@@ -69,6 +81,20 @@
     flex-direction: column;
     gap: 1.25rem;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) transparent;
+    padding-right: 0.25rem;
+}
+
+.nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nav::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: 4px;
 }
 
 .navSection {

@@ -1,5 +1,4 @@
 import { addHours } from 'date-fns';
-import { getTenantPrisma } from './tenant-prisma';
 
 // ============================================================================
 // TYPES
@@ -44,61 +43,6 @@ export function calculateEstimatedDate(durationMinutes: number | null): Date | n
 // STOCK VALIDATION
 // ============================================================================
 
-/**
- * Validate if there's sufficient stock for all required parts in a template
- * @param templateId - Template ID
- * @param tenantId - Tenant ID
- * @returns Validation result with missing parts details
- */
-export async function validateTemplateStock(
-  templateId: string,
-  tenantId: string
-): Promise<TemplateStockValidation> {
-  const db = getTenantPrisma(tenantId, 'system');
-
-  const template = await db.serviceTemplate.findUnique({
-    where: { id: templateId },
-    include: {
-      defaultParts: {
-        where: { required: true }, // Only check required parts
-        include: {
-          part: {
-            select: {
-              id: true,
-              name: true,
-              quantity: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!template) {
-    return {
-      valid: false,
-      missingParts: [],
-    };
-  }
-
-  const missingParts: TemplateStockValidation['missingParts'] = [];
-
-  for (const defaultPart of template.defaultParts) {
-    if (defaultPart.part.quantity < defaultPart.quantity) {
-      missingParts.push({
-        partId: defaultPart.partId,
-        partName: defaultPart.part.name,
-        required: defaultPart.quantity,
-        available: defaultPart.part.quantity,
-      });
-    }
-  }
-
-  return {
-    valid: missingParts.length === 0,
-    missingParts,
-  };
-}
 
 /**
  * Get stock status indicator for a part

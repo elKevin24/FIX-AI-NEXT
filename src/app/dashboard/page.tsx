@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
+import { isSuperAdmin } from "@/lib/authz";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
         redirect('/login');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
     const tenantId = session.user.tenantId;
     const tenantPrisma = getTenantPrisma(tenantId, session.user.id);
 
@@ -219,18 +220,19 @@ export default async function DashboardPage() {
     return (
         <div className={styles['dashboard']}>
             <header className={styles['header']}>
-                <div>
+                <div className={styles['headerTitleContainer']}>
                     <h1>Dashboard</h1>
                     <p>Bienvenido de vuelta, {session?.user?.name || session?.user?.email}</p>
                 </div>
-                {isSuperAdmin && (
+                
+                <div className={styles['searchBar']}>
+                    <GlobalSearch />
+                </div>
+
+                {isSuperAdminUser && (
                     <span className={styles['superAdminBadge']}>👑 Super Admin</span>
                 )}
             </header>
-
-            <div className={styles['searchBar']}>
-                <GlobalSearch />
-            </div>
 
             {/* Stats Grid */}
             <div className={styles['statsGrid']}>

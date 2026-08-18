@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import ThemeInit from "@/components/ThemeInit";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -26,33 +27,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es" className={inter.variable} suppressHydrationWarning>
-            <head>
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `
-                            (function() {
-                                try {
-                                    const theme = localStorage.getItem('theme') || 'auto';
-                                    
-                                    if (theme === 'auto') {
-                                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                                        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-                                    } else if (['light', 'dark', 'dark-colorblind'].includes(theme)) {
-                                        document.documentElement.setAttribute('data-theme', theme);
-                                    } else {
-                                        // Fallback to auto behavior
-                                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                                        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-                                    }
-                                } catch (e) {
-                                    document.documentElement.setAttribute('data-theme', 'light');
-                                }
-                            })();
-                        `,
-                    }}
-                />
-            </head>
+            <head />
             <body>
+                <ThemeInit />
                 <ThemeProvider>
                     {children}
                 </ThemeProvider>

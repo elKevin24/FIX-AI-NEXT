@@ -47,18 +47,20 @@
 /* Variants */
 .primary {
   background: var(--color-primary-600);
-  color: white;
+  color: #ffffff !important;
   border-color: transparent;
   box-shadow: var(--shadow-sm);
 }
 
 .primary:hover:not(:disabled) {
   background: var(--color-primary-700);
+  color: #ffffff !important;
   transform: translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-lg);
 }
 
 .primary:active:not(:disabled) {
+  color: #ffffff !important;
   transform: translateY(0) scale(0.98);
   transition: all 0.1s;
 }

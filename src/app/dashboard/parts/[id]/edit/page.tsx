@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import PartEditForm from './PartEditForm';
 
@@ -15,7 +16,7 @@ export default async function EditPartPage({ params }: Props) {
         redirect('/login');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
 
     const part = await prisma.part.findUnique({
         where: { id },
@@ -39,7 +40,7 @@ export default async function EditPartPage({ params }: Props) {
     }
 
     // Check tenant isolation (unless super admin)
-    if (!isSuperAdmin && part.tenantId !== session.user.tenantId) {
+    if (!isSuperAdminUser && part.tenantId !== session.user.tenantId) {
         redirect('/dashboard/parts');
     }
 

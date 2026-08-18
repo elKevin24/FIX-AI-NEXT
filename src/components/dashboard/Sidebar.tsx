@@ -37,6 +37,13 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
         if (path === '/dashboard') {
             return pathname === '/dashboard';
         }
+        if (path === '/dashboard/tickets') {
+            // Activo en /dashboard/tickets, /dashboard/tickets/create, /dashboard/tickets/[id], pero NO en /dashboard/tickets/pool
+            return (
+                pathname === '/dashboard/tickets' ||
+                (pathname?.startsWith('/dashboard/tickets/') && !pathname.startsWith('/dashboard/tickets/pool'))
+            );
+        }
         return pathname?.startsWith(path);
     };
 

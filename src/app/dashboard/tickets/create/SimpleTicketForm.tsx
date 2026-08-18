@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useActionState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createBatchTickets } from '@/lib/actions';
+import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
+import TemplateSelector, { ServiceTemplate } from '@/components/tickets/TemplateSelector';
 import styles from './SimpleTicketForm.module.css';
 
 interface Customer {
@@ -36,36 +39,68 @@ const DEVICE_TYPE_OPTIONS = [
 ];
 
 export default function SimpleTicketForm() {
+    const router = useRouter();
     const [customer, setCustomer] = useState<Customer | null>(null);
+    const [selectedTemplate, setSelectedTemplate] = useState<ServiceTemplate | null>(null);
     const [devices, setDevices] = useState<Device[]>([{
         title: '',
         description: '',
         deviceType: 'PC',
     }]);
+    const [error, setError] = useState<string | null>(null);
+    const [isPending, setIsPending] = useState(false);
 
-    const [state, formAction, isPending] = useActionState(createBatchTickets, null);
+    const handleTemplateChange = (template: ServiceTemplate | null) => {
+        setSelectedTemplate(template);
+        if (template) {
+            setDevices([{
+                title: template.defaultTitle,
+                description: template.defaultDescription,
+                deviceType: devices[0]?.deviceType || 'PC',
+                deviceModel: devices[0]?.deviceModel || '',
+                serialNumber: devices[0]?.serialNumber || '',
+                accessories: devices[0]?.accessories || '',
+                checkInNotes: devices[0]?.checkInNotes || '',
+            }]);
+        }
+    };
 
-    const handleSubmit = (formData: FormData) => {
+    const handleSubmit = async (formData: FormData) => {
         if (!customer) return;
 
-        formData.set('customerName', customer.name);
-        if (customer.id) {
-            formData.set('customerId', customer.id);
+        setIsPending(true);
+        setError(null);
+
+        try {
+            if (selectedTemplate && customer.id) {
+                const templateFormData = new FormData();
+                templateFormData.append('templateId', selectedTemplate.id);
+                templateFormData.append('customerId', customer.id);
+                if (devices[0]?.deviceType) templateFormData.append('deviceType', devices[0].deviceType);
+                if (devices[0]?.deviceModel) templateFormData.append('deviceModel', devices[0].deviceModel);
+
+                const ticket = await createTicketFromTemplate(templateFormData);
+                router.push(`/dashboard/tickets/${ticket.id}`);
+            } else {
+                formData.set('customerName', customer.name);
+                if (customer.id) formData.set('customerId', customer.id);
+                if (customer.email) formData.set('customerEmail', customer.email);
+                if (customer.phone) formData.set('customerPhone', customer.phone);
+                if (customer.dpi) formData.set('customerDpi', customer.dpi);
+                if (customer.nit) formData.set('customerNit', customer.nit);
+                formData.set('tickets', JSON.stringify(devices));
+
+                const result = await createBatchTickets(null, formData);
+                if (result && result.message) {
+                    setError(result.message);
+                    setIsPending(false);
+                    return;
+                }
+            }
+        } catch (err: any) {
+            setError(err.message || 'Error al crear el ticket');
+            setIsPending(false);
         }
-        if (customer.email) {
-            formData.set('customerEmail', customer.email);
-        }
-        if (customer.phone) {
-            formData.set('customerPhone', customer.phone);
-        }
-        if (customer.dpi) {
-            formData.set('customerDpi', customer.dpi);
-        }
-        if (customer.nit) {
-            formData.set('customerNit', customer.nit);
-        }
-        formData.set('tickets', JSON.stringify(devices));
-        formAction(formData);
     };
 
     const addDevice = () => {
@@ -88,9 +123,10 @@ export default function SimpleTicketForm() {
         setDevices(updated);
     };
 
+    const isSubmitDisabled = isPending || !customer || (!selectedTemplate && devices.some(d => !d.title || !d.description));
+
     return (
         <div className={styles['container']}>
-            {/* --- White Cloudy Background Effects --- */}
             <div className={styles['backgroundEffects']}>
                 <div className={`${styles['blob']} ${styles['blobBlue']}`} />
                 <div className={`${styles['blob']} ${styles['blobPurple']}`} />
@@ -98,22 +134,39 @@ export default function SimpleTicketForm() {
             </div>
 
             <div className={styles['content']}>
-                {/* Header Section */}
                 <div className={styles['header']}>
-                    <h1 className={styles['title']}>
-                        Nuevo Ticket
-                    </h1>
+                    <div className={styles['headerContent']}>
+                        <h1 className={styles['title']}>Nuevo Ticket</h1>
+                        <p className={styles['subtitle']}>Registra una nueva orden de servicio para reparación o mantenimiento</p>
+                    </div>
+                    <Button as="a" href="/dashboard/tickets" variant="secondary" size="sm">
+                        ← Volver
+                    </Button>
                 </div>
 
-                {state?.message && (
+                {error && (
                     <div style={{ marginBottom: '1.5rem' }}>
-                        <Alert variant="error">
-                            {state.message}
-                        </Alert>
+                        <Alert variant="error">{error}</Alert>
                     </div>
                 )}
 
                 <form action={handleSubmit} className={styles['form']}>
+
+                    {/* --- Template Selection --- */}
+                    <div className={styles['glassCard']}>
+                        <div className={styles['cardHeader']}>
+                            <h2 className={styles['cardTitle']}>Tipo de Servicio</h2>
+                            {selectedTemplate && (
+                                <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--color-primary-600)', fontWeight: 600 }}>
+                                    {selectedTemplate.icon || '📋'} {selectedTemplate.name}
+                                </span>
+                            )}
+                        </div>
+                        <TemplateSelector
+                            selectedTemplate={selectedTemplate}
+                            onSelect={handleTemplateChange}
+                        />
+                    </div>
 
                     {/* --- Customer Glass Card --- */}
                     <div className={styles['glassCard']}>
@@ -297,7 +350,7 @@ export default function SimpleTicketForm() {
                     <div className={styles['footer']}>
                         <Button
                             type="submit"
-                            disabled={isPending || !customer || devices.some(d => !d.title || !d.description)}
+                            disabled={isSubmitDisabled}
                             className={styles['submitBtn']}
                             isLoading={isPending}
                             variant="primary"
