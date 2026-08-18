@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId } from 'react';
+import React, { forwardRef, useId } from 'react';
 import styles from './Form.module.css';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -9,14 +9,16 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   helper?: string;
 }
 
-export function Input({
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+{
   label,
   error,
   helper,
   className = '',
   id,
   ...props
-}: InputProps) {
+},
+ref) {
   const generatedId = useId();
   const inputId = id || generatedId;
   const helperId = `${inputId}-helper`;
@@ -38,6 +40,7 @@ export function Input({
       )}
       <input
         id={inputId}
+        ref={ref}
         className={inputClasses}
         aria-invalid={hasError}
         aria-describedby={hasError ? errorId : helper ? helperId : undefined}
@@ -55,4 +58,6 @@ export function Input({
       )}
     </div>
   );
-}
+});
+
+Input.displayName = 'Input';

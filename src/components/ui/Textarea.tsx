@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId } from 'react';
+import React, { forwardRef, useId } from 'react';
 import styles from './Form.module.css';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -9,14 +9,16 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
   helper?: string;
 }
 
-export function Textarea({
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+{
   label,
   error,
   helper,
   className = '',
   id,
   ...props
-}: TextareaProps) {
+},
+ref) {
   const generatedId = useId();
   const textareaId = id || generatedId;
   const helperId = `${textareaId}-helper`;
@@ -38,6 +40,7 @@ export function Textarea({
       )}
       <textarea
         id={textareaId}
+        ref={ref}
         className={textareaClasses}
         aria-invalid={hasError}
         aria-describedby={hasError ? errorId : helper ? helperId : undefined}
@@ -55,4 +58,6 @@ export function Textarea({
       )}
     </div>
   );
-}
+});
+
+Textarea.displayName = 'Textarea';

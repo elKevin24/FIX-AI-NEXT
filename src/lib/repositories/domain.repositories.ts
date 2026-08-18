@@ -1,4 +1,4 @@
-import { Customer, Part, User, Ticket } from '@prisma/client';
+import { CashRegister, Customer, Invoice, Part, User, Ticket } from '@prisma/client';
 import { IBaseRepository } from './base.repository';
 
 export interface ICustomerRepository extends IBaseRepository<Customer, any, any> {
@@ -17,4 +17,18 @@ export interface IUserRepository extends IBaseRepository<User, any, any> {
 
 export interface ITicketRepository extends IBaseRepository<Ticket, any, any> {
     findByIdWithRelations(id: string): Promise<any | null>;
+}
+
+export interface IInvoiceRepository extends IBaseRepository<Invoice, any, any> {
+    findByIdWithRelations(id: string): Promise<any | null>;
+    findFirst(filter?: any): Promise<Invoice | null>;
+    findMany(filter?: any): Promise<Invoice[]>;
+    count(filter?: any): Promise<number>;
+}
+
+export interface ICashRegisterRepository extends IBaseRepository<CashRegister, any, any> {
+    findByIdWithTransactions(id: string): Promise<any | null>;
+    findFirst(filter?: any): Promise<CashRegister | null>;
+    findMany(filter?: any): Promise<CashRegister[]>;
+    count(filter?: any): Promise<number>;
 }

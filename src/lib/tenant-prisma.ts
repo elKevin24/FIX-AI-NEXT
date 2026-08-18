@@ -115,18 +115,22 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
 
                 async update({ model, args, query }: { model: string; args: any; query: any }) {
                     if (!isTenantModel(model)) return query(args);
-                    const { where } = args;
-                    const record = await (prisma[model as keyof typeof prisma] as any).findFirst({
-                        where: { ...where, tenantId },
-                        select: { id: true }
-                    });
-                    if (!record) {
-                        const error = new Error('Record to update not found or unauthorized.');
-                        (error as any).code = 'P2025';
-                        throw error;
+                    const { where, data, ...rest } = args ?? {};
+                    const sanitizedWhere = { ...(where ?? {}), tenantId };
+                    const modelClient = (prisma as any)?.[model];
+                    if (modelClient?.findFirst) {
+                        const record = await modelClient.findFirst({
+                            where: sanitizedWhere,
+                            select: { id: true }
+                        });
+                        if (!record) {
+                            const error = new Error('Record to update not found or unauthorized.');
+                            (error as any).code = 'P2025';
+                            throw error;
+                        }
                     }
-                    const data = { ...(args?.data ?? {}), updatedById: userId };
-                    return query({ ...args, where, data });
+                    const safeData = { ...(data ?? {}), updatedById: userId };
+                    return query({ ...rest, where: sanitizedWhere, data: safeData });
                 },
 
                 async updateMany({ model, args, query }: { model: string; args: any; query: any }) {
@@ -138,17 +142,21 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
 
                 async delete({ model, args, query }: { model: string; args: any; query: any }) {
                     if (!isTenantModel(model)) return query(args);
-                    const { where } = args;
-                    const record = await (prisma[model as keyof typeof prisma] as any).findFirst({
-                        where: { ...where, tenantId },
-                        select: { id: true }
-                    });
-                    if (!record) {
-                        const error = new Error('Record to delete not found or unauthorized.');
-                        (error as any).code = 'P2025';
-                        throw error;
+                    const { where, ...rest } = args ?? {};
+                    const sanitizedWhere = { ...(where ?? {}), tenantId };
+                    const modelClient = (prisma as any)?.[model];
+                    if (modelClient?.findFirst) {
+                        const record = await modelClient.findFirst({
+                            where: sanitizedWhere,
+                            select: { id: true }
+                        });
+                        if (!record) {
+                            const error = new Error('Record to delete not found or unauthorized.');
+                            (error as any).code = 'P2025';
+                            throw error;
+                        }
                     }
-                    return query({ ...args, where });
+                    return query({ ...rest, where: sanitizedWhere });
                 },
             },
         },

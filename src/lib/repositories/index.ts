@@ -4,4 +4,6 @@ export * from './prisma-customer.repository';
 export * from './prisma-part.repository';
 export * from './prisma-user.repository';
 export * from './prisma-ticket.repository';
+export * from './implementations/prisma-invoice.repository';
+export * from './implementations/prisma-cash-register.repository';
 export * from './container';
