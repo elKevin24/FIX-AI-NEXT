@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import styles from './page.module.css';
 
+export const metadata = {
+  title: 'FIX Workshop - Sistema de Gestión Multi-Tenant para Talleres',
+  description: 'Sistema de gestión integral multi-tenant para talleres electromecánicos. Control de tickets, inventario, facturación, clientes y reportes con aislamiento total de datos.',
+  openGraph: {
+    title: 'FIX Workshop - Sistema de Gestión Multi-Tenant',
+    description: 'Gestiona múltiples talleres electrónicos bajo un solo sistema escalable. Tickets, inventario, facturación y clientes.',
+  },
+};
+
 export default function Home() {
     return (
         <main className={styles['container']}>

@@ -61,10 +61,10 @@ export const metadata: Metadata = {
     },
     icons: {
         icon: [
-            { url: "/favicon.svg", type: "image/svg+xml" },
             { url: "/favicon.ico", sizes: "32x32" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
         ],
-        apple: "/apple-touch-icon.svg",
+        apple: "/apple-touch-icon.png",
         shortcut: "/favicon.ico",
     },
     manifest: "/manifest.json",
@@ -100,7 +100,7 @@ export default function RootLayout({
             <body>
                 <a
                     href="#main-content"
-                    className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-primary text-white px-4 py-2 rounded-md font-medium"
+                    className="skip-link"
                 >
                     Saltar al contenido principal
                 </a>

@@ -24,10 +24,10 @@ const CHANGE_PASSWORD_PATH = '/dashboard/profile/change-password';
 let redisRatelimitAuth: Ratelimit | null = null;
 let redisRatelimitSearch: Ratelimit | null = null;
 
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+if (process.env['UPSTASH_REDIS_REST_URL'] && process.env['UPSTASH_REDIS_REST_TOKEN']) {
   const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    url: process.env['UPSTASH_REDIS_REST_URL'],
+    token: process.env['UPSTASH_REDIS_REST_TOKEN'],
   });
   
   // Login limit: 10 requests per 1 minute

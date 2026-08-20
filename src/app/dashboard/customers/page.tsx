@@ -17,6 +17,15 @@ interface CustomersPageProps {
   }>;
 }
 
+export const metadata = {
+  title: 'Clientes',
+  description: 'Gestiona la base de datos de clientes, historial de reparaciones y datos de contacto.',
+  openGraph: {
+    title: 'Clientes | FIX Workshop',
+    description: 'Gestiona la base de datos de clientes, historial de reparaciones y datos de contacto.',
+  },
+};
+
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
   const session = await auth();
 

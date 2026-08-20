@@ -8,6 +8,7 @@ import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import PartsSection from './PartsSection';
 import ServicesSection from './ServicesSection';
 import AttachmentsSection from '@/components/tickets/AttachmentsSection';
@@ -127,6 +128,7 @@ const PRIORITY_OPTIONS = [
 
 export default function TicketDetailView({ ticket, availableUsers, availableParts, availableServices, isSuperAdmin, isAdmin, currentUserId, timelineEvents }: Props) {
     const router = useRouter();
+    const { addToast } = useToast();
     const [updateState, updateAction, isUpdating] = useActionState(updateTicket, null);
     const [deleteState, deleteAction, isDeleting] = useActionState(deleteTicket, null);
     const [noteState, noteAction, isAddingNote] = useActionState(addTicketNote, null);
@@ -407,7 +409,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                                     await generateInvoiceFromTicket({ ticketId: ticket.id });
                                                     router.refresh();
                                                 } catch (e: any) {
-                                                    alert(e.message || 'Error al generar factura');
+                                                    addToast(e.message || 'Error al generar factura', 'ERROR');
                                                 } finally {
                                                     setIsGeneratingInvoice(false);
                                                 }

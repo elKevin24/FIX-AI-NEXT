@@ -27,6 +27,15 @@ interface TicketsPageProps {
     }>;
 }
 
+export const metadata = {
+  title: 'Gestión de Tickets',
+  description: 'Administra órdenes de servicio, asigna técnicos y da seguimiento al estado de reparaciones del taller.',
+  openGraph: {
+    title: 'Gestión de Tickets | FIX Workshop',
+    description: 'Administra órdenes de servicio, asigna técnicos y da seguimiento al estado de reparaciones del taller.',
+  },
+};
+
 export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     const session = await auth();
 

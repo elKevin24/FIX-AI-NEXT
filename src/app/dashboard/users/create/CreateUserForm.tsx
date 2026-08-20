@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import { Input, Select, Button, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
 import styles from '@/components/ui/Form.module.css';
@@ -16,6 +17,7 @@ interface CreateUserFormProps {
 
 export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUserFormProps) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [state, formAction, isPending] = useActionState(createUser, {
     success: false,
     message: '',
@@ -34,7 +36,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
     if (state.success) {
       // Show temporary password if generated
       if (state.data?.['temporaryPassword']) {
-        alert(`Usuario creado exitosamente!\n\nContraseña temporal: ${state.data['temporaryPassword']}\n\nEl usuario deberá cambiarla en su primer inicio de sesión.`);
+        addToast(`Contraseña temporal: ${state.data['temporaryPassword']}`, 'SUCCESS', 'Usuario creado exitosamente');
       }
       router.push('/dashboard/users');
       router.refresh();

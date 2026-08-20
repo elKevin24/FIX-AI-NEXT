@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { deactivateUser, reactivateUser } from '@/lib/user-actions';
+import { useToast } from '@/context/ToastContext';
 import styles from './users.module.css';
 
 interface DeleteUserButtonProps {
@@ -20,6 +21,7 @@ export default function DeleteUserButton({
 }: DeleteUserButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { addToast } = useToast();
 
   const handleToggleActive = async () => {
     const action = isActive ? 'desactivar' : 'reactivar';
@@ -48,7 +50,7 @@ export default function DeleteUserButton({
       router.refresh();
     } catch (error) {
       console.error(`Error ${action} user:`, error);
-      alert(error instanceof Error ? error.message : `Error al ${action} usuario`);
+      addToast(error instanceof Error ? error.message : `Error al ${action} usuario`, 'ERROR');
     } finally {
       setIsLoading(false);
     }

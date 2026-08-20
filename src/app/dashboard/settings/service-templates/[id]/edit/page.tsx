@@ -7,7 +7,12 @@ import { TemplatePartsManager } from '../../TemplatePartsManager';
 import styles from '../../service-templates.module.css';
 
 export const metadata = {
-  title: 'Editar Plantilla de Servicio | Dashboard',
+  title: 'Editar Plantilla de Servicio',
+  description: 'Modifica los datos, partes y configuración de una plantilla de servicio existente.',
+  openGraph: {
+    title: 'Editar Plantilla de Servicio | FIX Workshop',
+    description: 'Modifica los datos, partes y configuración de una plantilla de servicio existente.',
+  },
 };
 
 export default async function EditServiceTemplatePage({ params }: { params: Promise<{ id: string }> }) {

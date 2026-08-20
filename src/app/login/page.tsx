@@ -106,11 +106,11 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className={styles['inputGroup']}>
-              <div className={styles['flexBetween']}>
+              <div className={styles['labelRow']}>
                 <label htmlFor="password" className={styles['label']}>
                   Contraseña
                 </label>
-                <Link href="#" className={styles['forgotPassword']}>
+                <Link href="/forgot-password" className={styles['forgotPassword']}>
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>

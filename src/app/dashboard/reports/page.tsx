@@ -4,8 +4,12 @@ import { getReportData } from '@/lib/report-actions';
 import ReportsClient from './ReportsClient';
 
 export const metadata = {
-  title: 'Reportes | FIX-AI',
-  description: 'Visualiza estadísticas y métricas de tu taller.',
+  title: 'Reportes',
+  description: 'Visualiza estadísticas de tickets, facturación, inventario y rendimiento del taller.',
+  openGraph: {
+    title: 'Reportes | FIX Workshop',
+    description: 'Visualiza estadísticas de tickets, facturación, inventario y rendimiento del taller.',
+  },
 };
 
 export default async function ReportsPage() {
