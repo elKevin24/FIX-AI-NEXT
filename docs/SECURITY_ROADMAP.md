@@ -150,7 +150,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
 ## 🟢 Fase 4: Subida de Archivos, Dependencias & CI/CD (P3)
 > **Objetivo:** Fortalecer la integridad de archivos adjuntos y mantener el proyecto libre de dependencias vulnerables.
 
-- [ ] **4.1 Validación Robusta de Archivos Adjuntos**
+- [x] **4.1 Validación Robusta de Archivos Adjuntos**
   - **Archivos:** `src/app/api/tickets/[id]/attachments/route.ts`
   - **Acción:**
     - Validar extensión de archivo permitida (`.jpg`, `.jpeg`, `.png`, `.webp`, `.pdf`, `.docx`, `.txt`).
