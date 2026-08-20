@@ -9,7 +9,7 @@ import { ServiceCategory } from '@prisma/client';
 const InitialPartSchema = z.object({
     partId: z.string().uuid('ID de repuesto inválido'),
     quantity: z.number().int().positive('La cantidad debe ser positiva')
-}).strict();
+});
 
 // Esquema para la creación de un solo ticket (parte del flujo multi-dispositivo)
 // NOTA: customerName se envía por separado en FormData, no dentro de cada ticket
@@ -35,7 +35,7 @@ export const CreateTicketSchema = z.object({
   accessories: z.string().optional().nullable(),
   checkInNotes: z.string().max(500, 'Las notas de ingreso son demasiado largas.').optional().nullable(),
   // cancellationReason no es parte de la creación inicial
-}).strict();
+});
 
 // Esquema para la creación de múltiples tickets (batch creation)
 // Esto será un array de CreateTicketSchema, ya que cada elemento es un ticket individual.
@@ -58,7 +58,7 @@ export const UpdateTicketSchema = z.object({
   accessories: z.string().optional().nullable(),
   checkInNotes: z.string().max(500, 'Las notas de ingreso son demasiado largas.').optional().nullable(),
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
-}).strict();
+});
 
 export const UpdateTicketStatusSchema = z.object({
   ticketId: z.string().min(1, 'ID de ticket requerido'),
@@ -66,7 +66,7 @@ export const UpdateTicketStatusSchema = z.object({
     errorMap: () => ({ message: 'Estado de ticket inválido.' })
   }),
   note: z.string().optional().nullable(),
-}).strict().superRefine((data, ctx) => {
+}).superRefine((data, ctx) => {
   if (data.status === 'CANCELLED') {
     if (!data.note || data.note.trim().length < 10) {
       ctx.addIssue({
@@ -81,7 +81,7 @@ export const UpdateTicketStatusSchema = z.object({
 export const DeleteTicketSchema = z.object({
   ticketId: z.string().min(1, 'ID de ticket requerido'),
   reason: z.string().min(10, 'El motivo de eliminación debe tener al menos 10 caracteres.'),
-}).strict();
+});
 
 // ============================================================================
 // USER SCHEMAS
@@ -94,7 +94,7 @@ export const CreateUserSchema = z.object({
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
-}).strict();
+});
 
 export const UpdateUserSchema = z.object({
   userId: z.string().uuid('ID de usuario inválido'),
@@ -104,7 +104,7 @@ export const UpdateUserSchema = z.object({
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
-}).strict();
+});
 
 // ============================================================================
 // CUSTOMER SCHEMAS
@@ -117,7 +117,7 @@ export const CreateCustomerSchema = z.object({
   address: z.string().optional().nullable(),
   dpi: z.string().optional().nullable(),
   nit: z.string().optional().nullable(),
-}).strict();
+});
 
 export const UpdateCustomerSchema = CreateCustomerSchema.extend({
   customerId: z.string().uuid('ID de cliente inválido'),
@@ -133,7 +133,7 @@ export const CreatePartSchema = z.object({
   quantity: z.number({ invalid_type_error: 'Cantidad inválida' }).int('La cantidad debe ser un entero').nonnegative('La cantidad no puede ser negativa'),
   cost: z.number({ invalid_type_error: 'Costo inválido' }).nonnegative('El costo no puede ser negativo'),
   price: z.number({ invalid_type_error: 'Precio inválido' }).nonnegative('El precio no puede ser negativo'),
-}).strict();
+});
 
 export const UpdatePartSchema = CreatePartSchema.extend({
   partId: z.string().uuid('ID de repuesto inválido'),
@@ -158,7 +158,7 @@ export const ServiceTemplateSchema = z.object({
   isActive: z.boolean().optional().default(true),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Color hexadecimal inválido').optional(),
   icon: z.string().max(10, 'Icono demasiado largo').optional(),
-}).strict();
+});
 
 export const CreateServiceTemplateSchema = ServiceTemplateSchema;
 
@@ -175,14 +175,14 @@ export const CreateTicketFromTemplateSchema = z.object({
   deviceModel: z.string().max(255, 'El modelo del dispositivo es demasiado largo.').optional().nullable(),
   customerId: z.string().uuid('ID de cliente inválido'),
   optionalParts: z.array(z.string().uuid()).optional(),
-}).strict();
+});
 
 export const AddPartToTemplateSchema = z.object({
   templateId: z.string().uuid('ID de plantilla inválido'),
   partId: z.string().uuid('ID de repuesto inválido'),
   quantity: z.number().int('La cantidad debe ser un entero').positive('La cantidad debe ser positiva'),
   required: z.boolean(),
-}).strict();
+});
 
 // ... (existing code)
 
@@ -190,7 +190,7 @@ export const UpdateTemplateDefaultPartSchema = z.object({
   id: z.string().uuid('ID de parte por defecto inválido'),
   quantity: z.number().int('La cantidad debe ser un entero').positive('La cantidad debe ser positiva'),
   required: z.boolean(),
-}).strict();
+});
 
 // ============================================================================
 // TECHNICIAN AVAILABILITY SCHEMAS
@@ -204,7 +204,7 @@ export const TechnicianUnavailabilitySchema = z.object({
     errorMap: () => ({ message: 'Razón inválida' })
   }),
   notes: z.string().optional().nullable(),
-}).strict().refine((data) => data.endDate >= data.startDate, {
+}).refine((data) => data.endDate >= data.startDate, {
   message: "La fecha de fin debe ser posterior a la fecha de inicio",
   path: ["endDate"],
 });
@@ -218,7 +218,7 @@ export const CreateUnavailabilitySchema = TechnicianUnavailabilitySchema;
 export const OpenCashRegisterSchema = z.object({
   name: z.string().min(1, 'El nombre de la caja es requerido').max(100),
   openingBalance: z.number().nonnegative('El saldo inicial no puede ser negativo'),
-}).strict();
+});
 
 export const CashTransactionSchema = z.object({
   cashRegisterId: z.string().uuid('ID de caja inválido'),
@@ -226,13 +226,13 @@ export const CashTransactionSchema = z.object({
   amount: z.number().positive('El monto debe ser positivo'),
   description: z.string().min(1, 'La descripción es requerida').max(255),
   reference: z.string().max(100).optional().nullable(),
-}).strict();
+});
 
 export const CloseCashRegisterSchema = z.object({
   cashRegisterId: z.string().uuid('ID de caja inválido'),
   closingBalance: z.number().nonnegative('El saldo final no puede ser negativo'),
   notes: z.string().max(500).optional().nullable(),
-}).strict();
+});
 
 // ============================================================================
 // POS SCHEMAS
@@ -241,13 +241,13 @@ export const CloseCashRegisterSchema = z.object({
 export const POSCartItemSchema = z.object({
   partId: z.string().uuid('ID de producto inválido'),
   quantity: z.number().int().positive('La cantidad debe ser positiva'),
-}).strict();
+});
 
 export const POSPaymentItemSchema = z.object({
   amount: z.number().positive('El monto debe ser positivo'),
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
   transactionRef: z.string().max(100).optional().nullable(),
-}).strict();
+});
 
 export const CreatePOSSaleSchema = z.object({
   items: z.array(POSCartItemSchema).min(1, 'Debe agregar al menos un producto'),
@@ -257,7 +257,7 @@ export const CreatePOSSaleSchema = z.object({
   customerNIT: z.string().max(20).optional().nullable(),
   discountAmount: z.number().nonnegative('El descuento no puede ser negativo').optional(),
   notes: z.string().max(500).optional().nullable(),
-}).strict();
+});
 
 // ============================================================================
 // INVOICE & PAYMENT SCHEMAS
@@ -269,7 +269,7 @@ export const GenerateInvoiceSchema = z.object({
   discountAmount: z.number().nonnegative('El descuento no puede ser negativo').optional(),
   notes: z.string().max(500).optional().nullable(),
   paymentTerms: z.string().max(255).optional().nullable(),
-}).strict();
+});
 
 export const RegisterPaymentSchema = z.object({
   invoiceId: z.string().uuid('ID de factura inválido'),
@@ -277,7 +277,7 @@ export const RegisterPaymentSchema = z.object({
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
   transactionRef: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-}).strict();
+});
 
 export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
 export type UpdateTicketInput = z.infer<typeof UpdateTicketSchema>;
@@ -294,7 +294,7 @@ export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export const DateRangeSchema = z.object({
   startDate: z.string().transform((str) => new Date(str)).optional().nullable(),
   endDate: z.string().transform((str) => new Date(str)).optional().nullable(),
-}).strict().refine((data) => {
+}).refine((data) => {
   if (data.startDate && data.endDate) {
     return data.endDate >= data.startDate;
   }
@@ -311,11 +311,11 @@ export const DateRangeSchema = z.object({
 export const NotificationFilterSchema = z.object({
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(20),
-}).strict();
+});
 
 export const NotificationIdSchema = z.object({
   id: z.string().uuid('ID de notificación inválido'),
-}).strict();
+});
 
 // ============================================================================
 // SLA SCHEMAS
@@ -323,14 +323,14 @@ export const NotificationIdSchema = z.object({
 
 export const SLACheckSchema = z.object({
   tenantId: z.string().uuid('ID de tenant inválido').optional(), // Opcional para correr el SLA limitadamente
-}).strict();
+});
 
 export const UpdateSLASettingsSchema = z.object({
   slaWarningPercent: z.number().min(1, 'Debe ser al menos 1%').max(99, 'No puede superar el 99%'),
   slaCriticalPercent: z.number().min(1, 'Debe ser al menos 1%').max(100, 'No puede superar el 100%'),
   slaEmailEnabled: z.boolean(),
   slaInAppEnabled: z.boolean(),
-}).strict().refine(data => data.slaWarningPercent < data.slaCriticalPercent, {
+}).refine(data => data.slaWarningPercent < data.slaCriticalPercent, {
   message: 'El porcentaje de advertencia debe ser menor al porcentaje crítico',
   path: ['slaWarningPercent'],
 });
@@ -343,7 +343,7 @@ export const QuotationExportSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
   status: z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELLED']).optional(),
-}).strict().refine((data) => {
+}).refine((data) => {
   if (data.startDate && data.endDate) {
     return data.endDate >= data.startDate;
   }
@@ -364,4 +364,4 @@ export const UpdateTenantSettingsSchema = z.object({
   currency: z.string().optional(),
   defaultPaymentTerms: z.string().nullable().optional(),
   invoiceFooter: z.string().nullable().optional(),
-}).strict();
+});
