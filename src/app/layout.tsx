@@ -68,9 +68,6 @@ export const metadata: Metadata = {
         shortcut: "/favicon.ico",
     },
     manifest: "/manifest.json",
-    verification: {
-        google: "google-site-verification-code",
-    },
     alternates: {
         canonical: siteUrl,
         languages: {
