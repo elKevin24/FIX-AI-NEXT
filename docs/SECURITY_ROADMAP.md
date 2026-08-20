@@ -103,7 +103,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     - Retornar `403 Forbidden` para roles no autorizados (`VIEWER`, `TECHNICIAN`).
   - **Criterio de Aceptación:** Usuarios técnicos o visores no pueden descargar volcados completos de inventario o finanzas.
 
-- [ ] **2.3 Resolver Ambigüedad de Login Multi-Tenant**
+- [x] **2.3 Resolver Ambigüedad de Login Multi-Tenant**
   - **Archivos:** `src/auth.ts`, `src/app/login/page.tsx`
   - **Acción:**
     - Documentar o definir la estrategia de autenticación:
