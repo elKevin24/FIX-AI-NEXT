@@ -16,7 +16,7 @@ export default function DeleteCustomerButton({ customerId, customerName }: Delet
   const { addToast } = useToast();
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${customerName}? This action cannot be undone.`)) {
+    if (!confirm(`¿Estás seguro de eliminar a ${customerName}? Esta acción no se puede deshacer.`)) {
       return;
     }
 
