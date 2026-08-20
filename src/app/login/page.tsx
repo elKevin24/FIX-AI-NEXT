@@ -55,6 +55,7 @@ export default function LoginPage() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -91,6 +92,7 @@ export default function LoginPage() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -162,7 +164,7 @@ export default function LoginPage() {
             {/* Error Message */}
             {errorMessage && (
               <div className={styles['errorMessage']} role="alert">
-                <svg fill="currentColor" viewBox="0 0 20 20">
+                <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -186,6 +188,7 @@ export default function LoginPage() {
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -199,7 +202,7 @@ export default function LoginPage() {
               ) : (
                 <>
                   <span>Iniciar sesión</span>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -212,28 +215,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className={`${styles['divider']} ${styles['animatedItem']}`}>
-            <div className={styles['dividerLine']} />
-            <div className={styles['dividerText']}>O continúa con</div>
-          </div>
 
-          {/* Demo Credentials */}
-          <div className={`${styles['demoCredentials']} ${styles['animatedItem']}`}>
-            <p className={styles['demoTitle']}>Credenciales de demostración:</p>
-            <div className={styles['demoGrid']}>
-              <div className={styles['demoCard']}>
-                <p className={styles['demoUser']}>Admin</p>
-                <p className={`${styles['demoEmail']} ${styles['demoEmailAdmin']}`}>admin@example.com</p>
-                <p className={styles['demoPassword']}>password123</p>
-              </div>
-              <div className={styles['demoCard']}>
-                <p className={styles['demoUser']}>Técnico</p>
-                <p className={`${styles['demoEmail']} ${styles['demoEmailTech']}`}>tech@example.com</p>
-                <p className={styles['demoPassword']}>password123</p>
-              </div>
-            </div>
-          </div>
 
           {/* Footer */}
           <p className={`${styles['footer']} ${styles['animatedItem']}`}>
