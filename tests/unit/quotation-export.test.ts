@@ -13,6 +13,7 @@ const SESSION = {
   user: {
     id: 'user-1',
     tenantId: 'tenant-1',
+    role: 'ADMIN',
   },
 };
 
