@@ -24,7 +24,7 @@ export async function GET(request: Request) {
         return NextResponse.json(tickets);
     } catch (error) {
         console.error('Failed to fetch tickets:', error);
-        return NextResponse.json({ error: 'Failed to fetch tickets' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -82,6 +82,6 @@ export async function POST(request: Request) {
         return NextResponse.json(ticket);
     } catch (error) {
         console.error('Failed to create ticket:', error);
-        return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

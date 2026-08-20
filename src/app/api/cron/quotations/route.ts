@@ -35,6 +35,6 @@ export async function GET(request: Request) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Quotation Cron Error:', message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

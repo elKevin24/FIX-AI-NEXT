@@ -63,7 +63,7 @@ export async function GET(
         return NextResponse.json(ticket);
     } catch (error) {
         console.error('Failed to fetch ticket:', error);
-        return NextResponse.json({ error: 'Failed to fetch ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -113,7 +113,7 @@ export async function PATCH(
         return NextResponse.json(ticket);
     } catch (error) {
         console.error('Failed to update ticket:', error);
-        return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -151,6 +151,6 @@ export async function DELETE(
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Failed to delete ticket:', error);
-        return NextResponse.json({ error: 'Failed to delete ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
