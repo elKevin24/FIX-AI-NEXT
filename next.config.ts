@@ -38,6 +38,14 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://blob.vercel-storage.com https://avatars.githubusercontent.com; font-src 'self' data:; connect-src 'self' https://useful-bluejay-92472.upstash.io;",
+          },
+          {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
           },
