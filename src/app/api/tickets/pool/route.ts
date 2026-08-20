@@ -152,9 +152,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching tickets pool:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

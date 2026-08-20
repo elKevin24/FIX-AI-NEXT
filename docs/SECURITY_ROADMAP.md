@@ -72,14 +72,14 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     - Content-Security-Policy (CSP) base.
   - **Criterio de Aceptación:** Los headers aparecen en la respuesta de cualquier ruta inspeccionada en DevTools o `curl -I`.
 
-- [ ] **1.3 Implementar Rate Limiting en Rutas Críticas**
+- [x] **1.3 Implementar Rate Limiting en Rutas Críticas**
   - **Archivos:** `src/middleware.ts` o utilidad `src/lib/rate-limit.ts`
   - **Acción:**
     - Limitar peticiones a `/api/auth/*` y `/api/search` (ej. máx 10 peticiones/minuto por IP).
     - Retornar `429 Too Many Requests` con header `Retry-After`.
   - **Criterio de Aceptación:** Ráfagas de peticiones concurrentes son frenadas con código 429.
 
-- [ ] **1.4 Sanitizar Respuestas de Error en APIs**
+- [x] **1.4 Sanitizar Respuestas de Error en APIs**
   - **Archivos:** Rutas en `src/app/api/**/route.ts`
   - **Acción:** Reemplazar `error: error.message` o `error: String(error)` en bloques `catch` por mensajes de error genéricos y amigables para el cliente, registrando el error real únicamente en el servidor vía `console.error`.
   - **Criterio de Aceptación:** No se filtran trazas de Prisma ni detalles de infraestructura en el cuerpo JSON de respuestas 500.

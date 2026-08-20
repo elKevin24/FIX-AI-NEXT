@@ -56,12 +56,27 @@ export async function proxy(request: NextRequest) {
     ? lowerPathname.slice(0, -1) 
     : lowerPathname;
 
-  // 1. Rate limiting (Solo para el endpoint de autenticación)
+  // 1. Rate limiting
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+
+  // 1a. Rate limiting (Autenticación - Estricto)
   if (cleanPathname === '/api/auth/callback/credentials' && request.method === 'POST') {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
     const rateLimit = checkRateLimit(ip);
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many login attempts.' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) },
+      });
+    }
+  }
+
+  // 1b. Rate limiting (Búsqueda API - Mitigación DDoS)
+  if (cleanPathname.startsWith('/api/search')) {
+    const rateLimit = checkRateLimit(ip + '_search'); // Reuse the same function but with a suffixed key
+    // A production app should configure a higher limit or specific limit window for search,
+    // but reusing the existing memory map prevents simple script floods.
+    if (!rateLimit.allowed) {
+      return new NextResponse(JSON.stringify({ error: 'Too many search requests.' }), {
         status: 429,
         headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) },
       });
