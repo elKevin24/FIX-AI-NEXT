@@ -959,3 +959,4 @@ model PasswordResetToken {
 
   @@unique([email, token])
 }
+// Trigger database-check workflow after fixing missing DATABASE_URL env var
