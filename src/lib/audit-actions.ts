@@ -94,7 +94,7 @@ export async function createSession(userId: string, tenantId: string) {
         const cookiesList = await cookies();
         cookiesList.set('session_log_token', sessionToken, { 
             httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env['NODE_ENV'] === 'production',
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 30 // 30 days
         });
