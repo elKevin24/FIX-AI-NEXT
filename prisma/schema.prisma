@@ -950,7 +950,6 @@ model UserPresence {
   @@map("user_presence")
 }
 
-
 model PasswordResetToken {
   id      String   @id @default(cuid())
   email   String
@@ -959,4 +958,5 @@ model PasswordResetToken {
 
   @@unique([email, token])
 }
+
 // Trigger database-check workflow after fixing missing DATABASE_URL env var
