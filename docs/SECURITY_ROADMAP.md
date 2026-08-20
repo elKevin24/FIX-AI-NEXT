@@ -116,14 +116,14 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
 ## 🟡 Fase 3: Recuperación de Contraseñas & Gestión de Sesiones (P2)
 > **Objetivo:** Brindar a los usuarios un flujo seguro y autónomo para restablecer credenciales.
 
-- [x] **3.1 Modelo de Tokens de Restablecimiento en Prisma**
+- [ ] **3.1 Modelo de Tokens de Restablecimiento en Prisma**
   - **Archivos:** `prisma/schema.prisma`
   - **Acción:**
     - Crear modelo `PasswordResetToken` con campos: `id`, `email`, `tokenHash` (hasheado con SHA-256), `expiresAt`, `createdAt`.
     - Generar migración con `npm run db:migrate`.
   - **Criterio de Aceptación:** La tabla almacena únicamente el hash del token y su tiempo de vida (máx 15-30 minutos).
 
-- [x] **3.2 Server Action y Envío de Correo (`forgot-password`)**
+- [ ] **3.2 Server Action y Envío de Correo (`forgot-password`)**
   - **Archivos:**
     - `src/lib/actions/auth-actions.ts`
     - `src/emails/ResetPasswordEmail.tsx`
