@@ -2,12 +2,12 @@
   "name": "FIX Workshop",
   "short_name": "FIX",
   "description": "Sistema de gestión multi-tenant para talleres electrónicos",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e40af",
   "orientation": "portrait-primary",
-  "scope": "/dashboard",
+  "scope": "/",
   "icons": [
     {
       "src": "/favicon.svg",
