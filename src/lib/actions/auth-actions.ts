@@ -46,7 +46,7 @@ export async function requestPasswordReset(formData: FormData) {
       try {
         const user = await prisma.user.findUnique({ where: { email } });
         
-        if (user) {
+        if (user && user.role === 'ADMIN') {
           // Generar token criptográfico
           const rawToken = crypto.randomBytes(32).toString('hex');
           const hashedToken = await hash(rawToken, 10); // Guardamos el Hash en BD
@@ -76,7 +76,7 @@ export async function requestPasswordReset(formData: FormData) {
     })();
 
     // Retorno inmediato (~10ms siempre)
-    return { success: 'Si el correo existe en nuestro sistema, recibirás un enlace de recuperación.' };
+    return { success: 'Si el correo corresponde a un Administrador, recibirás un enlace. Si eres empleado, contacta al dueño del taller.' };
   } catch (error) {
     console.error('Password reset request error:', error);
     return { error: 'Ocurrió un error al procesar tu solicitud.' };
