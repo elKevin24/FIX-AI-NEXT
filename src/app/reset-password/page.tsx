@@ -9,12 +9,13 @@ import styles from '@/app/login/login.module.css';
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const email = searchParams.get('email');
 
   const [state, formAction, isPending] = useActionState(async (prevState: any, formData: FormData) => {
     return await resetPassword(formData);
   }, undefined);
 
-  if (!token) {
+  if (!token || !email) {
     return (
       <div className={`${styles['form']} ${styles['animatedItem']}`}>
         <div className={styles['errorMessage']} role="alert">
@@ -30,6 +31,7 @@ function ResetPasswordForm() {
   return (
     <form action={formAction} className={`${styles['form']} ${styles['animatedItem']}`}>
       <input type="hidden" name="token" value={token} />
+      <input type="hidden" name="email" value={email} />
       
       <div className={styles['inputGroup']}>
         <label htmlFor="password" className={styles['label']}>
