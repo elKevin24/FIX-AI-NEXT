@@ -102,7 +102,7 @@ model User {
   uploadedAttachments  TicketAttachment[]         @relation("UploadedAttachments")
   tenant               Tenant                     @relation(fields: [tenantId], references: [id])
 
-  @@unique([tenantId, email], name: "unique_email_per_tenant")
+  @@unique([email])
   @@index([tenantId])
   @@index([createdById])
   @@index([updatedById])

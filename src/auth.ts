@@ -19,10 +19,9 @@ async function getUser(email: string) {
     try {
         // Buscar usuario por email (puede haber múltiples en diferentes tenants)
         // En login, el usuario solo provee email, así que buscamos el primero activo
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.findUnique({
             where: {
                 email,
-                isActive: true, // Solo usuarios activos pueden hacer login
             },
             include: { tenant: true },
         });
