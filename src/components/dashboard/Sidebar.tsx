@@ -73,7 +73,7 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
             />
 
             {/* Sidebar */}
-            <aside className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`}>
+            <aside className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`} aria-label="Menú de navegación">
                 <div className={styles['logo']}>
                     <div className={styles['logoIcon']} />
                     <h2>FIX-AI</h2>

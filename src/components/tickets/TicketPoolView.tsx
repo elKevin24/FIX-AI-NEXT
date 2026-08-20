@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Session } from 'next-auth';
 import PageHeader from '@/components/PageHeader';
+import { useToast } from '@/context/ToastContext';
 import styles from './TicketPoolView.module.css';
 
 interface Customer {
@@ -39,6 +40,7 @@ interface TicketPoolViewProps {
 }
 
 export function TicketPoolView({ session }: TicketPoolViewProps) {
+  const { addToast } = useToast();
   const [tickets, setTickets] = useState<PoolTicket[]>([]);
   const [workload, setWorkload] = useState<WorkloadInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,16 +100,16 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
 
       if (!res.ok) {
         const error = await res.json();
-        alert(error.error || 'Error al asignar el ticket');
+        addToast(error.error || 'Error al asignar el ticket', 'ERROR');
         return;
       }
 
       // Success - refresh the pool
       await fetchData();
-      alert('Ticket asignado exitosamente');
+      addToast('Ticket asignado exitosamente', 'SUCCESS');
     } catch (error) {
       console.error('Error taking ticket:', error);
-      alert('Error al asignar el ticket');
+      addToast('Error al asignar el ticket', 'ERROR');
     } finally {
       setTakingTicket(null);
     }

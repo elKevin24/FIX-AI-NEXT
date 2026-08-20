@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/context/ToastContext';
 
 interface Props {
   url: string;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function CsvExportButton({ url, filename, label = '📥 Exportar CSV', className = '' }: Props) {
   const [loading, setLoading] = useState(false);
+  const { addToast } = useToast();
 
   const handleExport = async () => {
     setLoading(true);
@@ -23,7 +25,7 @@ export default function CsvExportButton({ url, filename, label = '📥 Exportar 
       document.body.removeChild(link);
     } catch (e) {
       console.error(e);
-      alert('Error al exportar');
+      addToast('Error al exportar', 'ERROR');
     } finally {
       setTimeout(() => setLoading(false), 1000);
     }

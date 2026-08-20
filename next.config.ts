@@ -38,14 +38,6 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://blob.vercel-storage.com https://avatars.githubusercontent.com; font-src 'self' data:; connect-src 'self' https://useful-bluejay-92472.upstash.io;",
-          },
-          {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
           },
@@ -68,15 +60,6 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
@@ -128,76 +111,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  webpack: (config, { isServer, dev }) => {
-    if (!isServer && !dev) {
-      config.optimization.splitChunks = {
-        ...config.optimization.splitChunks,
-        chunks: 'all',
-        maxInitialRequests: 25,
-        minSize: 20000,
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          commons: {
-            name: 'commons',
-            chunks: 'all',
-            minChunks: 2,
-            maxInitialRequests: 10,
-            minSize: 0,
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)[\\/]/)?.[1];
-              return `npm.${packageName?.replace('@', '')}`;
-            },
-            chunks: 'all',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          recharts: {
-            name: 'recharts',
-            test: /[\\/]node_modules[\\/]recharts/,
-            chunks: 'all',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-          tanstack: {
-            name: 'tanstack',
-            test: /[\\/]node_modules[\\/]@tanstack/,
-            chunks: 'all',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-          pdf: {
-            name: 'pdf',
-            test: /[\\/]node_modules[\\/](jspdf|@react-pdf|html2canvas)/,
-            chunks: 'all',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-          xlsx: {
-            name: 'xlsx',
-            test: /[\\/]node_modules[\\/]xlsx/,
-            chunks: 'all',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-    }
-    return config;
-  },
-
-  // Disable source maps in production for security
-  productionBrowserSourceMaps: false,
-
-  // Output config for better caching
-  output: 'standalone',
-
-  // Enable Turbopack (Next.js 15+)
   turbopack: {
     rules: {
       '*.svg': {

@@ -31,6 +31,15 @@ enum TicketStatus {
   REJECTED = 'REJECTED',
 }
 
+export const metadata = {
+  title: 'Panel Principal',
+  description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
+  openGraph: {
+    title: 'Dashboard | FIX Workshop',
+    description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
+  },
+};
+
 export default async function DashboardPage() {
     const session = await auth();
 

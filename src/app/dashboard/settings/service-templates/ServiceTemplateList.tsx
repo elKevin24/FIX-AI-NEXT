@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ServiceCategory } from '@prisma/client';
 import { toggleTemplateActiveStatus, deleteServiceTemplate, duplicateServiceTemplate } from '@/lib/service-template-actions';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import styles from './service-templates.module.css';
 
@@ -33,6 +34,7 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
 
 export function ServiceTemplateList({ templates }: { templates: Template[] }) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [filter, setFilter] = useState<ServiceCategory | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       await toggleTemplateActiveStatus(id, !currentStatus);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al cambiar estado');
+      addToast(error instanceof Error ? error.message : 'Error al cambiar estado', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -65,7 +67,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       await deleteServiceTemplate(id);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al eliminar');
+      addToast(error instanceof Error ? error.message : 'Error al eliminar', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -78,7 +80,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       router.refresh();
       router.push(`/dashboard/settings/service-templates/${newTemplate.id}/edit`);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al duplicar');
+      addToast(error instanceof Error ? error.message : 'Error al duplicar', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -184,6 +186,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
                   className={`${styles['btnIcon']}`}
                   style={{ color: 'var(--color-text-secondary)' }}
                   title="Duplicar"
+                  aria-label="Duplicar plantilla"
                 >
                   <CopyIcon />
                 </button>
@@ -193,6 +196,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
                   className={`${styles['btnIcon']}`}
                   style={{ color: template.isActive ? 'var(--color-warning-600)' : 'var(--color-success-600)' }}
                   title={template.isActive ? 'Desactivar' : 'Activar'}
+                  aria-label={template.isActive ? 'Desactivar plantilla' : 'Activar plantilla'}
                 >
                   {template.isActive ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
@@ -201,6 +205,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
                   disabled={loading === template.id || template._count.tickets > 0}
                   className={`${styles['btnIcon']} ${styles['btnDelete']}`}
                   title={template._count.tickets > 0 ? 'Tiene tickets asociados' : 'Eliminar'}
+                  aria-label={template._count.tickets > 0 ? 'Tiene tickets asociados' : 'Eliminar plantilla'}
                 >
                   <TrashIcon />
                 </button>

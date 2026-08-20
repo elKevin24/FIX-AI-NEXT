@@ -8,8 +8,12 @@ import PageHeader from '@/components/PageHeader';
 import styles from './service-templates.module.css';
 
 export const metadata = {
-  title: 'Plantillas de Servicio | Dashboard',
-  description: 'Administración de plantillas de servicio',
+  title: 'Plantillas de Servicio',
+  description: 'Administra plantillas de servicio predefinidas para agilizar la creación de tickets.',
+  openGraph: {
+    title: 'Plantillas de Servicio | FIX Workshop',
+    description: 'Administra plantillas de servicio predefinidas para agilizar la creación de tickets.',
+  },
 };
 
 export default async function ServiceTemplatesPage() {

@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import styles from './AttachmentsSection.module.css';
 
 interface Attachment {
@@ -27,6 +28,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
+    const { addToast } = useToast();
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -50,7 +52,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
             router.refresh();
         } catch (error) {
             console.error(error);
-            alert('Error uploading file');
+            addToast('Error al subir el archivo', 'ERROR');
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -72,7 +74,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
             router.refresh();
         } catch (error) {
             console.error(error);
-            alert('Error deleting file');
+            addToast('Error al eliminar el archivo', 'ERROR');
         }
     };
 
@@ -131,6 +133,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
                                 handleDelete(att.id);
                             }}
                             title="Delete"
+                            aria-label="Eliminar adjunto"
                         >
                             ×
                         </button>
