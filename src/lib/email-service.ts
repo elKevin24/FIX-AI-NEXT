@@ -74,9 +74,9 @@ async function sendViaResend({ to, subject, text, html, react }: SendEmailParams
 
 function logEmail({ to, subject, text, html }: SendEmailParams) {
   console.log('⚠️ [Email Service] No provider configured (set SMTP_* or RESEND_API_KEY). Email not sent, but logged to console.');
-  console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
-  if (text) console.log(`Content: ${text}`);
+  
+  
+  
   if (html) console.log(`[HTML Content Provided: ${html.length} chars]`);
 }
 

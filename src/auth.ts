@@ -114,7 +114,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
 
                 const { email, password } = parsedCredentials.data;
-                console.log(`[NextAuth] Authorize attempt for email: ${email}`);
+                console.log("[NextAuth] Authorize attempt");
                 
                 let user;
                 try {
@@ -156,7 +156,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
 
                 // Login exitoso - resetear contadores
-                console.log(`[NextAuth] Login successful for user: ${user.id}`);
+                console.log("[NextAuth] Login successful");
                 await recordSuccessfulLogin(user.id);
 
                 // Retornar usuario con campos adicionales para la sesión
