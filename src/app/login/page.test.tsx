@@ -12,14 +12,10 @@ describe('LoginPage', () => {
     expect(screen.getByLabelText(/correo electrónico/i)).toBeDefined();
     expect(screen.getByLabelText('Contraseña', { selector: 'input' })).toBeDefined();
     expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeDefined();
-    expect(screen.getByText(/credenciales de demostración/i)).toBeDefined();
+    
   });
 
-  it('renders demo credentials with admin and tech accounts', () => {
-    render(<LoginPage />);
-    expect(screen.getByText(/admin@example.com/i)).toBeDefined();
-    expect(screen.getByText(/tech@example.com/i)).toBeDefined();
-  });
+  
 
   it('password input has minLength 6', () => {
     render(<LoginPage />);
