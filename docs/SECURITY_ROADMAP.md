@@ -89,7 +89,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
 ## 🟠 Fase 2: Aislamiento Multi-Tenant & RBAC en APIs (P1/P2)
 > **Objetivo:** Garantizar que ninguna entidad quede fuera del filtro de tenant y reforzar permisos por rol.
 
-- [ ] **2.1 Registrar Modelos Faltantes en `TENANTED_MODELS`**
+- [x] **2.1 Registrar Modelos Faltantes en `TENANTED_MODELS`**
   - **Archivos:** `src/lib/tenant-prisma.ts`
   - **Acción:**
     - Agregar `'SessionLog'` y `'UserPresence'` al `Set` de `TENANTED_MODELS`.
@@ -116,14 +116,14 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
 ## 🟡 Fase 3: Recuperación de Contraseñas & Gestión de Sesiones (P2)
 > **Objetivo:** Brindar a los usuarios un flujo seguro y autónomo para restablecer credenciales.
 
-- [ ] **3.1 Modelo de Tokens de Restablecimiento en Prisma**
+- [x] **3.1 Modelo de Tokens de Restablecimiento en Prisma**
   - **Archivos:** `prisma/schema.prisma`
   - **Acción:**
     - Crear modelo `PasswordResetToken` con campos: `id`, `email`, `tokenHash` (hasheado con SHA-256), `expiresAt`, `createdAt`.
     - Generar migración con `npm run db:migrate`.
   - **Criterio de Aceptación:** La tabla almacena únicamente el hash del token y su tiempo de vida (máx 15-30 minutos).
 
-- [ ] **3.2 Server Action y Envío de Correo (`forgot-password`)**
+- [x] **3.2 Server Action y Envío de Correo (`forgot-password`)**
   - **Archivos:**
     - `src/lib/actions/auth-actions.ts`
     - `src/emails/ResetPasswordEmail.tsx`
