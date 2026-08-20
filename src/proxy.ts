@@ -11,24 +11,66 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+
 // --- CONFIGURATION ---
 const DASHBOARD_PATH = '/dashboard';
 const LOGIN_PATH = '/login';
 const CHANGE_PASSWORD_PATH = '/dashboard/profile/change-password';
 
-// Rate limiting storage
+// --- RATE LIMITING ---
+// Upstash Redis (Distributed, DDoS protection)
+let redisRatelimitAuth: Ratelimit | null = null;
+let redisRatelimitSearch: Ratelimit | null = null;
+
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  
+  // Login limit: 10 requests per 1 minute
+  redisRatelimitAuth = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(10, '1 m'),
+    analytics: true,
+  });
+
+  // Search limit: 30 requests per 1 minute
+  redisRatelimitSearch = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(30, '1 m'),
+    analytics: true,
+  });
+}
+
+// Fallback in-memory storage (Not effective against distributed attacks in Serverless)
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX_ATTEMPTS = 10;
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+async function checkRateLimit(ip: string, type: 'auth' | 'search'): Promise<{ allowed: boolean; retryAfter?: number }> {
+  // Use Upstash Redis if configured
+  if (type === 'auth' && redisRatelimitAuth) {
+    const { success, reset } = await redisRatelimitAuth.limit(ip);
+    return { allowed: success, retryAfter: success ? undefined : Math.ceil((reset - Date.now()) / 1000) };
+  }
+  if (type === 'search' && redisRatelimitSearch) {
+    const { success, reset } = await redisRatelimitSearch.limit(ip);
+    return { allowed: success, retryAfter: success ? undefined : Math.ceil((reset - Date.now()) / 1000) };
+  }
+
+  // Fallback memory rate limit
   const now = Date.now();
-  const record = loginAttempts.get(ip);
+  const record = loginAttempts.get(ip + type);
+  const maxAttempts = type === 'auth' ? RATE_LIMIT_MAX_ATTEMPTS : 30;
+  
   if (!record || now > record.resetAt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    loginAttempts.set(ip + type, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
     return { allowed: true };
   }
-  if (record.count >= RATE_LIMIT_MAX_ATTEMPTS) {
+  if (record.count >= maxAttempts) {
     return { allowed: false, retryAfter: Math.ceil((record.resetAt - now) / 1000) };
   }
   record.count++;
@@ -61,7 +103,7 @@ export async function proxy(request: NextRequest) {
 
   // 1a. Rate limiting (Autenticación - Estricto)
   if (cleanPathname === '/api/auth/callback/credentials' && request.method === 'POST') {
-    const rateLimit = checkRateLimit(ip);
+    const rateLimit = await checkRateLimit(ip, 'auth');
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many login attempts.' }), {
         status: 429,
@@ -72,7 +114,7 @@ export async function proxy(request: NextRequest) {
 
   // 1b. Rate limiting (Búsqueda API - Mitigación DDoS)
   if (cleanPathname.startsWith('/api/search')) {
-    const rateLimit = checkRateLimit(ip + '_search'); // Reuse the same function but with a suffixed key
+    const rateLimit = await checkRateLimit(ip, 'search'); // Reuse the same function but with a suffixed key
     // A production app should configure a higher limit or specific limit window for search,
     // but reusing the existing memory map prevents simple script floods.
     if (!rateLimit.allowed) {
@@ -100,7 +142,7 @@ export async function proxy(request: NextRequest) {
 
   // 4. Protección de Rutas (Dashboard y API interna)
   const isApi = cleanPathname.startsWith('/api');
-  const isPublicApi = cleanPathname.startsWith('/api/auth');
+  const isPublicApi = cleanPathname.startsWith('/api/auth') || cleanPathname.startsWith('/api/cron');
   const isDashboard = cleanPathname.startsWith(DASHBOARD_PATH);
 
   // Si la ruta requiere protección
