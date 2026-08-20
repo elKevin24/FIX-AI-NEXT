@@ -32,12 +32,40 @@ export async function POST(
       return NextResponse.json({ error: 'File size exceeds 10MB limit' }, { status: 400 });
     }
 
-    // Basic type check, can be expanded
-    if (!file.type.startsWith('image/') && !file.type.startsWith('application/') && !file.type.startsWith('text/')) {
-        // Strict allow list is better
-        if (!ALLOWED_TYPES.includes(file.type)) {
-             return NextResponse.json({ error: 'File type not supported' }, { status: 400 });
+    if (!ALLOWED_TYPES.includes(file.type)) {
+         return NextResponse.json({ error: 'File type not supported' }, { status: 400 });
+    }
+
+    // Magic Number validation
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer).subarray(0, 4);
+    const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+    let isValidMagic = false;
+    if (file.type === 'text/plain') {
+        isValidMagic = true;
+    } else if (file.type === 'image/webp') {
+        const webpBytes = new Uint8Array(buffer).subarray(8, 12);
+        const webpStr = Array.from(webpBytes).map(b => String.fromCharCode(b)).join('');
+        if (hex.startsWith('52494646') && webpStr === 'WEBP') { // 52494646 = RIFF
+            isValidMagic = true;
         }
+    } else {
+        const MAGIC = {
+            'image/jpeg': ['ffd8ff'],
+            'image/png': ['89504e47'],
+            'application/pdf': ['25504446'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['504b0304', '504b0506', '504b0708'],
+            'application/msword': ['d0cf11e0']
+        };
+        const expected = MAGIC[file.type as keyof typeof MAGIC];
+        if (expected && expected.some(magic => hex.startsWith(magic))) {
+            isValidMagic = true;
+        }
+    }
+
+    if (!isValidMagic) {
+        return NextResponse.json({ error: 'Invalid file content (Magic number mismatch)' }, { status: 400 });
     }
 
     // Upload to Vercel Blob
