@@ -18,15 +18,15 @@ export const authConfig = {
         },
     },
     
-    useSecureCookies: process.env.NODE_ENV === "production",
+    useSecureCookies: process.env['NODE_ENV'] === "production",
     cookies: {
         sessionToken: {
-            name: process.env.NODE_ENV === "production" ? "__Host-next-auth.session-token" : "next-auth.session-token",
+            name: process.env['NODE_ENV'] === "production" ? "__Host-next-auth.session-token" : "next-auth.session-token",
             options: {
                 httpOnly: true,
                 sameSite: "strict",
                 path: "/",
-                secure: process.env.NODE_ENV === "production",
+                secure: process.env['NODE_ENV'] === "production",
             },
         },
     },

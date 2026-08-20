@@ -61,7 +61,7 @@ export async function requestPasswordReset(formData: FormData) {
           });
 
           // Enviamos el Raw Token en el correo
-          const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+          const resetUrl = `${process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
           
           // Enviamos el correo sin "await" para no bloquear
           await sendEmail({
@@ -141,39 +141,3 @@ export async function resetPassword(formData: FormData) {
   }
 }
 
-export async function resetPassword(formData: FormData) {
-  try {
-    const token = formData.get('token')?.toString();
-    const password = formData.get('password')?.toString();
-    
-    if (!token || !password || password.length < 6) {
-      return { error: 'Datos inválidos. La contraseña debe tener al menos 6 caracteres.' };
-    }
-
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token }
-    });
-
-    if (!resetToken || resetToken.expires < new Date()) {
-      return { error: 'El enlace de recuperación es inválido o ha expirado.' };
-    }
-
-    const hashedPassword = await hash(password, 10);
-
-    // Actualizar usuario
-    await prisma.user.update({
-      where: { email: resetToken.email },
-      data: { password: hashedPassword }
-    });
-
-    // Eliminar token usado
-    await prisma.passwordResetToken.delete({
-      where: { id: resetToken.id }
-    });
-
-    return { success: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' };
-  } catch (error) {
-    console.error('Reset password error:', error);
-    return { error: 'Ocurrió un error al restablecer la contraseña.' };
-  }
-}
