@@ -52,7 +52,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
 ## 🟠 Fase 1: Hardening de Red, Headers & Endpoints (P1)
 > **Objetivo:** Proteger el servidor contra ataques de denegación, abusos automatizados y manipulación de cabeceras.
 
-- [ ] **1.1 Proteger Endpoints CRON con Token Secreto**
+- [x] **1.1 Proteger Endpoints CRON con Token Secreto**
   - **Archivos:**
     - `src/app/api/cron/quotations/route.ts`
     - `src/app/api/cron/sla-check/route.ts`
@@ -61,7 +61,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     - Retornar `401 Unauthorized` si el token es inválido o no está presente.
   - **Criterio de Aceptación:** Peticiones GET manuales sin el Bearer token correcto son rechazadas inmediatamente.
 
-- [ ] **1.2 Configurar Headers de Seguridad HTTP**
+- [x] **1.2 Configurar Headers de Seguridad HTTP**
   - **Archivos:** `next.config.ts`
   - **Acción:** Configurar la propiedad `headers()` en NextConfig con:
     - `X-Frame-Options: DENY` (Anti Clickjacking).
