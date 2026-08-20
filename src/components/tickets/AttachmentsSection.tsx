@@ -60,7 +60,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     };
 
     const handleDelete = async (attachmentId: string) => {
-        if (!confirm('Are you sure you want to delete this attachment?')) return;
+        if (!confirm('¿Estás seguro de eliminar este adjunto?')) return;
 
         try {
             const res = await fetch(`/api/tickets/${ticketId}/attachments`, {
