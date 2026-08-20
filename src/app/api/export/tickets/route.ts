@@ -65,6 +65,10 @@ export async function GET(req: NextRequest) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+    return new NextResponse('Forbidden: Insufficient permissions for data export', { status: 403 });
+  }
+
   // Crear el stream
   const iterator = makeIterator(session.user.tenantId, session.user.id);
   const stream = iteratorToStream(iterator);

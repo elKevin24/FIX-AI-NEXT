@@ -96,7 +96,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     - Verificar si nuevos modelos creados en `schema.prisma` requieren inclusión automática.
   - **Criterio de Aceptación:** Consultas directas sobre `SessionLog` y `UserPresence` mediante `getTenantPrisma` inyectan automáticamente `where: { tenantId }`.
 
-- [ ] **2.2 Restricción RBAC en Exportaciones de Datos**
+- [x] **2.2 Restricción RBAC en Exportaciones de Datos**
   - **Archivos:** `src/app/api/export/[type]/route.ts`
   - **Acción:**
     - Verificar que el usuario tenga rol `ADMIN` o `MANAGER` antes de permitir la descarga masiva de facturas, clientes, repuestos y tickets.

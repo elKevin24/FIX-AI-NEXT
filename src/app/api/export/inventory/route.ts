@@ -63,6 +63,10 @@ export async function GET(req: NextRequest) {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+    return new Response('Forbidden: Insufficient permissions for data export', { status: 403 });
+  }
+
   const iterator = makeInventoryIterator(session.user.tenantId, session.user.id);
   const stream = iteratorToStream(iterator);
   const fecha = new Date().toISOString().split('T')[0];

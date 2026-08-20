@@ -85,6 +85,10 @@ export async function GET(req: NextRequest) {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+    return new Response('Forbidden: Insufficient permissions for data export', { status: 403 });
+  }
+
   const { searchParams } = new URL(req.url);
   const raw = {
     startDate: searchParams.get('startDate') || undefined,
