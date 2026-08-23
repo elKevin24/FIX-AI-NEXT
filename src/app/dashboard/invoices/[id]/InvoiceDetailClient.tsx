@@ -117,10 +117,11 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
         <div className={styles['itemsSection']}>
           <table className={styles['itemTable']}>
+            <caption className="sr-only">Detalles de la factura</caption>
             <thead>
               <tr>
-                <th>Descripción</th>
-                <th style={{ textAlign: 'right' }}>Total</th>
+                <th scope="col">Descripción</th>
+                <th scope="col" style={{ textAlign: 'right' }}>Total</th>
               </tr>
             </thead>
             <tbody>

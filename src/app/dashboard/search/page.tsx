@@ -6,6 +6,11 @@ import styles from '../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 
+export const metadata = {
+    title: 'Búsqueda',
+    description: 'Busca tickets, clientes y dispositivos en todo el taller.',
+};
+
 interface Props {
     searchParams: Promise<{ q?: string }>;
 }
@@ -102,14 +107,15 @@ export default async function SearchPage({ searchParams }: Props) {
                     <h2 style={{ marginBottom: '1rem' }}>Tickets ({tickets.length})</h2>
                     <div className={styles['tableContainer']} style={{ marginBottom: '2rem' }}>
                         <table className={styles['table']}>
+                          <caption className="sr-only">Resultados de búsqueda: tickets</caption>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Título</th>
-                                    <th>Cliente</th>
-                                    <th>Estado</th>
-                                    <th>Asignado a</th>
-                                    <th>Acciones</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Título</th>
+                                    <th scope="col">Cliente</th>
+                                    <th scope="col">Estado</th>
+                                    <th scope="col">Asignado a</th>
+                                    <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,13 +149,14 @@ export default async function SearchPage({ searchParams }: Props) {
                     <h2 style={{ marginBottom: '1rem' }}>Clientes ({customers.length})</h2>
                     <div className={styles['tableContainer']}>
                         <table className={styles['table']}>
+                          <caption className="sr-only">Resultados de búsqueda: clientes</caption>
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>Teléfono</th>
-                                    <th>Tickets</th>
-                                    <th>Acciones</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Teléfono</th>
+                                    <th scope="col">Tickets</th>
+                                    <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>

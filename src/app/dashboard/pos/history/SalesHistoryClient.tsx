@@ -327,12 +327,13 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
                             <div className={styles['detailSection']}>
                                 <h3>Productos</h3>
                                 <table className={styles['itemsTable']}>
+                                  <caption className="sr-only">Productos vendidos en la venta seleccionada</caption>
                                     <thead>
                                         <tr>
-                                            <th>Producto</th>
-                                            <th>Cant.</th>
-                                            <th>Precio</th>
-                                            <th>Total</th>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col">Cant.</th>
+                                            <th scope="col">Precio</th>
+                                            <th scope="col">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -4,6 +4,11 @@ import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import PartEditForm from './PartEditForm';
 
+export const metadata = {
+    title: 'Editar Repuesto',
+    description: 'Modifica los datos, precios y stock de un repuesto del inventario.',
+};
+
 interface Props {
     params: Promise<{ id: string }>;
 }

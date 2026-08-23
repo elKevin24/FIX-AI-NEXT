@@ -113,12 +113,13 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                 <>
                     <div className={styles['tableWrapper']}>
                         <table className={styles['table']}>
+                          <caption className="sr-only">Servicios del ticket</caption>
                             <thead>
                                 <tr className={styles['tableHeaderRow']}>
-                                    <th>Descripción del Servicio</th>
-                                    <th>Fecha Registro</th>
-                                    <th style={{ textAlign: 'right' }}>Costo Labor</th>
-                                    <th style={{ textAlign: 'center' }}>Acción</th>
+                                    <th scope="col">Descripción del Servicio</th>
+                                    <th scope="col">Fecha Registro</th>
+                                    <th scope="col" style={{ textAlign: 'right' }}>Costo Labor</th>
+                                    <th scope="col" style={{ textAlign: 'center' }}>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -1,19 +1,24 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import dynamic from 'next/dynamic';
 import { getReportData } from '@/lib/report-actions';
 import PageHeader from '@/components/PageHeader';
 import styles from './reports.module.css';
-import { 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line
-} from 'recharts';
+
+// Lazy-load: recharts no se incluye en el bundle inicial (Fase 2.5)
+const FinanceHistoryChart = dynamic(
+  () => import('./ReportsCharts').then((m) => m.FinanceHistoryChart),
+  { ssr: false, loading: () => <div style={{ height: 300 }} aria-busy="true" /> }
+);
+const TicketsByStatusChart = dynamic(
+  () => import('./ReportsCharts').then((m) => m.TicketsByStatusChart),
+  { ssr: false, loading: () => <div style={{ height: 300 }} aria-busy="true" /> }
+);
 
 interface Props {
   initialData: any;
 }
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'];
 
 export default function ReportsClient({ initialData }: Props) {
   const [data, setData] = useState(initialData);
@@ -110,23 +115,7 @@ export default function ReportsClient({ initialData }: Props) {
             </div>
           </div>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="99%" height="100%">
-              <LineChart data={data.finances.history}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(date) => new Date(date).toLocaleDateString('es-GT', { month: 'short', day: 'numeric' })}
-                />
-                <YAxis />
-                <Tooltip 
-                    formatter={(value: any) => formatCurrency(Number(value))} 
-                    labelFormatter={(date: any) => date ? new Date(date).toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="invoice" name="Facturación" stroke="var(--color-primary-500)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="pos" name="Ventas POS" stroke="var(--color-secondary-500)" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            <FinanceHistoryChart history={data.finances.history} />
           </div>
         </div>
 
@@ -134,25 +123,7 @@ export default function ReportsClient({ initialData }: Props) {
         <div className={styles['card']}>
           <h2 className={styles['cardTitle']}>Estado de Tickets</h2>
           <div style={{ height: 300 }}>
-            <ResponsiveContainer width="99%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {statusData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+            <TicketsByStatusChart statusData={statusData} />
           </div>
         </div>
 
@@ -161,11 +132,12 @@ export default function ReportsClient({ initialData }: Props) {
             <h2 className={styles['cardTitle']}>Top Ventas (POS)</h2>
             <div className={styles['tableContainer']} style={{ maxHeight: '300px' }}>
                 <table className={styles['table']}>
+                  <caption className="sr-only">Top de productos más vendidos en POS</caption>
                     <thead>
                         <tr>
-                            <th>Producto</th>
-                            <th style={{ textAlign: 'center' }}>Cant.</th>
-                            <th style={{ textAlign: 'right' }}>Total</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col" style={{ textAlign: 'center' }}>Cant.</th>
+                            <th scope="col" style={{ textAlign: 'right' }}>Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -207,13 +179,14 @@ export default function ReportsClient({ initialData }: Props) {
         <h2 className={styles['cardTitle']}>Productividad de Técnicos</h2>
         <div className={styles['tableContainer']}>
           <table className={styles['table']}>
+            <caption className="sr-only">Productividad de técnicos</caption>
             <thead>
               <tr>
-                <th>Técnico</th>
-                <th style={{ textAlign: 'center' }}>Tickets Resueltos</th>
-                <th style={{ textAlign: 'center' }}>Tickets Activos</th>
-                <th style={{ textAlign: 'center' }}>Total Asignados</th>
-                <th>Efectividad</th>
+                <th scope="col">Técnico</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Tickets Resueltos</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Tickets Activos</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Total Asignados</th>
+                <th scope="col">Efectividad</th>
               </tr>
             </thead>
             <tbody>

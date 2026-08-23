@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 
+export const metadata = {
+    title: "Registros de Auditoría",
+    description: "Consulta el historial de acciones y cambios realizados en el sistema.",
+};
+
 export default async function AuditLogsPage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
@@ -35,12 +40,13 @@ export default async function AuditLogsPage(props: {
 
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                  <caption className="sr-only">Registro de auditoría del sistema</caption>
                     <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                         <tr>
-                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Fecha</th>
-                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Usuario</th>
-                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Acción</th>
-                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Detalles</th>
+                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Fecha</th>
+                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Usuario</th>
+                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Acción</th>
+                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Detalles</th>
                         </tr>
                     </thead>
                     <tbody>

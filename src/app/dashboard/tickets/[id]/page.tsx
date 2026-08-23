@@ -10,6 +10,11 @@ interface Props {
     params: Promise<{ id: string }>;
 }
 
+export const metadata = {
+    title: 'Detalle de Ticket',
+    description: 'Consulta y gestiona el estado, notas y repuestos de una orden de servicio.',
+};
+
 export default async function TicketDetailPage({ params }: Props) {
     const { id } = await params;
     const session = await auth();

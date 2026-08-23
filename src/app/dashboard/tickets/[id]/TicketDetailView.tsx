@@ -205,19 +205,19 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             </div>
 
                             <div style={{ marginBottom: '1.5rem' }}>
-                                <h4 className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Descripción</h4>
+                                <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Descripción</span>
                                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{ticket.description}</p>
                             </div>
 
                             <div className={styles['gridTwoColumns']}>
                                 <div>
-                                    <h4 className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Prioridad</h4>
+                                    <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Prioridad</span>
                                     <span className={`${styles['status']} ${ticket.priority === 'High' ? styles['waiting_for_parts'] : ticket.priority === 'Medium' ? styles['in_progress'] : styles['closed']}`}>
                                         {ticket.priority || 'Sin definir'}
                                     </span>
                                 </div>
                                 <div>
-                                    <h4 className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Asignado a</h4>
+                                    <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Asignado a</span>
                                     <p><strong>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</strong></p>
                                 </div>
                             </div>

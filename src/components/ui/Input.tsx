@@ -44,7 +44,7 @@ export function Input({
         {...props}
       />
       {hasError && (
-        <span id={errorId} className={`${styles['helper']} ${styles['errorMessage']}`}>
+        <span id={errorId} role="alert" className={`${styles['helper']} ${styles['errorMessage']}`}>
           {error}
         </span>
       )}

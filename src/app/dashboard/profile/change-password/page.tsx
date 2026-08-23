@@ -3,6 +3,12 @@ import { redirect } from 'next/navigation';
 import ChangePasswordForm from './ChangePasswordForm';
 import PageHeader from '@/components/PageHeader';
 
+export const metadata = {
+  title: 'Cambiar Contraseña',
+  description: 'Actualiza la contraseña de tu cuenta de forma segura.',
+  robots: { index: false, follow: false },
+};
+
 export default async function ChangePasswordPage() {
     const session = await auth();
 

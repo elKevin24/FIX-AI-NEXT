@@ -1,6 +1,12 @@
 import { Button, Card, CardHeader, CardTitle, CardBody, Badge, Input, Textarea, Select, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
 
+export const metadata = {
+  title: 'Design System',
+  description: 'Guía interna de componentes y estilos del sistema.',
+  robots: { index: false, follow: false },
+};
+
 export default function DesignSystemPage() {
   const statusOptions: SelectOption[] = [
     { value: 'open', label: 'Open' },
@@ -96,7 +102,7 @@ export default function DesignSystemPage() {
       <section style={{ marginBottom: 'var(--spacing-12)' }}>
         <h2 style={{ marginBottom: 'var(--spacing-6)' }}>Typography</h2>
         <div style={{ marginBottom: 'var(--spacing-8)' }}>
-          <h1>Heading 1 - The quick brown fox</h1>
+          <h2>Heading 1 - The quick brown fox</h2>
           <h2>Heading 2 - The quick brown fox</h2>
           <h3>Heading 3 - The quick brown fox</h3>
           <h4>Heading 4 - The quick brown fox</h4>

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ThemeInit from "@/components/ThemeInit";
@@ -101,12 +103,43 @@ export default function RootLayout({
                 >
                     Saltar al contenido principal
                 </a>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@graph": [
+                                {
+                                    "@type": "Organization",
+                                    "name": "FIX Workshop",
+                                    "url": siteUrl,
+                                    "logo": `${siteUrl}/icon-512.png`,
+                                },
+                                {
+                                    "@type": "WebApplication",
+                                    "name": "FIX Workshop",
+                                    "url": siteUrl,
+                                    "applicationCategory": "BusinessApplication",
+                                    "operatingSystem": "All",
+                                    "offers": {
+                                        "@type": "Offer",
+                                        "price": "0",
+                                        "priceCurrency": "USD"
+                                    },
+                                    "description": "Sistema de gestión integral para talleres electrónicos multi-tenant con gestión de tickets, inventario y facturación."
+                                },
+                            ],
+                        }),
+                    }}
+                />
                 <ThemeInit />
                 <ThemeProvider>
                     <main id="main-content" tabIndex={-1}>
                         {children}
                     </main>
                 </ThemeProvider>
+                <SpeedInsights />
+                <Analytics />
             </body>
         </html>
     );

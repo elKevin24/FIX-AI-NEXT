@@ -3,6 +3,15 @@ import { isSuperAdmin } from '@/lib/authz';
 import { redirect } from 'next/navigation';
 import { WorkloadDashboard } from '@/components/technicians/WorkloadDashboard';
 
+export const metadata = {
+  title: 'Carga de Trabajo de Técnicos',
+  description: 'Monitoreo de ocupación, límites concurrentes y asignaciones del equipo técnico.',
+  openGraph: {
+    title: 'Carga de Trabajo | FIX Workshop',
+    description: 'Monitoreo de ocupación, límites concurrentes y asignaciones del equipo técnico.',
+  },
+};
+
 export default async function WorkloadPage() {
   const session = await auth();
 

@@ -4,6 +4,15 @@ import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import styles from '../page.module.css';
 
+export const metadata = {
+    title: 'Configuración General',
+    description: 'Ajustes del taller, perfil de usuario, datos de facturación y preferencias.',
+    openGraph: {
+        title: 'Configuración | FIX Workshop',
+        description: 'Ajustes del taller, perfil de usuario, datos de facturación y preferencias.',
+    },
+};
+
 export default async function SettingsPage() {
     const session = await auth();
 

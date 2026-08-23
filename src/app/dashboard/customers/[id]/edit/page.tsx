@@ -5,6 +5,11 @@ import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import EditCustomerForm from './EditCustomerForm';
 
+export const metadata = {
+    title: 'Editar Cliente',
+    description: 'Actualiza los datos de contacto e información de un cliente.',
+};
+
 interface Props {
     params: Promise<{ id: string }>;
 }

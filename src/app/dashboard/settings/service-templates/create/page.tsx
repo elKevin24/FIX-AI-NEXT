@@ -3,6 +3,11 @@ import { ServiceTemplateForm } from '../ServiceTemplateForm';
 import PageHeader from '@/components/PageHeader';
 import styles from './create.module.css';
 
+export const metadata = {
+  title: 'Nueva Plantilla de Servicio',
+  description: 'Define una plantilla de servicio con partes, costos y duración estimada.',
+};
+
 export default async function CreateServiceTemplatePage() {
   const session = await auth();
 

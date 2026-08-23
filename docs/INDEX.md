@@ -26,6 +26,21 @@ Bienvenido a la documentación del sistema Multi-Tenant Workshop Management.
 
 ---
 
+## 🗺️ Roadmaps
+
+- **[ROADMAP_MASTER.md](ROADMAP_MASTER.md)** ⭐ **ÍNDICE CENTRAL**
+  - Estado de los 8 roadmaps del proyecto con % de cumplimiento verificado
+  - Trabajo pendiente consolidado y priorizado
+
+### Roadmaps Activos
+- **[SECURITY_ROADMAP.md](SECURITY_ROADMAP.md)** - Hardening de seguridad (P0–P3) — ~82%
+- **[TICKET_WORKFLOW_ROADMAP.md](TICKET_WORKFLOW_ROADMAP.md)** - UI del workflow de tickets — ~50%
+- **[TRIGGERS_MIDDLEWARE_ROADMAP.md](TRIGGERS_MIDDLEWARE_ROADMAP.md)** - Integridad de datos BD — ~50%
+- **[ROADMAP_FRONTEND_AUDIT.md](ROADMAP_FRONTEND_AUDIT.md)** - SEO/A11y/Performance — ~35%
+- **[THEME_IMPROVEMENTS_ROADMAP.md](THEME_IMPROVEMENTS_ROADMAP.md)** - Sistema de temas — ~80%
+
+---
+
 ## 🎨 Diseño
 
 ### Sistema de Diseño
@@ -43,7 +58,7 @@ Bienvenido a la documentación del sistema Multi-Tenant Workshop Management.
   - Comparación con frameworks profesionales
   - 22 páginas de análisis técnico
 
-- **[THEME_IMPROVEMENTS_ROADMAP.md](design/themes/THEME_IMPROVEMENTS_ROADMAP.md)** 🗺️ **PLAN DE ACCIÓN**
+- **[THEME_IMPROVEMENTS_ROADMAP.md](THEME_IMPROVEMENTS_ROADMAP.md)** 🗺️ **PLAN DE ACCIÓN**
   - Roadmap de mejoras (8.5 → 9.5/10)
   - Código exacto para cada mejora
   - Timeline de 2 sprints

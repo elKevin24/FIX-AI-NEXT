@@ -68,7 +68,7 @@
     border-color: var(--color-border-medium);
 }
 
-.statCard h3 {
+.statCard h2 {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
@@ -307,7 +307,7 @@
     color: var(--color-text-secondary);
 }
 
-.emptyState h3 {
+.emptyState h2 {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-2);
     color: var(--color-text-primary);
@@ -449,7 +449,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.itemsSection h3 {
+.itemsSection h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-3);
@@ -582,7 +582,7 @@
     padding: var(--spacing-4);
 }
 
-.detailSection h3 {
+.detailSection h2 {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
@@ -610,7 +610,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.paymentSection h3 {
+.paymentSection h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-3);

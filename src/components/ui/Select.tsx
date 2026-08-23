@@ -66,7 +66,7 @@ export function Select({
         </select>
       </div>
       {hasError && (
-        <span id={errorId} className={`${styles['helper']} ${styles['errorMessage']}`}>
+        <span id={errorId} role="alert" className={`${styles['helper']} ${styles['errorMessage']}`}>
           {error}
         </span>
       )}

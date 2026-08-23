@@ -4,6 +4,15 @@ import NotificationList from './NotificationList';
 import PageHeader from '@/components/PageHeader';
 import styles from './notifications.module.css';
 
+export const metadata = {
+  title: 'Notificaciones',
+  description: 'Centro de notificaciones y alertas de tickets y sistema.',
+  openGraph: {
+    title: 'Notificaciones | FIX Workshop',
+    description: 'Centro de notificaciones y alertas de tickets y sistema.',
+  },
+};
+
 export default async function NotificationsPage({
   searchParams,
 }: {
