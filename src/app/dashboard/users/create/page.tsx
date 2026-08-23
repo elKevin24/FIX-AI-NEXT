@@ -4,6 +4,11 @@ import { Card, CardBody } from '@/components/ui';
 import CreateUserForm from './CreateUserForm';
 import PageHeader from '@/components/PageHeader';
 
+export const metadata = {
+  title: 'Nuevo Usuario',
+  description: 'Crea una cuenta de técnico, recepcionista o administrador del taller.',
+};
+
 export default async function CreateUserPage() {
   const session = await auth();
 

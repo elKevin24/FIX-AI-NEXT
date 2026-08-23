@@ -164,13 +164,14 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
       {defaultParts.length > 0 ? (
         <div className={styles['tableWrapper']}>
           <table className={styles['partsTable']}>
+            <caption className="sr-only">Repuestos predeterminados de la plantilla</caption>
             <thead>
               <tr>
-                <th>Parte</th>
-                <th style={{ textAlign: 'center' }}>Cant.</th>
-                <th>Tipo</th>
-                <th style={{ textAlign: 'center' }}>Stock</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+                <th scope="col">Parte</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Cant.</th>
+                <th scope="col">Tipo</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Stock</th>
+                <th scope="col" style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>

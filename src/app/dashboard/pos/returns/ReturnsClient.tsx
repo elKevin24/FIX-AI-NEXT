@@ -385,19 +385,19 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             {/* Stats */}
             <div className={styles['statsGrid']}>
                 <div className={styles['statCard']}>
-                    <h3>Total NC</h3>
+                    <h2>Total NC</h2>
                     <div className={styles['value']}>{stats.totalCreditNotes}</div>
                 </div>
                 <div className={`${styles['statCard']} ${styles['warning']}`}>
-                    <h3>Pendientes</h3>
+                    <h2>Pendientes</h2>
                     <div className={styles['value']}>{stats.pendingCreditNotes}</div>
                 </div>
                 <div className={styles['statCard']}>
-                    <h3>Procesadas (mes)</h3>
+                    <h2>Procesadas (mes)</h2>
                     <div className={styles['value']}>{stats.processedThisMonth}</div>
                 </div>
                 <div className={`${styles['statCard']} ${styles['error']}`}>
-                    <h3>Total Reembolsado</h3>
+                    <h2>Total Reembolsado</h2>
                     <div className={styles['value']}>
                         {formatCurrency(stats.totalRefundedAmount)}
                     </div>
@@ -431,15 +431,16 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             <div className={styles['tableContainer']}>
                 <div className={styles['tableWrapper']}>
                     <table className={styles['table']}>
+                      <caption className="sr-only">Notas de crédito recientes</caption>
                         <thead>
                             <tr>
-                                <th>Nota de Crédito</th>
-                                <th>Venta Original</th>
-                                <th>Motivo</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
+                                <th scope="col">Nota de Crédito</th>
+                                <th scope="col">Venta Original</th>
+                                <th scope="col">Motivo</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -447,7 +448,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                                 <tr>
                                     <td colSpan={7}>
                                         <div className={styles['emptyState']}>
-                                            <h3>No hay notas de crédito</h3>
+                                            <h2>No hay notas de crédito</h2>
                                             <p>Crea una nueva devolución para comenzar</p>
                                             <Button onClick={() => setShowCreateModal(true)}>
                                                 + Nueva Devolución
@@ -538,7 +539,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                 {/* Sale Search */}
                 {!selectedSale && (
                     <div className={styles['searchSection']}>
-                        <h3>Buscar Venta Original</h3>
+                        <h2>Buscar Venta Original</h2>
                         <input
                             type="text"
                             placeholder="Buscar por número de venta o cliente..."
@@ -580,7 +581,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                 {selectedSale && (
                     <>
                         <div className={styles['saleDetails']}>
-                            <h3>
+                            <h2>
                                 Venta: {selectedSale.saleNumber}
                                 <Button
                                     variant="ghost"
@@ -592,7 +593,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                                 >
                                     Cambiar
                                 </Button>
-                            </h3>
+                            </h2>
                             <div className={styles['saleDetailsGrid']}>
                                 <div className={styles['saleDetailRow']}>
                                     <span>Cliente:</span>
@@ -619,16 +620,17 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
 
                         {/* Items Selection */}
                         <div className={styles['itemsSection']}>
-                            <h3>Productos a Devolver</h3>
+                            <h2>Productos a Devolver</h2>
                             <table className={styles['itemsTable']}>
+                              <caption className="sr-only">Productos a devolver de la venta original</caption>
                                 <thead>
                                     <tr>
-                                        <th></th>
-                                        <th>Producto</th>
-                                        <th>Comprado</th>
-                                        <th>Disponible</th>
-                                        <th>Devolver</th>
-                                        <th>Subtotal</th>
+                                        <th scope="col"></th>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Comprado</th>
+                                        <th scope="col">Disponible</th>
+                                        <th scope="col">Devolver</th>
+                                        <th scope="col">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -782,7 +784,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                     <>
                         <div className={styles['detailGrid']}>
                             <div className={styles['detailSection']}>
-                                <h3>Información</h3>
+                                <h2>Información</h2>
                                 <div className={styles['detailRow']}>
                                     <span>Estado:</span>
                                     <span>{getStatusBadge(selectedCreditNote.status)}</span>
@@ -809,7 +811,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                                 </div>
                             </div>
                             <div className={styles['detailSection']}>
-                                <h3>Reembolso</h3>
+                                <h2>Reembolso</h2>
                                 <div className={styles['detailRow']}>
                                     <span>Método:</span>
                                     <span>{getPaymentLabel(selectedCreditNote.refundMethod)}</span>
@@ -836,20 +838,21 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                         </div>
 
                         <div className={styles['detailSection']}>
-                            <h3>Motivo</h3>
+                            <h2>Motivo</h2>
                             <p>{selectedCreditNote.reason}</p>
                         </div>
 
                         {/* Items */}
                         <div className={styles['itemsSection']}>
-                            <h3>Productos Devueltos</h3>
+                            <h2>Productos Devueltos</h2>
                             <table className={styles['itemsTable']}>
+                              <caption className="sr-only">Productos devueltos en la nota</caption>
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad</th>
-                                        <th>Precio Unit.</th>
-                                        <th>Subtotal</th>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Cantidad</th>
+                                        <th scope="col">Precio Unit.</th>
+                                        <th scope="col">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -892,7 +895,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
 
                         {selectedCreditNote.notes && (
                             <div className={styles['detailSection']}>
-                                <h3>Notas</h3>
+                                <h2>Notas</h2>
                                 <p>{selectedCreditNote.notes}</p>
                             </div>
                         )}
@@ -927,7 +930,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                 {selectedCreditNote && (
                     <>
                         <div className={styles['detailSection']}>
-                            <h3>Nota de Crédito</h3>
+                            <h2>Nota de Crédito</h2>
                             <div className={styles['detailRow']}>
                                 <span>Número:</span>
                                 <span>{selectedCreditNote.creditNoteNumber}</span>
@@ -949,7 +952,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
                         </div>
 
                         <div className={styles['refundSection']}>
-                            <h3>Método de Reembolso</h3>
+                            <h2>Método de Reembolso</h2>
                             <div className={styles['refundMethods']}>
                                 {(['CASH', 'CARD', 'TRANSFER'] as PaymentMethod[]).map(
                                     (method) => (

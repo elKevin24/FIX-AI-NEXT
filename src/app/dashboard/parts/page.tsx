@@ -22,6 +22,15 @@ interface PartsPageProps {
     }>;
 }
 
+export const metadata = {
+    title: 'Inventario de Repuestos',
+    description: 'Control de repuestos, stock mínimo, categorías y valor de inventario.',
+    openGraph: {
+        title: 'Inventario | FIX Workshop',
+        description: 'Control de repuestos, stock mínimo, categorías y valor de inventario.',
+    },
+};
+
 export default async function PartsPage({ searchParams }: PartsPageProps) {
     const session = await auth();
 

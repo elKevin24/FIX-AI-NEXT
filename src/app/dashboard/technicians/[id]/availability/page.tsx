@@ -6,6 +6,11 @@ import AvailabilityList from '@/components/technicians/AvailabilityList';
 import AvailabilityPageClient from './AvailabilityPageClient'; // Client wrapper for the Add Dialog
 import PageHeader from '@/components/PageHeader';
 
+export const metadata = {
+    title: 'Disponibilidad de Técnico',
+    description: 'Gestiona el estado, ausencias programadas y especializaciones del técnico.',
+};
+
 export default async function AvailabilityPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const session = await auth();

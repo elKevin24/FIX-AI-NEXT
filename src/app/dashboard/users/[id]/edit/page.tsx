@@ -4,6 +4,11 @@ import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import EditUserForm from './EditUserForm';
 
+export const metadata = {
+    title: 'Editar Usuario',
+    description: 'Modifica los datos, rol y estado de un miembro del equipo.',
+};
+
 interface Props {
     params: Promise<{ id: string }>;
 }

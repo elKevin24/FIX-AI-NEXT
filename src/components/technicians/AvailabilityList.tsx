@@ -56,14 +56,15 @@ export default function AvailabilityList({ absences, canEdit }: AvailabilityList
     return (
         <div style={styles['container']}>
             <table style={styles['table']}>
+              <caption className="sr-only">Disponibilidad de técnicos</caption>
                 <thead>
                     <tr>
-                        <th style={styles['th']}>Motivo</th>
-                        <th style={styles['th']}>Desde</th>
-                        <th style={styles['th']}>Hasta</th>
-                        <th style={styles['th']}>Notas</th>
-                        <th style={styles['th']}>Estado</th>
-                        {canEdit && <th style={styles['th']}>Acciones</th>}
+                        <th scope="col" style={styles['th']}>Motivo</th>
+                        <th scope="col" style={styles['th']}>Desde</th>
+                        <th scope="col" style={styles['th']}>Hasta</th>
+                        <th scope="col" style={styles['th']}>Notas</th>
+                        <th scope="col" style={styles['th']}>Estado</th>
+                        {canEdit && <th scope="col" style={styles['th']}>Acciones</th>}
                     </tr>
                 </thead>
                 <tbody>

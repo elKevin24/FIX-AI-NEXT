@@ -293,12 +293,13 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
           <h2 className={styles['cardTitle']}>Plantillas Más Usadas</h2>
           <div className={styles['tableContainer']}>
             <table className={styles['table']}>
+              <caption className="sr-only">Plantillas más usadas</caption>
               <thead>
                 <tr>
-                  <th>Plantilla</th>
-                  <th style={{ textAlign: 'center' }}>Tickets</th>
-                  <th style={{ textAlign: 'right' }}>Ingresos</th>
-                  <th style={{ textAlign: 'right' }}>Último Uso</th>
+                  <th scope="col">Plantilla</th>
+                  <th scope="col" style={{ textAlign: 'center' }}>Tickets</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Ingresos</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Último Uso</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,13 +351,14 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
         <h2 className={styles['cardTitle']}>Actividad Reciente</h2>
         <div className={styles['tableContainer']}>
           <table className={styles['table']}>
+            <caption className="sr-only">Actividad reciente de plantillas</caption>
             <thead>
               <tr>
-                <th>Ticket</th>
-                <th>Plantilla</th>
-                <th>Cliente</th>
-                <th style={{ textAlign: 'center' }}>Estado</th>
-                <th style={{ textAlign: 'right' }}>Fecha</th>
+                <th scope="col">Ticket</th>
+                <th scope="col">Plantilla</th>
+                <th scope="col">Cliente</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
+                <th scope="col" style={{ textAlign: 'right' }}>Fecha</th>
               </tr>
             </thead>
             <tbody>

@@ -8,7 +8,6 @@
 'use client';
 
 import React, { forwardRef, useEffect, useState } from 'react';
-import QRCode from 'qrcode';
 import styles from './Ticket80mm.module.css';
 import {
     Ticket80mmData,
@@ -134,12 +133,16 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
             return () => clearTimeout(timer);
         }, []);
 
-        // Generar QR Code
+        // Generar QR Code (import dinámico: 'qrcode' no se incluye en el bundle inicial)
         useEffect(() => {
             if (!showQR) return;
 
+            let cancelled = false;
+
             const generateQR = async () => {
                 try {
+                    const QRCode = (await import('qrcode')).default;
+
                     // Determinar URL base
                     const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '');
                     const ticketUrl = `${base}/tickets/status/${ticket.id}`;
@@ -155,13 +158,19 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                         errorCorrectionLevel: 'M',
                     });
 
-                    setQrCodeDataUrl(qrDataUrl);
+                    if (!cancelled) {
+                        setQrCodeDataUrl(qrDataUrl);
+                    }
                 } catch (error) {
                     console.error('Error generando QR code:', error);
                 }
             };
 
             generateQR();
+
+            return () => {
+                cancelled = true;
+            };
         }, [ticket.id, showQR, baseUrl]);
 
         return (
@@ -281,12 +290,13 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                     <div className={styles['section']}>
                         <h2 className={styles['sectionTitle']}>Repuestos</h2>
                         <table className={styles['itemsTable']}>
+                          <caption className="sr-only">Repuestos utilizados</caption>
                             <thead>
                                 <tr>
-                                    <th>Repuesto</th>
-                                    <th className={styles['alignCenter']}>Cant.</th>
-                                    <th className={styles['alignRight']}>Precio</th>
-                                    <th className={styles['alignRight']}>Total</th>
+                                    <th scope="col">Repuesto</th>
+                                    <th scope="col" className={styles['alignCenter']}>Cant.</th>
+                                    <th scope="col" className={styles['alignRight']}>Precio</th>
+                                    <th scope="col" className={styles['alignRight']}>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -315,10 +325,11 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                     <div className={styles['section']}>
                         <h2 className={styles['sectionTitle']}>Servicios</h2>
                         <table className={styles['itemsTable']}>
+                          <caption className="sr-only">Servicios realizados</caption>
                             <thead>
                                 <tr>
-                                    <th>Servicio</th>
-                                    <th className={styles['alignRight']}>Costo</th>
+                                    <th scope="col">Servicio</th>
+                                    <th scope="col" className={styles['alignRight']}>Costo</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -5,6 +5,15 @@ import BusinessSettingsForm from './BusinessSettingsForm';
 import PageHeader from '@/components/PageHeader';
 import styles from './business.module.css';
 
+export const metadata = {
+    title: 'Datos del Negocio',
+    description: 'Configuración fiscal, logotipo, dirección y datos comerciales del taller.',
+    openGraph: {
+        title: 'Datos del Negocio | FIX Workshop',
+        description: 'Configuración fiscal, logotipo, dirección y datos comerciales del taller.',
+    },
+};
+
 export default async function BusinessSettingsPage() {
     const session = await auth();
 

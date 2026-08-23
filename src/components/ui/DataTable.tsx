@@ -16,6 +16,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
     onRowClick?: (row: TData) => void;
     isLoading?: boolean;
+    caption?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -23,6 +24,7 @@ export function DataTable<TData, TValue>({
     data,
     onRowClick,
     isLoading = false,
+    caption,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -42,13 +44,14 @@ export function DataTable<TData, TValue>({
         <div className={styles['wrapper']}>
             <div className={styles['tableContainer']}>
                 <table className={styles['table']}>
+                    {caption && <caption className="sr-only">{caption}</caption>}
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className={styles['headerRow']}>
                                 {headerGroup.headers.map((header) => {
                                     const meta = header.column.columnDef.meta as any;
                                     return (
-                                        <th 
+                                        <th scope="col" 
                                             key={header.id} 
                                             className={`${styles['headerCell']} ${meta?.className || ''}`}
                                             onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}

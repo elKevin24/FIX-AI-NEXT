@@ -93,34 +93,17 @@
 **Priority:** HIGH
 
 **Features:**
-- [ ] Dynamic actions based on current ticket status
-- [ ] Status-specific action buttons
+- [x] Dynamic actions based on current ticket status
+- [x] Status-specific action buttons
   - OPEN: [Assign] [Take] [Cancel]
   - IN_PROGRESS: [Add Parts] [Add Note] [Wait for Parts] [Resolve] [Cancel]
   - WAITING_FOR_PARTS: [Resume] [Add Note] [Cancel]
   - RESOLVED: [Deliver] [Reopen]
   - CLOSED: [Reopen] [View History]
   - CANCELLED: [Reopen]
-- [ ] Quick action buttons with icons
-- [ ] Validation feedback (workload limits, availability)
-- [ ] Success/error toast notifications
-
-**Design:**
-```
-┌─────────────────────────────────────────────┐
-│  Ticket #1234 - IN_PROGRESS                │
-├─────────────────────────────────────────────┤
-│  📋 QUICK ACTIONS                           │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ 🔧 Add   │ │ ⏸️ Wait  │ │ ✅ Mark  │    │
-│  │   Parts  │ │   Parts  │ │ Resolved │    │
-│  └──────────┘ └──────────┘ └──────────┘   │
-│  ┌──────────┐ ┌──────────┐                │
-│  │ 💬 Add   │ │ ❌ Cancel│                 │
-│  │   Note   │ │          │                 │
-│  └──────────┘ └──────────┘                │
-└─────────────────────────────────────────────┘
-```
+- [x] Quick action buttons with icons
+- [x] Validation feedback (workload limits, availability)
+- [x] Success/error toast notifications
 
 ---
 
@@ -129,50 +112,44 @@
 
 **Priority:** HIGH
 
-**Dialogs to create:**
-- [ ] `AssignTechnicianDialog.tsx` - Select technician from dropdown
-  - [ ] Show technician availability
-  - [ ] Show current workload
-  - [ ] Disable if technician is unavailable or at capacity
-- [ ] `TakeTicketDialog.tsx` - Confirm auto-assignment
-  - [ ] Show current workload
-  - [ ] Warn if approaching limit
-- [ ] `AddPartDialog.tsx` - Add part to ticket
-  - [ ] Part selection from inventory
-  - [ ] Quantity input
-  - [ ] Live inventory check
-- [ ] `AddNoteDialog.tsx` - Add repair note
-  - [ ] Text area for note content
-  - [ ] Internal/external toggle
-- [ ] `CancelTicketDialog.tsx` - Cancel with reason
-  - [ ] Required cancellation reason text area
-  - [ ] Warning about inventory restoration
-- [ ] `ReopenTicketDialog.tsx` - Reopen with reason
-  - [ ] Optional reopening reason
-- [ ] `WaitForPartsDialog.tsx` - Pause for parts
-  - [ ] Required note about missing parts
-- [ ] `ResolveTicketDialog.tsx` - Mark resolved
-  - [ ] Required closing note
-  - [ ] Summary of work done
+**Dialogs:**
+- [x] `AssignTechnicianDialog.tsx` - Select technician from dropdown
+  - [x] Show technician availability
+  - [x] Show current workload
+  - [x] Disable if technician is unavailable or at capacity
+- [x] `TakeTicketDialog.tsx` - Confirm auto-assignment
+  - [x] Show current workload
+  - [x] Warn if approaching limit
+- [x] `AddPartDialog.tsx` - Add part to ticket
+- [x] `AddNoteDialog.tsx` - Add repair note
+- [x] `CancelTicketDialog.tsx` - Cancel with reason
+  - [x] Required cancellation reason text area
+  - [x] Warning about inventory restoration
+- [x] `ReopenTicketDialog.tsx` - Reopen with reason
+  - [x] Optional reopening reason
+- [x] `WaitForPartsDialog.tsx` - Pause for parts
+  - [x] Required note about missing parts
+- [x] `ResolveTicketDialog.tsx` - Mark resolved
+  - [x] Required closing note
+  - [x] Summary of work done
 
 ---
 
 ### 3. Timeline de Actividad (Activity History)
-**Location:** `/dashboard/tickets/[id]` (new tab or section)
+**Location:** `/dashboard/tickets/[id]` (sección integrada)
 
 **Priority:** MEDIUM
 
 **Features:**
-- [ ] Visual timeline of all ticket actions
-- [ ] Chronological display (newest first)
-- [ ] Action type icons (🔄 assign, ✅ resolve, 📝 note, etc.)
-- [ ] User avatar/name for each action
-- [ ] Timestamp (relative: "2 hours ago" + absolute on hover)
-- [ ] Expandable details for each action
-- [ ] Filter by action type
-- [ ] Status change highlights
-- [ ] Part additions/removals
-- [ ] Note entries (internal/external indicator)
+- [x] Visual timeline of all ticket actions
+- [x] Chronological display (newest first)
+- [x] Action type icons (🔄 assign, ✅ resolve, 📝 note, etc.)
+- [x] User avatar/name for each action
+- [x] Timestamp (relative + absolute)
+- [x] Expandable details for each action
+- [x] Status change highlights
+- [x] Part additions/removals
+- [x] Note entries (internal/external indicator)
 
 **Design:**
 ```

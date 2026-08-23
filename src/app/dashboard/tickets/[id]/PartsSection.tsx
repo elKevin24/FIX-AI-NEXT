@@ -250,16 +250,17 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                 <>
                     <div className={styles['tableWrapper']}>
                         <table className={styles['table']}>
+                          <caption className="sr-only">Repuestos del ticket</caption>
                             <thead>
                                 <tr className={styles['tableHeaderRow']}>
-                                    <th>Repuesto</th>
-                                    <th>SKU</th>
-                                    <th style={{ textAlign: 'center' }}>Cant.</th>
-                                    <th style={{ textAlign: 'right' }}>Costo U.</th>
-                                    <th style={{ textAlign: 'right' }}>Precio U.</th>
-                                    <th style={{ textAlign: 'right' }}>Subtotal</th>
-                                    <th style={{ textAlign: 'center' }}>Estado</th>
-                                    <th style={{ textAlign: 'center' }}>Acción</th>
+                                    <th scope="col">Repuesto</th>
+                                    <th scope="col">SKU</th>
+                                    <th scope="col" style={{ textAlign: 'center' }}>Cant.</th>
+                                    <th scope="col" style={{ textAlign: 'right' }}>Costo U.</th>
+                                    <th scope="col" style={{ textAlign: 'right' }}>Precio U.</th>
+                                    <th scope="col" style={{ textAlign: 'right' }}>Subtotal</th>
+                                    <th scope="col" style={{ textAlign: 'center' }}>Estado</th>
+                                    <th scope="col" style={{ textAlign: 'center' }}>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -9,6 +9,15 @@ import styles from './users.module.css';
 import { hasPermission } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 
+export const metadata = {
+    title: 'Gestión de Usuarios',
+    description: 'Administración de técnicos, administradores y personal del taller.',
+    openGraph: {
+        title: 'Usuarios | FIX Workshop',
+        description: 'Administración de técnicos, administradores y personal del taller.',
+    },
+};
+
 export default async function UsersPage() {
     const session = await auth();
 

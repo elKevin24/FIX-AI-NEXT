@@ -180,7 +180,7 @@ export function TicketPoolView({ session }: TicketPoolViewProps) {
       {workload && (
         <div className={styles['workloadCard']}>
           <div className={styles['workloadHeader']}>
-            <h3 className={styles['workloadTitle']}>Tu Capacidad</h3>
+            <h2 className={styles['workloadTitle']}>Tu Capacidad</h2>
             <span className={`${styles['statusBadge']} ${styles['status' + workload.status]}`}>
               {workload.status.replace(/_/g, ' ')}
             </span>

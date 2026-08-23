@@ -67,7 +67,7 @@
     border-color: var(--color-border-medium);
 }
 
-.statCard h3 {
+.statCard h2 {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
@@ -279,7 +279,7 @@
     color: var(--color-text-secondary);
 }
 
-.emptyState h3 {
+.emptyState h2 {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-2);
     color: var(--color-text-primary);
@@ -294,7 +294,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.searchSection h3 {
+.searchSection h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-3);
@@ -366,7 +366,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.saleDetails h3 {
+.saleDetails h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin: 0 0 var(--spacing-3) 0;
@@ -400,7 +400,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.itemsSection h3 {
+.itemsSection h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-3);
@@ -552,7 +552,7 @@
     padding: var(--spacing-4);
 }
 
-.detailSection h3 {
+.detailSection h2 {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
@@ -580,7 +580,7 @@
     margin-bottom: var(--spacing-6);
 }
 
-.refundSection h3 {
+.refundSection h2 {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-3);

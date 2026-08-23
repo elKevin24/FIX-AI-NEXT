@@ -5,6 +5,15 @@ import { redirect } from 'next/navigation';
 import SLASettingsForm from './SLASettingsForm';
 import PageHeader from '@/components/PageHeader';
 
+export const metadata = {
+    title: 'Configuración SLA',
+    description: 'Umbrales y notificaciones de Acuerdos de Nivel de Servicio (SLA) para tickets.',
+    openGraph: {
+        title: 'Configuración SLA | FIX Workshop',
+        description: 'Umbrales y notificaciones de Acuerdos de Nivel de Servicio (SLA) para tickets.',
+    },
+};
+
 export default async function SLASettingsPage() {
     const session = await auth();
     if (!session?.user?.tenantId || session.user.role !== 'ADMIN') {

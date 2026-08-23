@@ -471,19 +471,19 @@ export function QuotationsClient({
             {/* Stats */}
             <div className={styles['statsGrid']}>
                 <div className={styles['statCard']}>
-                    <h3>Total Cotizaciones</h3>
+                    <h2>Total Cotizaciones</h2>
                     <div className={styles['value']}>{stats.totalQuotations}</div>
                 </div>
                 <div className={`${styles['statCard']} ${styles['warning']}`}>
-                    <h3>Pendientes</h3>
+                    <h2>Pendientes</h2>
                     <div className={styles['value']}>{stats.pendingQuotations}</div>
                 </div>
                 <div className={`${styles['statCard']} ${styles['success']}`}>
-                    <h3>Convertidas (mes)</h3>
+                    <h2>Convertidas (mes)</h2>
                     <div className={styles['value']}>{stats.convertedThisMonth}</div>
                 </div>
                 <div className={`${styles['statCard']} ${styles['info']}`}>
-                    <h3>Tasa Conversión</h3>
+                    <h2>Tasa Conversión</h2>
                     <div className={styles['value']}>{stats.conversionRate}%</div>
                 </div>
             </div>
@@ -519,14 +519,15 @@ export function QuotationsClient({
             <div className={styles['tableContainer']}>
                 <div className={styles['tableWrapper']}>
                     <table className={styles['table']}>
+                      <caption className="sr-only">Listado de cotizaciones</caption>
                         <thead>
                             <tr>
-                                <th>Cotización</th>
-                                <th>Cliente</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                                <th>Válida Hasta</th>
-                                <th>Acciones</th>
+                                <th scope="col">Cotización</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Válida Hasta</th>
+                                <th scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -534,7 +535,7 @@ export function QuotationsClient({
                                 <tr>
                                     <td colSpan={6}>
                                         <div className={styles['emptyState']}>
-                                            <h3>No hay cotizaciones</h3>
+                                            <h2>No hay cotizaciones</h2>
                                             <p>Crea una nueva cotización para comenzar</p>
                                             <Button onClick={() => setShowCreateModal(true)}>
                                                 + Nueva Cotización
@@ -744,16 +745,17 @@ export function QuotationsClient({
 
                 {/* Items Table */}
                 <div className={styles['itemsSection']}>
-                    <h3>Productos</h3>
+                    <h2>Productos</h2>
                     <table className={styles['itemsTable']}>
+                      <caption className="sr-only">Productos agregados a la cotización</caption>
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Cant.</th>
-                                <th>Precio</th>
-                                <th>Desc. %</th>
-                                <th>Subtotal</th>
-                                <th></th>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Cant.</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Desc. %</th>
+                                <th scope="col">Subtotal</th>
+                                <th scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -980,7 +982,7 @@ export function QuotationsClient({
                     <>
                         <div className={styles['detailGrid']}>
                             <div className={styles['detailSection']}>
-                                <h3>Cliente</h3>
+                                <h2>Cliente</h2>
                                 <div className={styles['detailRow']}>
                                     <span>Nombre:</span>
                                     <span>
@@ -1002,7 +1004,7 @@ export function QuotationsClient({
                                 )}
                             </div>
                             <div className={styles['detailSection']}>
-                                <h3>Información</h3>
+                                <h2>Información</h2>
                                 <div className={styles['detailRow']}>
                                     <span>Estado:</span>
                                     <span>{getStatusBadge(selectedQuotation.status)}</span>
@@ -1028,15 +1030,16 @@ export function QuotationsClient({
 
                         {/* Items */}
                         <div className={styles['itemsSection']}>
-                            <h3>Productos</h3>
+                            <h2>Productos</h2>
                             <table className={styles['itemsTable']}>
+                              <caption className="sr-only">Vista previa de impresión: productos</caption>
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Cant.</th>
-                                        <th>Precio</th>
-                                        <th>Desc.</th>
-                                        <th>Subtotal</th>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Cant.</th>
+                                        <th scope="col">Precio</th>
+                                        <th scope="col">Desc.</th>
+                                        <th scope="col">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1095,7 +1098,7 @@ export function QuotationsClient({
 
                         {selectedQuotation.notes && (
                             <div className={styles['detailSection']}>
-                                <h3>Notas</h3>
+                                <h2>Notas</h2>
                                 <p>{selectedQuotation.notes}</p>
                             </div>
                         )}
@@ -1130,7 +1133,7 @@ export function QuotationsClient({
                 {selectedQuotation && (
                     <>
                         <div className={styles['detailSection']}>
-                            <h3>Cotización</h3>
+                            <h2>Cotización</h2>
                             <div className={styles['detailRow']}>
                                 <span>Número:</span>
                                 <span>{selectedQuotation.quotationNumber}</span>
@@ -1151,7 +1154,7 @@ export function QuotationsClient({
                         </div>
 
                         <div className={styles['paymentSection']}>
-                            <h3>Métodos de Pago</h3>
+                            <h2>Métodos de Pago</h2>
                             <div className={styles['paymentMethods']}>
                                 {(['CASH', 'CARD', 'TRANSFER'] as PaymentMethod[]).map(
                                     (method) => (
