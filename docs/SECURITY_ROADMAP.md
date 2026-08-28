@@ -158,14 +158,14 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     - (Opcional) Inspeccionar magic bytes de cabecera de archivo para verificar el tipo real antes de subirlo a Vercel Blob.
   - **Criterio de Aceptación:** Archivos con extensiones ejecutables (`.exe`, `.sh`, `.html`, `.svg` con scripts) son rechazados.
 
-- [ ] **4.2 Actualización y Remediación de Dependencias (`npm audit`)**
+- [x] **4.2 Actualización y Remediación de Dependencias (`npm audit`)**
   - **Archivos:** `package.json`
   - **Acción:**
     - Actualizar paquetes reportados con vulnerabilidades (`nanoid`, `deepmerge-ts`, `@vercel/*`).
     - Ajustar overrides en `package.json` si es necesario.
   - **Criterio de Aceptación:** `npm audit` finaliza con 0 vulnerabilidades altas o críticas.
 
-- [ ] **4.3 Automatización de Seguridad en CI/CD**
+- [x] **4.3 Automatización de Seguridad en CI/CD**
   - **Archivos:** `.github/workflows/ci.yml` (o pipeline existente)
   - **Acción:**
     - Incluir paso obligatorio `npm run check:all` (`tsc --noEmit && eslint . && vitest run && next build`).

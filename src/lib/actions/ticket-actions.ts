@@ -17,6 +17,7 @@ import { ActionState } from '@/lib/types';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
 import { TicketRepository } from '@/lib/repositories/ticket.repository';
 import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
+import { CreateBatchTicketsUseCase } from '@/use-cases/tickets/CreateBatchTicketsUseCase';
 import { UpdateTicketUseCase } from '@/use-cases/tickets/UpdateTicketUseCase';
 import { UpdateTicketStatusUseCase } from '@/use-cases/tickets/UpdateTicketStatusUseCase';
 import { DeleteTicketUseCase } from '@/use-cases/tickets/DeleteTicketUseCase';
@@ -28,6 +29,7 @@ import { RejectTicketPartsUseCase } from '@/use-cases/tickets/RejectTicketPartsU
 import { RemovePartFromTicketUseCase } from '@/use-cases/tickets/RemovePartFromTicketUseCase';
 import { AddServiceToTicketUseCase } from '@/use-cases/tickets/AddServiceToTicketUseCase';
 import { RemoveServiceFromTicketUseCase } from '@/use-cases/tickets/RemoveServiceFromTicketUseCase';
+import { PublicCustomerApprovalUseCase } from '@/use-cases/tickets/PublicCustomerApprovalUseCase';
 
 /**
  * Get ticket by ID for public status check.
@@ -52,6 +54,31 @@ export async function searchTicket(rawId: string) {
     } catch (error) {
         console.error('Error searching ticket:', error);
         return null;
+    }
+}
+
+/**
+ * Public action for customer approval/rejection from /tickets/status.
+ */
+export async function publicCustomerApproval(
+    ticketId: string,
+    action: 'APPROVE' | 'REJECT',
+    rejectionReason?: string,
+) {
+    try {
+        return await PublicCustomerApprovalUseCase.execute({
+            ticketId,
+            action,
+            rejectionReason,
+        });
+    } catch (error) {
+        console.error('Failed public customer approval:', error);
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Error al procesar la solicitud.',
+            ticketId,
+            newStatus: '',
+        };
     }
 }
 
@@ -169,51 +196,19 @@ export async function createBatchTickets(
     }
 
     try {
-        const { tenantId } = session.user;
-        const tenantDb = getTenantPrisma(tenantId, session.user.id);
-
-        const customer = await resolveOrCreateCustomer(tenantDb, {
-            customerId,
-            customerEmail,
-            customerPhone,
-            customerName,
-            customerDpi,
-            customerNit,
-            tenantId,
-            createdById: session.user.id,
-        });
-
-        const createdTicketIds = await tenantDb.$transaction(
-            async (tx: Prisma.TransactionClient) => {
-                const tickets = await Promise.all(
-                    ticketsData.map((ticket: z.infer<typeof CreateTicketSchema>) =>
-                        tx.ticket.create({
-                            data: {
-                                title: ticket.title,
-                                description: ticket.description,
-                                customerId: customer.id,
-                                status: 'OPEN',
-                                tenantId,
-                                deviceType: ticket.deviceType,
-                                deviceModel: ticket.deviceModel,
-                                serialNumber: ticket.serialNumber,
-                                accessories: ticket.accessories,
-                                checkInNotes: ticket.checkInNotes,
-                                createdById: session.user.id,
-                                updatedById: session.user.id,
-                            },
-                            select: { id: true },
-                        }),
-                    ),
-                );
-                return tickets.map((ticket) => ticket.id);
+        await CreateBatchTicketsUseCase.execute({
+            ticketsData,
+            customerInfo: {
+                customerId,
+                customerEmail,
+                customerPhone,
+                customerName,
+                customerDpi,
+                customerNit,
             },
-        );
-
-        // Send notifications after the transaction commits. Using void to
-        // explicitly mark this as a non-awaited fire-and-forget call.
-        // Notification failures must NOT rollback the ticket creation.
-        void sendBatchTicketNotifications(tenantDb, createdTicketIds);
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+        });
 
         revalidatePath('/dashboard/tickets');
     } catch (error) {
@@ -682,100 +677,5 @@ function parseJsonField<T>(raw: FormDataEntryValue | null, fallback: T): T {
         return JSON.parse(raw) as T;
     } catch {
         return fallback;
-    }
-}
-
-interface CustomerResolutionInput {
-    customerId: string;
-    customerEmail: string;
-    customerPhone: string;
-    customerName: string;
-    customerDpi: string;
-    customerNit: string;
-    tenantId: string;
-    createdById: string;
-}
-
-/**
- * Resolves an existing customer by ID, email, phone, or name in that priority
- * order, creating a new one only when no match is found.
- */
-async function resolveOrCreateCustomer(
-    db: ReturnType<typeof getTenantPrisma>,
-    input: CustomerResolutionInput,
-) {
-    const { customerId, customerEmail, customerPhone, customerName, customerDpi, customerNit, tenantId, createdById } = input;
-
-    if (customerId) {
-        const existing = await db.customer.findUnique({ where: { id: customerId } });
-        if (existing) return existing;
-    }
-
-    if (customerEmail) {
-        const existing = await db.customer.findFirst({ where: { email: customerEmail } });
-        if (existing) return existing;
-    }
-
-    if (customerPhone) {
-        const existing = await db.customer.findFirst({ where: { phone: customerPhone } });
-        if (existing) return existing;
-    }
-
-    const byName = await db.customer.findFirst({ where: { name: customerName } });
-    if (byName) return byName;
-
-    return db.customer.create({
-        data: {
-            name: customerName,
-            email: customerEmail || null,
-            phone: customerPhone || null,
-            dpi: customerDpi || null,
-            nit: customerNit || null,
-            tenantId,
-            createdById,
-            updatedById: createdById,
-        },
-    });
-}
-
-/**
- * Sends ticket creation notifications for a batch of newly created tickets.
- * This is deliberately fire-and-forget: notification failures must not
- * rollback the ticket creation transaction.
- */
-async function sendBatchTicketNotifications(
-    db: ReturnType<typeof getTenantPrisma>,
-    ticketIds: string[],
-): Promise<void> {
-    try {
-        const tickets = await db.ticket.findMany({
-            where: { id: { in: ticketIds } },
-            include: { customer: true, assignedTo: true },
-        });
-
-        for (const ticket of tickets) {
-            try {
-                await notifyTicketCreated({
-                    id: ticket.id,
-                    ticketNumber: ticket.ticketNumber,
-                    title: ticket.title,
-                    deviceType: ticket.deviceType,
-                    deviceModel: ticket.deviceModel,
-                    status: ticket.status,
-                    customerId: ticket.customerId,
-                    customer: {
-                        id: ticket.customer.id,
-                        name: ticket.customer.name,
-                        email: ticket.customer.email,
-                    },
-                    assignedTo: ticket.assignedTo,
-                    tenantId: ticket.tenantId,
-                });
-            } catch (notificationError) {
-                console.error('Failed to send batch ticket notification:', notificationError);
-            }
-        }
-    } catch (error) {
-        console.error('Failed to fetch tickets for notification:', error);
     }
 }
