@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ThemeInit from "@/components/ThemeInit";
+import { SerwistProvider } from "@serwist/turbopack/react";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -70,6 +71,11 @@ export const metadata: Metadata = {
         shortcut: "/favicon.ico",
     },
     manifest: "/manifest.json",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "FIX Workshop",
+    },
     alternates: {
         canonical: siteUrl,
         languages: {
@@ -134,9 +140,11 @@ export default function RootLayout({
                 />
                 <ThemeInit />
                 <ThemeProvider>
-                    <main id="main-content" tabIndex={-1}>
-                        {children}
-                    </main>
+                    <SerwistProvider swUrl="/serwist/sw.js">
+                        <main id="main-content" tabIndex={-1}>
+                            {children}
+                        </main>
+                    </SerwistProvider>
                 </ThemeProvider>
                 <SpeedInsights />
                 <Analytics />

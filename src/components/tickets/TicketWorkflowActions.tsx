@@ -8,6 +8,8 @@ import { CancelTicketDialog } from './actions/CancelTicketDialog';
 import { ResolveTicketDialog } from './actions/ResolveTicketDialog';
 import { WaitForPartsDialog } from './actions/WaitForPartsDialog';
 import { AssignTechnicianDialog } from './actions/AssignTechnicianDialog';
+import { TakeTicketDialog } from './actions/TakeTicketDialog';
+import { ReopenTicketDialog } from './actions/ReopenTicketDialog';
 import styles from './TicketWorkflowActions.module.css';
 
 interface User {
@@ -37,11 +39,12 @@ export default function TicketWorkflowActions({ ticket, availableUsers, isAdmin,
     const [showResolveDialog, setShowResolveDialog] = useState(false);
     const [showWaitPartsDialog, setShowWaitPartsDialog] = useState(false);
     const [showAssignDialog, setShowAssignDialog] = useState(false);
+    const [showTakeDialog, setShowTakeDialog] = useState(false);
+    const [showReopenDialog, setShowReopenDialog] = useState(false);
 
-    // Direct Actions (Start, Resume, Reopen, Close)
+    // Direct Actions (Start, Resume, Close)
     const [, startAction, isStarting] = useActionState(updateTicketStatus, null);
     const [, resumeAction, isResuming] = useActionState(updateTicketStatus, null);
-    const [, reopenAction, isReopening] = useActionState(updateTicketStatus, null);
     const [, closeAction, isClosing] = useActionState(updateTicketStatus, null);
 
     const isAssignedToMe = ticket.assignedTo?.id === currentUserId;
@@ -179,41 +182,44 @@ export default function TicketWorkflowActions({ ticket, availableUsers, isAdmin,
                             </Button>
                         </form>
 
-                        <form action={reopenAction}>
-                            <input type="hidden" name="ticketId" value={ticket.id} />
-                            <input type="hidden" name="status" value="IN_PROGRESS" />
-                            <input type="hidden" name="note" value="Reabierto por garantía/revisión" />
-                            <Button 
-                                variant="secondary" 
-                                type="submit" 
-                                isLoading={isReopening}
-                                disabled={!canAct}
-                            >
-                                ↩ Reabrir
-                            </Button>
-                        </form>
+                        <Button 
+                            variant="secondary" 
+                            type="button"
+                            onClick={() => setShowReopenDialog(true)}
+                            disabled={!canAct}
+                        >
+                            ↩ Reabrir
+                        </Button>
                     </>
                 )}
 
                 {/* CLOSED/CANCELLED Actions */}
                 {(ticket.status === 'CLOSED' || ticket.status === 'CANCELLED') && (
-                     <form action={reopenAction}>
-                        <input type="hidden" name="ticketId" value={ticket.id} />
-                        <input type="hidden" name="status" value="OPEN" />
-                        <input type="hidden" name="note" value="Ticket reabierto" />
-                        <Button 
-                            variant="secondary" 
-                            type="submit" 
-                            isLoading={isReopening}
-                            disabled={!isAdmin}
-                        >
-                            ↩ Reabrir Caso
-                        </Button>
-                    </form>
+                    <Button 
+                        variant="secondary" 
+                        type="button"
+                        onClick={() => setShowReopenDialog(true)}
+                        disabled={!isAdmin}
+                    >
+                        ↩ Reabrir Caso
+                    </Button>
                 )}
             </div>
 
             {/* Render Dialogs */}
+            <TakeTicketDialog 
+                ticketId={ticket.id}
+                ticketTitle={ticket.title}
+                isOpen={showTakeDialog}
+                onClose={() => setShowTakeDialog(false)}
+            />
+
+            <ReopenTicketDialog 
+                ticketId={ticket.id}
+                isOpen={showReopenDialog}
+                onClose={() => setShowReopenDialog(false)}
+            />
+
             <CancelTicketDialog 
                 ticketId={ticket.id}
                 isOpen={showCancelDialog}

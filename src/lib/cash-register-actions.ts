@@ -9,6 +9,7 @@ import {
   CashTransactionSchema,
   CloseCashRegisterSchema,
 } from '@/lib/schemas';
+import { GenerateCashCutUseCase, CutType } from '@/use-cases/cash-register/GenerateCashCutUseCase';
 
 // ============================================================================
 // TYPES
@@ -430,4 +431,29 @@ export async function registerInvoicePaymentInCash(
   revalidatePath('/dashboard/cash-register');
 
   return transaction;
+}
+
+/**
+ * Server Action para generar arqueos y cortes de caja (Corte X y Corte Z).
+ */
+export async function generateCashCutAction(
+  cashRegisterId: string,
+  cutType: CutType,
+  physicalCashReported?: number,
+) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  const result = await GenerateCashCutUseCase.execute({
+    cashRegisterId,
+    cutType,
+    physicalCashReported,
+    tenantId: session.user.tenantId,
+    userId: session.user.id,
+  });
+
+  revalidatePath('/dashboard/cash-register');
+  return result;
 }
