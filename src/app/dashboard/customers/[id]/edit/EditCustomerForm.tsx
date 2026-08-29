@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { updateCustomer, deleteCustomer } from '@/lib/actions';
 import styles from '../../../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -41,10 +42,11 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
         <div className={styles['container']}>
             <PageHeader
                 title="Editar Cliente"
+                subtitle={`Registro de cliente: ${customer.name}`}
                 actions={
-                    <Link href="/dashboard/customers" className={styles['viewLink']}>
-                        &larr; Volver a clientes
-                    </Link>
+                    <Button as={Link} href="/dashboard/customers" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                        Volver a Clientes
+                    </Button>
                 }
             />
 
@@ -146,20 +148,22 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                     </div>
 
                     <div className={styles['actions']}>
-                        <button
+                        <Button
                             type="submit"
-                            className={styles['createBtn']}
-                            disabled={isUpdating}
+                            variant="primary"
+                            size="sm"
+                            isLoading={isUpdating}
                         >
-                            {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
-                        </button>
-                        <Link
+                            Guardar Cambios
+                        </Button>
+                        <Button
+                            as={Link}
                             href="/dashboard/customers"
-                            className={styles['cancelBtn']}
-                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                            variant="ghost"
+                            size="sm"
                         >
                             Cancelar
-                        </Link>
+                        </Button>
                     </div>
                 </form>
             </div>
@@ -170,22 +174,22 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                     <h2 className={styles['dangerTitle']}>Zona de Peligro</h2>
 
                     {hasTickets ? (
-                        <div className={styles['errorMessage']} style={{ color: 'var(--color-warning-700)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
-                            No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
+                        <div className={styles['errorMessage']} style={{ color: 'var(--color-warning-800)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
+                            ⚠️ No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
                         </div>
                     ) : !showDeleteConfirm ? (
-                        <button
+                        <Button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className={styles['dangerBtn']}
+                            variant="danger"
+                            size="sm"
                         >
                             Eliminar Cliente
-                        </button>
+                        </Button>
                     ) : (
                         <div className={styles['formGroup']}>
-                            <p style={{ color: 'var(--color-danger-600)' }}>
-                                ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>?
-                                Esta acción no se puede deshacer.
+                            <p style={{ color: 'var(--color-error-600)', margin: '0 0 1rem 0' }}>
+                                ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>? Esta acción no se puede deshacer.
                             </p>
 
                             <form action={deleteAction}>
@@ -198,20 +202,22 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                                 )}
 
                                 <div className={styles['actions']}>
-                                    <button
+                                    <Button
                                         type="submit"
-                                        className={styles['dangerBtn']}
-                                        disabled={isDeleting}
+                                        variant="danger"
+                                        size="sm"
+                                        isLoading={isDeleting}
                                     >
-                                        {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Cliente'}
-                                    </button>
-                                    <button
+                                        Sí, Eliminar Cliente
+                                    </Button>
+                                    <Button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className={styles['cancelBtn']}
+                                        variant="ghost"
+                                        size="sm"
                                     >
                                         Cancelar
-                                    </button>
+                                    </Button>
                                 </div>
                             </form>
                         </div>

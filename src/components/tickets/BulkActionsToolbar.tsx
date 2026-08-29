@@ -3,6 +3,7 @@
 
 import { useTransition } from 'react';
 import { bulkUpdateTicketStatus, bulkDeleteTickets } from '@/lib/bulk-actions';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
     selectedTickets: any[];
@@ -34,14 +35,21 @@ export default function BulkActionsToolbar({ selectedTickets, onSuccess, isAdmin
     };
 
     return (
-        <>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <select 
                 onChange={(e) => {
                     if (e.target.value) handleStatusUpdate(e.target.value);
                     e.target.value = '';
                 }}
                 disabled={isPending}
-                className="px-2 py-1 border rounded text-sm"
+                style={{
+                    padding: '0.375rem 0.75rem',
+                    fontSize: '0.875rem',
+                    borderRadius: 'var(--radius-base)',
+                    border: '1px solid var(--color-border-medium)',
+                    backgroundColor: 'var(--color-surface)',
+                    color: 'var(--color-text-primary)'
+                }}
             >
                 <option value="">Cambiar Estado...</option>
                 <option value="OPEN">Abierto</option>
@@ -52,14 +60,16 @@ export default function BulkActionsToolbar({ selectedTickets, onSuccess, isAdmin
             </select>
 
             {isAdmin && (
-                <button 
+                <Button 
                     disabled={isPending} 
+                    isLoading={isPending}
                     onClick={handleDelete} 
-                    className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-medium"
+                    variant="danger"
+                    size="sm"
                 >
                     Eliminar
-                </button>
+                </Button>
             )}
-        </>
+        </div>
     );
 }

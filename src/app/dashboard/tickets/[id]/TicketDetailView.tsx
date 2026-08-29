@@ -5,6 +5,7 @@ import { updateTicket, deleteTicket, addTicketNote, deleteTicketNote } from '@/l
 import { generateInvoiceFromTicket } from '@/lib/invoice-actions';
 import styles from '../tickets.module.css';
 import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -162,20 +163,19 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
         <div className={styles['container']}>
             {/* Header */}
             <PageHeader
-                title={
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Link href="/dashboard/tickets" className={styles['viewLink']}>
-                            &larr; Volver
-                        </Link>
-                        Ticket #{ticket.id.slice(0, 8)}
-                    </span>
-                }
+                title={`Ticket #${ticket.id.slice(0, 8)}`}
+                subtitle={ticket.title}
                 actions={
-                    isSuperAdmin ? (
-                        <span className={styles['superAdminBadge']}>
-                            Tenant: {ticket.tenant.name}
-                        </span>
-                    ) : undefined
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <Button as={Link} href="/dashboard/tickets" variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+                            Volver a Tickets
+                        </Button>
+                        {isSuperAdmin && (
+                            <span className={styles['superAdminBadge']}>
+                                Tenant: {ticket.tenant.name}
+                            </span>
+                        )}
+                    </div>
                 }
             />
 
@@ -195,13 +195,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                         <>
                             <div className={styles['sectionHeader']}>
                                 <h2 className={styles['sectionTitle']}>{ticket.title}</h2>
-                                <button
+                                <Button
                                     onClick={() => setIsEditing(true)}
-                                    className={styles['createBtn']}
-                                    style={{ padding: '0.5rem 1rem' }}
+                                    variant="secondary"
+                                    size="sm"
                                 >
                                     Editar
-                                </button>
+                                </Button>
                             </div>
 
                             <div style={{ marginBottom: '1.5rem' }}>
@@ -308,20 +308,22 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             )}
 
                             <div className={styles['actions']}>
-                                <button
+                                <Button
                                     type="submit"
-                                    className={styles['createBtn']}
-                                    disabled={isUpdating}
+                                    variant="primary"
+                                    size="sm"
+                                    isLoading={isUpdating}
                                 >
-                                    {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
-                                </button>
-                                <button
+                                    Guardar Cambios
+                                </Button>
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => setIsEditing(false)}
-                                    className={styles['cancelBtn']}
                                 >
                                     Cancelar
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     )}
@@ -330,78 +332,84 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 {/* Right Column - Customer Info & Timeline */}
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     {/* Customer Info */}
-                    <div className={styles['section']} style={{ padding: '1.5rem', marginTop: 0 }}>
-                        <h3 className={styles['label']} style={{ marginBottom: '1rem' }}>Cliente</h3>
-                        <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{ticket.customer.name}</p>
+                    <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
+                        <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Cliente</h3>
+                        <p style={{ fontWeight: '600', marginBottom: '0.25rem', color: 'var(--color-text-primary)' }}>{ticket.customer.name}</p>
                         {ticket.customer.email && (
-                            <p className={styles['textMuted']} style={{ fontSize: '0.9rem' }}>{ticket.customer.email}</p>
+                            <p className={styles['textMuted']} style={{ fontSize: '0.875rem', margin: '0.125rem 0' }}>{ticket.customer.email}</p>
                         )}
                         {ticket.customer.phone && (
-                            <p className={styles['textMuted']} style={{ fontSize: '0.9rem' }}>{ticket.customer.phone}</p>
+                            <p className={styles['textMuted']} style={{ fontSize: '0.875rem', margin: '0.125rem 0' }}>{ticket.customer.phone}</p>
                         )}
-                        <Link
+                        <Button
+                            as={Link}
                             href={`/dashboard/customers/${ticket.customer.id}/edit`}
-                            className={styles['viewLink']}
-                            style={{ display: 'inline-block', marginTop: '0.5rem' }}
+                            variant="secondary"
+                            size="sm"
+                            style={{ marginTop: '0.75rem' }}
                         >
                             Ver cliente
-                        </Link>
+                        </Button>
                     </div>
 
                     {/* Dates */}
-                    <div className={styles['section']} style={{ padding: '1.5rem', marginTop: 0 }}>
-                        <h3 className={styles['label']} style={{ marginBottom: '1rem' }}>Fechas</h3>
-                        <div className={styles['flexCol']} style={{ fontSize: '0.9rem' }}>
+                    <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
+                        <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Fechas</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
                             <div>
                                 <span className={styles['textMuted']}>Creado:</span>{' '}
-                                {new Date(ticket.createdAt).toLocaleString('es-ES')}
+                                <strong style={{ color: 'var(--color-text-primary)' }}>{new Date(ticket.createdAt).toLocaleString('es-ES')}</strong>
                             </div>
                             <div>
                                 <span className={styles['textMuted']}>Actualizado:</span>{' '}
-                                {new Date(ticket.updatedAt).toLocaleString('es-ES')}
+                                <strong style={{ color: 'var(--color-text-primary)' }}>{new Date(ticket.updatedAt).toLocaleString('es-ES')}</strong>
                             </div>
                         </div>
                     </div>
 
                     {/* PDF Documents */}
-                    <div className={styles['section']} style={{ padding: '1.5rem', marginTop: 0 }}>
-                        <h3 className={styles['label']} style={{ marginBottom: '1rem' }}>Documentos</h3>
-                        <div className={styles['flexCol']}>
-                            <a
+                    <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
+                        <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Documentos y Formatos</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <Button
+                                as="a"
                                 href={`/api/tickets/${ticket.id}/pdf/work-order`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={styles['createBtn']}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    textAlign: 'center',
-                                    textDecoration: 'none',
-                                    fontSize: '0.9rem',
-                                    display: 'block'
-                                }}
+                                variant="secondary"
+                                size="sm"
+                                fullWidth
+                                leftIcon={<span aria-hidden="true">📄</span>}
                             >
-                                📄 Orden de Ingreso
-                            </a>
+                                Orden de Ingreso (PDF)
+                            </Button>
+
+                            <Button
+                                as={Link}
+                                href={`/dashboard/tickets/${ticket.id}/ticket80mm`}
+                                variant="secondary"
+                                size="sm"
+                                fullWidth
+                                leftIcon={<span aria-hidden="true">🖨️</span>}
+                            >
+                                Ticket Térmico 80mm
+                            </Button>
 
                             {/* Facturación */}
                             {ticket.invoice ? (
-                                <Link
+                                <Button
+                                    as={Link}
                                     href={`/dashboard/invoices/${ticket.invoice.id}`}
-                                    className={styles['createBtn']}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        textAlign: 'center',
-                                        textDecoration: 'none',
-                                        fontSize: '0.9rem',
-                                        display: 'block',
-                                        backgroundColor: 'var(--color-secondary-600)'
-                                    }}
+                                    variant="primary"
+                                    size="sm"
+                                    fullWidth
+                                    leftIcon={<span aria-hidden="true">💰</span>}
                                 >
-                                    💰 Ver Factura ({ticket.invoice.invoiceNumber})
-                                </Link>
+                                    Ver Factura ({ticket.invoice.invoiceNumber})
+                                </Button>
                             ) : (
                                 (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && isAdmin && (
-                                    <button
+                                    <Button
                                         onClick={async () => {
                                             if (confirm('¿Generar factura para este ticket?')) {
                                                 setIsGeneratingInvoice(true);
@@ -416,38 +424,30 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                             }
                                         }}
                                         disabled={isGeneratingInvoice}
-                                        className={styles['createBtn']}
-                                        style={{
-                                            padding: '0.5rem 1rem',
-                                            textAlign: 'center',
-                                            fontSize: '0.9rem',
-                                            display: 'block',
-                                            backgroundColor: 'var(--color-warning-600)',
-                                            width: '100%'
-                                        }}
+                                        isLoading={isGeneratingInvoice}
+                                        variant="warning"
+                                        size="sm"
+                                        fullWidth
+                                        leftIcon={<span aria-hidden="true">💰</span>}
                                     >
-                                        {isGeneratingInvoice ? 'Generando...' : '💰 Generar Factura'}
-                                    </button>
+                                        Generar Factura
+                                    </Button>
                                 )
                             )}
 
                             {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && (
-                                <a
+                                <Button
+                                    as="a"
                                     href={`/api/tickets/${ticket.id}/pdf/delivery-receipt`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={styles['createBtn']}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        textAlign: 'center',
-                                        textDecoration: 'none',
-                                        fontSize: '0.9rem',
-                                        display: 'block',
-                                        backgroundColor: 'var(--color-success-600)'
-                                    }}
+                                    variant="success"
+                                    size="sm"
+                                    fullWidth
+                                    leftIcon={<span aria-hidden="true">✓</span>}
                                 >
-                                    ✓ Comprobante de Entrega
-                                </a>
+                                    Comprobante de Entrega
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -466,17 +466,18 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             <h3 className={styles['dangerTitle']}>Zona de Peligro</h3>
 
                             {!showDeleteConfirm ? (
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => setShowDeleteConfirm(true)}
-                                    className={styles['dangerBtn']}
-                                    style={{ width: '100%' }}
+                                    variant="danger"
+                                    size="sm"
+                                    fullWidth
                                 >
                                     Eliminar Ticket
-                                </button>
+                                </Button>
                             ) : (
                                 <div className={styles['formGroup']}>
-                                    <p className={styles['textDanger']} style={{ fontSize: '0.875rem' }}>
+                                    <p className={styles['textDanger']} style={{ fontSize: '0.875rem', margin: '0 0 0.5rem 0' }}>
                                         ¿Eliminar este ticket? Esta acción no se puede deshacer.
                                     </p>
 
@@ -484,7 +485,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         <input type="hidden" name="ticketId" value={ticket.id} />
 
                                         <div style={{ margin: '0.75rem 0' }}>
-                                            <label htmlFor="delete-reason" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.25rem' }}>
+                                            <label htmlFor="delete-reason" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.25rem' }}>
                                                 Motivo de eliminación * (mínimo 10 caracteres)
                                             </label>
                                             <textarea
@@ -496,9 +497,9 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                                 minLength={10}
                                                 required
                                                 rows={2}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem' }}
+                                                className={styles['textarea']}
                                             />
-                                            <small style={{ color: isDeleteReasonValid ? '#059669' : '#dc2626', fontSize: '0.75rem', display: 'block', marginTop: '0.25rem' }}>
+                                            <small style={{ color: isDeleteReasonValid ? 'var(--color-success-600)' : 'var(--color-error-600)', fontSize: '0.75rem', display: 'block', marginTop: '0.25rem' }}>
                                                 {deleteReason.trim().length} / 10 caracteres mínimos
                                             </small>
                                         </div>
@@ -510,23 +511,26 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                         )}
 
                                         <div className={styles['actions']}>
-                                            <button
+                                            <Button
                                                 type="submit"
-                                                className={styles['dangerBtn']}
+                                                variant="danger"
+                                                size="sm"
+                                                isLoading={isDeleting}
                                                 disabled={isDeleting || !isDeleteReasonValid}
                                             >
-                                                {isDeleting ? 'Eliminando...' : 'Confirmar'}
-                                            </button>
-                                            <button
+                                                Confirmar
+                                            </Button>
+                                            <Button
                                                 type="button"
                                                 onClick={() => {
                                                     setShowDeleteConfirm(false);
                                                     setDeleteReason('');
                                                 }}
-                                                className={styles['cancelBtn']}
+                                                variant="ghost"
+                                                size="sm"
                                             >
                                                 Cancelar
-                                            </button>
+                                            </Button>
                                         </div>
                                     </form>
                                 </div>
@@ -580,13 +584,15 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                     )}
 
                     <div className={styles['actions']} style={{ justifyContent: 'flex-end', marginTop: '1rem' }}>
-                        <button
+                        <Button
                             type="submit"
-                            className={styles['createBtn']}
+                            variant="primary"
+                            size="sm"
+                            isLoading={isAddingNote}
                             disabled={isAddingNote || !noteContent.trim()}
                         >
-                            {isAddingNote ? 'Agregando...' : 'Agregar Nota'}
-                        </button>
+                            Agregar Nota
+                        </Button>
                     </div>
                 </form>
 
@@ -652,11 +658,13 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                                         background: 'none',
                                                         border: 'none',
                                                         cursor: 'pointer',
-                                                        fontSize: '0.8rem',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600,
                                                         textDecoration: 'underline'
                                                     }}
+                                                    aria-label="Eliminar nota"
                                                 >
-                                                    Eliminar
+                                                    {isDeletingNote ? 'Eliminando...' : 'Eliminar'}
                                                 </button>
                                             </form>
                                         )}

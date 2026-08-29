@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
 
 export default function Error({
   error,
@@ -34,37 +35,21 @@ export default function Error({
         Ocurrió un error inesperado al mostrar esta sección.
         {error?.digest ? ` Código de referencia: ${error.digest}` : ''}
       </p>
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button
+      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+        <Button
           onClick={() => retry()}
-          style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: 'var(--color-primary-600)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
+          variant="primary"
+          size="base"
         >
           Intentar de nuevo
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => window.location.assign('/dashboard')}
-          style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: 'var(--color-surface)',
-            color: 'var(--color-text-primary)',
-            border: '1px solid var(--color-border)',
-            borderRadius: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
+          variant="secondary"
+          size="base"
         >
           Ir al inicio
-        </button>
+        </Button>
       </div>
     </div>
   );

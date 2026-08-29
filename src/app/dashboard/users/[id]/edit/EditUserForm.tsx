@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { updateUser, deleteUser } from '@/lib/actions';
 import styles from '../../../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -35,10 +36,11 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
         <div className={styles['container']}>
             <PageHeader
                 title="Editar Usuario"
+                subtitle={`Usuario: ${user.name || user.email}`}
                 actions={
-                    <Link href="/dashboard/users" className={styles['viewLink']}>
-                        &larr; Volver a usuarios
-                    </Link>
+                    <Button as={Link} href="/dashboard/users" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                        Volver a Usuarios
+                    </Button>
                 }
             />
 
@@ -124,20 +126,22 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                     </div>
 
                     <div className={styles['actions']}>
-                        <button
+                        <Button
                             type="submit"
-                            className={styles['createBtn']}
-                            disabled={isUpdating}
+                            variant="primary"
+                            size="sm"
+                            isLoading={isUpdating}
                         >
-                            {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
-                        </button>
-                        <Link
+                            Guardar Cambios
+                        </Button>
+                        <Button
+                            as={Link}
                             href="/dashboard/users"
-                            className={styles['cancelBtn']}
-                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                            variant="ghost"
+                            size="sm"
                         >
                             Cancelar
-                        </Link>
+                        </Button>
                     </div>
                 </form>
             </div>
@@ -148,18 +152,18 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                     <h2 className={styles['dangerTitle']}>Zona de Peligro</h2>
 
                     {!showDeleteConfirm ? (
-                        <button
+                        <Button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className={styles['dangerBtn']}
+                            variant="danger"
+                            size="sm"
                         >
                             Eliminar Usuario
-                        </button>
+                        </Button>
                     ) : (
                         <div className={styles['formGroup']}>
-                            <p style={{ color: 'var(--color-danger-600)' }}>
-                                ¿Estás seguro de que deseas eliminar a <strong>{user.name || user.email}</strong>?
-                                Esta acción no se puede deshacer.
+                            <p style={{ color: 'var(--color-error-600)', margin: '0 0 1rem 0' }}>
+                                ¿Estás seguro de que deseas eliminar a <strong>{user.name || user.email}</strong>? Esta acción no se puede deshacer.
                             </p>
 
                             <form action={deleteAction}>
@@ -172,20 +176,22 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                                 )}
 
                                 <div className={styles['actions']}>
-                                    <button
+                                    <Button
                                         type="submit"
-                                        className={styles['dangerBtn']}
-                                        disabled={isDeleting}
+                                        variant="danger"
+                                        size="sm"
+                                        isLoading={isDeleting}
                                     >
-                                        {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Usuario'}
-                                    </button>
-                                    <button
+                                        Sí, Eliminar Usuario
+                                    </Button>
+                                    <Button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className={styles['cancelBtn']}
+                                        variant="ghost"
+                                        size="sm"
                                     >
                                         Cancelar
-                                    </button>
+                                    </Button>
                                 </div>
                             </form>
                         </div>

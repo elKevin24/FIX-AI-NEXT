@@ -3,6 +3,7 @@
 import { useActionState, useState, useEffect } from 'react';
 import { addPartToTicket, removePartFromTicket, approveTicketParts, rejectTicketParts } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 import styles from '../tickets.module.css';
 
 interface Part {
@@ -93,12 +94,13 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
         <div className={styles['section']}>
             <div className={styles['sectionHeader']}>
                 <h3 className={styles['sectionTitle']}>Repuestos Utilizados ({partsUsed.length})</h3>
-                <button
+                <Button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? styles['cancelBtn'] : styles['createBtn']}
+                    variant={showAddForm ? 'ghost' : 'primary'}
+                    size="sm"
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Repuesto'}
-                </button>
+                </Button>
             </div>
 
             {/* Pending Approval Banner */}
@@ -110,7 +112,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                     padding: '1rem 1.25rem',
                     marginBottom: '1rem',
                 }}>
-                    <p style={{ fontWeight: 700, margin: '0 0 0.25rem', fontSize: '0.9rem' }}>
+                    <p style={{ fontWeight: 700, margin: '0 0 0.25rem', fontSize: '0.9rem', color: 'var(--color-warning-800)' }}>
                         ⏳ Repuestos pendientes de aprobación del cliente
                     </p>
                     <p style={{ margin: '0 0 0.75rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
@@ -119,24 +121,26 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
 
                     {canApprove ? (
                         <>
-                            <div className={styles['actions']} style={{ marginTop: '0.5rem' }}>
+                            <div className={styles['actions']} style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 <form action={approveAction}>
                                     <input type="hidden" name="ticketId" value={ticketId} />
-                                    <button
+                                    <Button
                                         type="submit"
-                                        disabled={isApproving}
-                                        className={styles['createBtn']}
+                                        variant="success"
+                                        size="sm"
+                                        isLoading={isApproving}
                                     >
-                                        {isApproving ? 'Aprobando...' : 'Aprobar repuestos'}
-                                    </button>
+                                        Aprobar repuestos
+                                    </Button>
                                 </form>
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => setShowRejectForm(!showRejectForm)}
-                                    className={showRejectForm ? styles['cancelBtn'] : styles['dangerBtn']}
+                                    variant={showRejectForm ? 'ghost' : 'danger'}
+                                    size="sm"
                                 >
                                     {showRejectForm ? 'Cancelar' : 'Rechazar'}
-                                </button>
+                                </Button>
                             </div>
 
                             {showRejectForm && (
@@ -155,13 +159,15 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                             className={styles['textarea']}
                                         />
                                     </div>
-                                    <button
+                                    <Button
                                         type="submit"
+                                        variant="danger"
+                                        size="sm"
+                                        isLoading={isRejecting}
                                         disabled={isRejecting || !isRejectReasonValid}
-                                        className={styles['dangerBtn']}
                                     >
-                                        {isRejecting ? 'Rechazando...' : 'Confirmar rechazo'}
-                                    </button>
+                                        Confirmar rechazo
+                                    </Button>
                                 </form>
                             )}
                         </>
@@ -220,13 +226,15 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                             )}
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
+                            variant="primary"
+                            size="sm"
+                            isLoading={isAdding}
                             disabled={isAdding || !selectedPartId}
-                            className={styles['createBtn']}
                         >
-                            {isAdding ? 'Agregando...' : 'Agregar'}
-                        </button>
+                            Agregar
+                        </Button>
                     </div>
 
                     <p className={styles['textMuted']} style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
@@ -289,9 +297,17 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                                         type="submit"
                                                         disabled={isRemoving}
                                                         className={styles['textDanger']}
-                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            textDecoration: 'underline',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 600
+                                                        }}
+                                                        aria-label={`Eliminar repuesto ${usage.part.name}`}
                                                     >
-                                                        Eliminar
+                                                        {isRemoving ? 'Eliminando...' : 'Eliminar'}
                                                     </button>
                                                 </form>
                                             </td>

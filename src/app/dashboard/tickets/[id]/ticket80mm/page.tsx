@@ -12,6 +12,7 @@ import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
 import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import styles from './page.module.css';
 
 interface Props {
@@ -110,9 +111,9 @@ export default async function Ticket80mmPage({ params }: Props) {
                 title="Ticket 80mm - Orden de Servicio"
                 subtitle="Formato optimizado para impresión térmica y compartir"
                 actions={
-                    <Link href={`/dashboard/tickets/${id}`} className={styles['backButton']}>
-                        ← Volver al Ticket
-                    </Link>
+                    <Button as={Link} href={`/dashboard/tickets/${id}`} variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+                        Volver al Ticket
+                    </Button>
                 }
             />
 

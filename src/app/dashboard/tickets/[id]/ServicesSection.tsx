@@ -3,6 +3,7 @@
 import { useActionState, useState, useEffect } from 'react';
 import { addServiceToTicket, removeServiceFromTicket } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 import styles from '../tickets.module.css';
 
 interface Service {
@@ -55,12 +56,13 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
         <div className={styles['section']}>
             <div className={styles['sectionHeader']}>
                 <h3 className={styles['sectionTitle']}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
-                <button
+                <Button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? styles['cancelBtn'] : styles['createBtn']}
+                    variant={showAddForm ? 'ghost' : 'primary'}
+                    size="sm"
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Servicio'}
-                </button>
+                </Button>
             </div>
 
             {/* Add Service Form */}
@@ -87,13 +89,15 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                             </select>
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
+                            variant="primary"
+                            size="sm"
+                            isLoading={isAdding}
                             disabled={isAdding || !selectedServiceId}
-                            className={styles['createBtn']}
                         >
-                            {isAdding ? 'Agregando...' : 'Agregar'}
-                        </button>
+                            Agregar
+                        </Button>
                     </div>
 
                     {addState?.message && !addState.success && (
@@ -135,9 +139,17 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                                                     type="submit"
                                                     disabled={isRemoving}
                                                     className={styles['textDanger']}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'underline',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600
+                                                    }}
+                                                    aria-label={`Eliminar servicio ${usage.name}`}
                                                 >
-                                                    Eliminar
+                                                    {isRemoving ? 'Eliminando...' : 'Eliminar'}
                                                 </button>
                                             </form>
                                         </td>

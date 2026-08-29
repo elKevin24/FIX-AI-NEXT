@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { markMyNotificationAsRead, deleteMyNotification, markAllMyNotificationsAsRead } from '@/lib/notifications';
+import { Button } from '@/components/ui/Button';
 import styles from './notifications.module.css';
 
 interface Notification {
@@ -49,13 +50,14 @@ export default function NotificationList({ initialNotifications, totalPages, cur
         <div className={styles['container']}>
             <div className={styles['header']}>
                 <span className={styles['pageInfo']}>Mostrando página {currentPage} de {totalPages || 1}</span>
-                <button 
+                <Button 
                     onClick={handleMarkAllRead}
                     disabled={isPending || notifications.every(n => n.isRead)}
-                    className={styles['markAllBtn']}
+                    variant="secondary"
+                    size="sm"
                 >
                     Marcar todas como leídas
-                </button>
+                </Button>
             </div>
 
             <div className={styles['list']}>

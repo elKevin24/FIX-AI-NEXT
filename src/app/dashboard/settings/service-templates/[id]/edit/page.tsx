@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getServiceTemplate } from '@/lib/service-template-actions';
 import { ServiceTemplateForm } from '../../ServiceTemplateForm';
 import { TemplatePartsManager } from '../../TemplatePartsManager';
+import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import styles from '../../service-templates.module.css';
 
 export const metadata = {
@@ -31,12 +33,13 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
           <p className="text-red-600 mb-4">
             Solo los administradores pueden editar plantillas.
           </p>
-          <Link
+          <Button
+            as={Link}
             href="/dashboard"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            variant="primary"
           >
             Volver al Dashboard
-          </Link>
+          </Button>
         </div>
       </div>
     );
@@ -46,25 +49,32 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
 
   return (
     <div className={`${styles['container']} max-w-5xl`}>
-      {/* Back Link */}
-      <Link
-        href="/dashboard/settings/service-templates"
-        className={`${styles['backLink']} mb-4`}
-      >
-        ← Volver a plantillas
-      </Link>
+      <PageHeader
+        title="Editar Plantilla de Servicio"
+        subtitle={`Configuración de la plantilla: ${template.name}`}
+        actions={
+          <Button
+            as={Link}
+            href="/dashboard/settings/service-templates"
+            variant="secondary"
+            size="sm"
+            leftIcon={<span>←</span>}
+          >
+            Volver a Plantillas
+          </Button>
+        }
+      />
 
       <div className="space-y-4">
         {/* Template Form */}
         <div className={`${styles['glassCard']} ${styles['slideUp']}`}>
-          <div className="mb-4 md:mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Editar Plantilla</h1>
-            {template._count.tickets > 0 && (
+          {template._count.tickets > 0 && (
+            <div style={{ marginBottom: '1rem' }}>
               <span className={styles['warningBadge']}>
                 ⚠️ Esta plantilla tiene {template._count.tickets} tickets asociados
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           <ServiceTemplateForm initialData={template} />
         </div>

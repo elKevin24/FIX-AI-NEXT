@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import TemplateSelector, {
   ServiceTemplate,
 } from '@/components/tickets/TemplateSelector';
@@ -155,6 +156,11 @@ export default function TicketWizard() {
         <PageHeader
           title="✨ Nuevo Ticket - Asistente"
           subtitle="Crea tickets rápidamente con plantillas predefinidas o manualmente"
+          actions={
+            <Button as={Link} href="/dashboard/tickets" variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+              Volver a Tickets
+            </Button>
+          }
         />
 
         {/* Progress Steps */}

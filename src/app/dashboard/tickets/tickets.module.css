@@ -275,6 +275,78 @@
 .actions {
     display: flex;
     gap: var(--spacing-3);
+    align-items: center;
+}
+
+.createBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--color-primary-600);
+    color: var(--color-on-primary, #ffffff);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-base);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.createBtn:hover:not(:disabled) {
+    background-color: var(--color-primary-700);
+    transform: translateY(-1px);
+}
+
+.cancelBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-border-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+
+.dangerBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--color-error-600);
+    color: #ffffff;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-base);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.dangerBtn:hover:not(:disabled) {
+    background-color: var(--color-error-700);
+}
+
+.superAdminBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-50);
+    color: var(--color-primary-700);
+    border: 1px solid var(--color-primary-200);
 }
 
 .gridTwoColumns {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ServiceCategory } from '@prisma/client';
 import { createServiceTemplate, updateServiceTemplate } from '@/lib/service-template-actions';
+import { Button } from '@/components/ui/Button';
 import styles from './ServiceTemplateForm.module.css';
 
 type ServiceTemplateFormProps = {
@@ -312,20 +313,23 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
 
       {/* Botones */}
       <div className={styles['actions']}>
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className={styles['submitBtn']}
+          isLoading={loading}
+          variant="primary"
+          size="sm"
         >
-          {loading ? 'Guardando...' : initialData ? 'Actualizar Plantilla' : 'Crear Plantilla'}
-        </button>
-        <button
+          {initialData ? 'Actualizar Plantilla' : 'Crear Plantilla'}
+        </Button>
+        <Button
           type="button"
           onClick={() => router.back()}
-          className={styles['cancelBtn']}
+          variant="ghost"
+          size="sm"
         >
           Cancelar
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -3,8 +3,8 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
-import { Badge } from '@/components/ui';
-import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge'; // Usaremos el componente existente si es posible
+import { Badge, Button } from '@/components/ui';
+import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 import Link from 'next/link';
 
 interface TicketData {
@@ -104,12 +104,14 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
             header: 'Acciones',
             meta: { className: 'w-[120px] text-right pr-4' },
             cell: ({ row }) => (
-                <Link 
+                <Button 
+                    as={Link}
                     href={`/dashboard/tickets/${row.original.id}`} 
-                    className="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-md transition-colors"
+                    variant="secondary"
+                    size="sm"
                 >
                     Ver Detalles
-                </Link>
+                </Button>
             ),
         },
     ];

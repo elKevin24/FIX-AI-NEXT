@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createBatchTickets } from '@/lib/actions';
 import { createTicketFromTemplate } from '@/lib/service-template-actions';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
@@ -139,8 +140,8 @@ export default function SimpleTicketForm() {
                     title="Nuevo Ticket"
                     subtitle="Registra una nueva orden de servicio para reparación o mantenimiento"
                     actions={
-                        <Button as="a" href="/dashboard/tickets" variant="secondary" size="sm">
-                            ← Volver
+                        <Button as={Link} href="/dashboard/tickets" variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+                            Volver a Tickets
                         </Button>
                     }
                 />

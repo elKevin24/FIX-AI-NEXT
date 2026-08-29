@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
 import styles from './AttachmentsSection.module.css';
+import { Button } from '@/components/ui/Button';
 
 import Image from 'next/image';
 
@@ -36,6 +37,12 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Validaciones básicas
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+            addToast('El archivo no debe exceder 5MB', 'ERROR');
+            return;
+        }
+
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -48,13 +55,13 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
 
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.error || 'Upload failed');
+                throw new Error(err.error || 'Failed to upload');
             }
 
+            addToast('Archivo adjuntado correctamente', 'SUCCESS');
             router.refresh();
-        } catch (error) {
-            console.error(error);
-            addToast('Error al subir el archivo', 'ERROR');
+        } catch (error: any) {
+            addToast(error.message, 'ERROR');
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -65,18 +72,18 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
         if (!confirm('¿Estás seguro de eliminar este adjunto?')) return;
 
         try {
-            const res = await fetch(`/api/tickets/${ticketId}/attachments`, {
+            const res = await fetch(`/api/tickets/${ticketId}/attachments?attachmentId=${attachmentId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ attachmentId }),
             });
 
-            if (!res.ok) throw new Error('Delete failed');
-            
+            if (!res.ok) {
+                throw new Error('Failed to delete');
+            }
+
+            addToast('Archivo eliminado', 'SUCCESS');
             router.refresh();
-        } catch (error) {
-            console.error(error);
-            addToast('Error al eliminar el archivo', 'ERROR');
+        } catch (error: any) {
+            addToast(error.message, 'ERROR');
         }
     };
 
@@ -92,13 +99,15 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
         <div className={styles['container']}>
             <div className={styles['header']}>
                 <h3 className={styles['title']}>Attachments ({initialAttachments.length})</h3>
-                <button 
+                <Button 
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    isLoading={isUploading}
+                    variant="primary"
+                    size="sm"
                 >
-                    {isUploading ? 'Uploading...' : 'Add File'}
-                </button>
+                    Add File
+                </Button>
                 <input 
                     type="file" 
                     ref={fileInputRef} 

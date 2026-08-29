@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PaymentMethod } from '@prisma/client';
 import { registerPayment } from '@/lib/invoice-actions';
+import { Button } from '@/components/ui/Button';
 import styles from './invoice-detail.module.css';
 
 interface InvoiceDetailClientProps {
@@ -57,27 +58,27 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
   return (
     <div className={styles['container']}>
       <div className={styles['backButtonContainer']}>
-        <Link href="/dashboard/invoices" className={styles['backButton']}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
+        <Button 
+          as={Link} 
+          href="/dashboard/invoices" 
+          variant="secondary" 
+          size="sm"
+          leftIcon={<span>←</span>}
+        >
           Volver a Facturación
-        </Link>
+        </Button>
 
-        <a 
+        <Button 
+          as="a"
           href={`/api/invoices/${invoice.id}/pdf`}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles['btnPrint']}
+          variant="secondary"
+          size="sm"
+          leftIcon={<span>🖨️</span>}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-          </svg>
           Imprimir PDF
-        </a>
+        </Button>
       </div>
 
       <div className={styles['invoicePaper']}>
@@ -174,9 +175,9 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
         <div className={styles['paymentHeader']}>
           <h2>Historial de Pagos</h2>
           {!isFullyPaid && (
-            <button className={`${styles['btn']} ${styles['btnPrimary']}`} onClick={() => setIsModalOpen(true)}>
+            <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
               Registrar Pago
-            </button>
+            </Button>
           )}
         </div>
 
@@ -256,12 +257,23 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
               </div>
 
               <div className={styles['buttonGroup']}>
-                <button type="button" className={`${styles['btn']} ${styles['btnSecondary']}`} onClick={() => setIsModalOpen(false)}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsModalOpen(false)}
+                >
                   Cancelar
-                </button>
-                <button type="submit" className={`${styles['btn']} ${styles['btnPrimary']}`} disabled={isSubmitting}>
-                  {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
-                </button>
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary" 
+                  size="sm"
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  Confirmar Pago
+                </Button>
               </div>
             </form>
           </div>
