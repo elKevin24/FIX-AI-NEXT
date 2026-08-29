@@ -129,7 +129,7 @@ Documento histórico conservado para referencia.
 
 1. **Notificaciones Automatizadas (Feature 2 Etapa 2):** WhatsApp Business API / Webhooks de estado.
 2. **Administración Avanzada (Feature 3):** Portal público de autoservicio de clientes para seguimiento de estado y presupuestos.
-3. **Auditorías Continuas (Fase 4/5):** Integración de Lighthouse CI y PWA Service Worker.
+3. **Auditorías Continuas (Fase 4/5):** Lighthouse CI ✅ + **PWA Service Worker ✅ (Serwist/@serwist-turbopack, offline fallback `/~offline`)**. Pendiente: PWA Web Push (VAPID).
 
 ---
 

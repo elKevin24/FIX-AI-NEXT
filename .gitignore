@@ -58,6 +58,10 @@ src/app/api/temp-users/
 # Tool-specific files
 .claude/
 
+# Serwist / PWA service worker artifacts
+public/sw*
+public/swe-worker*
+
 .gemini/
 gha-creds-*.json
 /generated/
