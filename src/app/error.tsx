@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
 export default function Error({
@@ -44,7 +45,8 @@ export default function Error({
           Intentar de nuevo
         </Button>
         <Button
-          onClick={() => window.location.assign('/dashboard')}
+          as={Link}
+          href="/dashboard"
           variant="secondary"
           size="base"
         >
