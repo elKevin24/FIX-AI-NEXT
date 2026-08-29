@@ -11,7 +11,11 @@ const themes: { value: Theme; label: string; icon: string }[] = [
     { value: 'dark-colorblind', label: 'Dark Colorblind', icon: '👁️' },
 ];
 
-export default function ThemeSwitcher() {
+export interface ThemeSwitcherProps {
+    placement?: 'top' | 'bottom';
+}
+
+export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps = {}) {
     const { theme, setTheme } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
@@ -154,11 +158,11 @@ export default function ThemeSwitcher() {
                 </button>
 
                 {isOpen && (
-                    <div
-                        role="menu"
-                        aria-orientation="vertical"
+                    <ul
+                        id="theme-listbox"
+                        className={`${styles.dropdown} ${placement === 'bottom' ? styles.dropdownBottom : styles.dropdownTop}`}
+                        role="listbox"
                         aria-label="Selección de tema"
-                        className={styles['dropdown']}
                         onKeyDown={handleKeyDown}
                     >
                         {themes.map((t, index) => (
@@ -197,7 +201,7 @@ export default function ThemeSwitcher() {
                                 )}
                             </button>
                         ))}
-                    </div>
+                    </ul>
                 )}
             </div>
 

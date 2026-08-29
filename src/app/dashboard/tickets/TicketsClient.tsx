@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@/components/ui/DataTable';
+import { DataTable, EmptyState, Button } from '@/components/ui';
 import { Badge } from '@/components/ui';
-import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge'; // Usaremos el componente existente si es posible
+import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 import Link from 'next/link';
 
 interface TicketData {
@@ -31,6 +31,14 @@ interface TicketData {
 interface TicketsClientProps {
     data: TicketData[];
     isSuperAdmin?: boolean;
+}
+
+function TicketIcon() {
+    return (
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+        </svg>
+    );
 }
 
 export default function TicketsClient({ data, isSuperAdmin = false }: TicketsClientProps) {
@@ -113,6 +121,21 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
             ),
         },
     ];
+
+    if (data.length === 0) {
+        return (
+            <EmptyState
+                icon={<TicketIcon />}
+                title="No hay tickets"
+                description="Aún no se han creado tickets. Crea el primero para comenzar a gestionar las reparaciones."
+                action={
+                    <Link href="/dashboard/tickets/create">
+                        <Button variant="primary">Crear Ticket</Button>
+                    </Link>
+                }
+            />
+        );
+    }
 
     return (
         <DataTable 

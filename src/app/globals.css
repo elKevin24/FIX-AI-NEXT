@@ -4,6 +4,8 @@
    ======================================== */
 
 :root {
+
+  
   /* ========== COLOR PALETTE ========== */
   /* Optimized for WCAG AA/AAA Contrast */
 
@@ -238,6 +240,25 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* ========== COMPONENT TOKENS (TIER 3 ABSTRACTION) ========== */
+  --button-primary-bg: var(--color-primary-600);
+  --button-primary-text: var(--color-on-primary, #ffffff);
+  --button-primary-hover-bg: var(--color-primary-700);
+
+  --button-secondary-bg: var(--color-surface);
+  --button-secondary-text: var(--color-text-primary);
+  --button-secondary-border: var(--color-border-strong);
+  --button-secondary-hover-bg: var(--color-surface-hover);
+
+  --card-bg: var(--color-surface);
+  --card-border: var(--color-border-light);
+  --card-radius: var(--radius-xl);
+
+  --modal-bg: var(--color-surface);
+  --modal-border: var(--color-border-light);
+  --modal-z-backdrop: var(--z-modal-backdrop);
+  --modal-z-content: var(--z-modal);
 
   /* ========== LEGACY COMPATIBILITY ALIASES ========== */
   /* Old token names still referenced by legacy module CSS (POS, cash register,
@@ -1447,3 +1468,28 @@ a:hover {
     border-color: var(--separator-color) !important;
   }
 }
+
+/* ========================================================================== */
+/* DEEP TECH / EXECUTIVE AURORA UI CLASSES                                    */
+/* ========================================================================== */
+
+/* Tipografía de Métricas */
+.metric-tabular {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.audit-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Fallback automático para modo de bajo consumo / sin transparencias */
+@media (prefers-reduced-transparency: reduce) {
+  .backdrop-blur-md, .backdrop-blur-xs, .glass-card {
+    background-color: var(--color-surface) !important;
+    backdrop-filter: none !important;
+  }
+}
+
+

@@ -1,0 +1,105 @@
+/* ========================================
+   CUSTOM SELECT STYLES (Dropdown)
+   ======================================== */
+
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.customSelect {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.open {
+  border-color: var(--color-primary-600) !important;
+  box-shadow: 0 0 0 2px var(--color-primary-100) !important;
+}
+
+.placeholder {
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.selectedText {
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-tertiary);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.open .chevron {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: var(--z-dropdown, 1000);
+  margin: 0;
+  padding: var(--spacing-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  animation: slideDown 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top;
+}
+
+.option {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  margin-bottom: 2px;
+}
+
+.option:last-child {
+  margin-bottom: 0;
+}
+
+.option:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.selectedOption {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .selectedOption {
+  background: var(--color-primary-900);
+  color: var(--color-primary-100);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}

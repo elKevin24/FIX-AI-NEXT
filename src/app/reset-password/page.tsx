@@ -81,7 +81,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className={styles['container']}>
+    <div className={styles['container']}>
       {/* Decorative Blobs */}
       <div className={styles['decorativeBlobs']}>
         <div className={styles['blob']} />
@@ -104,6 +104,6 @@ export default function ResetPasswordPage() {
           </Suspense>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

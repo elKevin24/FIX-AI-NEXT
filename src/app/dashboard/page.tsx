@@ -235,6 +235,7 @@ export default async function DashboardPage() {
                 superAdmin={isSuperAdminUser}
             />
 
+            
             {/* Stats Grid */}
             <div className={styles['statsGrid']}>
                 <StatCard 
@@ -242,68 +243,65 @@ export default async function DashboardPage() {
                     value={activeTickets}
                     label="Abiertos + En Progreso"
                     icon="📊"
-                    iconBgColor="#dbeafe"
-                    iconColor="#1e40af"
+                    variant="info"
                 />
                 <StatCard 
                     title="Esperando Repuestos"
                     value={pendingParts}
                     label="Inventario pendiente"
                     icon="⏳"
-                    iconBgColor="#fef3c7"
-                    iconColor="#92400e"
+                    variant="warning"
                 />
                 <StatCard 
                     title="Completados Hoy"
                     value={completedToday}
                     label="Tickets resueltos"
                     icon="✓"
-                    iconBgColor="#d1fae5"
-                    iconColor="#065f46"
+                    variant="success"
                 />
                 <StatCard 
                     title="Total Clientes"
                     value={totalCustomers}
                     label="En base de datos"
                     icon="👥"
-                    iconBgColor="#e0e7ff"
-                    iconColor="#3730a3"
+                    variant="default"
                 />
             </div>
 
+            
             {/* Financial Stats Grid */}
             <div className={styles['statsGrid']}>
                 <StatCard 
                     title="Ingresos Totales"
                     value={formatCurrency(totalIncome)}
                     label="Facturación + POS"
-                    icon="💰"
-                    iconBgColor="#dcfce7"
-                    iconColor="#166534"
+                    
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                    variant="success"
                 />
                 <StatCard 
                     title="Cuentas por Cobrar"
                     value={formatCurrency(pendingCollection)}
                     label="Facturas pendientes"
-                    icon="📋"
-                    iconBgColor="#fef2f2"
-                    iconColor="#991b1b"
+                    
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>}
+                    variant="danger"
                 />
                 <StatCard 
                     title="Ventas POS"
                     value={posStats?.salesCount || 0}
                     label="Ventas directas"
-                    icon="🛒"
-                    iconBgColor="#f0f9ff"
-                    iconColor="#075985"
+                    
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 5.43-11.45L2 6"></path></svg>}
+                    variant="info"
                 />
                 <StatCard 
                     title="Mano de Obra"
                     value={formatCurrency(financialStats?.totalLaborIncome || 0)}
                     label="Ingresos por servicio"
-                    icon="🔧"
-                    iconBgColor="#faf5ff"
-                    iconColor="#6b21a8"
+                    
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>}
+                    variant="warning"
                 />
             </div>
 

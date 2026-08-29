@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useActionState } from 'react';
 import { authenticate } from '@/lib/actions';
 import Link from 'next/link';
+import { Input, Button, Alert } from '@/components/ui';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -17,7 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className={styles['container']}>
+    <div className={styles['container']}>
       {/* Elementos decorativos */}
       <div className={styles['decorativeBlobs']}>
         <div className={`${styles['blob']} ${styles['blob1']}`} />
@@ -28,24 +29,12 @@ export default function LoginPage() {
       {/* Contenedor principal */}
       <div className={styles['cardWrapper']}>
         {/* Back to Home Link */}
-        <div style={{ marginBottom: 'var(--spacing-4)', textAlign: 'center' }}>
-          <Link
-            href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-2)',
-              color: 'var(--color-text-secondary)',
-              textDecoration: 'none',
-              fontSize: 'var(--font-size-sm)',
-              transition: 'color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-primary-600)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
-          >
+        <div className={styles['backLink']}>
+          <Link href="/" className={styles['backLinkText']}>
             <span>←</span> Back to Home
           </Link>
         </div>
+
         {/* Card */}
         <div className={styles['card']}>
           {/* Header */}
@@ -72,40 +61,18 @@ export default function LoginPage() {
           {/* Formulario */}
           <form action={formAction} className={`${styles['form']} ${styles['animatedItem']}`}>
             {/* Email Field */}
-            <div className={styles['inputGroup']}>
-              <label htmlFor="email" className={styles['label']}>
-                Correo electrónico
-              </label>
-              <div className={styles['inputContainer']}>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@example.com"
-                  required
-                  className={styles['input']}
-                />
-                <svg
-                  className={styles['inputIcon']}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-            </div>
+            <Input
+              label="Correo electrónico"
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@example.com"
+              required
+            />
 
             {/* Password Field */}
-            <div className={styles['inputGroup']}>
+            <div className={styles['passwordGroup']}>
               <div className={styles['labelRow']}>
                 <label htmlFor="password" className={styles['label']}>
                   Contraseña
@@ -163,59 +130,23 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className={styles['errorMessage']} role="alert">
-                <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <p>{typeof errorMessage === 'string' ? errorMessage : String(errorMessage)}</p>
-              </div>
+              <Alert variant="error">
+                {typeof errorMessage === 'string' ? errorMessage : String(errorMessage)}
+              </Alert>
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              fullWidth
+              isLoading={isPending}
               disabled={isPending}
               className={styles['submitButton']}
             >
-              {isPending ? (
-                <>
-                  <svg
-                    className={styles['spinner']}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 3v3m0 12v3m9-9h-3m-12 0H3m16.5-4.5L19.5 6m-15 15l-1.5-1.5M6 19.5L7.5 18m12-12l1.5-1.5M4.5 6L6 7.5"
-                    />
-                  </svg>
-                  Iniciando sesión...
-                </>
-              ) : (
-                <>
-                  <span>Iniciar sesión</span>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </>
-              )}
-            </button>
+              {isPending ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            </Button>
           </form>
-
-
 
           {/* Footer */}
           <p className={`${styles['footer']} ${styles['animatedItem']}`}>
@@ -226,6 +157,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

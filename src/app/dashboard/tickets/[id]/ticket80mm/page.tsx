@@ -105,7 +105,7 @@ export default async function Ticket80mmPage({ params }: Props) {
     };
 
     return (
-        <main className={styles['container']}>
+        <div className={styles['container']}>
             <PageHeader
                 title="Ticket 80mm - Orden de Servicio"
                 subtitle="Formato optimizado para impresión térmica y compartir"
@@ -142,6 +142,6 @@ export default async function Ticket80mmPage({ params }: Props) {
                     </li>
                 </ul>
             </div>
-        </main>
+        </div>
     );
 }

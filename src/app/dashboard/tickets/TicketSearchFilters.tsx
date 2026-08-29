@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { Input, Select, Button, SearchInputGroup } from '@/components/ui';
+import { Input, Select, Button, SearchInputGroup, Card, CardBody } from '@/components/ui';
 import styles from './searchFilters.module.css';
 
 const statusOptions = [
@@ -64,91 +65,75 @@ export default function TicketSearchFilters() {
     }, []);
 
     const hasFilters = Boolean(search || status || priority || assignedTo || dateFrom || dateTo || deviceType);
+
     return (
-        <form className={styles['filters']} onSubmit={(event) => { event.preventDefault(); updateFilters(); }} aria-label="Filtros de tickets">
-    {/* Primary Filters */}
-    <section className={styles['filterSection']} aria-labelledby="ticket-primary-filters">
-        <div className={styles['sectionHeading']}>
-            <h2 id="ticket-primary-filters">Búsqueda de Tickets</h2>
-            <span>Filtros rápidos</span>
-        </div>
-        <div className={styles['gridContainer']}>
-            <div className={styles['searchItem']}>
-                <label className={styles['searchLabel']}>Término de búsqueda</label>
-                <SearchInputGroup
-                    value={search}
-                    onChange={setSearch}
-                    onSearch={updateFilters}
-                    placeholder="Buscar por ID, título o cliente..."
-                    buttonText="Buscar"
-                    isLoading={isPending}
-                    inputRef={searchRef}
-                    ariaLabel="Buscar tickets por ID, título o cliente"
-                />
-            </div>
-            <div className={styles['filterItem']}>
-                <Select
-                    label="Estado"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    options={statusOptions}
-                    aria-label="Filtrar por estado"
-                />
-            </div>
-            <div className={styles['filterItem']}>
-                <Select
-                    label="Prioridad"
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                    options={priorityOptions}
-                    aria-label="Filtrar por prioridad"
-                />
-            </div>
-        </div>
-    </section>
+    <form className={styles['filters']} onSubmit={(event) => { event.preventDefault(); updateFilters(); }} aria-label="Filtros de tickets">
+      <Card className={styles['filtersCard']}>
+        <CardBody className={styles['filtersCardBody']}>
+            <div className={styles['filtersRow']}>
+                {/* 1. Búsqueda Principal */}
+                <div className={styles['filterGroup']}>
+                    <h2 className={styles['filterGroupTitle']}>Búsqueda Principal</h2>
+                    <div className={styles['filterGroupContent']}>
+                        <SearchInputGroup
+                            value={search}
+                            onChange={setSearch}
+                            onSearch={updateFilters}
+                            placeholder="Buscar por ID, título..."
+                            buttonText="Buscar"
+                            isLoading={isPending}
+                            inputRef={searchRef}
+                            ariaLabel="Buscar tickets"
+                        />
+                        <div className={styles['flexRow']}>
+                            <Select label="Estado" value={status} onChange={(e) => setStatus(e.target.value)} options={statusOptions} />
+                            <Select label="Prioridad" value={priority} onChange={(e) => setPriority(e.target.value)} options={priorityOptions} />
+                        </div>
+                    </div>
+                </div>
 
-    {/* Advanced Filters – grouped into logical collapsible sections */}
-    <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
-        <summary>
-            <span>⚙️ Más Filtros</span>
-            <span>Fechas, técnico y dispositivo</span>
-        </summary>
-        <div className={styles['advancedGrid']}>
-            {/* Dates */}
-            <section aria-labelledby="ticket-date-filters" className={styles['filterSection']}>
-                <h3 id="ticket-date-filters">Rango de Fechas</h3>
-                <Input label="Desde" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} aria-label="Fecha inicial" />
-                <Input label="Hasta" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} aria-label="Fecha final" />
-            </section>
-            {/* Technician */}
-            <section aria-labelledby="ticket-tech-filters" className={styles['filterSection']}>
-                <h3 id="ticket-tech-filters">Técnico Asignado</h3>
-                <Input label="Técnico asignado" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nombre o correo" aria-label="Filtrar por técnico asignado" />
-            </section>
-            {/* Device Type */}
-            <section aria-labelledby="ticket-device-filters" className={styles['filterSection']}>
-                <h3 id="ticket-device-filters">Tipo de Dispositivo</h3>
-                <Select
-                    label="Tipo de dispositivo"
-                    value={deviceType}
-                    onChange={(e) => setDeviceType(e.target.value)}
-                    aria-label="Filtrar por tipo de dispositivo"
-                    options={deviceOptions}
-                />
-            </section>
-        </div>
-    </details>
+                {/* 2. Fechas */}
+                <div className={styles['filterGroup']}>
+                    <h2 className={styles['filterGroupTitle']}>Rango de Fechas</h2>
+                    <div className={styles['filterGroupContent']}>
+                        <div className={styles['flexRow']}>
+                            <Input label="Desde" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                            <Input label="Hasta" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                        </div>
+                    </div>
+                </div>
 
-    {hasFilters && (
-        <div className={styles['activeFilters']} aria-label="Filtros activos">
-            {search && <span className={styles['filterBadge']}>Búsqueda: {search}</span>}
-            {status && <span className={styles['filterBadge']}>Estado: {status}</span>}
-            {priority && <span className={styles['filterBadge']}>Prioridad: {priority}</span>}
-            {assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}
-            {deviceType && <span className={styles['filterBadge']}>Equipo: {deviceType}</span>}
-        </div>
-    )}
-    <Button variant="ghost" type="button" onClick={handleClear} disabled={isPending}>Limpiar filtros</Button>
-</form>
+                {/* 3. Detalles */}
+                <div className={styles['filterGroup']}>
+                    <h2 className={styles['filterGroupTitle']}>Detalles Operativos</h2>
+                    <div className={styles['filterGroupContent']}>
+                         <div className={styles['flexRow']}>
+                            <Input label="Técnico asignado" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nombre o correo" />
+                            <Select label="Dispositivo" value={deviceType} onChange={(e) => setDeviceType(e.target.value)} options={deviceOptions} />
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles['filtersActions']}>
+                {hasFilters && (
+                    <div className={styles['activeFilters']}>
+                        {search && <span className={styles['filterBadge']}>Búsqueda: {search}</span>}
+                        {status && <span className={styles['filterBadge']}>Estado: {status}</span>}
+                        {priority && <span className={styles['filterBadge']}>Prioridad: {priority}</span>}
+                        {assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}
+                        {deviceType && <span className={styles['filterBadge']}>Equipo: {deviceType}</span>}
+                        {dateFrom && <span className={styles['filterBadge']}>Desde: {dateFrom}</span>}
+                        {dateTo && <span className={styles['filterBadge']}>Hasta: {dateTo}</span>}
+                    </div>
+                )}
+                <div className={styles['actionButtons']}>
+                    <Button variant="ghost" type="button" onClick={handleClear} disabled={isPending}>Limpiar</Button>
+                    <Button variant="primary" type="submit" disabled={isPending}>Aplicar Filtros</Button>
+                </div>
+            </div>
+        </CardBody>
+      </Card>
+    </form>
     );
 }

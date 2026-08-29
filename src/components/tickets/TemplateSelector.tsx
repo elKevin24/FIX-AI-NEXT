@@ -238,9 +238,9 @@ export default function TemplateSelector({
       {/* Selected Template Preview */}
       {selectedTemplate && selectedTemplateData && (
         <div className={styles['preview']}>
-          <h4 className={styles['previewTitle']}>
+          <h2 className={styles['previewTitle']}>
             📄 Vista Previa: {selectedTemplate.name}
-          </h4>
+          </h2>
 
           {selectedTemplateData.hasInsufficientStock && (
             <div className={styles['warningBanner']}>
@@ -315,7 +315,7 @@ export default function TemplateSelector({
 
             {/* Cost Breakdown */}
             <div className={styles['costBreakdown']}>
-              <h5 className={styles['costTitle']}>💰 Costo Estimado</h5>
+              <h3 className={styles['costTitle']}>💰 Costo Estimado</h3>
               <div className={styles['costRow']}>
                 <span>Mano de obra:</span>
                 <span>{formatCurrency(selectedTemplateData.costBreakdown.laborCost)}</span>

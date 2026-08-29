@@ -210,7 +210,7 @@ export async function createBatchTickets(
             userId: session.user.id,
         });
 
-        revalidatePath('/dashboard/tickets');
+        revalidatePath('/dashboard/tickets', 'layout');
     } catch (error) {
         console.error('Failed to create batch tickets:', error);
         return {
@@ -318,6 +318,7 @@ export async function updateTicketStatus(
             userId: user.id,
         });
 
+        revalidatePath('/dashboard/tickets', 'layout');
         return { success: true, message: 'Estado actualizado' };
     } catch (error) {
         console.error('Failed to update ticket status:', error);

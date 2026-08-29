@@ -1,4 +1,5 @@
 'use client';
+import styles from './users.module.css';
 
 import React, { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -69,27 +70,23 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
                 const initials = getInitials(user);
 
                 return (
-                    <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                            user.isActive
-                                ? 'bg-primary-100 text-primary-700'
-                                : 'bg-gray-200 text-gray-500'
-                        }`}>
+                    <div className={styles['userCell']}>
+                        <div className={`${styles['avatarCircle']} ${user.isActive ? styles['avatarActive'] : styles['avatarInactive']}`}>
                             {initials}
                         </div>
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                                <span className={`font-bold ${user.isActive ? 'text-gray-800' : 'text-gray-400'}`}>
+                        <div className={styles['userCellInfo']}>
+                            <div className={styles['userNameRow']}>
+                                <span className={user.isActive ? styles['userNameText'] : styles['userNameInactive']}>
                                     {displayName}
                                 </span>
                                 {!user.isActive && (
-                                    <Badge variant="gray" className="text-xs">Inactivo</Badge>
+                                    <Badge variant="gray" className={styles['badgeText']}>Inactivo</Badge>
                                 )}
                                 {user.passwordMustChange && user.isActive && (
-                                    <Badge variant="warning" className="text-xs">Cambiar clave</Badge>
+                                    <Badge variant="warning" className={styles['badgeText']}>Cambiar clave</Badge>
                                 )}
                             </div>
-                            <span className="text-xs text-gray-500 font-mono">{user.email}</span>
+                            <span className={styles['userEmailText']}>{user.email}</span>
                         </div>
                     </div>
                 );

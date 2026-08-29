@@ -148,15 +148,29 @@
     box-shadow: var(--shadow-sm);
 }
 
-/* Active State */
+/* Active State (Executive Glow) */
 .navLink.active {
-    background: var(--color-primary-50);
-    /* Blue 50 with opacity */
-    backdrop-filter: blur(5px);
-    border: 1px solid var(--color-border-medium);
-    color: var(--color-primary-600);
-    /* Blue 600 */
-    box-shadow: var(--shadow-sm);
+    background: var(--color-primary-600);
+    color: #ffffff;
+    box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--color-primary-600) 40%, transparent);
+    border: 1px solid transparent;
+    font-weight: 700;
+}
+
+/* En light mode, el shadow puede verse muy fuerte, pero el color primario es universal */
+:global([data-theme="dark"]) .navLink.active {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+    box-shadow: 0 4px 15px -3px color-mix(in srgb, var(--color-primary-600) 50%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary-400) 20%, transparent);
+}
+
+:global([data-theme="dark"]) .navLink {
+    color: #94A3B8; /* slate-400 */
+}
+
+:global([data-theme="dark"]) .navLink:hover {
+    background: #1E293B; /* slate-800 */
+    color: #F8FAFC; /* slate-50 */
 }
 
 .navIcon {

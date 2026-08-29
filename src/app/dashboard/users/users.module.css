@@ -243,3 +243,66 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+/* User Table Cell Styles (SSoT compliant) */
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatarCircle {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: var(--radius-full, 9999px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.avatarActive {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-800);
+}
+
+.avatarInactive {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-tertiary);
+}
+
+.userCellInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.userNameRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.userNameText {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.userNameInactive {
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.userEmailText {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-family-mono);
+}
+
+.badgeText {
+    font-size: 0.7rem;
+}

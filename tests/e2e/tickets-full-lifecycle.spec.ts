@@ -63,7 +63,6 @@ test.describe('Full Ticket Lifecycle', () => {
     // ── 4. Start Repair (OPEN → IN_PROGRESS) ──
     await page.locator('button:has-text("Iniciar Reparación")').click();
     await page.waitForTimeout(2000);
-    await page.reload();
 
     // "Marcar Resuelto" appears when IN_PROGRESS
     await expect(page.locator('button:has-text("Marcar Resuelto")')).toBeVisible({ timeout: 10000 });
@@ -82,7 +81,10 @@ test.describe('Full Ticket Lifecycle', () => {
     await page.fill('input[name="quantity"]', '1');
     await page.getByRole('button', { name: 'Agregar', exact: true }).click();
     await page.waitForTimeout(1000);
-    await page.reload();
+
+    // Aprobar el repuesto para volver a estado IN_PROGRESS
+    await page.locator('button:has-text("Aprobar repuestos")').click();
+    await page.waitForTimeout(1000);
 
     // ── 6. Add a Service ──
     await page.getByRole('button', { name: '+ Agregar Servicio' }).click();
@@ -97,20 +99,17 @@ test.describe('Full Ticket Lifecycle', () => {
     }
     await page.getByRole('button', { name: 'Agregar', exact: true }).click();
     await page.waitForTimeout(1000);
-    await page.reload();
 
     // ── 7. Add a Note ──
     await page.fill('textarea[placeholder*="Agregar una nota"]', `Diagnóstico completo. Se reemplazó pantalla y se probó funcionalidad. Todo OK. - ${timestamp}`);
     await page.locator('button:has-text("Agregar Nota")').click();
     await page.waitForTimeout(1000);
-    await page.reload();
 
     // ── 8. Resolve (IN_PROGRESS → RESOLVED) ──
     await page.locator('button:has-text("Marcar Resuelto")').click();
     await page.fill('textarea#resolve-note', 'Reparación completada: pantalla reemplazada, prueba de funcionamiento exitosa.');
     await page.locator('button:has-text("Marcar como Resuelto")').click();
     await page.waitForTimeout(2000);
-    await page.reload();
 
     // "Entregar y Cerrar" appears when RESOLVED
     await expect(page.locator('button:has-text("Entregar y Cerrar")')).toBeVisible({ timeout: 10000 });
@@ -144,6 +143,7 @@ test.describe('Full Ticket Lifecycle', () => {
       await page.locator('input[type="number"]').fill(totalAmount.toString());
     }
 
+    await page.locator('select').selectOption('TRANSFER');
     await page.locator('button:has-text("Confirmar Pago")').click();
 
     // Verify the invoice shows PAID

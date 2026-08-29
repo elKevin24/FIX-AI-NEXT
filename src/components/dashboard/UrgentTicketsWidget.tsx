@@ -68,7 +68,7 @@ export default function UrgentTicketsWidget({ tickets }: Props) {
                         >
                             <div className={styles['ticketHeader']}>
                                 <div className={styles['ticketInfo']}>
-                                    <h4 className={styles['ticketTitle']}>{ticket.title}</h4>
+                                    <h3 className={styles['ticketTitle']}>{ticket.title}</h3>
                                     <p className={styles['ticketCustomer']}>{ticket.customer.name}</p>
                                 </div>
                                 <div className={`${styles['priorityBadge']} ${getPriorityClass(ticket.priority)}`}>

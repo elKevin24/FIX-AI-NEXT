@@ -48,8 +48,6 @@
 
 .dropdown {
     position: absolute;
-    bottom: calc(100% + var(--spacing-1));
-    /* Abre hacia arriba en el sidebar para no cortarse */
     left: 0;
     right: 0;
     width: 100%;
@@ -59,17 +57,34 @@
     box-shadow: var(--shadow-xl);
     overflow: visible;
     z-index: var(--z-tooltip);
-    /* 1070 - highest in design system */
+}
+
+.dropdownTop {
+    bottom: calc(100% + var(--spacing-1));
+    animation: slideUp var(--transition-fast);
+}
+
+.dropdownBottom {
+    top: calc(100% + var(--spacing-1));
     animation: slideDown var(--transition-fast);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
         transform: translateY(-8px);
-        /* Desliza desde arriba hacia abajo */
     }
-
     to {
         opacity: 1;
         transform: translateY(0);

@@ -38,7 +38,7 @@
 
 .subtitle {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 /* Progress Steps */
@@ -54,12 +54,12 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  color: #9ca3af;
+  color: var(--color-gray-600);
   transition: color 0.3s;
 }
 
 .stepActive {
-  color: #3b82f6;
+  color: var(--color-primary-600);
   font-weight: 600;
 }
 
@@ -68,7 +68,7 @@
   height: 40px;
   border-radius: 50%;
   background: #e5e7eb;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,7 +141,7 @@
 
 .newCustomerHint {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
   font-style: italic;
 }
@@ -191,7 +191,7 @@
 
 .partQty {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .requiredBadge {
@@ -240,7 +240,7 @@
 
 .partStock {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin-left: auto;
 }
 

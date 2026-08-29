@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ServiceCategory } from '@prisma/client';
 import { createServiceTemplate, updateServiceTemplate } from '@/lib/service-template-actions';
+import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui';
 import styles from './ServiceTemplateForm.module.css';
 
 type ServiceTemplateFormProps = {
@@ -111,7 +112,11 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
         </div>
       )}
 
-      {/* Nombre */}
+      <div className={styles['cardGrid']}>
+      <Card>
+        <CardHeader><CardTitle>1. Información General</CardTitle></CardHeader>
+        <CardBody>
+          {/* Nombre */}
       <div className={styles['formGroup']}>
         <label className={styles['label']}>
           Nombre de la Plantilla *
@@ -148,7 +153,13 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
         </div>
       </div>
 
-      {/* Título Default */}
+              </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>2. Configuración del Ticket</CardTitle></CardHeader>
+        <CardBody>
+          {/* Título Default */}
       <div className={styles['formGroup']}>
         <label className={styles['label']}>
           Título Default para Tickets *
@@ -202,7 +213,13 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
         </select>
       </div>
 
-      {/* Duración Estimada */}
+              </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>3. Costos y Métricas</CardTitle></CardHeader>
+        <CardBody>
+          {/* Duración Estimada */}
       <div className={styles['formGroup']}>
         <label className={styles['label']}>
           Duración Estimada (minutos)
@@ -251,7 +268,13 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
         />
       </div>
 
-      {/* Color e Icono */}
+              </CardBody>
+      </Card>
+      
+      <Card>
+        <CardHeader><CardTitle>4. Apariencia y Estado</CardTitle></CardHeader>
+        <CardBody>
+          {/* Color e Icono */}
       <div className={styles['gridTwo']}>
         <div className={styles['formGroup']}>
           <label className={styles['label']}>Color</label>
@@ -291,7 +314,11 @@ export function ServiceTemplateForm({ initialData }: ServiceTemplateFormProps) {
         </label>
       </div>
 
-      {/* Vista Previa */}
+              </CardBody>
+      </Card>
+    </div>
+    
+    {/* Vista Previa */}
       <div className={styles['previewCard']}>
         <h3 className={styles['label']}>Vista Previa</h3>
         <div

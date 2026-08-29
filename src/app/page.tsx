@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function Home() {
     return (
-        <main className={styles['container']}>
+        <div className={styles['container']}>
             <div className={styles['hero']}>
                 <div className={styles['heroContent']}>
                     <h1 className={styles['title']}>
@@ -69,6 +69,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

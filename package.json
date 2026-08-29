@@ -29,8 +29,10 @@
     "create:maintenance-templates": "npx tsx scripts/create-maintenance-templates.ts",
     "seed:service-templates": "npx tsx scripts/seed-all-service-templates.ts",
     "check:types": "npx tsc --noEmit",
-    "check:all": "npx tsc --noEmit && npm run lint && npm run test && npm run build",
-    "postinstall": "npx prisma generate"
+    "check:all": "npx tsc --noEmit && npm run lint && npm run lint:design && npm run test && npm run build",
+    "postinstall": "npx prisma generate",
+    "lint:design": "node scripts/design-lint.cjs",
+    "test:a11y": "npx playwright test tests/e2e/a11y.spec.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -73,6 +75,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.3.3",
     "@playwright/test": "^1.62.0",
     "@serwist/turbopack": "^9.5.12",
