@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import type { UserRole } from '@prisma/client';
+
 interface User {
     id: string;
     name: string | null;
     email: string;
-    role: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+    role: UserRole;
     tenantId: string;
     tenant: {
         name: string;

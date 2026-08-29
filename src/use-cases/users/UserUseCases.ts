@@ -9,6 +9,10 @@ export class CreateUserUseCase {
         userId: string,
         repo?: IUserRepository
     ) {
+        if ((data.role as string) === 'SUPER_ADMIN') {
+            throw new Error('No está permitido crear usuarios con el rol Super Administrador');
+        }
+
         const userRepo = repo || new PrismaUserRepository(tenantId, userId);
         const existingUser = await userRepo.findByEmail(data.email);
 
@@ -35,11 +39,25 @@ export class UpdateUserUseCase {
         userId: string,
         repo?: IUserRepository
     ) {
+        if ((data.role as string) === 'SUPER_ADMIN') {
+            throw new Error('No está permitido asignar el rol Super Administrador');
+        }
+
         const userRepo = repo || new PrismaUserRepository(tenantId, userId);
         const existingUser = await userRepo.findById(data.userId);
 
         if (!existingUser) {
             throw new Error('Usuario no encontrado');
+        }
+
+        // Proteger usuario SUPER_ADMIN
+        if (existingUser.role === 'SUPER_ADMIN') {
+            if (userId !== data.userId) {
+                throw new Error('No autorizado para modificar al Super Administrador');
+            }
+            if (data.role && (data.role as string) !== 'SUPER_ADMIN') {
+                throw new Error('No se puede revocar el rol del Super Administrador');
+            }
         }
 
         if (data.email !== existingUser.email) {
@@ -52,7 +70,7 @@ export class UpdateUserUseCase {
         const updateData: any = {
             name: data.name,
             email: data.email,
-            role: data.role,
+            role: existingUser.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : data.role,
         };
 
         if (data.password && data.password.length > 0) {
@@ -83,6 +101,10 @@ export class DeleteUserUseCase {
 
         if (!existingUser) {
             throw new Error('Usuario no encontrado');
+        }
+
+        if (existingUser.role === 'SUPER_ADMIN') {
+            throw new Error('No es posible eliminar al Super Administrador del sistema');
         }
 
         return await userRepo.delete(targetUserId);

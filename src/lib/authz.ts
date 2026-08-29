@@ -12,6 +12,8 @@ const SUPERADMIN_EMAILS = (process.env['SUPERADMIN_EMAILS'] || '')
     .filter(Boolean);
 
 export function isSuperAdmin(user: AuthUser | undefined | null): boolean {
-    if (!user?.email) return false;
-    return SUPERADMIN_EMAILS.includes(user.email.trim().toLowerCase()) || user.role === 'SUPERADMIN';
+    if (!user) return false;
+    if (user.role === 'SUPER_ADMIN' || user.role === 'SUPERADMIN') return true;
+    if (!user.email) return false;
+    return SUPERADMIN_EMAILS.includes(user.email.trim().toLowerCase());
 }

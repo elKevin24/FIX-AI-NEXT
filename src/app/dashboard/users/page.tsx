@@ -41,8 +41,12 @@ export default async function UsersPage() {
     }
 
     const db = getTenantPrisma(session.user.tenantId);
+    const isSuperAdminUser = session.user.role === 'SUPER_ADMIN';
 
     const users = await db.user.findMany({
+        where: isSuperAdminUser ? {} : {
+            role: { not: 'SUPER_ADMIN' }
+        },
         select: {
             id: true,
             email: true,

@@ -599,8 +599,15 @@ export async function resetPassword(
       return { success: false, message: 'Usuario no encontrado' };
     }
 
-    // 5. Verificar acceso al tenant
+    // 5. Verificar acceso al tenant y jerarquía
     validateTenantAccess(tenantId, targetUser.tenantId);
+
+    if (!isSelf && !canModifyUser(actorRole as UserRole, targetUser.role as UserRole, false)) {
+      return {
+        success: false,
+        message: 'No puedes resetear la contraseña de usuarios de igual o mayor jerarquía',
+      };
+    }
 
     // 6. Generar o validar contraseña
     let finalPassword = newPassword;

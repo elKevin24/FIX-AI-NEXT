@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  hasPermission, isAdmin, isManager, isTechnician, isViewer,
+  hasPermission, isSuperAdmin, isAdmin, isManager, isTechnician, isViewer,
   canManageUsers, getRoleHierarchyLevel, canModifyUser,
   AuthorizationError, requirePermission, requireAdmin,
   requireAdminOrManager, validateTenantAccess,
@@ -11,6 +11,14 @@ import {
 
 describe('auth-utils', () => {
   describe('hasPermission', () => {
+    it('SUPER_ADMIN has all permissions', () => {
+      expect(hasPermission('SUPER_ADMIN', 'canCreateUsers')).toBe(true);
+      expect(hasPermission('SUPER_ADMIN', 'canDeleteUsers')).toBe(true);
+      expect(hasPermission('SUPER_ADMIN', 'canManageTenantSettings')).toBe(true);
+      expect(hasPermission('SUPER_ADMIN', 'canViewReports')).toBe(true);
+      expect(hasPermission('SUPER_ADMIN', 'canExportData')).toBe(true);
+    });
+
     it('ADMIN has all permissions', () => {
       expect(hasPermission('ADMIN', 'canCreateUsers')).toBe(true);
       expect(hasPermission('ADMIN', 'canDeleteUsers')).toBe(true);
@@ -49,7 +57,16 @@ describe('auth-utils', () => {
   });
 
   describe('role check functions', () => {
-    it('isAdmin returns true only for ADMIN', () => {
+    it('isSuperAdmin returns true only for SUPER_ADMIN', () => {
+      expect(isSuperAdmin('SUPER_ADMIN')).toBe(true);
+      expect(isSuperAdmin('ADMIN')).toBe(false);
+      expect(isSuperAdmin('MANAGER')).toBe(false);
+      expect(isSuperAdmin('TECHNICIAN')).toBe(false);
+      expect(isSuperAdmin('VIEWER')).toBe(false);
+    });
+
+    it('isAdmin returns true for ADMIN and SUPER_ADMIN', () => {
+      expect(isAdmin('SUPER_ADMIN')).toBe(true);
       expect(isAdmin('ADMIN')).toBe(true);
       expect(isAdmin('MANAGER')).toBe(false);
       expect(isAdmin('TECHNICIAN')).toBe(false);
@@ -73,6 +90,7 @@ describe('auth-utils', () => {
   });
 
   describe('getRoleHierarchyLevel', () => {
+    it('SUPER_ADMIN is level 5', () => expect(getRoleHierarchyLevel('SUPER_ADMIN')).toBe(5));
     it('ADMIN is level 4', () => expect(getRoleHierarchyLevel('ADMIN')).toBe(4));
     it('MANAGER is level 3', () => expect(getRoleHierarchyLevel('MANAGER')).toBe(3));
     it('TECHNICIAN is level 2', () => expect(getRoleHierarchyLevel('TECHNICIAN')).toBe(2));
@@ -81,6 +99,7 @@ describe('auth-utils', () => {
   });
 
   describe('canManageUsers', () => {
+    it('SUPER_ADMIN can manage users', () => expect(canManageUsers('SUPER_ADMIN')).toBe(true));
     it('ADMIN can manage users', () => expect(canManageUsers('ADMIN')).toBe(true));
     it('MANAGER can manage users', () => expect(canManageUsers('MANAGER')).toBe(true));
     it('TECHNICIAN cannot manage users', () => expect(canManageUsers('TECHNICIAN')).toBe(false));
@@ -89,8 +108,19 @@ describe('auth-utils', () => {
 
   describe('canModifyUser', () => {
     it('can modify self regardless of role', () => {
+      expect(canModifyUser('SUPER_ADMIN', 'SUPER_ADMIN', true)).toBe(true);
       expect(canModifyUser('VIEWER', 'VIEWER', true)).toBe(true);
       expect(canModifyUser('TECHNICIAN', 'TECHNICIAN', true)).toBe(true);
+    });
+
+    it('SUPER_ADMIN can modify any lower role', () => {
+      expect(canModifyUser('SUPER_ADMIN', 'ADMIN', false)).toBe(true);
+      expect(canModifyUser('SUPER_ADMIN', 'MANAGER', false)).toBe(true);
+      expect(canModifyUser('SUPER_ADMIN', 'VIEWER', false)).toBe(true);
+    });
+
+    it('ADMIN cannot modify SUPER_ADMIN', () => {
+      expect(canModifyUser('ADMIN', 'SUPER_ADMIN', false)).toBe(false);
     });
 
     it('ADMIN can modify any lower role', () => {

@@ -2,7 +2,7 @@ import { prisma } from '../src/lib/prisma';
 import bcryptjs from 'bcryptjs';
 
 async function createSuperAdmin() {
-    console.log('🚀 Creando Super Admin (adminkev@example.com)...');
+    console.log('🚀 Creando Super Admin (kevcordon5@gmail.com)...');
 
     // 1. Necesitamos un tenant para asociar al usuario (aunque sea Super Admin, necesita un tenantId por schema)
     // Buscamos el primero disponible o creamos uno por defecto
@@ -22,29 +22,45 @@ async function createSuperAdmin() {
 
     console.log(`✅ Asociando a tenant: ${tenant.name}`);
 
+    // Limpiar usuario dummy anterior si existiera para mantener unicidad
+    await prisma.user.deleteMany({
+        where: { email: 'adminkev@example.com' }
+    });
+
     // 2. Hash de la contraseña
     const password = await bcryptjs.hash('password123', 12);
 
-    // 3. Crear o actualizar usuario
-    await prisma.user.upsert({
-        where: { unique_email_per_tenant: { email: 'adminkev@example.com', tenantId: tenant.id } },
-        update: {
-            role: 'ADMIN',
-            password, // Actualizamos password para asegurar que sea el conocido
-            name: 'Super Admin Kev',
-            tenantId: tenant.id
-        },
-        create: {
-            email: 'adminkev@example.com',
-            name: 'Super Admin Kev',
-            password,
-            role: 'ADMIN',
-            tenantId: tenant.id
-        },
+    // 3. Crear o actualizar usuario Super Admin (Singleton)
+    const existing = await prisma.user.findFirst({
+        where: { email: 'kevcordon5@gmail.com' }
     });
 
+    if (existing) {
+        await prisma.user.update({
+            where: { id: existing.id },
+            data: {
+                role: 'SUPER_ADMIN',
+                password,
+                name: 'Kevin Cordon',
+                tenantId: tenant.id,
+                isActive: true,
+            },
+        });
+    } else {
+        await prisma.user.create({
+            data: {
+                email: 'kevcordon5@gmail.com',
+                name: 'Kevin Cordon',
+                password,
+                role: 'SUPER_ADMIN',
+                tenantId: tenant.id,
+                isActive: true,
+            },
+        });
+    }
+
     console.log('✅ Super Admin configurado exitosamente!');
-    console.log('📧 Email: adminkev@example.com');
+    console.log('📧 Email: kevcordon5@gmail.com');
     console.log('🔑 Pass:  password123');
     console.log('🌍 Entorno: ' + (process.env.DATABASE_URL?.includes('neon') ? 'NEON (Cloud)' : 'LOCAL'));
 }

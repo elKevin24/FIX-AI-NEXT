@@ -41,7 +41,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
       router.push('/dashboard/users');
       router.refresh();
     }
-  }, [state.success, state.data, router]);
+  }, [state.success, state.data, router, addToast]);
 
   return (
     <form action={formAction}>

@@ -60,4 +60,57 @@ describe('UserUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {
             DeleteUserUseCase.execute('user-1', 'tenant-1', 'user-1', mockRepo)
         ).rejects.toThrow('No puedes eliminar tu propio usuario');
     });
+
+    it('should prevent creating a user with SUPER_ADMIN role', async () => {
+        await expect(
+            CreateUserUseCase.execute(
+                { name: 'Fake SuperAdmin', email: 'fake@example.com', password: 'password123', role: 'SUPER_ADMIN' as any },
+                'tenant-1',
+                'user-1',
+                mockRepo
+            )
+        ).rejects.toThrow('No está permitido crear usuarios con el rol Super Administrador');
+    });
+
+    it('should prevent assigning SUPER_ADMIN role in update', async () => {
+        await expect(
+            UpdateUserUseCase.execute(
+                { userId: 'user-2', name: 'User', email: 'user@example.com', role: 'SUPER_ADMIN' as any },
+                'tenant-1',
+                'user-1',
+                mockRepo
+            )
+        ).rejects.toThrow('No está permitido asignar el rol Super Administrador');
+    });
+
+    it('should prevent non-self modification of SUPER_ADMIN', async () => {
+        (mockRepo.findById as any).mockResolvedValueOnce({
+            id: 'super-admin-id',
+            name: 'Super Admin',
+            email: 'kevcordon5@gmail.com',
+            role: 'SUPER_ADMIN',
+        });
+
+        await expect(
+            UpdateUserUseCase.execute(
+                { userId: 'super-admin-id', name: 'Tampered Name', email: 'kevcordon5@gmail.com', role: 'ADMIN' },
+                'tenant-1',
+                'other-user-id',
+                mockRepo
+            )
+        ).rejects.toThrow('No autorizado para modificar al Super Administrador');
+    });
+
+    it('should prevent deleting SUPER_ADMIN user', async () => {
+        (mockRepo.findById as any).mockResolvedValueOnce({
+            id: 'super-admin-id',
+            name: 'Super Admin',
+            email: 'kevcordon5@gmail.com',
+            role: 'SUPER_ADMIN',
+        });
+
+        await expect(
+            DeleteUserUseCase.execute('super-admin-id', 'tenant-1', 'other-user-id', mockRepo)
+        ).rejects.toThrow('No es posible eliminar al Super Administrador del sistema');
+    });
 });
