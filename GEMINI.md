@@ -65,19 +65,19 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
     *   Gestor de partes por defecto en plantillas.
 *   **Optimización UI/UX (Ley de Miller & Accesibilidad WCAG AA):**
     *   Rediseño del Sidebar agrupando los 15 ítems en 4 bloques cognitivos (General, Operaciones, Ventas & POS, Administración) de 3 a 5 ítems cada uno.
+    *   Agrupamiento cognitivo en filtros masivos (`TicketSearchFilters`, `PartSearchFilters`) en bloques estructurados (Búsqueda, Asignación, Temporalidad y Almacén).
     *   Optimización del contraste de color en `.btn-glass` (relación >4.5:1).
+    *   Protección y aislamiento de demo en `TicketStatusPage` (`src/app/tickets/status/page.tsx`).
 
 *   **Notificaciones Automatizadas:** Correos integrados con `@react-email` en Server Actions.
-*   **Pruebas Formales (Testing):** Cobertura con Vitest (99+ pruebas) incluyendo componentes y acciones críticas.
+*   **Pruebas Formales (Testing):** Cobertura con Vitest (502+ pruebas) incluyendo componentes, RBAC, POS y acciones críticas.
 *   **Reportes Avanzados:** Agrupaciones y métricas en dashboard con `recharts`.
 *   **Punto de Venta (POS):** Control de caja e inventario atómico integrado.
+*   **Rol SUPER_ADMIN Singleton:** Restricción física en BD y blindaje RBAC jerárquico Nivel 5.
 
 ### 🚧 En Progreso / Pendiente
-1.  **Ley de Miller en Módulos Complejos (UI/UX):** Extender la heurística de agrupamiento cognitivo (7 ± 2) a los filtros de búsqueda masiva (`TicketSearchFilters`, `PartSearchFilters`) y formularios extendidos.
-2.  **Refactorización SOLID (Clean Architecture):**
-    *   **Problema:** `src/lib/actions.ts` (1,200+ líneas) actúa como "Objeto Dios" violando SRP (Single Responsibility Principle). Acoplamiento fuerte a Prisma que viola DIP (Dependency Inversion Principle).
-    *   **Estrategia:** Implementar Patrón de Repositorios (Repository Pattern) para abstraer `getTenantPrisma`. Dividir `actions.ts` en casos de uso específicos (Use Cases).
-    *   **Cuándo:** Post-lanzamiento v2.0 (No bloquear MVP actual).
+1.  **Squash de Migraciones:** Consolidar las 27 migraciones acumuladas en una única migración limpia antes del release v2.0 definitivo.
+2.  **Refactorización SOLID (Clean Architecture):** Continuar extendiendo el Patrón de Repositorios para los módulos secundarios restantes post-v2.0.
 
 ## 4. Convenciones de Desarrollo
 

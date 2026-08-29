@@ -38,25 +38,80 @@ export default function PartSearchFilters() {
   const hasFilters = Boolean(search || lowStock || category || location);
   return (
     <form className={styles['inventoryFilters']} onSubmit={(event) => { event.preventDefault(); applyFilters(); }} aria-label="Filtros de inventario">
+      {/* Bloque 1 (Miller Block 1 - 2 items): Búsqueda Principal & Alerta de Stock */}
       <section className={styles['inventoryFilterSection']} aria-labelledby="parts-quick-filters">
-        <div className={styles['filterHeading']}><h2 id="parts-quick-filters">Filtro rápido</h2><span>Nombre, SKU y stock</span></div>
+        <div className={styles['filterHeading']}>
+          <h2 id="parts-quick-filters">Búsqueda de Repuestos</h2>
+          <span>Nombre, SKU y disponibilidad</span>
+        </div>
         <div className={styles['inventoryFilterGrid']}>
-          <Input data-part-search label="Nombre o SKU" placeholder="Buscar repuesto..." value={search} onChange={(event) => setSearch(event.target.value)} aria-label="Buscar por nombre o SKU" />
-          <label className={styles['stockToggle']}><input type="checkbox" checked={lowStock} onChange={(event) => setLowStock(event.target.checked)} aria-label="Mostrar solo productos con stock bajo" /> Solo stock bajo</label>
-          <Button type="submit" variant="primary">Aplicar filtros</Button>
+          <div style={{ flex: 2, minWidth: '240px' }}>
+            <Input
+              data-part-search
+              label="Nombre o código SKU"
+              placeholder="Buscar por nombre, modelo o SKU... (Ctrl + K)"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              aria-label="Buscar por nombre o SKU"
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', height: '42px' }}>
+            <label className={styles['stockToggle']}>
+              <input
+                type="checkbox"
+                checked={lowStock}
+                onChange={(event) => setLowStock(event.target.checked)}
+                aria-label="Mostrar solo productos con stock bajo"
+              />
+              ⚠️ Solo stock bajo
+            </label>
+          </div>
+          <Button type="submit" variant="primary">
+            Buscar
+          </Button>
         </div>
       </section>
+
+      {/* Bloque 2 (Miller Block 2 - 2 items): Organización y Almacén */}
       <details className={styles['inventoryAdvancedFilters']} open={Boolean(category || location)}>
-        <summary>Filtros por categoría y ubicación</summary>
-        <div className={styles['inventoryFilterGrid']}>
-          <Input label="Categoría" placeholder="Ej. Pantallas" value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filtrar por categoría" />
-          <Input label="Ubicación" placeholder="Ej. Bodega A" value={location} onChange={(event) => setLocation(event.target.value)} aria-label="Filtrar por ubicación" />
+        <summary>
+          <span>📦 Organización en Bodega (Categoría y Ubicación)</span>
+          <span>{Boolean(category || location) ? 'Filtros aplicados' : 'Desplegar'}</span>
+        </summary>
+        <div className={styles['inventoryAdvancedGrid']}>
+          <Input
+            label="Categoría del repuesto"
+            placeholder="Ej. Pantallas, Baterías, Cargadores..."
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            aria-label="Filtrar por categoría"
+          />
+          <Input
+            label="Ubicación física"
+            placeholder="Ej. Estante A-2, Vitrina 1..."
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            aria-label="Filtrar por ubicación"
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
+          <Button type="submit" variant="secondary" size="sm">
+            Aplicar filtros de bodega
+          </Button>
         </div>
       </details>
-      {hasFilters && <div className={styles['activeFilterBadges']} aria-label="Filtros activos">
-        {search && <span className={styles['activeFilterBadge']}>Búsqueda: {search}</span>}{lowStock && <span className={styles['activeFilterBadge']}>Stock bajo</span>}{category && <span className={styles['activeFilterBadge']}>Categoría: {category}</span>}{location && <span className={styles['activeFilterBadge']}>Ubicación: {location}</span>}
-        <Button type="button" variant="ghost" onClick={clearFilters}>Limpiar filtros</Button>
-      </div>}
+
+      {hasFilters && (
+        <div className={styles['activeFilterBadges']} aria-label="Filtros activos">
+          {search && <span className={styles['activeFilterBadge']}>Búsqueda: {search}</span>}
+          {lowStock && <span className={styles['activeFilterBadge']}>⚠️ Stock Crítico</span>}
+          {category && <span className={styles['activeFilterBadge']}>Categoría: {category}</span>}
+          {location && <span className={styles['activeFilterBadge']}>Ubicación: {location}</span>}
+          <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
+            Limpiar todos los filtros
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

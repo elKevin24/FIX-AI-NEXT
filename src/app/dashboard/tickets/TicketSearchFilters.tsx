@@ -68,11 +68,11 @@ export default function TicketSearchFilters() {
     return (
         <form className={styles['filters']} onSubmit={(event) => { event.preventDefault(); updateFilters(); }} aria-label="Filtros de tickets">
             <div className={styles['filtersCard']}>
-                {/* Primary Filters */}
+                {/* Grupo 1 (Miller Block 1 - 3 items): Búsqueda Principal y Estado */}
                 <section className={styles['filterSection']} aria-labelledby="ticket-primary-filters">
                     <div className={styles['sectionHeading']}>
-                        <h2 id="ticket-primary-filters">Búsqueda de Tickets</h2>
-                        <span>Filtros rápidos</span>
+                        <h2 id="ticket-primary-filters">Búsqueda y Estado</h2>
+                        <span>Filtros prioritarios</span>
                     </div>
                     <div className={styles['gridContainer']}>
                         <div className={styles['searchItem']}>
@@ -81,7 +81,7 @@ export default function TicketSearchFilters() {
                                 value={search}
                                 onChange={setSearch}
                                 onSearch={updateFilters}
-                                placeholder="Buscar por ID, título o cliente..."
+                                placeholder="Buscar por ID, título o cliente... (Ctrl + K)"
                                 buttonText="Buscar"
                                 isLoading={isPending}
                                 inputRef={searchRef}
@@ -90,7 +90,7 @@ export default function TicketSearchFilters() {
                         </div>
                         <div className={styles['filterItem']}>
                             <Select
-                                label="Estado"
+                                label="Estado del ticket"
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 options={statusOptions}
@@ -99,7 +99,7 @@ export default function TicketSearchFilters() {
                         </div>
                         <div className={styles['filterItem']}>
                             <Select
-                                label="Prioridad"
+                                label="Nivel de prioridad"
                                 value={priority}
                                 onChange={(e) => setPriority(e.target.value)}
                                 options={priorityOptions}
@@ -109,34 +109,61 @@ export default function TicketSearchFilters() {
                     </div>
                 </section>
 
-                {/* Advanced Filters – grouped into logical collapsible sections */}
+                {/* Filtros Secundarios Agrupados Cognitivamente (Miller Blocks 2 & 3) */}
                 <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
                     <summary>
-                        <span>⚙️ Más Filtros</span>
-                        <span>Fechas, técnico y dispositivo</span>
+                        <span>⚙️ Filtros Avanzados (Dispositivo, Asignación y Fechas)</span>
+                        <span>{Boolean(dateFrom || dateTo || assignedTo || deviceType) ? 'Filtros activos' : 'Desplegar opciones'}</span>
                     </summary>
-                    <div className={styles['advancedGrid']}>
-                        {/* Dates */}
-                        <div className={styles['filterSection']}>
-                            <Input label="Desde" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} aria-label="Fecha inicial" />
-                        </div>
-                        <div className={styles['filterSection']}>
-                            <Input label="Hasta" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} aria-label="Fecha final" />
-                        </div>
-                        {/* Technician */}
-                        <div className={styles['filterSection']}>
-                            <Input label="Técnico asignado" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nombre o correo" aria-label="Filtrar por técnico asignado" />
-                        </div>
-                        {/* Device Type */}
-                        <div className={styles['filterSection']}>
-                            <Select
-                                label="Tipo de dispositivo"
-                                value={deviceType}
-                                onChange={(e) => setDeviceType(e.target.value)}
-                                aria-label="Filtrar por tipo de dispositivo"
-                                options={deviceOptions}
-                            />
-                        </div>
+                    
+                    <div className={styles['advancedClusters']}>
+                        {/* Grupo 2 (Miller Block 2 - 2 items): Dispositivo y Técnico */}
+                        <fieldset className={styles['clusterGroup']}>
+                            <legend className={styles['clusterLegend']}>Dispositivo y Asignación</legend>
+                            <div className={styles['clusterGrid']}>
+                                <Select
+                                    label="Tipo de dispositivo"
+                                    value={deviceType}
+                                    onChange={(e) => setDeviceType(e.target.value)}
+                                    aria-label="Filtrar por tipo de dispositivo"
+                                    options={deviceOptions}
+                                />
+                                <Input
+                                    label="Técnico responsable"
+                                    value={assignedTo}
+                                    onChange={(e) => setAssignedTo(e.target.value)}
+                                    placeholder="Nombre o correo..."
+                                    aria-label="Filtrar por técnico asignado"
+                                />
+                            </div>
+                        </fieldset>
+
+                        {/* Grupo 3 (Miller Block 3 - 2 items): Rango Temporal */}
+                        <fieldset className={styles['clusterGroup']}>
+                            <legend className={styles['clusterLegend']}>Rango Temporal de Creación</legend>
+                            <div className={styles['clusterGrid']}>
+                                <Input
+                                    label="Fecha desde"
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    aria-label="Fecha inicial de creación"
+                                />
+                                <Input
+                                    label="Fecha hasta"
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    aria-label="Fecha final de creación"
+                                />
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div className={styles['advancedActionRow']}>
+                        <Button variant="secondary" size="sm" type="submit" isLoading={isPending}>
+                            Aplicar filtros avanzados
+                        </Button>
                     </div>
                 </details>
 
@@ -145,10 +172,15 @@ export default function TicketSearchFilters() {
                         {search && <span className={styles['filterBadge']}>Búsqueda: {search}</span>}
                         {status && <span className={styles['filterBadge']}>Estado: {statusOptions.find(s => s.value === status)?.label || status}</span>}
                         {priority && <span className={styles['filterBadge']}>Prioridad: {priorityOptions.find(p => p.value === priority)?.label || priority}</span>}
-                        {assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}
                         {deviceType && <span className={styles['filterBadge']}>Equipo: {deviceOptions.find(d => d.value === deviceType)?.label || deviceType}</span>}
+                        {assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}
+                        {(dateFrom || dateTo) && (
+                            <span className={styles['filterBadge']}>
+                                Periodo: {dateFrom || 'Inicio'} → {dateTo || 'Hoy'}
+                            </span>
+                        )}
                         <Button variant="ghost" size="sm" type="button" onClick={handleClear} disabled={isPending}>
-                            Limpiar filtros
+                            Limpiar todos los filtros
                         </Button>
                     </div>
                 )}

@@ -18,7 +18,8 @@ export default async function TicketStatusPage() {
 
     try {
         const tenant = await prisma.tenant.findUnique({
-            where: { slug: 'electrofix' }
+            where: { slug: 'electrofix' },
+            select: { id: true },
         });
 
         if (tenant) {
@@ -32,21 +33,10 @@ export default async function TicketStatusPage() {
                     deviceType: true
                 }
             });
-        } else {
-            // Fallback if seeded tenant not found (e.g. random data)
-            demoTickets = await prisma.ticket.findMany({
-                take: 2,
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true,
-                    title: true,
-                    deviceType: true
-                }
-            });
         }
-    } catch (error) {
-        console.error("Failed to fetch demo tickets:", error);
-        // Continue with empty demos
+    } catch {
+        // Safe fallback for static rendering or isolated environments
+        demoTickets = [];
     }
 
     return <TicketSearchClient demoTickets={demoTickets} />;
