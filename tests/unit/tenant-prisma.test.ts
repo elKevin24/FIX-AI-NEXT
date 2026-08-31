@@ -238,7 +238,7 @@ describe('update', () => {
       select: { id: true },
     });
     expect(fakeQuery).toHaveBeenCalledWith({
-      where: { id: 't1' },
+      where: { id: 't1', tenantId: TENANT },
       data: { title: 'N', updatedById: USER },
     });
   });
@@ -272,6 +272,6 @@ describe('delete', () => {
     mockPrisma.Part.findFirst.mockResolvedValue({ id: 'p1' });
     const fakeQuery = vi.fn().mockResolvedValue({ id: 'p1' });
     await h.delete({ model: 'Part', args: { where: { id: 'p1' } }, query: fakeQuery });
-    expect(fakeQuery).toHaveBeenCalledWith({ where: { id: 'p1' } });
+    expect(fakeQuery).toHaveBeenCalledWith({ where: { id: 'p1', tenantId: TENANT } });
   });
 });

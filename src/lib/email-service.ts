@@ -1,3 +1,4 @@
+import 'server-only';
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';

@@ -83,3 +83,18 @@ export function toDomainError(error: unknown): DomainError {
     }
     return new InternalError('Error desconocido');
 }
+
+/**
+ * Produce a safe, user-facing error message without leaking internal details
+ * (stack traces, driver metadata, DB constraint values, PII) to the client.
+ * Curated DomainError messages are preserved; anything else maps to a generic fallback.
+ */
+export function toClientMessage(error: unknown, fallback: string): string {
+    if (isDomainError(error)) {
+        return error.message;
+    }
+    if (error instanceof Error && (error as any).code === 'P2025') {
+        return 'El registro no existe o no tiene permisos.';
+    }
+    return fallback;
+}

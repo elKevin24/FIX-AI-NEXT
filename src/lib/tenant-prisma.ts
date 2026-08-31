@@ -1,3 +1,4 @@
+import 'server-only';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from "./prisma";
 
@@ -116,8 +117,9 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                 async update({ model, args, query }: { model: string; args: any; query: any }) {
                     if (!isTenantModel(model)) return query(args);
                     const { where } = args;
+                    const scopedWhere = { ...(where ?? {}), tenantId };
                     const record = await (prisma[model as keyof typeof prisma] as any).findFirst({
-                        where: { ...where, tenantId },
+                        where: scopedWhere,
                         select: { id: true }
                     });
                     if (!record) {
@@ -129,7 +131,7 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                         ...(args?.data ?? {}),
                         ...(userId && hasUpdatedBy(model) && { updatedById: userId }),
                     };
-                    return query({ ...args, where, data });
+                    return query({ ...args, where: scopedWhere, data });
                 },
 
                 async updateMany({ model, args, query }: { model: string; args: any; query: any }) {
@@ -145,8 +147,9 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                 async delete({ model, args, query }: { model: string; args: any; query: any }) {
                     if (!isTenantModel(model)) return query(args);
                     const { where } = args;
+                    const scopedWhere = { ...(where ?? {}), tenantId };
                     const record = await (prisma[model as keyof typeof prisma] as any).findFirst({
-                        where: { ...where, tenantId },
+                        where: scopedWhere,
                         select: { id: true }
                     });
                     if (!record) {
@@ -154,7 +157,7 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                         (error as any).code = 'P2025';
                         throw error;
                     }
-                    return query({ ...args, where });
+                    return query({ ...args, where: scopedWhere });
                 },
             },
         },

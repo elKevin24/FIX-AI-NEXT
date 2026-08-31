@@ -1,3 +1,4 @@
+import 'server-only';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env['GOOGLE_AI_API_KEY'];

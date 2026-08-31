@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { CreateCustomerSchema, UpdateCustomerSchema } from '@/lib/schemas';
 import { CreateCustomerUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
+import { toClientMessage } from '@/lib/errors';
 
 /**
  * Create a new customer (Server Action)
@@ -28,7 +29,7 @@ export async function createCustomer(prevState: any, formData: FormData) {
         await CreateCustomerUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to create customer:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo crear el cliente.' };
+        return { success: false, message: toClientMessage(error, 'No se pudo crear el cliente.') };
     }
 
     redirect('/dashboard/customers');
@@ -57,7 +58,7 @@ export async function updateCustomer(prevState: any, formData: FormData) {
         await UpdateCustomerUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to update customer:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el cliente.' };
+        return { success: false, message: toClientMessage(error, 'No se pudo actualizar el cliente.') };
     }
 
     redirect('/dashboard/customers');
@@ -86,7 +87,7 @@ export async function deleteCustomer(prevState: any, formData: FormData) {
         await DeleteCustomerUseCase.execute(customerId, session.user.tenantId, session.user.id);
     } catch (error) {
         console.error('Failed to delete customer:', error);
-        return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el cliente.' };
+        return { success: false, message: toClientMessage(error, 'No se pudo eliminar el cliente.') };
     }
 
     redirect('/dashboard/customers');

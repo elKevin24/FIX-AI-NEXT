@@ -1,5 +1,6 @@
 import { CreateCustomerInput, UpdateCustomerInput } from '@/lib/schemas';
 import { ICustomerRepository, PrismaCustomerRepository } from '@/lib/repositories';
+import { NotFoundError, BusinessRuleError } from '@/lib/errors';
 
 export class CreateCustomerUseCase {
     static async execute(
@@ -34,7 +35,7 @@ export class UpdateCustomerUseCase {
         const existingCustomer = await customerRepo.findById(data.customerId);
 
         if (!existingCustomer) {
-            throw new Error('Cliente no encontrado');
+            throw new NotFoundError('Cliente');
         }
 
         return await customerRepo.update(data.customerId, {
@@ -60,11 +61,11 @@ export class DeleteCustomerUseCase {
         const existingCustomer = await customerRepo.findByIdWithTickets(customerId);
 
         if (!existingCustomer) {
-            throw new Error('Cliente no encontrado');
+            throw new NotFoundError('Cliente');
         }
 
         if (existingCustomer.tickets && existingCustomer.tickets.length > 0) {
-            throw new Error(`No se puede eliminar: el cliente tiene ${existingCustomer.tickets.length} ticket(s) asociado(s)`);
+            throw new BusinessRuleError(`No se puede eliminar: el cliente tiene ${existingCustomer.tickets.length} ticket(s) asociado(s)`);
         }
 
         return await customerRepo.delete(customerId);

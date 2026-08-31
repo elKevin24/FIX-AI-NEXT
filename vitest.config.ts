@@ -11,6 +11,8 @@ export default defineConfig({
     exclude: ['tests/e2e/**', 'node_modules/**'],
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'server-only': path.resolve(__dirname, 'src/test-utils/server-only-stub.ts'),
+      'client-only': path.resolve(__dirname, 'src/test-utils/server-only-stub.ts'),
       '@prisma/client/runtime/library': path.resolve(__dirname, 'node_modules/@prisma/client/runtime/client'),
     },
     server: {
