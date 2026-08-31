@@ -5,7 +5,7 @@ El sistema envía notificaciones automáticas a los clientes cuando el estado de
 ## 🎯 Características
 
 - ✅ **Notificaciones In-App**: Campana de notificaciones en el dashboard
-- 📧 **Emails Automáticos**: Templates profesionales con HTML responsivo
+- 📧 **Emails Automáticos**: Templates profesionales con HTML responsivo (`@react-email`)
 - 🎨 **Templates por Estado**: Diseños específicos para cada transición
 - 🔔 **Notificación a Técnicos**: Los técnicos reciben notificaciones cuando se les asigna un ticket
 - 🚀 **No-bloqueante**: Los errores de notificación no afectan las operaciones de ticket
@@ -33,45 +33,41 @@ El sistema envía notificaciones automáticas a los clientes cuando el estado de
 - **Destinatario**: Técnico asignado
 - **Contenido**: Información del ticket y cliente
 
-## 🛠️ Configuración
+## 🛠️ Configuración (Gmail / SMTP)
 
-### Paso 1: Crear cuenta en Resend
+El envío de correos se realiza exclusivamente con **Nodemailer** a través de **SMTP de Gmail** (app password), usando los templates de `@react-email` para el cuerpo HTML.
 
-1. Visita [resend.com](https://resend.com)
-2. Crea una cuenta gratuita (100 emails/día)
-3. Verifica tu dominio o usa el dominio de prueba
+### Paso 1: Crear una App Password de Gmail
 
-### Paso 2: Obtener API Key
+1. Activa la verificación en 2 pasos de tu cuenta de Google.
+2. Ve a [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+3. Crea una nueva "Contraseña de aplicación" para la app (por ejemplo, "FIX-AI").
+4. Copia la contraseña de 16 caracteres generada.
 
-1. Ve a [resend.com/api-keys](https://resend.com/api-keys)
-2. Crea una nueva API key
-3. Copia la key (empieza con `re_`)
-
-### Paso 3: Configurar Variables de Entorno
+### Paso 2: Configurar Variables de Entorno
 
 Edita tu archivo `.env.local`:
 
 ```bash
-# Resend Email Service
-RESEND_API_KEY=re_abc123xyz_YOUR_ACTUAL_KEY_HERE
-RESEND_FROM_EMAIL=noreply@yourdomain.com
+# Provider (opcional; se auto-detecta si no está definido)
+EMAIL_PROVIDER=smtp
 
-# (Opcional) Personalizar URL del dashboard
-AUTH_URL=https://yourdomain.com
+# SMTP / Gmail
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=youraccount@gmail.com
+SMTP_PASS=tu-app-password-de-16-caracteres
+
+# Email del remitente
+EMAIL_FROM='FIX-AI <youraccount@gmail.com>'
 ```
 
-### Paso 4: Verificar Email del Remitente
+> **Nota**: No uses tu contraseña normal de Gmail como `SMTP_PASS`. Usa una **App Password** generada con 2FA activado.
 
-**Opción A: Usar dominio de prueba de Resend**
-```bash
-RESEND_FROM_EMAIL=onboarding@resend.dev
-```
+### Paso 3: Modo Log (Desarrollo)
 
-**Opción B: Usar tu propio dominio** (recomendado para producción)
-1. Agrega tu dominio en Resend
-2. Configura los registros DNS (SPF, DKIM)
-3. Espera verificación (~24h)
-4. Usa tu email: `RESEND_FROM_EMAIL=noreply@tudominio.com`
+Si no se configura ningún proveedor, `email-service.ts` usa el modo `log`: los correos no se envían pero se registran en consola, lo que permite testear flujos sin enviar emails.
 
 ## 🧪 Pruebas
 
@@ -92,38 +88,37 @@ RESEND_FROM_EMAIL=onboarding@resend.dev
 4. Cambia el estado del ticket (por ejemplo, a `IN_PROGRESS`)
 5. Deberías recibir un segundo email
 
-### Probar Email con Template
+### Probar Email con Script CLI
 
 ```bash
-# Opción 1: Crear ticket con el wizard
-npm run dev
-# Navega a: http://localhost:3000/dashboard/tickets/create-with-template
-# Selecciona "Mantenimiento Preventivo"
-# Usa un cliente con email válido
-
-# Opción 2: Usar el script de templates
-npm run create:maintenance-templates
+npm run send:test-email   # Envía un correo de prueba vía SMTP (Gmail)
 ```
 
 ## 📧 Templates de Email
 
-Los templates están en `src/lib/email-service.ts`:
+Los templates viven en `src/emails/` como componentes de `@react-email`:
 
-- `getTicketCreatedTemplate()` - Ticket creado
-- `getStatusChangeTemplate()` - Cambio de estado genérico
-- `getTicketResolvedTemplate()` - Ticket resuelto (especial)
-- `getTicketClosedTemplate()` - Ticket cerrado (especial)
+- `TicketCreated.tsx` - Ticket creado
+- `TicketStatusChanged.tsx` - Cambio de estado
+- `TechnicianAssigned.tsx` - Técnico asignado
+- `SLABreach.tsx` - Incumplimiento de SLA
+- `ResetPasswordEmail.tsx` - Restablecimiento de contraseña
+- `PartsApprovalRequired.tsx` - Requiere aprobación de repuestos
+- `LowStock.tsx` - Alerta de stock bajo
+- `components/EmailLayout.tsx` - Layout base compartido
 
 ### Personalizar Templates
 
-Edita `src/lib/email-service.ts` y modifica las funciones de template.
+Edita los componentes en `src/emails/`. El envío se orquesta desde `src/lib/email-service.ts` y `src/lib/ticket-notifications.ts`:
 
-Los emails usan:
-- HTML inline para máxima compatibilidad
-- Diseño responsivo
-- Gradientes según el estado
-- Iconos emoji para mejor UX
-- Botón CTA para ver detalles
+```typescript
+// src/lib/email-service.ts (enviar un email)
+import { render } from '@react-email/render';
+import { sendMail } from 'nodemailer';
+
+const html = await render(<TicketCreated ticket={ticket} />);
+// -> transporter.sendMail({ ... }) vía SMTP/Gmail
+```
 
 ## 🔍 Monitoreo
 
@@ -136,16 +131,8 @@ npm run dev
 ```
 
 Los logs incluyen:
-- `✓ Email sent to user@example.com for ticket creation`
-- `✓ Email sent to user@example.com for status: RESOLVED`
+- `✅ [Email Service] Email sent via Gmail/SMTP: <messageId>`
 - `Failed to send notifications: [error]` (no bloquea operaciones)
-
-### Dashboard de Resend
-
-1. Ve a [resend.com/emails](https://resend.com/emails)
-2. Revisa los emails enviados
-3. Ve el estado de entrega
-4. Revisa bounces y quejas
 
 ## 🚨 Solución de Problemas
 
@@ -153,14 +140,15 @@ Los logs incluyen:
 
 **1. Verifica configuración**
 ```bash
-echo $RESEND_API_KEY  # Debe empezar con "re_"
-echo $RESEND_FROM_EMAIL  # Email verificado
+echo $SMTP_USER   # Tu cuenta Gmail
+echo $SMTP_PASS   # Debe ser una App Password de 16 caracteres
+echo $EMAIL_FROM  # Email del remitente
 ```
 
 **2. Verifica logs del servidor**
 ```bash
 npm run dev
-# Busca: "Failed to send" o "Email sent"
+# Busca: "Failed to send" o "Email sent via Gmail/SMTP"
 ```
 
 **3. Verifica el cliente tiene email**
@@ -171,58 +159,28 @@ if (!customer.email) {
 }
 ```
 
-**4. Revisa Resend Dashboard**
-- ¿El email aparece como enviado?
-- ¿Hay errores de autenticación?
-- ¿El dominio está verificado?
-
 ### Emails van a spam
 
-1. **Verifica SPF y DKIM** en tu dominio
-2. **Usa un dominio verificado** (no el de prueba)
+1. **Verifica SPF y DKIM** en tu dominio (si usas correo propio)
+2. **Usa una cuenta Gmail configurada correctamente**
 3. **Evita contenido spam** (muchos signos !, MAYÚSCULAS, etc.)
-4. **Calienta el dominio** (envía poco a poco, no 1000 emails de golpe)
+4. **Calienta la cuenta** (envía poco a poco, no muchos correos de golpe)
 
-### Error: "Invalid API Key"
-
-```bash
-# La API key debe empezar con "re_"
-# Ejemplo correcto: re_abc123xyz
-# Ejemplo incorrecto: abc123xyz
-```
-
-1. Ve a [resend.com/api-keys](https://resend.com/api-keys)
-2. Revisa que la key esté activa
-3. Copia y pega de nuevo en `.env.local`
-4. Reinicia el servidor: `npm run dev`
-
-### Error: "From email not verified"
+### Error: "Invalid login" / "Application-specific password required"
 
 ```bash
-# Usa el dominio de prueba
-RESEND_FROM_EMAIL=onboarding@resend.dev
-
-# O verifica tu dominio en Resend
+# SMTP_PASS debe ser una App Password de 16 caracteres, NO tu contraseña normal
+# Genera una en: https://myaccount.google.com/apppasswords
 ```
-
-## 📊 Límites
-
-### Plan Gratuito de Resend
-- 100 emails/día
-- 1 dominio verificado
-- 1 equipo
-- API access completo
-
-### Plan Pro
-- 50,000 emails/mes ($20/mes)
-- Dominios ilimitados
-- Sin branding de Resend
-- Soporte prioritario
+1. Asegúrate de tener 2FA activado en la cuenta.
+2. Regenera la App Password.
+3. Sustituye `SMTP_PASS` en `.env.local`.
+4. Reinicia el servidor: `npm run dev`.
 
 ## 🔐 Seguridad
 
 - ✅ Emails solo a clientes del mismo tenant
-- ✅ API keys en variables de entorno (nunca en código)
+- ✅ Credenciales SMTP en variables de entorno (nunca en código)
 - ✅ Validación de tenant isolation en todas las notificaciones
 - ✅ Errores de email no exponen información sensible
 
@@ -241,7 +199,7 @@ await db.ticket.update({ status: 'RESOLVED' })
 try {
   await notifyTicketStatusChange(ticket, { oldStatus, newStatus })
   // → In-app notification (createNotification)
-  // → Email notification (sendTicketResolvedEmail)
+  // → Email notification (sendTicketStatusChangedEmail)
 } catch (err) {
   console.error(err) // Log pero no falla la request
 }
@@ -254,64 +212,26 @@ return { success: true, ticket }
 
 ```
 src/lib/
-├── email-service.ts          # Templates HTML + Resend API
-├── ticket-notifications.ts   # Lógica de notificaciones
+├── email-service.ts          # Lógica de envío (Nodemailer / SMTP / Gmail)
+├── ticket-notifications.ts   # Lógica de notificaciones (in-app + email)
+├── sla-actions.ts            # Alertas de SLA (email + in-app)
 └── notifications.ts          # Notificaciones in-app
+
+src/emails/
+├── TicketCreated.tsx         # Templates @react-email
+├── TicketStatusChanged.tsx
+└── ...
 
 src/app/api/tickets/[id]/actions/
 └── route.ts                  # Integration point
 ```
 
-## 🎨 Personalización Avanzada
-
-### Agregar Nuevo Tipo de Notificación
-
-1. **Crea template HTML**:
-```typescript
-// src/lib/email-service.ts
-export async function sendCustomEmail(data: CustomData) {
-  await resend.emails.send({
-    from: DEFAULT_FROM_EMAIL,
-    to: data.email,
-    subject: 'Mi Subject Personalizado',
-    html: getCustomTemplate(data),
-  });
-}
-```
-
-2. **Llama desde tu acción**:
-```typescript
-// src/app/api/my-action/route.ts
-import { sendCustomEmail } from '@/lib/email-service';
-
-await sendCustomEmail({ ... });
-```
-
-### Agregar Attachments
-
-```typescript
-await resend.emails.send({
-  from: DEFAULT_FROM_EMAIL,
-  to: customer.email,
-  subject: 'Ticket Resolved',
-  html: template,
-  attachments: [
-    {
-      filename: 'invoice.pdf',
-      content: pdfBuffer,
-    }
-  ],
-});
-```
-
 ## 🚀 Siguientes Pasos
 
-- [ ] Configurar webhooks de Resend para tracking de entregas
-- [ ] Agregar notificaciones por WhatsApp (Twilio)
 - [ ] Implementar preferencias de notificación por usuario
 - [ ] Agregar templates multiidioma
 - [ ] Implementar rate limiting para prevenir spam
 
 ---
 
-**¿Necesitas ayuda?** Revisa la [documentación de Resend](https://resend.com/docs) o los logs del servidor.
+**¿Necesitas ayuda?** Revisa los logs del servidor o la configuración de Nodemailer/Gmail.

@@ -14,6 +14,7 @@ interface DemoTicket {
 
 export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?: DemoTicket[] }) {
     const [ticketId, setTicketId] = useState('');
+    const [verification, setVerification] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [ticket, setTicket] = useState<any | null>(null);
@@ -27,15 +28,15 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
         setTicket(null);
 
         try {
-            const result = await searchTicket(ticketId.trim());
+            const result = await searchTicket(ticketId.trim(), verification.trim() || undefined);
             if (result) {
                 setTicket(result);
             } else {
-                setError('ID no encontrado.');
+                setError('Ticket no encontrado o datos de verificación incorrectos.');
             }
         } catch (err) {
             console.error(err);
-            setError('Error de conexión.');
+            setError('Error de conexión al consultar el ticket.');
         } finally {
             setLoading(false);
         }
@@ -95,7 +96,7 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                 {/* Buscador Compacto */}
                 <div style={{
                     width: '100%',
-                    maxWidth: '26.25rem',
+                    maxWidth: '28rem',
                     transition: 'all 0.3s ease'
                 }}>
                     <div style={{
@@ -110,16 +111,16 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                             marginBottom: '0.5rem',
                             transition: 'all 0.3s ease'
                         }}>Estado de Reparación</h1>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Consulta el progreso de tu equipo</p>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Consulta el progreso seguro de tu equipo</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
                             background: 'var(--color-surface)',
                             border: `1px solid ${error ? 'var(--color-error-600)' : 'var(--color-border-medium)'}`,
-                            borderRadius: '1rem',
+                            borderRadius: '0.75rem',
                             boxShadow: 'var(--shadow-sm)',
                             overflow: 'hidden',
                             isolation: 'isolate',
@@ -131,7 +132,7 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                                 type="text"
                                 value={ticketId}
                                 onChange={(e) => { setTicketId(e.target.value); setError(''); }}
-                                placeholder="Ingresa tu ID de Ticket (ej: 90287b37)"
+                                placeholder="Número o ID de Ticket (ej: TK-1001)"
                                 style={{
                                     flex: 1,
                                     background: 'transparent',
@@ -143,40 +144,68 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                                     fontFamily: 'monospace'
                                 }}
                             />
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="search-button"
-                                style={{
-                                    background: loading ? 'var(--color-gray-400)' : 'var(--color-primary-600)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '0.75rem',
-                                    padding: '0.625rem 1.25rem',
-                                    margin: '0.25rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '600',
-                                    cursor: loading ? 'wait' : 'pointer',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                    overflow: 'hidden',
-                                    WebkitAppearance: 'none',
-                                    MozAppearance: 'none',
-                                    appearance: 'none',
-                                    transform: loading ? 'scale(0.95)' : 'scale(1)'
-                                }}
-                            >
-                                <span style={{
-                                    display: 'inline-block',
-                                    animation: loading ? 'pulse 1.5s ease-in-out infinite' : 'none'
-                                }}>
-                                    {loading ? '...' : 'Buscar'}
-                                </span>
-                            </button>
                         </div>
+
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            background: 'var(--color-surface)',
+                            border: '1px solid var(--color-border-medium)',
+                            borderRadius: '0.75rem',
+                            boxShadow: 'var(--shadow-sm)',
+                            overflow: 'hidden',
+                            isolation: 'isolate',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                            className="search-container"
+                        >
+                            <input
+                                type="text"
+                                value={verification}
+                                onChange={(e) => { setVerification(e.target.value); setError(''); }}
+                                placeholder="Correo o últimos 4 dígitos del teléfono (opcional)"
+                                style={{
+                                    flex: 1,
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: '0.625rem 1rem',
+                                    color: 'var(--color-text-primary)',
+                                    outline: 'none',
+                                    fontSize: '0.875rem'
+                                }}
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading || !ticketId.trim()}
+                            className="search-button"
+                            style={{
+                                background: loading || !ticketId.trim() ? 'var(--color-gray-400)' : 'var(--color-primary-600)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.75rem',
+                                padding: '0.75rem 1.25rem',
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                cursor: loading || !ticketId.trim() ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                outline: 'none',
+                                boxShadow: 'var(--shadow-sm)',
+                                width: '100%',
+                                transform: loading ? 'scale(0.98)' : 'scale(1)'
+                            }}
+                        >
+                            <span style={{
+                                display: 'inline-block',
+                                animation: loading ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                            }}>
+                                {loading ? 'Consultando...' : 'Consultar Ticket'}
+                            </span>
+                        </button>
+
                         {error && (
-                            <p style={{ position: 'absolute', top: '100%', left: '0.25rem', marginTop: '0.5rem', color: 'var(--color-error-600)', fontSize: '0.75rem', fontWeight: '500' }}>
+                            <p style={{ color: 'var(--color-error-600)', fontSize: '0.75rem', fontWeight: '500', margin: '0.25rem 0 0 0.25rem' }}>
                                 {error}
                             </p>
                         )}

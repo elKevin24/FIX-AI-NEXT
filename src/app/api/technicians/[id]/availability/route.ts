@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { logAction } from '@/lib/audit-actions';
 import { TechnicianStatus } from '@prisma/client';
 
@@ -10,16 +10,16 @@ export async function GET(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.tenantId) {
+    if (!session?.user?.tenantId || !session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
+    const tenantPrisma = getTenantPrisma(session.user.tenantId, session.user.id);
 
-    const technician = await prisma.user.findFirst({
+    const technician = await tenantPrisma.user.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
       },
       select: {
         id: true,
@@ -87,18 +87,18 @@ export async function PATCH(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.tenantId) {
+    if (!session?.user?.tenantId || !session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
+    const tenantPrisma = getTenantPrisma(session.user.tenantId, session.user.id);
     const body = await req.json();
     const { status, statusReason, maxConcurrentTickets } = body;
 
-    const technician = await prisma.user.findFirst({
+    const technician = await tenantPrisma.user.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
       },
     });
 
@@ -109,7 +109,7 @@ export async function PATCH(
       );
     }
 
-    const updated = await prisma.user.update({
+    const updated = await tenantPrisma.user.update({
       where: { id },
       data: {
         ...(status && { status: status as TechnicianStatus }),
@@ -153,11 +153,12 @@ export async function POST(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.tenantId) {
+    if (!session?.user?.tenantId || !session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
+    const tenantPrisma = getTenantPrisma(session.user.tenantId, session.user.id);
     const body = await req.json();
     const { startDate, endDate, reason, notes } = body;
 
@@ -168,10 +169,9 @@ export async function POST(
       );
     }
 
-    const technician = await prisma.user.findFirst({
+    const technician = await tenantPrisma.user.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
       },
     });
 
@@ -182,7 +182,7 @@ export async function POST(
       );
     }
 
-    const unavailability = await prisma.technicianUnavailability.create({
+    const unavailability = await tenantPrisma.technicianUnavailability.create({
       data: {
         userId: id,
         startDate: new Date(startDate),
@@ -197,7 +197,7 @@ export async function POST(
     const end = new Date(endDate);
 
     if (start <= now && end >= now) {
-      await prisma.user.update({
+      await tenantPrisma.user.update({
         where: { id },
         data: {
           status: reason as TechnicianStatus,

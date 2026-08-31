@@ -141,9 +141,9 @@ export default function RootLayout({
                 <ThemeInit />
                 <ThemeProvider>
                     <SerwistProvider swUrl="/serwist/sw.js">
-                        <main id="main-content" tabIndex={-1}>
+                        <div id="app-root">
                             {children}
-                        </main>
+                        </div>
                     </SerwistProvider>
                 </ThemeProvider>
                 <SpeedInsights />

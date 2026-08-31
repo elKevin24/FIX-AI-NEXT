@@ -138,6 +138,8 @@ model Customer {
   @@index([createdById])
   @@index([updatedById])
   @@index([tenantId])
+  @@index([tenantId, email])
+  @@index([tenantId, phone])
   @@map("customers")
 }
 
@@ -164,6 +166,8 @@ model Ticket {
   priority                TicketPriority     @default(MEDIUM)
   dueDate                 DateTime?
   estimatedCompletionDate DateTime?
+  approvalToken           String?            @unique
+  approvalTokenExpiresAt  DateTime?
   attachments             TicketAttachment[]
   invoice                 Invoice?
   partsUsed               PartUsage[]
@@ -178,6 +182,9 @@ model Ticket {
   viewedByUsers           UserPresence[]
 
   @@unique([ticketNumber, tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, priority, status])
   @@index([status, priority])
   @@index([assignedToId, status])
   @@index([serviceTemplateId])
@@ -442,6 +449,7 @@ model Notification {
 
   @@index([userId])
   @@index([tenantId])
+  @@index([tenantId, userId, isRead])
   @@map("notifications")
 }
 
@@ -537,6 +545,7 @@ model CashRegister {
   transactions    CashTransaction[]
 
   @@index([tenantId])
+  @@index([tenantId, isOpen])
   @@index([isOpen])
   @@index([openedAt])
   @@map("cash_registers")

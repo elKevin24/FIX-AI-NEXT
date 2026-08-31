@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 
 export default function GlobalError({
   error,
-  retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
     console.error(error);
@@ -43,7 +43,7 @@ export default function GlobalError({
             {error?.digest ? ` Código de referencia: ${error.digest}` : ''}
           </p>
           <button
-            onClick={() => retry()}
+            onClick={() => reset()}
             style={{
               padding: '0.75rem 1.5rem',
               backgroundColor: '#2563eb',

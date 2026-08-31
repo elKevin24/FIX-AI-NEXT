@@ -4,6 +4,7 @@ import { notifyTicketStatusChange } from "@/lib/ticket-notifications";
 
 export interface PublicCustomerApprovalParams {
     ticketId: string;
+    token: string;
     action: "APPROVE" | "REJECT";
     rejectionReason?: string;
 }
@@ -18,15 +19,21 @@ export interface PublicApprovalResult {
 /**
  * Permite al cliente final autorizar o rechazar un presupuesto de reparacion
  * desde el portal publico (/tickets/status).
+ * Exige un token de autorizacion criptografico de un solo uso (One-Time Token).
  * Utiliza transaccion atomica con bloqueo por tenant para garantizar consistencia.
  */
 export class PublicCustomerApprovalUseCase {
-    static async execute({ ticketId, action, rejectionReason }: PublicCustomerApprovalParams): Promise<PublicApprovalResult> {
+    static async execute({ ticketId, token, action, rejectionReason }: PublicCustomerApprovalParams): Promise<PublicApprovalResult> {
         if (!ticketId || typeof ticketId !== "string") {
             throw new Error("ID de ticket no valido");
         }
 
+        if (!token || typeof token !== "string" || token.trim().length < 8) {
+            throw new Error("Token de autorizacion invalido o ausente");
+        }
+
         const cleanId = ticketId.trim();
+        const cleanToken = token.trim();
 
         // 1. Localizar el ticket sin requerir sesion de dashboard (acceso publico por ID o numero)
         const publicTicket = await prisma.ticket.findFirst({
@@ -49,6 +56,21 @@ export class PublicCustomerApprovalUseCase {
 
         if (!publicTicket) {
             throw new Error("Ticket no encontrado");
+        }
+
+        // 2. Validar token de autorizacion del cliente (One-Time Token)
+        if (!publicTicket.approvalToken || publicTicket.approvalToken !== cleanToken) {
+            throw new Error("Token de aprobacion no valido o no autorizado");
+        }
+
+        // 3. Validar expiracion del token
+        if (publicTicket.approvalTokenExpiresAt && new Date() > publicTicket.approvalTokenExpiresAt) {
+            throw new Error("El enlace de autorizacion ha expirado");
+        }
+
+        // 4. Blindaje de estado: Solo tickets no cerrados/cancelados pueden procesarse
+        if (publicTicket.status === 'CLOSED' || publicTicket.status === 'CANCELLED' || publicTicket.status === 'RESOLVED') {
+            throw new Error(`El ticket se encuentra en estado ${publicTicket.status} y no admite modificaciones.`);
         }
 
         const tenantDb = getTenantPrisma(publicTicket.tenantId);
@@ -90,11 +112,13 @@ export class PublicCustomerApprovalUseCase {
                     });
                 }
 
-                // Cambiar estado del ticket a IN_PROGRESS si estaba esperando aprobacion
+                // Cambiar estado del ticket a IN_PROGRESS e invalidar token de un solo uso
                 const updatedTicket = await tx.ticket.update({
                     where: { id: publicTicket.id },
                     data: {
                         status: "IN_PROGRESS",
+                        approvalToken: null,
+                        approvalTokenExpiresAt: null,
                     }
                 });
 
@@ -119,7 +143,7 @@ export class PublicCustomerApprovalUseCase {
                 await tx.ticketNote.create({
                     data: {
                         ticketId: publicTicket.id,
-                        content: 'Presupuesto aprobado por el cliente desde el portal publico.',
+                        content: 'Presupuesto aprobado por el cliente desde el portal publico con token verificado.',
                         isInternal: false,
                         tenantId: publicTicket.tenantId,
                     }
@@ -139,6 +163,8 @@ export class PublicCustomerApprovalUseCase {
                     where: { id: publicTicket.id },
                     data: {
                         status: "CANCELLED",
+                        approvalToken: null,
+                        approvalTokenExpiresAt: null,
                     }
                 });
 

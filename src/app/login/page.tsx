@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className={styles['container']}>
+    <main id="main-content" className={styles['container']}>
       {/* Elementos decorativos */}
       <div className={styles['decorativeBlobs']}>
         <div className={`${styles['blob']} ${styles['blob1']}`} />

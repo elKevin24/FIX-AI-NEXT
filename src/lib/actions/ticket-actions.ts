@@ -48,9 +48,9 @@ export async function getTicketById(rawId: string) {
  * Search ticket safely for client-side usage. Returns null when not found
  * instead of throwing, making it safe for UI error states.
  */
-export async function searchTicket(rawId: string) {
+export async function searchTicket(rawId: string, customerVerification?: string) {
     try {
-        return await TicketRepository.findPublicByIdOrNumber(rawId);
+        return await TicketRepository.findPublicByIdOrNumber(rawId, customerVerification);
     } catch (error) {
         console.error('Error searching ticket:', error);
         return null;
@@ -59,15 +59,18 @@ export async function searchTicket(rawId: string) {
 
 /**
  * Public action for customer approval/rejection from /tickets/status.
+ * Requires a cryptographically secure one-time token.
  */
 export async function publicCustomerApproval(
     ticketId: string,
+    token: string,
     action: 'APPROVE' | 'REJECT',
     rejectionReason?: string,
 ) {
     try {
         return await PublicCustomerApprovalUseCase.execute({
             ticketId,
+            token,
             action,
             rejectionReason,
         });

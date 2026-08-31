@@ -33,7 +33,6 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@neon/config": "^1.0.4",
     "@neon/env": "^1.1.4",
     "@neondatabase/serverless": "^1.1.0",
@@ -64,7 +63,6 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^3.7.0",
-    "resend": "^6.22.1",
     "server-only": "^0.0.1",
     "ua-parser-js": "^2.0.9",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",

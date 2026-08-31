@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useCallback, useSyncExternalStore } from 'react';
 
 export type Theme = 'light' | 'dark' | 'dark-colorblind' | 'auto';
 type ResolvedTheme = 'light' | 'dark' | 'dark-colorblind';
@@ -12,6 +12,8 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+const THEME_STORAGE_KEY = 'theme';
 
 // Helper to get system theme preference
 const getSystemTheme = (): 'light' | 'dark' => {
@@ -31,77 +33,56 @@ const resolveTheme = (theme: Theme): ResolvedTheme => {
     return theme;
 };
 
+const subscribeToTheme = (callback: () => void) => {
+    if (typeof window === 'undefined') return () => {};
+
+    const handleStorage = (e: StorageEvent) => {
+        if (e.key === THEME_STORAGE_KEY) {
+            callback();
+        }
+    };
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('themechange', callback);
+    mediaQuery.addEventListener('change', callback);
+
+    return () => {
+        window.removeEventListener('storage', handleStorage);
+        window.removeEventListener('themechange', callback);
+        mediaQuery.removeEventListener('change', callback);
+    };
+};
+
+const getThemeSnapshot = (): Theme => {
+    if (typeof window === 'undefined') return 'auto';
+    try {
+        const saved = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+        if (saved && ['light', 'dark', 'dark-colorblind', 'auto'].includes(saved)) {
+            return saved;
+        }
+    } catch {
+        // Storage restricted
+    }
+    return 'auto';
+};
+
+const getServerSnapshot = (): Theme => 'auto';
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    // Read initial theme from DOM (set by blocking script)
-    const getInitialTheme = (): Theme => {
-        if (typeof window !== 'undefined') {
-            try {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme && ['light', 'dark', 'dark-colorblind', 'auto'].includes(savedTheme)) {
-                    return savedTheme as Theme;
-                }
-            } catch {
-                // localStorage unavailable (privacy mode, storage restrictions) - fall back to auto
-            }
+    const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerSnapshot);
+    const resolvedTheme = resolveTheme(theme);
+
+    const setTheme = useCallback((newTheme: Theme) => {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+        } catch {
+            // Storage restricted
         }
-        return 'auto'; // Default to auto
-    };
-
-    const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-    const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-        resolveTheme(getInitialTheme())
-    );
-
-    // Apply resolved theme to DOM
-    useEffect(() => {
-        const resolved = resolveTheme(theme);
-        if (resolved !== resolvedTheme) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setResolvedTheme(resolved);
-        }
-        document.documentElement.setAttribute('data-theme', resolved);
-    }, [theme, resolvedTheme]);
-
-    // Listen for system theme changes when theme is 'auto'
-    useEffect(() => {
-        if (theme !== 'auto') return;
-
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = () => {
-            const resolved = resolveTheme('auto');
-            setResolvedTheme(resolved);
-            document.documentElement.setAttribute('data-theme', resolved);
-        };
-
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [theme]);
-
-    // Sync theme across browser tabs
-    useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'theme' && e.newValue) {
-                const newTheme = e.newValue as Theme;
-                if (['light', 'dark', 'dark-colorblind', 'auto'].includes(newTheme)) {
-                    setThemeState(newTheme);
-                    const resolved = resolveTheme(newTheme);
-                    setResolvedTheme(resolved);
-                    document.documentElement.setAttribute('data-theme', resolved);
-                }
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
-
-    const setTheme = (newTheme: Theme) => {
-        setThemeState(newTheme);
-        localStorage.setItem('theme', newTheme);
         const resolved = resolveTheme(newTheme);
-        setResolvedTheme(resolved);
         document.documentElement.setAttribute('data-theme', resolved);
-    };
+        window.dispatchEvent(new Event('themechange'));
+    }, []);
 
     return (
         <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
@@ -117,3 +98,4 @@ export function useTheme() {
     }
     return context;
 }
+

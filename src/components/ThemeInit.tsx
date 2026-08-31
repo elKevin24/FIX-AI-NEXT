@@ -1,20 +1,12 @@
-'use client';
-
-import { useEffect } from 'react';
-
 const THEME_SCRIPT = `
 (function() {
     try {
         var theme = localStorage.getItem('theme') || 'auto';
+        var resolved = theme;
         if (theme === 'auto') {
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        } else if (['light', 'dark', 'dark-colorblind'].includes(theme)) {
-            document.documentElement.setAttribute('data-theme', theme);
-        } else {
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
+        document.documentElement.setAttribute('data-theme', resolved);
     } catch (e) {
         document.documentElement.setAttribute('data-theme', 'light');
     }
@@ -22,11 +14,11 @@ const THEME_SCRIPT = `
 `;
 
 export default function ThemeInit() {
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.textContent = THEME_SCRIPT;
-        document.head.prepend(script);
-    }, []);
-
-    return null;
+    return (
+        <script
+            dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+            suppressHydrationWarning
+        />
+    );
 }
+

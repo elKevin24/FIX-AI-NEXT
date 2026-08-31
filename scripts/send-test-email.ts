@@ -8,8 +8,8 @@ async function main() {
     const result = await sendEmail({
         to,
         subject: 'Prueba de Envío FIX-AI',
-        text: 'Esta es una prueba de envío desde el CLI de FIX-AI para verificar la configuración de Resend.',
-        html: '<p>Esta es una <strong>prueba de envío</strong> desde el CLI de FIX-AI para verificar la configuración de Resend.</p>'
+        text: 'Esta es una prueba de envío desde el CLI de FIX-AI para verificar la configuración de SMTP (Gmail).',
+        html: '<p>Esta es una <strong>prueba de envío</strong> desde el CLI de FIX-AI para verificar la configuración de SMTP (Gmail).</p>'
     });
 
     if (result.success) {

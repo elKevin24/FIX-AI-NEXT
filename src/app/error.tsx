@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/Button';
 
 export default function Error({
   error,
-  retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
     console.error(error);
@@ -38,7 +38,7 @@ export default function Error({
       </p>
       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
         <Button
-          onClick={() => retry()}
+          onClick={() => reset()}
           variant="primary"
           size="base"
         >

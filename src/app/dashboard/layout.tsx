@@ -54,7 +54,7 @@ export default async function DashboardLayout({
         <ToastProvider>
             <div className={styles['container']}>
                 <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-                <main className={styles['mainContent']}>
+                <main id="main-content" className={styles['mainContent']}>
                     <TopNav />
                     {children}
                 </main>

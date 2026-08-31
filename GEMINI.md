@@ -16,8 +16,7 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
     *   **Autenticación:** NextAuth.js v5.0.0-beta.30
     *   **Validación:** Zod (Estándar obligatorio para Server Actions)
     *   **Estilos:** CSS Modules (Vanilla CSS con variables)
-    *   **Email:** @react-email/components (Templates), Resend (Delivery)
-    *   **AI:** @google/generative-ai (Gemini SDK)
+    *   **Email:** @react-email/components (Templates), Nodemailer / Gmail SMTP (Delivery)
 
 ## 2. Arquitectura y Seguridad
 

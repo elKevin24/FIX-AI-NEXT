@@ -1,16 +1,41 @@
+import dynamic from 'next/dynamic';
 import { auth } from "@/auth";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
 import { isSuperAdmin } from "@/lib/authz";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
-import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
-import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
 import PageHeader from '@/components/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
 import RecentTicketsTable from '@/components/dashboard/RecentTicketsTable';
+
+const TicketsByStatusChart = dynamic(
+    () => import('@/components/dashboard/TicketsByStatusChart'),
+    {
+        loading: () => (
+            <div 
+                role="status" 
+                aria-label="Cargando gráfico de tickets por estado"
+                style={{ width: '100%', height: '300px', backgroundColor: 'var(--color-surface-hover, #f1f5f9)', borderRadius: '8px' }} 
+            />
+        ),
+    }
+);
+
+const TechnicianMetrics = dynamic(
+    () => import('@/components/dashboard/TechnicianMetrics'),
+    {
+        loading: () => (
+            <div 
+                role="status" 
+                aria-label="Cargando métricas de técnicos"
+                style={{ width: '100%', height: '350px', backgroundColor: 'var(--color-surface-hover, #f1f5f9)', borderRadius: '8px' }} 
+            />
+        ),
+    }
+);
 
 // Define types locally since they may not be exported yet
 enum TicketPriority {

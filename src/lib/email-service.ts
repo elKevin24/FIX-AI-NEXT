@@ -1,6 +1,5 @@
 import 'server-only';
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import { ReactElement } from 'react';
 
@@ -12,31 +11,34 @@ interface SendEmailParams {
   react?: ReactElement;
 }
 
-type EmailProvider = 'smtp' | 'resend' | 'log';
+type EmailProvider = 'smtp' | 'log';
 
 function resolveProvider(): EmailProvider {
   const explicit = process.env['EMAIL_PROVIDER']?.toLowerCase();
-  if (explicit === 'smtp' || explicit === 'resend' || explicit === 'log') return explicit;
+  if (explicit === 'smtp' || explicit === 'log') return explicit;
 
   if (process.env['SMTP_HOST'] && process.env['SMTP_USER']) return 'smtp';
-  if (process.env['RESEND_API_KEY']) return 'resend';
+  if (process.env['SMTP_USER'] && process.env['SMTP_PASS']) return 'smtp';
   return 'log';
 }
 
 function getFrom() {
   return (
     process.env['EMAIL_FROM'] ||
-    process.env['RESEND_FROM_EMAIL'] ||
-    'FIX-AI <onboarding@resend.dev>'
+    process.env['SMTP_USER'] ||
+    'FIX Workshop <no-reply@fixworkshop.com>'
   );
 }
 
 async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) {
   const htmlContent = html || (react ? await render(react) : undefined);
   const transporter = nodemailer.createTransport({
-    host: process.env['SMTP_HOST'],
+    host: process.env['SMTP_HOST'] || 'smtp.gmail.com',
     port: Number(process.env['SMTP_PORT']) || 587,
     secure: process.env['SMTP_SECURE'] === 'true',
+    connectionTimeout: 10000, // 10s max para establecer conexión
+    greetingTimeout: 5000,    // 5s max para handshake SMTP
+    socketTimeout: 15000,     // 15s max para transmisión
     auth: {
       user: process.env['SMTP_USER'] || '',
       pass: process.env['SMTP_PASS'] || '',
@@ -54,38 +56,15 @@ async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) 
   return { success: true, messageId: info.messageId };
 }
 
-async function sendViaResend({ to, subject, text, html, react }: SendEmailParams) {
-  const resend = new Resend(process.env['RESEND_API_KEY']);
-
-  const { data, error } = await resend.emails.send({
-    from: getFrom(),
-    to: [to],
-    subject,
-    text: text || '',
-    html: html,
-    react: react,
-  });
-
-  if (error) {
-    return { success: false, error };
-  }
-
-  return { success: true, messageId: data?.id };
-}
-
 function logEmail({ to, subject, text, html }: SendEmailParams) {
-  console.log('⚠️ [Email Service] No provider configured (set SMTP_* or RESEND_API_KEY). Email not sent, but logged to console.');
-  
-  
-  
+  console.log('⚠️ [Email Service] No SMTP provider configured (set SMTP_USER & SMTP_PASS for Gmail). Email not sent, but logged to console.');
   if (html) console.log(`[HTML Content Provided: ${html.length} chars]`);
 }
 
 /**
- * Sends an email using the configured provider:
- *  - EMAIL_PROVIDER=smtp (or SMTP_HOST+SMTP_USER set) -> nodemailer SMTP (Gmail, etc.)
- *  - EMAIL_PROVIDER=resend (or RESEND_API_KEY set)    -> Resend SDK
- *  - otherwise                                        -> log only
+ * Sends an email using Nodemailer (Gmail / SMTP):
+ *  - EMAIL_PROVIDER=smtp (or SMTP_USER set) -> nodemailer SMTP (Gmail)
+ *  - otherwise                              -> log only
  */
 export async function sendEmail(params: SendEmailParams) {
   const provider = resolveProvider();
@@ -93,7 +72,7 @@ export async function sendEmail(params: SendEmailParams) {
   if (provider === 'smtp') {
     try {
       const result = await sendViaSmtp(params);
-      console.log('✅ [Email Service] Email sent via SMTP:', result.messageId);
+      console.log('✅ [Email Service] Email sent via Gmail/SMTP:', result.messageId);
       return result;
     } catch (error) {
       console.error('❌ [Email Service] SMTP Error:', error);
@@ -101,21 +80,7 @@ export async function sendEmail(params: SendEmailParams) {
     }
   }
 
-  if (provider === 'resend') {
-    try {
-      const result = await sendViaResend(params);
-      if (result.success) {
-        console.log('✅ [Email Service] Email sent via Resend:', result.messageId);
-      } else {
-        console.error('❌ [Email Service] Resend API Error:', result.error);
-      }
-      return result;
-    } catch (error) {
-      console.error('❌ [Email Service] Unexpected Error:', error);
-      return { success: false, error };
-    }
-  }
-
   logEmail(params);
   return { success: true, logged: true };
 }
+
