@@ -2,7 +2,7 @@ import 'dotenv/config'; // Load env vars
 import { sendEmail } from '../src/lib/email-service';
 
 async function main() {
-    const to = 'kevcordon5@gmail.com';
+    const to = 'busqueda63@hotmail.com';
     console.log(`📧 Sending test email to ${to}...`);
 
     const result = await sendEmail({

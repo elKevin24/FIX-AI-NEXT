@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { useQueryStates, parseAsString } from 'nuqs';
 import { Input, Select, Button, SearchInputGroup } from '@/components/ui';
 import styles from './searchFilters.module.css';
 
@@ -20,34 +20,75 @@ const deviceOptions = [
     { value: 'Printer', label: 'Impresora' }, { value: 'Other', label: 'Otro' },
 ];
 
+export const ticketFilterParsers = {
+    search: parseAsString.withDefault(''),
+    status: parseAsString.withDefault(''),
+    priority: parseAsString.withDefault(''),
+    assignedTo: parseAsString.withDefault(''),
+    dateFrom: parseAsString.withDefault(''),
+    dateTo: parseAsString.withDefault(''),
+    deviceType: parseAsString.withDefault(''),
+    page: parseAsString.withDefault(''),
+};
+
 export default function TicketSearchFilters() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const [filters, setFilters] = useQueryStates(ticketFilterParsers, { shallow: false });
     const [isPending, startTransition] = useTransition();
     const searchRef = useRef<HTMLInputElement>(null);
-    const [search, setSearch] = useState(searchParams.get('search') || '');
-    const [status, setStatus] = useState(searchParams.get('status') || '');
-    const [priority, setPriority] = useState(searchParams.get('priority') || '');
-    const [assignedTo, setAssignedTo] = useState(searchParams.get('assignedTo') || '');
-    const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || '');
-    const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || '');
-    const [deviceType, setDeviceType] = useState(searchParams.get('deviceType') || '');
+
+    const [searchDraft, setSearchDraft] = useState(filters.search);
+    const [statusDraft, setStatusDraft] = useState(filters.status);
+    const [priorityDraft, setPriorityDraft] = useState(filters.priority);
+    const [assignedToDraft, setAssignedToDraft] = useState(filters.assignedTo);
+    const [dateFromDraft, setDateFromDraft] = useState(filters.dateFrom);
+    const [dateToDraft, setDateToDraft] = useState(filters.dateTo);
+    const [deviceTypeDraft, setDeviceTypeDraft] = useState(filters.deviceType);
+
+    useEffect(() => {
+        setSearchDraft(filters.search);
+        setStatusDraft(filters.status);
+        setPriorityDraft(filters.priority);
+        setAssignedToDraft(filters.assignedTo);
+        setDateFromDraft(filters.dateFrom);
+        setDateToDraft(filters.dateTo);
+        setDeviceTypeDraft(filters.deviceType);
+    }, [filters]);
 
     const updateFilters = () => {
-        const params = new URLSearchParams();
-        if (search.trim()) params.set('search', search.trim());
-        if (status) params.set('status', status);
-        if (priority) params.set('priority', priority);
-        if (assignedTo.trim()) params.set('assignedTo', assignedTo.trim());
-        if (dateFrom) params.set('dateFrom', dateFrom);
-        if (dateTo) params.set('dateTo', dateTo);
-        if (deviceType) params.set('deviceType', deviceType);
-        startTransition(() => router.push(`/dashboard/tickets?${params.toString()}`));
+        startTransition(async () => {
+            await setFilters({
+                search: searchDraft.trim() || null,
+                status: statusDraft || null,
+                priority: priorityDraft || null,
+                assignedTo: assignedToDraft.trim() || null,
+                dateFrom: dateFromDraft || null,
+                dateTo: dateToDraft || null,
+                deviceType: deviceTypeDraft || null,
+                page: null,
+            });
+        });
     };
 
     const handleClear = () => {
-        setSearch(''); setStatus(''); setPriority(''); setAssignedTo(''); setDateFrom(''); setDateTo(''); setDeviceType('');
-        startTransition(() => router.push('/dashboard/tickets'));
+        setSearchDraft('');
+        setStatusDraft('');
+        setPriorityDraft('');
+        setAssignedToDraft('');
+        setDateFromDraft('');
+        setDateToDraft('');
+        setDeviceTypeDraft('');
+        startTransition(async () => {
+            await setFilters({
+                search: null,
+                status: null,
+                priority: null,
+                assignedTo: null,
+                dateFrom: null,
+                dateTo: null,
+                deviceType: null,
+                page: null,
+            });
+        });
     };
 
     useEffect(() => {
@@ -63,7 +104,7 @@ export default function TicketSearchFilters() {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    const hasFilters = Boolean(search || status || priority || assignedTo || dateFrom || dateTo || deviceType);
+    const hasFilters = Boolean(filters.search || filters.status || filters.priority || filters.assignedTo || filters.dateFrom || filters.dateTo || filters.deviceType);
 
     return (
         <form className={styles['filters']} onSubmit={(event) => { event.preventDefault(); updateFilters(); }} aria-label="Filtros de tickets">
@@ -78,8 +119,8 @@ export default function TicketSearchFilters() {
                         <div className={styles['searchItem']}>
                             <label className={styles['searchLabel']}>Término de búsqueda</label>
                             <SearchInputGroup
-                                value={search}
-                                onChange={setSearch}
+                                value={searchDraft}
+                                onChange={setSearchDraft}
                                 onSearch={updateFilters}
                                 placeholder="Buscar por ID, título o cliente... (Ctrl + K)"
                                 buttonText="Buscar"
@@ -91,8 +132,8 @@ export default function TicketSearchFilters() {
                         <div className={styles['filterItem']}>
                             <Select
                                 label="Estado del ticket"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
+                                value={statusDraft}
+                                onChange={(e) => setStatusDraft(e.target.value)}
                                 options={statusOptions}
                                 aria-label="Filtrar por estado"
                             />
@@ -100,8 +141,8 @@ export default function TicketSearchFilters() {
                         <div className={styles['filterItem']}>
                             <Select
                                 label="Nivel de prioridad"
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
+                                value={priorityDraft}
+                                onChange={(e) => setPriorityDraft(e.target.value)}
                                 options={priorityOptions}
                                 aria-label="Filtrar por prioridad"
                             />
@@ -110,10 +151,10 @@ export default function TicketSearchFilters() {
                 </section>
 
                 {/* Filtros Secundarios Agrupados Cognitivamente (Miller Blocks 2 & 3) */}
-                <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
+                <details className={styles['advancedFilters']} open={Boolean(filters.dateFrom || filters.dateTo || filters.assignedTo || filters.deviceType)}>
                     <summary>
                         <span>⚙️ Filtros Avanzados (Dispositivo, Asignación y Fechas)</span>
-                        <span>{Boolean(dateFrom || dateTo || assignedTo || deviceType) ? 'Filtros activos' : 'Desplegar opciones'}</span>
+                        <span>{Boolean(filters.dateFrom || filters.dateTo || filters.assignedTo || filters.deviceType) ? 'Filtros activos' : 'Desplegar opciones'}</span>
                     </summary>
                     
                     <div className={styles['advancedClusters']}>
@@ -123,15 +164,15 @@ export default function TicketSearchFilters() {
                             <div className={styles['clusterGrid']}>
                                 <Select
                                     label="Tipo de dispositivo"
-                                    value={deviceType}
-                                    onChange={(e) => setDeviceType(e.target.value)}
+                                    value={deviceTypeDraft}
+                                    onChange={(e) => setDeviceTypeDraft(e.target.value)}
                                     aria-label="Filtrar por tipo de dispositivo"
                                     options={deviceOptions}
                                 />
                                 <Input
                                     label="Técnico responsable"
-                                    value={assignedTo}
-                                    onChange={(e) => setAssignedTo(e.target.value)}
+                                    value={assignedToDraft}
+                                    onChange={(e) => setAssignedToDraft(e.target.value)}
                                     placeholder="Nombre o correo..."
                                     aria-label="Filtrar por técnico asignado"
                                 />
@@ -145,15 +186,15 @@ export default function TicketSearchFilters() {
                                 <Input
                                     label="Fecha desde"
                                     type="date"
-                                    value={dateFrom}
-                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    value={dateFromDraft}
+                                    onChange={(e) => setDateFromDraft(e.target.value)}
                                     aria-label="Fecha inicial de creación"
                                 />
                                 <Input
                                     label="Fecha hasta"
                                     type="date"
-                                    value={dateTo}
-                                    onChange={(e) => setDateTo(e.target.value)}
+                                    value={dateToDraft}
+                                    onChange={(e) => setDateToDraft(e.target.value)}
                                     aria-label="Fecha final de creación"
                                 />
                             </div>
@@ -169,14 +210,14 @@ export default function TicketSearchFilters() {
 
                 {hasFilters && (
                     <div className={styles['activeFilters']} aria-label="Filtros activos">
-                        {search && <span className={styles['filterBadge']}>Búsqueda: {search}</span>}
-                        {status && <span className={styles['filterBadge']}>Estado: {statusOptions.find(s => s.value === status)?.label || status}</span>}
-                        {priority && <span className={styles['filterBadge']}>Prioridad: {priorityOptions.find(p => p.value === priority)?.label || priority}</span>}
-                        {deviceType && <span className={styles['filterBadge']}>Equipo: {deviceOptions.find(d => d.value === deviceType)?.label || deviceType}</span>}
-                        {assignedTo && <span className={styles['filterBadge']}>Técnico: {assignedTo}</span>}
-                        {(dateFrom || dateTo) && (
+                        {filters.search && <span className={styles['filterBadge']}>Búsqueda: {filters.search}</span>}
+                        {filters.status && <span className={styles['filterBadge']}>Estado: {statusOptions.find(s => s.value === filters.status)?.label || filters.status}</span>}
+                        {filters.priority && <span className={styles['filterBadge']}>Prioridad: {priorityOptions.find(p => p.value === filters.priority)?.label || filters.priority}</span>}
+                        {filters.deviceType && <span className={styles['filterBadge']}>Equipo: {deviceOptions.find(d => d.value === filters.deviceType)?.label || filters.deviceType}</span>}
+                        {filters.assignedTo && <span className={styles['filterBadge']}>Técnico: {filters.assignedTo}</span>}
+                        {(filters.dateFrom || filters.dateTo) && (
                             <span className={styles['filterBadge']}>
-                                Periodo: {dateFrom || 'Inicio'} → {dateTo || 'Hoy'}
+                                Periodo: {filters.dateFrom || 'Inicio'} → {filters.dateTo || 'Hoy'}
                             </span>
                         )}
                         <Button variant="ghost" size="sm" type="button" onClick={handleClear} disabled={isPending}>

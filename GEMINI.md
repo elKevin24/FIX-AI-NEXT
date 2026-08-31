@@ -80,11 +80,22 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
 
 ## 4. Convenciones de Desarrollo
 
-### Estilo de Código
+### Convenciones de UI, Animaciones y Estado
 *   **TypeScript:** Estricto. No usar `any`.
 *   **Server Components:** Preferidos por defecto.
 *   **Client Components:** Solo para interactividad (`'use client'`).
 *   **Formularios:** Usar `FormData` en Server Actions, parseado y validado con Zod.
+*   **Filtros en URL (`nuqs`):** Usar siempre `nuqs` (`useQueryStates` / `useQueryState`) para filtros tipados y paginación en URL.
+*   **Estado de Carrito / POS (`zustand`):** Usar `src/lib/stores/usePosStore.ts` exclusivamente para la reactividad en memoria del Punto de Venta.
+*   **Reglas Estrictas de Animación (`motion / motion/react`):**
+    *   **Ámbitos Permitidos ÚNICAMENTE:**
+        1. Modales y Drawers ([`Modal.tsx`](file:///c:/Users/busqu/Documents/GitHub/FIX-AI-NEXT/src/components/ui/Modal.tsx)) con `AnimatePresence` para entradas y salidas suaves.
+        2. Tarjetas de estado / feedback de confirmación (ej. [`ApprovalHandler.tsx`](file:///c:/Users/busqu/Documents/GitHub/FIX-AI-NEXT/src/app/tickets/approval/ApprovalHandler.tsx)).
+        3. Toasts flotantes y notificaciones que requieran animación de salida física del DOM.
+        4. Reordenamiento visual y drop en tableros Kanban de tickets (`ticket-dnd.ts`).
+    *   **Prohibido Usar `motion` para:**
+        *   Efectos de hover, focus, botones o tablas simples (usar variables CSS nativas `--transition-*`).
+        *   Envolver páginas estáticas o Server Components innecesariamente (evitar bundle bloat).
 
 ### Base de Datos
 *   Si modificas `schema.prisma`:

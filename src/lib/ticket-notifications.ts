@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { randomBytes } from 'crypto';
 import { createNotification } from './notifications';
 import { sendEmail } from './email-service';
 import { TicketCreatedEmail } from '@/emails/TicketCreated';
@@ -56,6 +58,27 @@ export async function notifyPartsApprovalRequired(
     total: number,
 ) {
     const ticketRef = ticket.ticketNumber;
+    const baseUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app';
+    const approvalTokenTtlMs = 72 * 60 * 60 * 1000; // 72 horas
+
+    // 0. Generar y persistir un token de aprobación de un solo uso (One-Time Token)
+    const approvalToken = randomBytes(24).toString('base64url');
+    const approvalTokenExpiresAt = new Date(Date.now() + approvalTokenTtlMs);
+
+    try {
+        const tenantDb = getTenantPrisma(ticket.tenantId);
+        await tenantDb.ticket.update({
+            where: { id: ticket.id },
+            data: { approvalToken, approvalTokenExpiresAt },
+        });
+    } catch (error) {
+        console.error('[notifyPartsApprovalRequired] Failed to persist approval token:', error);
+    }
+
+    const buildApprovalLink = (action: 'approve' | 'reject') => {
+        const params = new URLSearchParams({ ticketId: ticket.id, token: approvalToken, action });
+        return `${baseUrl}/tickets/approval?${params.toString()}`;
+    };
 
     // 1. Notificar al Técnico Asignado (In-app)
     if (ticket.assignedToId) {
@@ -69,7 +92,7 @@ export async function notifyPartsApprovalRequired(
         });
     }
 
-    // 2. Notificar al Cliente (Email)
+    // 2. Notificar al Cliente (Email) — la decisión de aprobar/rechazar vive en el cuerpo
     if (ticket.customer.email) {
         await sendEmail({
             to: ticket.customer.email,
@@ -83,7 +106,9 @@ export async function notifyPartsApprovalRequired(
                 quantity,
                 priceAtProposal,
                 total,
-                ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                approveUrl: buildApprovalLink('approve'),
+                rejectUrl: buildApprovalLink('reject'),
+                ticketLink: `${baseUrl}/tickets/status/${ticket.id}`
             })
         });
     }

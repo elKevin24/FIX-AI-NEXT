@@ -125,7 +125,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 1b. Rate limiting (Búsqueda API y Portal Público)
-  if (cleanPathname.startsWith('/api/search') || cleanPathname.startsWith('/tickets/status')) {
+  if (cleanPathname.startsWith('/api/search') || cleanPathname.startsWith('/tickets/status') || cleanPathname.startsWith('/tickets/approval')) {
     const rateLimit = await checkRateLimit(ip, 'search');
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many search requests. Please wait.' }), {

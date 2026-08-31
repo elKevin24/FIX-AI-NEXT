@@ -11,6 +11,8 @@ interface PartsApprovalRequiredEmailProps {
   quantity: number;
   priceAtProposal: number;
   total: number;
+  approveUrl?: string;
+  rejectUrl?: string;
   ticketLink?: string;
 }
 
@@ -29,7 +31,9 @@ export const PartsApprovalRequiredEmail = ({
   quantity = 1,
   priceAtProposal = 0,
   total = 0,
-  ticketLink = `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets`,
+  approveUrl = '',
+  rejectUrl = '',
+  ticketLink = `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/tickets/status`,
 }: PartsApprovalRequiredEmailProps) => {
   return (
     <EmailLayout
@@ -71,14 +75,27 @@ export const PartsApprovalRequiredEmail = ({
 
       <Text style={paragraph}>
         Este repuesto <strong>no ha sido cobrado ni descontado del inventario</strong>{' '}
-        hasta que confirmes la aprobación. Puedes comunicarte con el taller para
-        aprobar o rechazar esta propuesta.
+        hasta que confirmes tu decisión. Solo tienes que elegir una opción:
       </Text>
 
       <Section style={btnContainer}>
-        <Button style={button} href={ticketLink}>
-          Ver Ticket
-        </Button>
+        <div style={ctaRow}>
+          <Button style={{ ...button, backgroundColor: '#16a34a' }} href={approveUrl}>
+            Aprobar Presupuesto
+          </Button>
+          <Button style={{ ...button, backgroundColor: '#dc2626' }} href={rejectUrl}>
+            Rechazar Presupuesto
+          </Button>
+        </div>
+        {ticketLink && (
+          <Text style={mutedCenter}>
+            ¿Prefieres revisarlo con calma?{' '}
+            <a href={ticketLink} style={link}>
+              Consulta el estado de tu ticket aquí
+            </a>
+            .
+          </Text>
+        )}
       </Section>
 
       <Text style={muted}>
@@ -143,6 +160,14 @@ const btnContainer = {
   margin: '24px 0',
 };
 
+const ctaRow = {
+  display: 'flex',
+  flexDirection: 'row' as const,
+  justifyContent: 'center',
+  gap: '10px',
+  marginBottom: '12px',
+};
+
 const button = {
   backgroundColor: '#2563EB',
   color: '#ffffff',
@@ -151,4 +176,16 @@ const button = {
   fontSize: '16px',
   fontWeight: 600,
   textDecoration: 'none',
+};
+
+const mutedCenter = {
+  fontSize: '13px',
+  lineHeight: '20px',
+  color: '#9ca3af',
+  margin: '8px 0 0',
+};
+
+const link = {
+  color: '#2563EB',
+  textDecoration: 'underline',
 };

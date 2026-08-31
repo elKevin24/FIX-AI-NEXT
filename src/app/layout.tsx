@@ -6,6 +6,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ThemeInit from "@/components/ThemeInit";
 import { SerwistProvider } from "@serwist/turbopack/react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -140,11 +141,13 @@ export default function RootLayout({
                 />
                 <ThemeInit />
                 <ThemeProvider>
-                    <SerwistProvider swUrl="/serwist/sw.js">
-                        <div id="app-root">
-                            {children}
-                        </div>
-                    </SerwistProvider>
+                    <NuqsAdapter>
+                        <SerwistProvider swUrl="/serwist/sw.js">
+                            <div id="app-root">
+                                {children}
+                            </div>
+                        </SerwistProvider>
+                    </NuqsAdapter>
                 </ThemeProvider>
                 <SpeedInsights />
                 <Analytics />

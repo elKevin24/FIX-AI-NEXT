@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -112,45 +113,59 @@ export function Modal({
     }
   };
 
-  if (!isOpen) return null;
-
-  const modalContent = (
-    <div className={styles['backdrop']} onClick={handleBackdropClick}>
-      <div
-        className={`${styles['modal']} ${styles[size]}`}
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        tabIndex={-1}
-      >
-        <div className={styles['header']}>
-          <h2 id="modal-title" className={styles['title']}>{title}</h2>
-          <button
-            onClick={onClose}
-            className={styles['closeButton']}
-            aria-label="Cerrar modal"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div className={styles['body']}>
-          {children}
-        </div>
-
-        {footer && (
-          <div className={styles['footer']}>
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   // Render to body using portal to ensure it stays on top of everything
   // We need to check if document is defined (for SSR safety)
   if (typeof document === 'undefined') return null;
 
-  return createPortal(modalContent, document.body);
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="modal-backdrop"
+          className={styles['backdrop']}
+          onClick={handleBackdropClick}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            key="modal-container"
+            className={`${styles['modal']} ${styles[size]}`}
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            tabIndex={-1}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className={styles['header']}>
+              <h2 id="modal-title" className={styles['title']}>{title}</h2>
+              <button
+                onClick={onClose}
+                className={styles['closeButton']}
+                aria-label="Cerrar modal"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className={styles['body']}>
+              {children}
+            </div>
+
+            {footer && (
+              <div className={styles['footer']}>
+                {footer}
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
 }
