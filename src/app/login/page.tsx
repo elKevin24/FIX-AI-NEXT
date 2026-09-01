@@ -84,6 +84,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@example.com"
+                  autoComplete="email"
+                  aria-invalid={!!errorMessage}
                   required
                   className={styles['input']}
                 />
@@ -122,6 +124,8 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="current-password"
+                  aria-invalid={!!errorMessage}
                   required
                   minLength={6}
                   className={styles['input']}
@@ -133,7 +137,7 @@ export default function LoginPage() {
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? (
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -148,7 +152,7 @@ export default function LoginPage() {
                       />
                     </svg>
                   ) : (
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -179,6 +183,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isPending}
+              aria-busy={isPending ? 'true' : undefined}
               className={styles['submitButton']}
             >
               {isPending ? (

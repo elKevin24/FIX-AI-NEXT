@@ -39,41 +39,72 @@ export default function TicketsByStatusChart({ data }: Props) {
 
     if (totalTickets === 0) {
         return (
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '300px',
-                color: '#9ca3af',
-                fontSize: '14px'
-            }}>
+            <div 
+                role="status" 
+                aria-live="polite"
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '300px',
+                    color: 'var(--color-text-tertiary)',
+                    fontSize: '14px'
+                }}
+            >
                 No hay tickets para mostrar
             </div>
         );
     }
 
     return (
-        <div style={{ width: '100%', height: '300px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                    <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={(entry) => `${entry.name}: ${entry.value}`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                    >
-                        {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+        <div 
+            role="region" 
+            aria-label="Gráfico de distribución de tickets por estado"
+            style={{ width: '100%', height: '300px' }}
+        >
+            {/* Semantic Data Table Alternative for Screen Readers (WCAG 1.1.1) */}
+            <div className="sr-only">
+                <table>
+                    <caption>Distribución de tickets por estado</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Cantidad de tickets</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {chartData.map((item) => (
+                            <tr key={item.name}>
+                                <td>{item.name}</td>
+                                <td>{item.value}</td>
+                            </tr>
                         ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                </PieChart>
-            </ResponsiveContainer>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style={{ width: '100%', height: '100%' }} aria-hidden="true">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={chartData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={(entry) => `${entry.name}: ${entry.value}`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                        >
+                            {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
         </div>
     );
 }

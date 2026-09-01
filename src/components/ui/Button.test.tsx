@@ -3,9 +3,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from './Button';
 
 describe('Button component', () => {
-  it('renders button with children text', () => {
+  it('renders button with children text and default type="button"', () => {
     render(<Button>Guardar</Button>);
-    expect(screen.getByRole('button', { name: /guardar/i })).toBeDefined();
+    const button = screen.getByRole('button', { name: /guardar/i });
+    expect(button).toBeDefined();
+    expect(button.getAttribute('type')).toBe('button');
+  });
+
+  it('allows overriding type="submit"', () => {
+    render(<Button type="submit">Enviar</Button>);
+    const button = screen.getByRole('button', { name: /enviar/i });
+    expect(button.getAttribute('type')).toBe('submit');
   });
 
   it('handles click events', () => {
@@ -24,10 +32,11 @@ describe('Button component', () => {
     expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it('disables button and shows spinner when loading is true', () => {
+  it('disables button, sets aria-busy, and shows spinner when loading is true', () => {
     render(<Button loading>Procesando</Button>);
     const button = screen.getByRole('button', { name: /procesando/i });
     expect(button.hasAttribute('disabled')).toBe(true);
+    expect(button.getAttribute('aria-busy')).toBe('true');
   });
 
   it('renders left and right icons when provided', () => {

@@ -60,7 +60,7 @@ describe('NotificationBell', () => {
 
   it('renders bell button', async () => {
     await act(async () => { render(<NotificationBell />); });
-    expect(screen.getByLabelText('Notificaciones')).toBeDefined();
+    expect(screen.getByRole('button', { name: /notificaciones/i })).toBeDefined();
   });
 
   it('shows unread count badge', async () => {
@@ -87,7 +87,7 @@ describe('NotificationBell', () => {
       expect(screen.getByText('2')).toBeDefined();
     });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
     expect(screen.getByText('Notificaciones')).toBeDefined();
     expect(screen.getByText('Ticket Urgente')).toBeDefined();
@@ -102,7 +102,7 @@ describe('NotificationBell', () => {
       expect(mockGetMyNotifications).toHaveBeenCalled();
     });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
     expect(screen.getByText('No tienes notificaciones.')).toBeDefined();
   });
@@ -112,9 +112,9 @@ describe('NotificationBell', () => {
     await act(async () => { render(<NotificationBell />); });
     await waitFor(() => { expect(screen.getByText('2')).toBeDefined(); });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
-    const markBtns = screen.getAllByTitle('Marcar como leída');
+    const markBtns = screen.getAllByRole('button', { name: /marcar como leída/i });
     await act(async () => { fireEvent.click(markBtns[0]!); });
     expect(mockMarkAsRead).toHaveBeenCalledWith('1');
   });
@@ -124,7 +124,7 @@ describe('NotificationBell', () => {
     await act(async () => { render(<NotificationBell />); });
     await waitFor(() => { expect(screen.getByText('2')).toBeDefined(); });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
     await act(async () => { fireEvent.click(screen.getByText('Marcar leídas')); });
     expect(mockMarkAllRead).toHaveBeenCalled();
@@ -134,7 +134,7 @@ describe('NotificationBell', () => {
     await act(async () => { render(<NotificationBell />); });
     await waitFor(() => { expect(screen.getByText('2')).toBeDefined(); });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
     expect(screen.getByText('Ver todas las notificaciones')).toBeDefined();
   });
@@ -143,7 +143,7 @@ describe('NotificationBell', () => {
     await act(async () => { render(<NotificationBell />); });
     await waitFor(() => { expect(screen.getByText('2')).toBeDefined(); });
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Notificaciones'));
+      fireEvent.click(screen.getByRole('button', { name: /notificaciones/i }));
     });
     const link = screen.getByText('Ver todas las notificaciones');
     expect(link.getAttribute('href')).toBe('/dashboard/notifications');

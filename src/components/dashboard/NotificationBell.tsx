@@ -86,33 +86,48 @@ export default function NotificationBell() {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     };
 
+    // Close dropdown on Escape key
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            setIsOpen(false);
+        }
+    };
+
     return (
         <div 
             className={styles['container']} 
             ref={containerRef}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onKeyDown={handleKeyDown}
         >
             <button 
+                type="button"
                 className={styles['bellButton']}
-                aria-label="Notificaciones"
-                title="Notificaciones"
-                onClick={() => setIsOpen(!isOpen)} // Mantiene compatibilidad click/touch
+                aria-label={unreadCount > 0 ? `Notificaciones, ${unreadCount} no leídas` : 'Notificaciones'}
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                onClick={() => setIsOpen(!isOpen)}
             >
                 <BellIcon />
                 {unreadCount > 0 && (
-                    <span className={styles['unreadBadge']}>
+                    <span className={styles['unreadBadge']} aria-hidden="true">
                         {unreadCount}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div className={styles['dropdown']}>
+                <div className={styles['dropdown']} role="region" aria-label="Notificaciones recientes">
                     <div className={styles['header']}>
                         <h3 className={styles['title']}>Notificaciones</h3>
                         {unreadCount > 0 && (
-                            <button onClick={handleMarkAllRead} className={styles['markAllRead']}>
+                            <button 
+                                type="button" 
+                                onClick={handleMarkAllRead} 
+                                className={styles['markAllRead']}
+                                aria-label="Marcar todas las notificaciones como leídas"
+                            >
                                 Marcar leídas
                             </button>
                         )}
@@ -133,11 +148,12 @@ export default function NotificationBell() {
                                         </span>
                                         {!notification.isRead && (
                                             <button 
+                                                type="button"
                                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
                                                 className={styles['closeBtn']}
-                                                title="Marcar como leída"
+                                                aria-label="Marcar como leída"
                                             >
-                                                ×
+                                                <span aria-hidden="true">×</span>
                                             </button>
                                         )}
                                     </div>
@@ -184,7 +200,7 @@ function getNotificationTypeClass(type: string, styles: any) {
 
 function BellIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import styles from './Modal.module.css';
@@ -41,6 +41,8 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const rawId = useId();
+  const titleId = `modal-title-${rawId.replace(/:/g, '')}`;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -135,7 +137,7 @@ export function Modal({
             ref={modalRef}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="modal-title"
+            aria-labelledby={titleId}
             tabIndex={-1}
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -143,13 +145,14 @@ export function Modal({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className={styles['header']}>
-              <h2 id="modal-title" className={styles['title']}>{title}</h2>
+              <h2 id={titleId} className={styles['title']}>{title}</h2>
               <button
+                type="button"
                 onClick={onClose}
                 className={styles['closeButton']}
                 aria-label="Cerrar modal"
               >
-                &times;
+                <span aria-hidden="true">&times;</span>
               </button>
             </div>
 

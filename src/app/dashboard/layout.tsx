@@ -22,14 +22,16 @@ export default async function DashboardLayout({
             style={{ width: '100%' }}
         >
             <button 
+                type="submit"
+                aria-label="Cerrar sesión"
                 style={{
                     width: '100%',
                     padding: '0.75rem 1rem',
                     background: 'var(--color-surface)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    border: '1px solid var(--color-error-300)',
                     borderRadius: '0.75rem',
                     cursor: 'pointer',
-                    color: '#dc2626',
+                    color: 'var(--color-error-600)',
                     fontSize: '0.9rem',
                     fontWeight: 600,
                     transition: 'all 0.2s ease',
@@ -40,7 +42,7 @@ export default async function DashboardLayout({
                     boxSizing: 'border-box'
                 }}
             >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                     <polyline points="16 17 21 12 16 7"></polyline>
                     <line x1="21" y1="12" x2="9" y2="12"></line>

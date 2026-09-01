@@ -29,9 +29,12 @@ export function Button({
   children,
   disabled,
   as: Component = 'button',
+  type,
+  onClick,
   ...props
 }: ButtonProps) {
-  const isBusy = isLoading || loading;
+  const isBusy = Boolean(isLoading || loading);
+  const isDisabled = Boolean(disabled || isBusy);
   
   // Map variant strings to styles
   const variantStyle = styles[variant] || styles['primary'];
@@ -46,19 +49,28 @@ export function Button({
     variantStyle,
     sizeStyle,
     widthStyle,
+    isDisabled ? styles['disabled'] : '',
     className
   ].filter(Boolean).join(' ');
+
+  const isNativeButton = Component === 'button';
+  const buttonType = isNativeButton ? (type || 'button') : undefined;
 
   return (
     <Component 
       className={classes} 
-      disabled={disabled || isBusy} 
+      type={buttonType}
+      disabled={isNativeButton ? isDisabled : undefined}
+      aria-disabled={!isNativeButton && isDisabled ? 'true' : undefined}
+      tabIndex={!isNativeButton && isDisabled ? -1 : props.tabIndex}
+      aria-busy={isBusy ? 'true' : undefined}
+      onClick={onClick}
       {...props}
     >
       {isBusy && <span className={styles['spinner']} aria-hidden="true" />}
-      {!isBusy && leftIcon && <span className={styles['iconLeft']}>{leftIcon}</span>}
+      {!isBusy && leftIcon && <span className={styles['iconLeft']} aria-hidden="true">{leftIcon}</span>}
       {children}
-      {!isBusy && rightIcon && <span className={styles['iconRight']}>{rightIcon}</span>}
+      {!isBusy && rightIcon && <span className={styles['iconRight']} aria-hidden="true">{rightIcon}</span>}
     </Component>
   );
 }

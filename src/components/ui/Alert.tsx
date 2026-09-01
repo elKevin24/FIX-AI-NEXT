@@ -10,9 +10,15 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Alert({ variant = 'info', children, className = '', ...props }: AlertProps) {
   const variantClass = styles[variant] || styles['info'];
   const classes = `${styles['alert']} ${variantClass} ${className}`.trim();
+  const isAssertive = variant === 'error' || variant === 'warning';
   
   return (
-    <div className={classes} role="alert" {...props}>
+    <div 
+      className={classes} 
+      role={isAssertive ? 'alert' : 'status'} 
+      aria-live={isAssertive ? 'assertive' : 'polite'}
+      {...props}
+    >
       {children}
     </div>
   );

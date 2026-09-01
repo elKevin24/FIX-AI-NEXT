@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
@@ -14,6 +15,17 @@ interface SidebarProps {
 export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
     const { isOpen, close } = useSidebar();
     const pathname = usePathname();
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                close();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, close]);
 
     const isActive = (path: string) => {
         if (path === '/dashboard') {
@@ -40,12 +52,13 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                 className={`${styles['overlay']} ${isOpen ? styles['open'] : ''}`}
                 onClick={close}
                 role="presentation"
+                aria-hidden="true"
             />
 
             {/* Sidebar */}
-            <aside className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`} aria-label="Menú de navegación">
+            <aside className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`} aria-label="Menú de navegación principal">
                 <div className={styles['logo']}>
-                    <div className={styles['logoIcon']} />
+                    <div className={styles['logoIcon']} aria-hidden="true" />
                     <h2>FIX-AI</h2>
                     <button
                         className={styles['closeDrawerBtn']}
@@ -53,25 +66,25 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                         aria-label="Cerrar menú"
                         type="button"
                     >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
                     </button>
                 </div>
-                <nav className={styles['nav']}>
+                <nav className={styles['nav']} aria-label="Secciones del sistema">
                     {/* Grupo 1: General (3 ítems) */}
                     <div className={styles['navSection']}>
                         <span className={styles['navSectionTitle']}>General</span>
-                        <Link href="/dashboard" className={getLinkClass('/dashboard')}>
+                        <Link href="/dashboard" className={getLinkClass('/dashboard')} aria-current={isActive('/dashboard') ? 'page' : undefined}>
                             <HomeIcon className={styles['navIcon']} />
                             Inicio
                         </Link>
-                        <Link href="/dashboard/tickets" className={getLinkClass('/dashboard/tickets')}>
+                        <Link href="/dashboard/tickets" className={getLinkClass('/dashboard/tickets')} aria-current={isActive('/dashboard/tickets') ? 'page' : undefined}>
                             <TicketIcon className={styles['navIcon']} />
                             Tickets
                         </Link>
-                        <Link href="/dashboard/tickets/pool" className={getLinkClass('/dashboard/tickets/pool')}>
+                        <Link href="/dashboard/tickets/pool" className={getLinkClass('/dashboard/tickets/pool')} aria-current={isActive('/dashboard/tickets/pool') ? 'page' : undefined}>
                             <PoolIcon className={styles['navIcon']} />
                             Pool de Tickets
                         </Link>
@@ -80,21 +93,21 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                     {/* Grupo 2: Taller & Operaciones (4 ítems) */}
                     <div className={styles['navSection']}>
                         <span className={styles['navSectionTitle']}>Operaciones</span>
-                        <Link href="/dashboard/parts" className={getLinkClass('/dashboard/parts')}>
+                        <Link href="/dashboard/parts" className={getLinkClass('/dashboard/parts')} aria-current={isActive('/dashboard/parts') ? 'page' : undefined}>
                             <CubeIcon className={styles['navIcon']} />
                             Repuestos
                         </Link>
-                        <Link href="/dashboard/technicians/workload" className={getLinkClass('/dashboard/technicians/workload')}>
+                        <Link href="/dashboard/technicians/workload" className={getLinkClass('/dashboard/technicians/workload')} aria-current={isActive('/dashboard/technicians/workload') ? 'page' : undefined}>
                             <WorkloadIcon className={styles['navIcon']} />
                             Carga de Trabajo
                         </Link>
                         {userRole === 'ADMIN' && (
-                            <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')}>
+                            <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')} aria-current={isActive('/dashboard/settings/service-templates') ? 'page' : undefined}>
                                 <TemplatesIcon className={styles['navIcon']} />
                                 Plantillas
                             </Link>
                         )}
-                        <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')}>
+                        <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')} aria-current={isActive('/dashboard/customers') ? 'page' : undefined}>
                             <UsersIcon className={styles['navIcon']} />
                             Clientes
                         </Link>
@@ -103,23 +116,23 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                     {/* Grupo 3: Ventas & Punto de Venta (5 ítems) */}
                     <div className={styles['navSection']}>
                         <span className={styles['navSectionTitle']}>Ventas & POS</span>
-                        <Link href="/dashboard/pos" className={getLinkClass('/dashboard/pos')}>
+                        <Link href="/dashboard/pos" className={getLinkClass('/dashboard/pos')} aria-current={isActive('/dashboard/pos') ? 'page' : undefined}>
                             <POSIcon className={styles['navIcon']} />
                             Punto de Venta
                         </Link>
-                        <Link href="/dashboard/cash-register" className={getLinkClass('/dashboard/cash-register')}>
+                        <Link href="/dashboard/cash-register" className={getLinkClass('/dashboard/cash-register')} aria-current={isActive('/dashboard/cash-register') ? 'page' : undefined}>
                             <CashIcon className={styles['navIcon']} />
                             Caja
                         </Link>
-                        <Link href="/dashboard/invoices" className={getLinkClass('/dashboard/invoices')}>
+                        <Link href="/dashboard/invoices" className={getLinkClass('/dashboard/invoices')} aria-current={isActive('/dashboard/invoices') ? 'page' : undefined}>
                             <InvoiceIcon className={styles['navIcon']} />
                             Facturación
                         </Link>
-                        <Link href="/dashboard/pos/quotations" className={getLinkClass('/dashboard/pos/quotations')}>
+                        <Link href="/dashboard/pos/quotations" className={getLinkClass('/dashboard/pos/quotations')} aria-current={isActive('/dashboard/pos/quotations') ? 'page' : undefined}>
                             <QuotationIcon className={styles['navIcon']} />
                             Cotizaciones
                         </Link>
-                        <Link href="/dashboard/pos/returns" className={getLinkClass('/dashboard/pos/returns')}>
+                        <Link href="/dashboard/pos/returns" className={getLinkClass('/dashboard/pos/returns')} aria-current={isActive('/dashboard/pos/returns') ? 'page' : undefined}>
                             <ReturnIcon className={styles['navIcon']} />
                             Devoluciones
                         </Link>
@@ -128,15 +141,15 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                     {/* Grupo 4: Administración (3 ítems) */}
                     <div className={styles['navSection']}>
                         <span className={styles['navSectionTitle']}>Administración</span>
-                        <Link href="/dashboard/reports" className={getLinkClass('/dashboard/reports')}>
+                        <Link href="/dashboard/reports" className={getLinkClass('/dashboard/reports')} aria-current={isActive('/dashboard/reports') ? 'page' : undefined}>
                             <ChartIcon className={styles['navIcon']} />
                             Reportes
                         </Link>
-                        <Link href="/dashboard/users" className={getLinkClass('/dashboard/users')}>
+                        <Link href="/dashboard/users" className={getLinkClass('/dashboard/users')} aria-current={isActive('/dashboard/users') ? 'page' : undefined}>
                             <UserGroupIcon className={styles['navIcon']} />
                             Usuarios
                         </Link>
-                        <Link href="/dashboard/settings" className={getLinkClass('/dashboard/settings')}>
+                        <Link href="/dashboard/settings" className={getLinkClass('/dashboard/settings')} aria-current={isActive('/dashboard/settings') ? 'page' : undefined}>
                             <SettingsIcon className={styles['navIcon']} />
                             Configuración
                         </Link>
@@ -153,10 +166,10 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
     );
 }
 
-// Icons Components (Simple SVG Wrappers)
+// Icons Components (Simple SVG Wrappers with aria-hidden)
 function HomeIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
     );
@@ -164,7 +177,7 @@ function HomeIcon({ className }: { className?: string }) {
 
 function TicketIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
         </svg>
     );
@@ -172,7 +185,7 @@ function TicketIcon({ className }: { className?: string }) {
 
 function UsersIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
     );
@@ -180,7 +193,7 @@ function UsersIcon({ className }: { className?: string }) {
 
 function UserGroupIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
     );
@@ -188,7 +201,7 @@ function UserGroupIcon({ className }: { className?: string }) {
 
 function SettingsIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -197,7 +210,7 @@ function SettingsIcon({ className }: { className?: string }) {
 
 function PoolIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
     );
@@ -205,14 +218,15 @@ function PoolIcon({ className }: { className?: string }) {
 
 function WorkloadIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
     );
 }
+
 function ChartIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
@@ -221,7 +235,7 @@ function ChartIcon({ className }: { className?: string }) {
 
 function InvoiceIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
     );
@@ -229,7 +243,7 @@ function InvoiceIcon({ className }: { className?: string }) {
 
 function CashIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
     );
@@ -237,7 +251,7 @@ function CashIcon({ className }: { className?: string }) {
 
 function TemplatesIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2v6h6" />
         </svg>
@@ -246,7 +260,7 @@ function TemplatesIcon({ className }: { className?: string }) {
 
 function POSIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
     );
@@ -254,7 +268,7 @@ function POSIcon({ className }: { className?: string }) {
 
 function QuotationIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
         </svg>
     );
@@ -262,7 +276,7 @@ function QuotationIcon({ className }: { className?: string }) {
 
 function ReturnIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
         </svg>
     );
@@ -270,7 +284,7 @@ function ReturnIcon({ className }: { className?: string }) {
 
 function CubeIcon({ className }: { className?: string }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
     );

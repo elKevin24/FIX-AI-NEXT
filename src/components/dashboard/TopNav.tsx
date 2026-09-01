@@ -17,7 +17,7 @@ export default function TopNav() {
                     aria-expanded={isOpen}
                     type="button"
                 >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         {isOpen ? (
                             <>
                                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -33,7 +33,7 @@ export default function TopNav() {
                     </svg>
                 </button>
                 <div className={styles['mobileBrand']}>
-                    <span className={styles['brandIcon']} />
+                    <span className={styles['brandIcon']} aria-hidden="true" />
                     <span className={styles['brandText']}>FIX-AI</span>
                 </div>
             </div>

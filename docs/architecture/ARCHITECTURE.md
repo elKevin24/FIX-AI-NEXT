@@ -1,279 +1,90 @@
-# Arquitectura del Sistema Multi-Tenant Workshop
+# Arquitectura — FIX-AI NEXT
 
-## Visión General
+> Documento actualizado contra el **código real** (branch `develop`). Si algo de este doc contradice el código, **el código manda**.
 
-Este sistema está diseñado para gestionar múltiples talleres electrónicos bajo una sola aplicación, utilizando un modelo de **multi-tenancy** con aislamiento de datos a nivel de aplicación.
+## Visión general
 
-## Diagrama de Arquitectura
+Aplicación web **multi-tenant** (shared database + shared schema) para la gestión de talleres de reparación electrónica. Cada *tenant* (taller) es un registro de la tabla `tenants`; todos los modelos de datos de un tenant llevan una columna escalar `tenantId` y se aíslan **en la capa de acceso a datos** mediante `getTenantPrisma`.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        FRONTEND (Next.js 15)                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  Landing     │  │   Dashboard  │  │ Public Query │      │
-│  │  Page        │  │   (Auth)     │  │  (No Auth)   │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    MIDDLEWARE (Auth Check)                   │
-│              NextAuth.js v5 + JWT Sessions                   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      API ROUTES (Next.js)                    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  /api/auth   │  │ /api/tickets │  │ /api/users   │      │
-│  │  (NextAuth)  │  │  (CRUD)      │  │  (CRUD)      │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-│                                                               │
-│  Validación de tenantId en TODAS las operaciones            │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    PRISMA ORM (Type-Safe)                    │
-│                   Tenant Isolation Layer                     │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     POSTGRESQL DATABASE                      │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Tenants │ Users │ Tickets │ Customers │ AuditLogs  │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Modelo de Multi-Tenancy
-
-### Estrategia: Shared Database, Shared Schema
-
-- **Una base de datos** para todos los talleres
-- **Un esquema** compartido
-- **Aislamiento por `tenantId`** en cada tabla
-
-#### Ventajas
-✅ Menor costo de infraestructura  
-✅ Fácil mantenimiento y actualizaciones  
-✅ Escalabilidad horizontal simple  
-✅ Backup y restore centralizados  
-
-#### Desventajas
-⚠️ Requiere validación estricta de `tenantId`  
-⚠️ Riesgo de data leakage si hay bugs  
-⚠️ Límites de escalabilidad a largo plazo  
-
-### Implementación de Aislamiento
-
-```typescript
-// ✅ CORRECTO: Todas las queries incluyen tenantId
-const tickets = await prisma.ticket.findMany({
-  where: {
-    tenantId: session.user.tenantId,  // Aislamiento
-    status: 'OPEN'
-  }
-});
-
-// ❌ INCORRECTO: Sin validación de tenant
-const tickets = await prisma.ticket.findMany({
-  where: { status: 'OPEN' }  // ¡PELIGRO! Acceso a todos los tenants
-});
-```
-
-## Flujo de Autenticación
+### Diagrama de flujo (real)
 
 ```
-1. Usuario → /login
-2. Credenciales → NextAuth.js
-3. Validación → Prisma → PostgreSQL
-4. JWT generado con: { id, email, role, tenantId }
-5. Session almacenada
-6. Middleware valida en cada request
-7. API Routes acceden a session.user.tenantId
+Browser
+   ↓
+Next.js 16 (App Router)
+   ↓
+Middleware (src/proxy.ts)  → auth + rate limiting + passwordMustChange
+   ↓
+Server Components  +  Client Components  +  Route Handlers (src/app/api)
+   ↓
+Server Actions ('use server')  →  src/lib/actions/*, src/lib/*-actions.ts
+   ↓
+Business Logic (use-cases siempre que existan; si no, directo en la action)
+   ↓
+getTenantPrisma(tenantId, userId)   (src/lib/tenant-prisma.ts)
+   ↓
+Prisma 7 + @prisma/adapter-neon
+   ↓
+PostgreSQL / Neon
 ```
 
-## Control de Acceso (RBAC)
+## Stack real (verificado)
 
-### Roles
+- **Next.js 16.3.3** / **React 19.2.1** / **TypeScript 5** (strict).
+- **Prisma 7** + `@prisma/adapter-neon` — el adapter se pasa programáticamente en `src/lib/prisma.ts` (no hay `url`/`directUrl` en `prisma/schema.prisma`).
+- **PostgreSQL** vía **Neon** (producción) o Docker (local).
+- **NextAuth v5** (Credentials + JWT).
+- **Zod**, **date-fns**, **nuqs**, **Recharts**, **xlsx**, **jspdf/html2canvas**, **@react-email+Nodemailer**, **qrcode**, **Serwist** (PWA).
+- **Testing**: Vitest + Testing Library + Playwright.
 
-| Rol | Permisos |
-|-----|----------|
-| **ADMIN** | Acceso completo al tenant. Crear/editar usuarios, tickets, configuración |
-| **TECHNICIAN** | Ver y actualizar tickets asignados. Agregar repuestos |
-| **RECEPTIONIST** | Crear tickets. Ver estado. No puede eliminar |
+> No usarás **Zustand** ni **@tanstack/react-query**: no están instalados. El estado/fecthing es server-driven (Server + Server Actions). `nuqs` se usa únicamente en filtros de listados (`PartSearchFilters`, `TicketSearchFilters`) para mantener el estado en la URL.
 
-### Implementación
+## Frontend
 
-```typescript
-// Middleware de autorización
-if (session.user.role !== 'ADMIN') {
-  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-}
-```
+- **Rota principal dividida**: área pública de auth (`/login`, `/forgot-password`, `/reset-password`), portal público (`/tickets/status/[id]`, `/tickets/approval`), y el área autenticada `/dashboard/*`.
+- **Layout root** (`src/app/layout.tsx`): `ThemeProvider` (con `ThemeInit`), `NuqsAdapter`, `SerwistProvider` (PWA), `SpeedInsights` + `Analytics` (Vercel), skip-link y metadata SEO/OG.
+- **CSS Modules** por componente + **design tokens** en `src/app/globals.css` (light/dark/dark-colorblind).
+- **`'use client'`** solo donde hay interactividad/estado (ver `docs/development/rules.md`).
 
-## Modelo de Datos
+## Backend
 
-### Relaciones Principales
+- **Server Actions** son el mecanismo primario de mutación. Están en `src/lib/actions/*-actions.ts` y `src/lib/*-actions.ts` (`'use server'`).
+  - Los módulos `customer`/`part`/`ticket` delegan en **Use Cases** (`src/use-cases/`).
+  - `user` y `tenant-settings` consultan `getTenantPrisma` **directamente en la action**.
+  - Hay una capa de repositorios (`src/lib/repositories/`) que hoy **no consume** la mayoría de las actions (plumbing paralelo).
+- **Route Handlers** (`src/app/api/**/route.ts`) cubren: auth (NextAuth), cron (`/api/cron/*`, protegidos con `CRON_SECRET`), export (`/api/export/*`), attachments, pool de tickets, disponibilidad de técnicos y CRUD legacy (`/api/users`, `/api/customers`, `/api/tickets`). El frontend usa **Server Actions** para los flujos nuevos; las rutas CRUD son en buena medida herencia.
+- **Middleware** = `src/proxy.ts` (Next 16 renombró `middleware.ts`): protege `/dashboard` y `/api` internos, fuerza `passwordMustChange`, y aplica rate limiting por IP (Upstash Redis con fallback en memoria).
 
-```
-Tenant (1) ──< (N) User
-Tenant (1) ──< (N) Ticket
-Tenant (1) ──< (N) Customer
-Tenant (1) ──< (N) Part
-Tenant (1) ──< (N) AuditLog
+## Datos / Multi-tenancy
 
-Ticket (N) ──> (1) Customer
-Ticket (N) ──> (1) User (assignedTo)
-Ticket (1) ──< (N) PartUsage
-Part (1) ──< (N) PartUsage
-```
+- Modelo tenancy: cada modelo tenanted tiene `tenantId` + relación `tenant`. No hay RLS por defecto (la migración `postgres_rls_policies` existe como hardening).
+- El aislamiento de datos lo impone **`getTenantPrisma(tenantId, userId)`**, que:
+  - inyecta `tenantId` en `where` de `findMany/findFirst/findUnique/count/aggregate/groupBy/update/delete` para los modelos de `TENANTED_MODELS`;
+  - añade `tenantId` y `createdById/updatedById` en `create/createMany`;
+  - en `update/delete` verifica que el registro pertenezca al tenant, lanzando `P2025` si no.
+- **`findUnique` se reimplementa como `findFirst` escopetado** (para poder inyectar tenantId).
+- Puntos donde se usa `prisma` (no tenanted) a propósito: cron system-wide (`/api/cron/*`, `quotation-cron`), `sla-actions`, `auth-actions` (password reset por email), y `ticket.repository.ts` (búsqueda pública del portal).
 
-### Índices Importantes
+## Capas de dependencia (regla)
 
-```sql
--- Optimización de queries por tenant
-CREATE INDEX idx_tickets_tenant ON tickets(tenant_id);
-CREATE INDEX idx_users_tenant ON users(tenant_id);
-CREATE INDEX idx_customers_tenant ON customers(tenant_id);
-
--- Búsqueda de tickets
-CREATE INDEX idx_tickets_status ON tickets(status);
-CREATE INDEX idx_tickets_assigned ON tickets(assigned_to_id);
-```
-
-## Auditoría y Trazabilidad
-
-Todas las operaciones críticas generan un registro en `AuditLog`:
-
-```typescript
-await prisma.auditLog.create({
-  data: {
-    action: 'UPDATE_TICKET',
-    details: JSON.stringify({
-      ticketId,
-      changes: { status: 'RESOLVED' }
-    }),
-    userId: session.user.id,
-    tenantId: session.user.tenantId,
-  }
-});
-```
-
-### Eventos Auditados
-
-- ✅ Creación de tickets
-- ✅ Actualización de estado
-- ✅ Asignación de técnicos
-- ✅ Eliminación de registros (solo ADMIN)
-- ✅ Cambios en usuarios
-
-## Escalabilidad
-
-### Horizontal (Recomendado)
-
-- **Serverless Functions** en Vercel
-- Auto-scaling basado en demanda
-- Sin gestión de servidores
-
-### Vertical (Futuro)
-
-Si un tenant crece mucho:
-1. Migrar a su propia base de datos
-2. Actualizar `DATABASE_URL` por tenant
-3. Mantener la misma aplicación
-
-### Caching
-
-```typescript
-// Implementar Redis para queries frecuentes
-const cachedTickets = await redis.get(`tickets:${tenantId}`);
-if (cachedTickets) return JSON.parse(cachedTickets);
-
-// Si no está en cache, consultar DB
-const tickets = await prisma.ticket.findMany({...});
-await redis.set(`tickets:${tenantId}`, JSON.stringify(tickets), 'EX', 300);
-```
-
-## Seguridad
-
-### Medidas Implementadas
-
-1. **Autenticación**: NextAuth.js con JWT
-2. **Hashing de passwords**: bcryptjs (12 rounds)
-3. **Aislamiento de datos**: Validación de `tenantId` en todas las queries
-4. **RBAC**: Control de acceso basado en roles
-5. **HTTPS**: Obligatorio en producción
-6. **Variables de entorno**: Secrets nunca en código
-
-### Mejoras Futuras
-
-- [ ] Rate limiting por tenant
-- [ ] 2FA (Two-Factor Authentication)
-- [ ] Encriptación de datos sensibles
-- [ ] WAF (Web Application Firewall)
-- [ ] Monitoreo de accesos sospechosos
-
-## Monitoreo y Observabilidad
-
-### Métricas Clave
-
-- Requests por tenant
-- Tiempo de respuesta de APIs
-- Errores de autenticación
-- Uso de base de datos
-
-### Herramientas Sugeridas
-
-- **Vercel Analytics**: Performance monitoring
-- **Sentry**: Error tracking
-- **Prisma Pulse**: Database events
-- **LogRocket**: Session replay
-
-## Despliegue
-
-### Entornos
+Permitido (derecha usa abajo):
 
 ```
-Development → Staging → Production
-     ↓            ↓          ↓
-  Local DB    Test DB    Prod DB
+UI (components)      → solo props + Server Actions + ui primitives
+Feature (pages)      → Server Actions / Use Cases
+Business Logic       → Use Cases (getTenantPrisma / repos)
+Data Access          → Prisma via getTenantPrisma
+Database             → Neon / Postgres
 ```
 
-### CI/CD Pipeline
+Prohibido / a evitar:
+- **UI → Prisma directo** (las páginas no consultan Prisma; siempre vía action/use-case).
+- **UI → `getTenantPrisma` directo dentro de un `'use client'`** (hace falta `server-only`).
+- Saltarse `getTenantPrisma` para modelos tenanted (riesgo de fuga cross-tenant).
 
-```yaml
-# .github/workflows/deploy.yml
-on: [push]
-jobs:
-  deploy:
-    - npm install
-    - npm run lint
-    - npm run build
-    - npx prisma migrate deploy
-    - Deploy to Vercel
-```
+## Decisiones arquitectónicas pendientes de consolidar
 
-## Costos Estimados (Producción)
+- La capa `repositories/` + `container.ts` es en gran parte **plumbing paralelo no consumido**; decidir si se adopta o se elimina.
+- Hay server actions dispersas (5 en `actions/`, ~15 en raíz de `lib/`); conviene unificar ubicación.
 
-| Servicio | Plan | Costo/mes |
-|----------|------|-----------|
-| Vercel | Pro | $20 |
-| PostgreSQL | Neon/Supabase | $25 |
-| Redis (opcional) | Upstash | $10 |
-| **Total** | | **~$55/mes** |
-
-Escala con número de tenants y tráfico.
-
-## Conclusión
-
-Esta arquitectura proporciona:
-- ✅ Aislamiento seguro de datos
-- ✅ Escalabilidad automática
-- ✅ Bajo costo inicial
-- ✅ Fácil mantenimiento
-- ✅ Auditoría completa
-
-Ideal para startups y SMBs que necesitan gestionar múltiples clientes bajo una sola plataforma.
+Ver ADRs recomendados en `docs/adr/` (propuesto) para las decisiones `por qué`.

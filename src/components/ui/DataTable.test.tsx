@@ -55,7 +55,7 @@ describe('DataTable Component', () => {
     expect(screen.getByText('Cargando datos...')).toBeDefined();
   });
 
-  it('calls onRowClick when a row is clicked', () => {
+  it('calls onRowClick when a row is clicked or activated with Enter key', () => {
     const handleRowClick = vi.fn();
     render(<DataTable columns={columns} data={mockData} onRowClick={handleRowClick} />);
 
@@ -63,6 +63,9 @@ describe('DataTable Component', () => {
     if (aliceRow) {
       fireEvent.click(aliceRow);
       expect(handleRowClick).toHaveBeenCalledWith(mockData[0]);
+
+      fireEvent.keyDown(aliceRow, { key: 'Enter' });
+      expect(handleRowClick).toHaveBeenCalledTimes(2);
     }
   });
 

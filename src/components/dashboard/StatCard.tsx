@@ -11,13 +11,21 @@ interface StatCardProps {
   iconColor?: string;
 }
 
-export function StatCard({ title, value, label, icon, iconBgColor = '#dbeafe', iconColor = '#1e40af' }: StatCardProps) {
+export function StatCard({ 
+  title, 
+  value, 
+  label, 
+  icon, 
+  iconBgColor = 'var(--color-primary-100)', 
+  iconColor = 'var(--color-primary-700)' 
+}: StatCardProps) {
   return (
     <Card className={styles['card']}>
       <CardBody className={styles['body']}>
         <div 
           className={styles['iconWrapper']}
           style={{ backgroundColor: iconBgColor, color: iconColor }}
+          aria-hidden="true"
         >
           {icon}
         </div>

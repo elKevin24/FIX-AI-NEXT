@@ -75,6 +75,15 @@ export function DataTable<TData, TValue>({
                                 key={index}
                                 className={`${styles['mobileCardItem']} ${onRowClick ? styles['clickableRow'] : ''}`}
                                 onClick={() => onRowClick?.(item)}
+                                onKeyDown={(e) => {
+                                    if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                                        e.preventDefault();
+                                        onRowClick(item);
+                                    }
+                                }}
+                                tabIndex={onRowClick ? 0 : undefined}
+                                role={onRowClick ? 'button' : undefined}
+                                aria-label={onRowClick ? 'Ver detalles de elemento' : undefined}
                             >
                                 {renderMobileCard(item)}
                             </div>
@@ -97,21 +106,43 @@ export function DataTable<TData, TValue>({
                             <tr key={headerGroup.id} className={styles['headerRow']}>
                                 {headerGroup.headers.map((header) => {
                                     const meta = header.column.columnDef.meta as any;
+                                    const canSort = header.column.getCanSort();
+                                    const isSorted = header.column.getIsSorted();
+                                    const sortState = isSorted === 'asc' ? 'ascending' : isSorted === 'desc' ? 'descending' : canSort ? 'none' : undefined;
+
                                     return (
-                                        <th scope="col" 
+                                        <th 
+                                            scope="col" 
                                             key={header.id} 
                                             className={`${styles['headerCell']} ${meta?.className || ''}`}
-                                            onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                                            style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                            aria-sort={sortState}
                                         >
-                                            <div className={styles['headerContent']}>
-                                                {flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                                {header.column.getIsSorted() === 'asc' && ' 🔼'}
-                                                {header.column.getIsSorted() === 'desc' && ' 🔽'}
-                                            </div>
+                                            {canSort ? (
+                                                <button
+                                                    type="button"
+                                                    className={styles['sortButton']}
+                                                    onClick={header.column.getToggleSortingHandler()}
+                                                    aria-label={`Ordenar por ${typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : 'columna'}`}
+                                                >
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                    {isSorted === 'asc' && (
+                                                        <span aria-hidden="true"> 🔼</span>
+                                                    )}
+                                                    {isSorted === 'desc' && (
+                                                        <span aria-hidden="true"> 🔽</span>
+                                                    )}
+                                                </button>
+                                            ) : (
+                                                <div className={styles['headerContent']}>
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                </div>
+                                            )}
                                         </th>
                                     );
                                 })}
@@ -131,6 +162,15 @@ export function DataTable<TData, TValue>({
                                     key={row.id} 
                                     className={`${styles['row']} ${onRowClick ? styles['clickableRow'] : ''}`}
                                     onClick={() => onRowClick?.(row.original)}
+                                    onKeyDown={(e) => {
+                                        if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                                            e.preventDefault();
+                                            onRowClick(row.original);
+                                        }
+                                    }}
+                                    tabIndex={onRowClick ? 0 : undefined}
+                                    role={onRowClick ? 'button' : undefined}
+                                    aria-label={onRowClick ? 'Ver detalles de fila' : undefined}
                                 >
                                     {row.getVisibleCells().map((cell) => {
                                         const meta = cell.column.columnDef.meta as any;

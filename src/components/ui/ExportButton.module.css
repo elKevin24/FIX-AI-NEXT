@@ -4,7 +4,7 @@
 }
 
 .dropdown {
-    display: none;
+    display: block;
     position: absolute;
     right: 0;
     top: calc(100% + 0.25rem);
@@ -17,23 +17,23 @@
     overflow: hidden;
 }
 
-.wrapper:hover .dropdown {
-    display: block;
-}
-
 .dropdownItem {
     display: block;
     width: 100%;
     text-align: left;
-    padding: 0.5rem 0.875rem;
+    padding: 0.625rem 1rem;
     background: none;
     border: none;
     color: var(--color-text-primary);
     font-size: 0.8125rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-.dropdownItem:hover {
-    background: var(--color-bg-secondary);
+.dropdownItem:hover,
+.dropdownItem:focus-visible {
+    background: var(--color-surface-hover);
+    color: var(--color-primary-600);
+    outline: none;
 }

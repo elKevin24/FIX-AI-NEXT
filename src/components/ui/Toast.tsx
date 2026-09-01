@@ -42,14 +42,37 @@ export default function Toast({ id, type, title, message, duration = 5000, onDis
     }
   };
 
+  const isAssertive = type === 'ERROR' || type === 'WARNING';
+
   return (
-    <div className={`${styles['toast']} ${getTypeClass()} ${isExiting ? styles['exiting'] : ''}`} role="alert">
+    <div 
+      className={`${styles['toast']} ${getTypeClass()} ${isExiting ? styles['exiting'] : ''}`} 
+      role={isAssertive ? 'alert' : 'status'}
+      aria-live={isAssertive ? 'assertive' : 'polite'}
+      aria-atomic="true"
+    >
       <div className={styles['content']}>
         {title && <span className={styles['title']}>{title}</span>}
         <span className={styles['message']}>{message}</span>
       </div>
-      <button onClick={handleDismiss} className={styles['closeBtn']} aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <button 
+        type="button" 
+        onClick={handleDismiss} 
+        className={styles['closeBtn']} 
+        aria-label="Cerrar notificación"
+      >
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
