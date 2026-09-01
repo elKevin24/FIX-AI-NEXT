@@ -18,17 +18,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.5rem; /* Ajustado a 0.5rem para coincidir con Tickets */
-    margin-top: -1.5rem; /* Zero Waste Alignment */
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: var(--spacing-4);
     position: relative;
     z-index: 10;
-    pointer-events: none;
     flex-wrap: wrap;
-}
-
-.header > * {
-    pointer-events: auto;
+    gap: var(--spacing-3);
 }
 
 .headerContent h1 {

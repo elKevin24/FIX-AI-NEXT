@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { logAction } from '@/lib/audit-actions';
@@ -92,6 +93,15 @@ export async function PATCH(
     }
 
     const { id } = await params;
+
+    // Permissions: Only admins or the technician themselves
+    if (session.user.role !== 'ADMIN' && session.user.id !== id) {
+      return NextResponse.json(
+        { error: 'Forbidden: Cannot modify other technician availability' },
+        { status: 403 }
+      );
+    }
+
     const tenantPrisma = getTenantPrisma(session.user.tenantId, session.user.id);
     const body = await req.json();
     const { status, statusReason, maxConcurrentTickets } = body;
@@ -140,6 +150,9 @@ export async function PATCH(
         userId: session.user.id
     });
 
+    revalidatePath('/dashboard/technicians/workload');
+    revalidatePath(`/dashboard/technicians/${id}/availability`);
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating technician availability:', error);
@@ -158,6 +171,15 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    // Permissions: Only admins or the technician themselves
+    if (session.user.role !== 'ADMIN' && session.user.id !== id) {
+      return NextResponse.json(
+        { error: 'Forbidden: Cannot create unavailability for other technician' },
+        { status: 403 }
+      );
+    }
+
     const tenantPrisma = getTenantPrisma(session.user.tenantId, session.user.id);
     const body = await req.json();
     const { startDate, endDate, reason, notes } = body;
@@ -220,6 +242,9 @@ export async function POST(
         tenantId: session.user.tenantId,
         userId: session.user.id
     });
+
+    revalidatePath('/dashboard/technicians/workload');
+    revalidatePath(`/dashboard/technicians/${id}/availability`);
 
     return NextResponse.json(unavailability, { status: 201 });
   } catch (error) {

@@ -463,6 +463,14 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
   VIEWER: 'Solo puede ver información, sin capacidad de realizar cambios',
 };
 
+export const ROLE_BADGE_VARIANTS: Record<UserRole, 'primary' | 'success' | 'warning' | 'error' | 'info' | 'gray'> = {
+  SUPER_ADMIN: 'warning',
+  ADMIN: 'error',
+  MANAGER: 'primary',
+  TECHNICIAN: 'info',
+  VIEWER: 'gray',
+};
+
 export const ROLE_COLORS: Record<UserRole, { bg: string; text: string }> = {
   SUPER_ADMIN: { bg: 'bg-amber-100 text-amber-900 border-amber-300', text: 'text-amber-800' },
   ADMIN: { bg: 'bg-red-100', text: 'text-red-800' },

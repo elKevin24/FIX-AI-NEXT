@@ -1,24 +1,36 @@
+.container {
+  position: fixed;
+  bottom: var(--space-6, 24px);
+  right: var(--space-6, 24px);
+  z-index: var(--z-toast, 9999);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+
 .toast {
   display: flex;
   align-items: flex-start;
   padding: 1rem;
   margin-bottom: 0.75rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg, 0.75rem);
   
   /* Light Mode: 95% opacity for readability */
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
   min-width: 320px;
   max-width: 420px;
   animation: slideIn 0.3s ease-out forwards;
   position: relative;
   overflow: hidden;
   pointer-events: auto;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal, 0.2s ease);
 }
 
 .toast.exiting {
@@ -75,8 +87,8 @@
   margin: -0.25rem;
   color: var(--color-text-tertiary);
   opacity: 0.7;
-  transition: opacity 0.2s;
-  border-radius: 4px;
+  transition: opacity var(--transition-fast, 0.15s ease);
+  border-radius: var(--radius-sm, 4px);
 }
 
 .closeBtn:hover {
@@ -88,28 +100,27 @@
   outline: 2px solid var(--color-primary-500);
 }
 
-/* Types - High Contrast borders */
+/* Types - High Contrast borders using Design Tokens */
 .info {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--color-info-500);
 }
 
 .success {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--color-success-500);
 }
 
 .warning {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--color-warning-500);
 }
 
 .error {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--color-error-500);
 }
 
 /* Dark mode support */
 :global(.dark) .toast,
 [data-theme="dark"] .toast {
-  /* Dark Mode: 95% opacity dark bg */
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background: var(--color-surface, rgba(30, 41, 59, 0.95));
+  border-color: var(--color-border, rgba(255, 255, 255, 0.15));
+  box-shadow: var(--shadow-xl, 0 4px 12px rgba(0, 0, 0, 0.5));
 }

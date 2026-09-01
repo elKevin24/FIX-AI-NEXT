@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { canManageUsers, UserRole } from '@/lib/auth-utils';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
@@ -21,6 +23,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    if (!canManageUsers(session.user.role as UserRole)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Insufficient permissions to view users' },
+        { status: 403 }
       );
     }
 
@@ -114,6 +123,8 @@ export async function POST(request: NextRequest) {
         createdAt: true,
       },
     });
+
+    revalidatePath('/dashboard/users');
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {

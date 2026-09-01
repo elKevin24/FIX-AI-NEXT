@@ -2,6 +2,8 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma"; // Use global prisma for logging to avoid circular deps or scoping issues
+import { getTenantPrisma } from "@/lib/tenant-prisma";
+import { isSuperAdmin } from "@/lib/authz";
 import { AuditAction, AuditModule } from "@prisma/client";
 import { headers, cookies } from "next/headers";
 
@@ -175,12 +177,19 @@ export async function getAuditLogs(
     }
 ) {
     const session = await auth();
-    // Security check: must be same tenant or SuperAdmin (not implemented yet)
-    if (session?.user?.tenantId !== tenantId && session?.user?.role !== 'ADMIN') {
+    if (!session?.user?.id) {
         throw new Error("Unauthorized");
     }
 
-    const whereClause: any = { tenantId };
+    const isSuperAdminUser = isSuperAdmin(session.user);
+    // Security check: normal user can ONLY access their own tenant, and must be ADMIN of that tenant
+    if (!isSuperAdminUser) {
+        if (session.user.tenantId !== tenantId || session.user.role !== 'ADMIN') {
+            throw new Error("Unauthorized");
+        }
+    }
+
+    const whereClause: any = {};
     if (filters?.userId) whereClause.userId = filters.userId;
     if (filters?.action) whereClause.action = filters.action;
     if (filters?.module) whereClause.module = filters.module;
@@ -191,17 +200,33 @@ export async function getAuditLogs(
     }
 
     try {
-        const logs = await prisma.auditLog.findMany({
-            where: whereClause,
-            orderBy: { createdAt: 'desc' },
-            take: limit,
-            skip: offset,
-            include: {
-                user: { select: { name: true, email: true } }
-            }
-        });
-        const total = await prisma.auditLog.count({ where: whereClause });
-        return { logs, total };
+        if (isSuperAdminUser) {
+            whereClause.tenantId = tenantId;
+            const logs = await prisma.auditLog.findMany({
+                where: whereClause,
+                orderBy: { createdAt: 'desc' },
+                take: limit,
+                skip: offset,
+                include: {
+                    user: { select: { name: true, email: true } }
+                }
+            });
+            const total = await prisma.auditLog.count({ where: whereClause });
+            return { logs, total };
+        } else {
+            const db = getTenantPrisma(tenantId, session.user.id);
+            const logs = await db.auditLog.findMany({
+                where: whereClause,
+                orderBy: { createdAt: 'desc' },
+                take: limit,
+                skip: offset,
+                include: {
+                    user: { select: { name: true, email: true } }
+                }
+            });
+            const total = await db.auditLog.count({ where: whereClause });
+            return { logs, total };
+        }
     } catch (error) {
         console.error("Failed to fetch audit logs:", error);
         return { logs: [], total: 0 };

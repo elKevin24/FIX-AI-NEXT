@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { isSuperAdmin } from '@/lib/authz';
 import { renderToStream } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
@@ -18,33 +19,43 @@ export async function GET(
 
         const { id } = await params;
         const isSuperAdminUser = isSuperAdmin(session.user);
+        const tenantId = session.user.tenantId;
 
-        // Buscar la factura con toda la información necesaria
-        const invoice = await prisma.invoice.findUnique({
-            where: { id },
-            include: {
-                tenant: true,
-                customer: true,
-                ticket: {
-                    include: {
-                        partsUsed: {
-                            include: {
-                                part: true
-                            }
+        const includeRelations = {
+            tenant: true,
+            customer: true,
+            ticket: {
+                include: {
+                    partsUsed: {
+                        include: {
+                            part: true
                         }
                     }
-                },
-                payments: true
+                }
             },
-        });
+            payments: true
+        };
+
+        // Buscar la factura con toda la información necesaria
+        let invoice;
+        if (isSuperAdminUser) {
+            invoice = await prisma.invoice.findUnique({
+                where: { id },
+                include: includeRelations,
+            });
+        } else {
+            if (!tenantId) {
+                return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+            }
+            const tenantPrisma = getTenantPrisma(tenantId);
+            invoice = await tenantPrisma.invoice.findUnique({
+                where: { id },
+                include: includeRelations,
+            });
+        }
 
         if (!invoice) {
             return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
-        }
-
-        // Verificar permisos de tenant (a menos que sea super admin)
-        if (!isSuperAdminUser && invoice.tenantId !== session.user.tenantId) {
-            return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
         }
 
         // Transformar datos para el componente PDF (Prisma.Decimal -> number)

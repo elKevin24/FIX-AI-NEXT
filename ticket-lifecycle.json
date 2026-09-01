@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Ticket Lifecycle State Machine",
+    "output": "ticket-lifecycle.html",
+    "viewBox": [1040, 660],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main-lifecycle",
+        "label": "Flujo Principal de Reparación",
+        "focus": ["open", "diagnosis", "waiting_approval", "in_repair", "closed"],
+        "note": "Ruta secuencial óptima desde la recepción en taller hasta el cierre y facturación."
+      },
+      {
+        "id": "parts-and-waiting",
+        "label": "Espera de Piezas y Control",
+        "focus": ["waiting_approval", "waiting_parts", "in_repair"],
+        "note": "Interrupciones operativas por adquisición de repuestos y validación."
+      },
+      {
+        "id": "terminal-exits",
+        "label": "Salidas y Cancelaciones",
+        "focus": ["waiting_parts", "cancelled", "in_repair", "rejected"],
+        "note": "Salidas del ciclo de vida por cancelación o rechazo de cotización."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Fases Principales de Servicio" },
+    { "id": "waiting", "label": "Interrupciones & Stock" },
+    { "id": "terminal", "label": "Salidas Terminales" }
+  ],
+  "states": [
+    {
+      "id": "open",
+      "type": "start",
+      "label": "Ingresado",
+      "sublabel": "OPEN",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "Recepción"
+    },
+    {
+      "id": "diagnosis",
+      "type": "active",
+      "label": "Diagnóstico",
+      "sublabel": "IN_PROGRESS",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "Técnico"
+    },
+    {
+      "id": "waiting_approval",
+      "type": "decision",
+      "label": "Presupuesto",
+      "sublabel": "WAITING_APPROVAL",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "Cliente"
+    },
+    {
+      "id": "in_repair",
+      "type": "active",
+      "label": "Reparación",
+      "sublabel": "RESOLVED",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "Taller"
+    },
+    {
+      "id": "closed",
+      "type": "success",
+      "label": "Cerrado",
+      "sublabel": "CLOSED",
+      "lane": "main",
+      "col": 4,
+      "step": "05",
+      "tag": "Facturado"
+    },
+    {
+      "id": "waiting_parts",
+      "type": "waiting",
+      "label": "Sin Repuesto",
+      "sublabel": "WAITING_FOR_PARTS",
+      "lane": "waiting",
+      "col": 0,
+      "tag": "Inventario"
+    },
+    {
+      "id": "cancelled",
+      "type": "failure",
+      "label": "Cancelado",
+      "sublabel": "CANCELLED",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "Salida"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "Rechazado",
+      "sublabel": "REJECTED",
+      "lane": "terminal",
+      "col": 1,
+      "tag": "Salida"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "trans-need-parts",
+      "from": "waiting_approval",
+      "to": "waiting_parts",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    },
+    {
+      "id": "trans-parts-to-repair",
+      "from": "waiting_parts",
+      "to": "in_repair",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [[470, 307], [556, 307]]
+    },
+    {
+      "id": "trans-parts-cancelled",
+      "from": "waiting_parts",
+      "to": "cancelled",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    },
+    {
+      "id": "trans-repair-rejected",
+      "from": "in_repair",
+      "to": "rejected",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Reglas de Transición y Cierre",
+      "items": [
+        "Progreso: OPEN → Diagnóstico → Presupuesto → Reparación → CLOSED (Venta POS)",
+        "WAITING_FOR_PARTS retiene por stock; CANCELLED / REJECTED liberan reservas"
+      ]
+    }
+  ]
+}

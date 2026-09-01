@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
 import { z } from 'zod';
 
 // Validation schema
@@ -128,6 +130,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!hasPermission(session.user.role as UserRole, 'canCreateCustomers')) {
+      return NextResponse.json(
+        { error: 'Forbidden: Insufficient permissions to create customers' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input
@@ -163,6 +172,8 @@ export async function POST(request: NextRequest) {
         createdAt: true,
       },
     });
+
+    revalidatePath('/dashboard/customers');
 
     return NextResponse.json(newCustomer, { status: 201 });
   } catch (error) {

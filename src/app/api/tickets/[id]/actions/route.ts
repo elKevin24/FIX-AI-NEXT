@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { TicketStatus, UserRole } from '@prisma/client';
@@ -540,6 +541,10 @@ export async function POST(
         console.error('Failed to send notifications:', notificationError);
       }
     }
+
+    revalidatePath('/dashboard/tickets');
+    revalidatePath(`/dashboard/tickets/${id}`);
+    revalidatePath('/dashboard');
 
     return NextResponse.json({
       success: true,

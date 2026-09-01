@@ -77,6 +77,12 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
 ### 🚧 En Progreso / Pendiente
 1.  **Squash de Migraciones:** Consolidar las 27 migraciones acumuladas en una única migración limpia antes del release v2.0 definitivo.
 2.  **Refactorización SOLID (Clean Architecture):** Continuar extendiendo el Patrón de Repositorios para los módulos secundarios restantes post-v2.0.
+3.  **Roadmap de Diagramas de Arquitectura & Perspectivas Visuales:**
+    *   ✅ **Perspectiva 1 - Arquitectura en Tiempo de Ejecución (`architecture`):** Topología perimetral (Edge Proxy, Upstash Redis, NextAuth v5, Server Actions, TenantPrisma, Neon DB, Event Bus, Email Service).
+    *   🚧 **Perspectiva 2 - Ciclo de Vida del Ticket (`lifecycle`):** Modelado formal de la máquina de estados (`OPEN` → `IN_PROGRESS` → `WAITING_APPROVAL` → `WAITING_FOR_PARTS` → `RESOLVED` → `CLOSED` / `CANCELLED` / `REJECTED`).
+    *   ⏳ **Perspectiva 3 - Concurrencia Transaccional POS e Inventario (`sequence`):** Validación en tiempo real, bloqueo y deducción atómica de inventario (`inventory-atomic.ts`), cobro y generación de factura.
+    *   ⏳ **Perspectiva 4 - Linaje de Datos y Auditoría (`dataflow`):** Trazabilidad de mutaciones hacia `AuditLog`, agregaciones analíticas con `recharts` y exportaciones CSV/Excel/PDF.
+4.  **Evolución del Broker de Eventos:** Migrar `InMemoryEventEmitter` a **Upstash QStash / Redis PubSub** para soportar el despacho asíncrono desacoplado en entornos multi-instancia/serverless puros.
 
 ## 4. Convenciones de Desarrollo
 
@@ -86,7 +92,7 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
 *   **Client Components:** Solo para interactividad (`'use client'`).
 *   **Formularios:** Usar `FormData` en Server Actions, parseado y validado con Zod.
 *   **Filtros en URL (`nuqs`):** Usar siempre `nuqs` (`useQueryStates` / `useQueryState`) para filtros tipados y paginación en URL.
-*   **Estado de Carrito / POS (`zustand`):** Usar `src/lib/stores/usePosStore.ts` exclusivamente para la reactividad en memoria del Punto de Venta.
+*   **Estado de Carrito / POS:** Manejo de estado reactivo y transacciones atómicas con Server Actions (`inventory-atomic.ts`).
 *   **Reglas Estrictas de Animación (`motion / motion/react`):**
     *   **Ámbitos Permitidos ÚNICAMENTE:**
         1. Modales y Drawers ([`Modal.tsx`](file:///c:/Users/busqu/Documents/GitHub/FIX-AI-NEXT/src/components/ui/Modal.tsx)) con `AnimatePresence` para entradas y salidas suaves.

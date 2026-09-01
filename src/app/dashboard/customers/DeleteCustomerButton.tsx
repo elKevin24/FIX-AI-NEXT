@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface DeleteCustomerButtonProps {
   customerId: string;

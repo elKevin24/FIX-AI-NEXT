@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getMyNotifications, markMyNotificationAsRead, markAllMyNotificationsAsRead } from '@/lib/notifications';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import styles from './NotificationBell.module.css';
 

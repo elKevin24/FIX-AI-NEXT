@@ -6,6 +6,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: 'sm' | 'base' | 'lg';
   fullWidth?: boolean;
   isLoading?: boolean;
+  loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   children: React.ReactNode;
@@ -21,6 +22,7 @@ export function Button({
   size = 'base',
   fullWidth = false,
   isLoading = false,
+  loading = false,
   leftIcon,
   rightIcon,
   className = '',
@@ -29,6 +31,7 @@ export function Button({
   as: Component = 'button',
   ...props
 }: ButtonProps) {
+  const isBusy = isLoading || loading;
   
   // Map variant strings to styles
   const variantStyle = styles[variant] || styles['primary'];
@@ -49,13 +52,13 @@ export function Button({
   return (
     <Component 
       className={classes} 
-      disabled={disabled || isLoading} 
+      disabled={disabled || isBusy} 
       {...props}
     >
-      {isLoading && <span className={styles['spinner']} aria-hidden="true" />}
-      {!isLoading && leftIcon && <span className={styles['iconLeft']}>{leftIcon}</span>}
+      {isBusy && <span className={styles['spinner']} aria-hidden="true" />}
+      {!isBusy && leftIcon && <span className={styles['iconLeft']}>{leftIcon}</span>}
       {children}
-      {!isLoading && rightIcon && <span className={styles['iconRight']}>{rightIcon}</span>}
+      {!isBusy && rightIcon && <span className={styles['iconRight']}>{rightIcon}</span>}
     </Component>
   );
 }

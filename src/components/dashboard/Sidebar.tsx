@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
+import { useSidebar } from '@/contexts/SidebarContext';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -12,26 +12,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    const { isOpen, close } = useSidebar();
     const pathname = usePathname();
-
-    // Close sidebar when route changes (mobile)
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIsOpen(false);
-    }, [pathname]);
-
-    // Prevent scrolling when sidebar is open on mobile
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
 
     const isActive = (path: string) => {
         if (path === '/dashboard') {
@@ -53,23 +35,11 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
 
     return (
         <>
-            {/* Mobile Toggle Button */}
-            <button
-                className={`${styles['mobileToggle']} ${isOpen ? styles['toggleOpen'] : ''}`}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label="Toggle Menu"
-            >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-
             {/* Overlay */}
             <div
                 className={`${styles['overlay']} ${isOpen ? styles['open'] : ''}`}
-                onClick={() => setIsOpen(false)}
+                onClick={close}
+                role="presentation"
             />
 
             {/* Sidebar */}
@@ -77,6 +47,17 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
                 <div className={styles['logo']}>
                     <div className={styles['logoIcon']} />
                     <h2>FIX-AI</h2>
+                    <button
+                        className={styles['closeDrawerBtn']}
+                        onClick={close}
+                        aria-label="Cerrar menú"
+                        type="button"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
                 </div>
                 <nav className={styles['nav']}>
                     {/* Grupo 1: General (3 ítems) */}

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui';
+import styles from './PaginationControls.module.css';
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -29,20 +30,13 @@ export default function PaginationControls({
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: '1.5rem',
-      paddingTop: '1rem',
-      borderTop: '1px solid var(--color-border-light)'
-    }}>
-      <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-        Mostrando página <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{currentPage}</span> de <span style={{ fontWeight: 600 }}>{totalPages}</span>
-        <span style={{ marginLeft: '0.5rem', color: 'var(--color-text-tertiary)' }}>({totalItems} resultados)</span>
+    <nav className={styles['pagination']} aria-label="Paginación">
+      <div className={styles['info']}>
+        Mostrando página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
+        <span className={styles['count']}>({totalItems} resultados)</span>
       </div>
-      
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+
+      <div className={styles['controls']}>
         <Button
           variant="secondary"
           size="sm"
@@ -60,6 +54,6 @@ export default function PaginationControls({
           Siguiente →
         </Button>
       </div>
-    </div>
+    </nav>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { deactivateUser, reactivateUser } from '@/lib/user-actions';
-import { useToast } from '@/context/ToastContext';
+import { deactivateUser, reactivateUser } from '@/lib/actions';
+import { useToast } from '@/contexts/ToastContext';
 import styles from './users.module.css';
 
 interface DeleteUserButtonProps {

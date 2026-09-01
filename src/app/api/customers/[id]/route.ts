@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { z } from 'zod';
@@ -131,6 +132,10 @@ export async function PATCH(
       },
     });
 
+    const customerId = (await params).id;
+    revalidatePath('/dashboard/customers');
+    revalidatePath(`/dashboard/customers/${customerId}`);
+
     return NextResponse.json(updatedCustomer);
   } catch (error) {
     console.error('Error updating customer:', error);
@@ -194,6 +199,8 @@ export async function DELETE(
     await db.customer.delete({
       where: { id: (await params).id },
     });
+
+    revalidatePath('/dashboard/customers');
 
     return NextResponse.json(
       { message: 'Customer deleted successfully' },

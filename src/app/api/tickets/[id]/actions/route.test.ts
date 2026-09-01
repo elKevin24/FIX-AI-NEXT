@@ -11,6 +11,10 @@ vi.mock('@/lib/auth-utils', () => ({
   AuthorizationError: class extends Error { code = 'FORBIDDEN' },
 }));
 vi.mock('@/lib/ticket-notifications');
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+}));
 vi.mock('next/server', () => ({
   NextResponse: {
     json: vi.fn((data, init) => ({ data, init, status: init?.status || 200 })),

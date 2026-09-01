@@ -6,7 +6,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
-import { ROLE_LABELS, ROLE_COLORS, hasPermission, canModifyUser } from '@/lib/auth-utils';
+import { ROLE_LABELS, ROLE_BADGE_VARIANTS, hasPermission, canModifyUser } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 
 interface UserData {
@@ -100,13 +100,13 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
             header: 'Rol',
             cell: ({ row }) => {
                 const role = row.original.role;
-                const colors = ROLE_COLORS[role] || ROLE_COLORS.VIEWER;
                 const label = ROLE_LABELS[role] || role;
+                const variant = ROLE_BADGE_VARIANTS[role] || 'gray';
 
                 return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
+                    <Badge variant={variant}>
                         {label}
-                    </span>
+                    </Badge>
                 );
             },
             filterFn: (row, _columnId, filterValue) => {
@@ -126,6 +126,7 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
         {
             accessorKey: '_count.assignedTickets',
             header: 'Tickets',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => {
                 const count = row.original._count?.assignedTickets || 0;
                 return (
@@ -138,6 +139,7 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
         {
             accessorKey: 'lastLoginAt',
             header: 'Ultimo acceso',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => {
                 const lastLogin = row.original.lastLoginAt;
                 if (!lastLogin) {

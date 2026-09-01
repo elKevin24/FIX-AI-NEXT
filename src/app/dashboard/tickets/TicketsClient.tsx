@@ -71,6 +71,7 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         ...(isSuperAdmin ? [{
             accessorKey: 'tenant.name',
             header: 'Tenant',
+            meta: { hideBelow: '640px' },
             cell: ({ row }: any) => <Badge variant="gray">{row.original.tenant?.name}</Badge>
         }] : []),
         {
@@ -82,6 +83,7 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'priority',
             header: 'Prioridad',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => {
                 const priority = row.original.priority;
                 let color = 'gray';
@@ -97,6 +99,7 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'assignedTo.name',
             header: 'Técnico',
+            meta: { hideBelow: '768px' },
             cell: ({ row }) => row.original.assignedTo?.name || row.original.assignedTo?.email || <span className="text-gray-400 italic">Sin asignar</span>,
         },
         {

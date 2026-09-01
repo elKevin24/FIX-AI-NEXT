@@ -15,16 +15,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
-    margin-top: -1.5rem; /* Zero Waste Alignment */
+    margin-bottom: var(--spacing-4);
     position: relative;
-    z-index: 60;
-    pointer-events: none;
+    z-index: 10;
     flex-wrap: wrap;
-}
-
-.header > * {
-    pointer-events: auto;
+    gap: var(--spacing-3);
 }
 
 .headerContent h1 {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Session } from 'next-auth';
 import PageHeader from '@/components/PageHeader';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import styles from './TicketPoolView.module.css';
 
 interface Customer {

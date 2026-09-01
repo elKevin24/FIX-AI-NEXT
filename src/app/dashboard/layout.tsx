@@ -2,9 +2,9 @@ import { signOut, auth } from '@/auth';
 import styles from './dashboard.module.css';
 import Sidebar from '@/components/dashboard/Sidebar';
 import TopNav from '@/components/dashboard/TopNav';
-import { ToastProvider } from '@/context/ToastContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import { SidebarProvider } from '@/contexts/SidebarContext';
 import ToastContainer from '@/components/ui/ToastContainer';
-// We don't import Sidebar.module.css here, the component handles it.
 
 export default async function DashboardLayout({
     children,
@@ -52,14 +52,16 @@ export default async function DashboardLayout({
 
     return (
         <ToastProvider>
-            <div className={styles['container']}>
-                <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-                <main id="main-content" className={styles['mainContent']}>
-                    <TopNav />
-                    {children}
-                </main>
-                <ToastContainer />
-            </div>
+            <SidebarProvider>
+                <div className={styles['container']}>
+                    <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
+                    <main id="main-content" className={styles['mainContent']}>
+                        <TopNav />
+                        {children}
+                    </main>
+                    <ToastContainer />
+                </div>
+            </SidebarProvider>
         </ToastProvider>
     );
 }

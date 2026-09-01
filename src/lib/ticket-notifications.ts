@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { randomBytes } from 'crypto';
 import { createNotification } from './notifications';
@@ -220,11 +219,12 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
  * Alerta de stock bajo (Para Admins)
  */
 export async function notifyLowStock(partName: string, currentQuantity: number, tenantId: string) {
-    // Buscar administradores del tenant
-    const admins = await prisma.user.findMany({
+    // Buscar administradores del tenant con aislamiento
+    const db = getTenantPrisma(tenantId);
+    const admins = await db.user.findMany({
         where: {
-            tenantId,
-            role: 'ADMIN'
+            role: 'ADMIN',
+            isActive: true,
         },
         include: {
             tenant: { select: { name: true } }

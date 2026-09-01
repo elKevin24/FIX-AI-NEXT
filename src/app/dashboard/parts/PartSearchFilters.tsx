@@ -23,12 +23,14 @@ export default function PartSearchFilters() {
   const [categoryDraft, setCategoryDraft] = useState(filters.category);
   const [locationDraft, setLocationDraft] = useState(filters.location);
 
-  useEffect(() => {
+  const [prevFilters, setPrevFilters] = useState(filters);
+  if (filters !== prevFilters) {
+    setPrevFilters(filters);
     setSearchDraft(filters.search);
     setLowStockDraft(filters.lowStock);
     setCategoryDraft(filters.category);
     setLocationDraft(filters.location);
-  }, [filters]);
+  }
 
   const applyFilters = () => {
     startTransition(async () => {

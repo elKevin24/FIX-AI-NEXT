@@ -13,7 +13,10 @@ import { redirect } from 'next/navigation';
 // Mock dependencies
 vi.mock('@/auth');
 vi.mock('@/lib/tenant-prisma');
-vi.mock('next/cache');
+vi.mock('next/cache', () => ({
+    revalidatePath: vi.fn(),
+    revalidateTag: vi.fn(),
+}));
 vi.mock('next/navigation', () => ({
     redirect: vi.fn(),
     notFound: vi.fn(),

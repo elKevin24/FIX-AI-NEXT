@@ -180,6 +180,7 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
         {
             id: 'items',
             header: 'Items',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => `${row.original.items.length} productos`,
         },
         {

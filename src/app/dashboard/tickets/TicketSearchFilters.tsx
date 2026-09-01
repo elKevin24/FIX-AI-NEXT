@@ -44,7 +44,9 @@ export default function TicketSearchFilters() {
     const [dateToDraft, setDateToDraft] = useState(filters.dateTo);
     const [deviceTypeDraft, setDeviceTypeDraft] = useState(filters.deviceType);
 
-    useEffect(() => {
+    const [prevFilters, setPrevFilters] = useState(filters);
+    if (filters !== prevFilters) {
+        setPrevFilters(filters);
         setSearchDraft(filters.search);
         setStatusDraft(filters.status);
         setPriorityDraft(filters.priority);
@@ -52,7 +54,7 @@ export default function TicketSearchFilters() {
         setDateFromDraft(filters.dateFrom);
         setDateToDraft(filters.dateTo);
         setDeviceTypeDraft(filters.deviceType);
-    }, [filters]);
+    }
 
     const updateFilters = () => {
         startTransition(async () => {

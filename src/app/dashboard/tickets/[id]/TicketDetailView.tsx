@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import PartsSection from './PartsSection';
 import ServicesSection from './ServicesSection';
 import AttachmentsSection from '@/components/tickets/AttachmentsSection';

@@ -30,15 +30,9 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
-    margin-top: -1.5rem; /* Ajuste solicitado por el usuario */
-    margin-bottom: 0.25rem; /* Compacto */
+    margin-bottom: var(--spacing-4);
     position: relative;
     z-index: 10;
-    pointer-events: none;
-}
-
-.header > * {
-    pointer-events: auto; /* Reactivar clicks en elementos hijos */
 }
 
 .header h1 {

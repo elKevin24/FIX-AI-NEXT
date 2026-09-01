@@ -206,3 +206,22 @@
     transform: rotate(360deg);
   }
 }
+
+/* ========== MOBILE: TOUCH TARGETS ========== */
+/* Ensure core interactive buttons meet a comfortable ~44px touch target on
+   small screens (WCAG/Apple/Google guideline) without bloating desktop UI. */
+@media (max-width: 639px) {
+  .base {
+    min-height: 44px;
+  }
+
+  .baseSize {
+    height: 2.75rem; /* 44px */
+  }
+
+  /* Icon-only buttons (hamburger, close, etc.) get bigger hot areas */
+  .sm {
+    min-height: 44px;
+    padding-inline: 0.875rem;
+  }
+}

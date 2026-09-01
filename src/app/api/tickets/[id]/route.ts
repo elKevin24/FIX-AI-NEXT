@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 
@@ -21,9 +22,7 @@ export async function GET(
         const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
         const ticket = await db.ticket.findUnique({
-            where: {
-                id: id,
-            },
+            where: { id },
             include: {
                 customer: true,
                 assignedTo: true,
@@ -35,29 +34,8 @@ export async function GET(
             },
         });
 
-        if (!ticket) {
+        if (!ticket || ticket.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
-        }
-
-        // Technically already secured by getTenantPrisma + tenantId in where(if used) or implicit tenantId check if we rely on it.
-        // But since getTenantPrisma(tenantId) creates a client that might not ALWAYS inject tenantId into every findUnique (unless using specific extensions setup),
-        // we should double check if the extension guarantees it. 
-        // Based on actions.ts patterns, we either trust the client or check manually.
-        // However, standard prisma client findUnique usually searches globally if valid ID.
-        // BUT `getTenantPrisma` returns a client extended with $extends...
-        // Let's assume the extension handles it OR we add a check.  
-        // Wait, for `findUnique` if the ID is global UUID, it finds it.
-        // Does the extension add `where: { tenantId }` automatically?
-        // If not, we should use `findFirst` with tenantId OR check result.tenantId.
-        // Let's use `findFirst` to be safe and consistent with previous code OR check after.
-        // Actually, `getTenantPrisma` logic in `tenant-prisma.ts` usually adds RLS-like behavior or we manually check.
-        // For safety/compatibility with what I did in actions.ts (where I used tenantDb.model.findUnique and sometimes checked tenantId manually),
-        // I'll manually check tenantId if the query doesn't restrict it, OR use findFirst({ where: { id, tenantId } }).
-        // BUT `getTenantPrisma` MIGHT restrict it.
-        // Let's stick to the previous code's `findFirst` pattern with `db`.
-
-        if (ticket.tenantId !== session.user.tenantId) {
-             return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
         }
 
         return NextResponse.json(ticket);
@@ -68,7 +46,7 @@ export async function GET(
 }
 
 /**
- * Update a ticket's status, assignment, or priority
+ * Update a ticket's status, assignment, or priority (ADMIN, MANAGER, TECHNICIAN)
  */
 export async function PATCH(
     request: Request,
@@ -78,6 +56,12 @@ export async function PATCH(
 
     if (!session?.user?.tenantId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Role check: Only authorized roles can update tickets via API
+    const userRole = session.user.role;
+    if (userRole === 'VIEWER') {
+        return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     const { id } = await params;
@@ -90,7 +74,7 @@ export async function PATCH(
 
         // Verify ticket belongs to user's tenant
         const existingTicket = await db.ticket.findUnique({
-            where: { id: id },
+            where: { id },
         });
 
         if (!existingTicket || existingTicket.tenantId !== session.user.tenantId) {
@@ -98,17 +82,21 @@ export async function PATCH(
         }
 
         const ticket = await db.ticket.update({
-            where: { id: id },
+            where: { id },
             data: {
-                status,
-                assignedToId,
-                priority,
+                ...(status && { status }),
+                ...(assignedToId !== undefined && { assignedToId }),
+                ...(priority && { priority }),
             },
             include: {
                 customer: true,
                 assignedTo: true,
             },
         });
+
+        revalidatePath('/dashboard/tickets');
+        revalidatePath(`/dashboard/tickets/${id}`);
+        revalidatePath('/dashboard');
 
         return NextResponse.json(ticket);
     } catch (error) {
@@ -137,7 +125,7 @@ export async function DELETE(
 
         // Verify ticket belongs to user's tenant
         const existingTicket = await db.ticket.findUnique({
-            where: { id: id },
+            where: { id },
         });
 
         if (!existingTicket || existingTicket.tenantId !== session.user.tenantId) {
@@ -145,8 +133,11 @@ export async function DELETE(
         }
 
         await db.ticket.delete({
-            where: { id: id },
+            where: { id },
         });
+
+        revalidatePath('/dashboard/tickets');
+        revalidatePath('/dashboard');
 
         return NextResponse.json({ success: true });
     } catch (error) {

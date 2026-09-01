@@ -58,6 +58,7 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
         {
             accessorKey: 'assignedTo.name',
             header: 'Técnico',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => (
                 <span className="text-xs text-gray-600">
                     {row.original.assignedTo?.name || 'Sin asignar'}
@@ -67,6 +68,7 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
         {
             accessorKey: 'createdAt',
             header: 'Fecha',
+            meta: { hideBelow: '640px' },
             cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString('es-ES'),
         },
     ];

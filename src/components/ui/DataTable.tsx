@@ -9,6 +9,7 @@ import {
     getSortedRowModel,
     SortingState,
 } from '@tanstack/react-table';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import styles from './DataTable.module.css';
 
 interface DataTableProps<TData, TValue> {
@@ -17,6 +18,12 @@ interface DataTableProps<TData, TValue> {
     onRowClick?: (row: TData) => void;
     isLoading?: boolean;
     caption?: string;
+    /** Breakpoint below which non-essential columns are hidden.
+     *  Mark optional columns with `meta.hideBelow` (e.g. '640px').
+     *  Set this to the smallest breakpoint you want the full table at. */
+    mobileBreakpoint?: string;
+    /** Render function to render a custom card layout on mobile viewports instead of table */
+    renderMobileCard?: (row: TData) => React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -25,8 +32,11 @@ export function DataTable<TData, TValue>({
     onRowClick,
     isLoading = false,
     caption,
+    mobileBreakpoint = '640px',
+    renderMobileCard,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
+    const isMobile = useMediaQuery(`(max-width: ${mobileBreakpoint})`);
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -34,11 +44,48 @@ export function DataTable<TData, TValue>({
         columns,
         state: {
             sorting,
+            columnVisibility: isMobile
+                ? Object.fromEntries(
+                      columns
+                          .map((col) => (col as { id?: string; accessorKey?: string }).id ?? (col as any).accessorKey)
+                          .filter((id): id is string => !!id)
+                          .map((id) => [
+                              id,
+                              !(columns.find((c) =>
+                                  ((c as { id?: string }).id ?? (c as any).accessorKey) === id
+                              ) as any)?.meta?.hideBelow,
+                          ]),
+                  )
+                : {},
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
+
+    if (isMobile && renderMobileCard) {
+        return (
+            <div className={styles['wrapper']}>
+                {isLoading ? (
+                    <div className={styles['emptyCell']}>Cargando datos...</div>
+                ) : data.length > 0 ? (
+                    <div className={styles['cardList']}>
+                        {data.map((item, index) => (
+                            <div
+                                key={index}
+                                className={`${styles['mobileCardItem']} ${onRowClick ? styles['clickableRow'] : ''}`}
+                                onClick={() => onRowClick?.(item)}
+                            >
+                                {renderMobileCard(item)}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className={styles['emptyCell']}>No hay resultados disponibles.</div>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className={styles['wrapper']}>

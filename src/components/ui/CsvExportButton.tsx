@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
+import { Button } from './Button';
 
 interface Props {
   url: string;
@@ -23,6 +24,7 @@ export default function CsvExportButton({ url, filename, label = '📥 Exportar 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      addToast('Archivo exportado correctamente', 'SUCCESS');
     } catch (e) {
       console.error(e);
       addToast('Error al exportar', 'ERROR');
@@ -32,26 +34,15 @@ export default function CsvExportButton({ url, filename, label = '📥 Exportar 
   };
 
   return (
-    <button
+    <Button
+      variant="outline"
+      size="sm"
       onClick={handleExport}
+      loading={loading}
       disabled={loading}
       className={className}
-      style={{
-        padding: '0.5rem 1rem',
-        backgroundColor: 'white',
-        border: '1px solid var(--color-border)',
-        borderRadius: '6px',
-        cursor: loading ? 'wait' : 'pointer',
-        fontWeight: 500,
-        fontSize: '0.875rem',
-        color: 'var(--color-text-primary)',
-        opacity: loading ? 0.7 : 1,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}
     >
       {loading ? 'Exportando...' : label}
-    </button>
+    </Button>
   );
 }

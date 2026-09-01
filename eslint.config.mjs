@@ -13,6 +13,8 @@ const eslintConfig = [
       "playwright-report/**",
       "test-results/**",
       "coverage/**",
+      "archify/**",
+      "scripts/**",
     ],
   },
   ...nextPlugin,

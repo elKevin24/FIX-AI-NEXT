@@ -82,6 +82,7 @@ export default function POSClient({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'catalog' | 'cart'>('catalog');
 
     // Filtered parts
     const filteredParts = useMemo(() => {
@@ -295,9 +296,35 @@ export default function POSClient({
             {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
             {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}
 
+            {/* Mobile Segmented Tabs */}
+            <div className={styles['mobileTabs']} role="tablist" aria-label="Vistas del Punto de Venta">
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'catalog'}
+                    className={`${styles['tabBtn']} ${activeTab === 'catalog' ? styles['tabBtnActive'] : ''}`}
+                    onClick={() => setActiveTab('catalog')}
+                >
+                    Catálogo
+                    <span className={styles['tabBadge']}>{filteredParts.length}</span>
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'cart'}
+                    className={`${styles['tabBtn']} ${activeTab === 'cart' ? styles['tabBtnActive'] : ''}`}
+                    onClick={() => setActiveTab('cart')}
+                >
+                    Carrito
+                    <span className={styles['tabBadge']}>
+                        {cart.reduce((s, i) => s + i.quantity, 0)}
+                    </span>
+                </button>
+            </div>
+
             <div className={styles['posLayout']}>
                 {/* Products Grid */}
-                <div className={styles['productsSection']}>
+                <div className={`${styles['productsSection']} ${activeTab !== 'catalog' ? styles['hideOnMobile'] : ''}`}>
                     <div className={styles['sectionTitle']}>
                         <h2>Productos</h2>
                         <span>{filteredParts.length} disponible{filteredParts.length !== 1 ? 's' : ''}</span>
@@ -342,7 +369,7 @@ export default function POSClient({
                 </div>
 
                 {/* Cart Section */}
-                <div className={styles['cartSection']}>
+                <div className={`${styles['cartSection']} ${activeTab !== 'cart' ? styles['hideOnMobile'] : ''}`}>
                     <div className={styles['sectionTitle']}>
                         <h2>Carrito</h2>
                         {cart.length > 0 && <span>{cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}</span>}

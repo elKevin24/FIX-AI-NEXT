@@ -1,15 +1,16 @@
 .backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  /* inset avoids the classic 100vw + scrollbar horizontal-overflow bug */
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1040; /* var(--z-modal-backdrop) */
+  padding: var(--spacing-3);
 }
 
 .modal {
@@ -17,9 +18,9 @@
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  width: 90%;
+  width: 100%;
   max-width: 500px;
-  max-height: 90vh;
+  max-height: min(90vh, 85dvh);
   overflow-y: auto;
   z-index: 1050; /* var(--z-modal) */
   display: flex;
@@ -98,3 +99,33 @@
 .md { max-width: 550px; }
 .lg { max-width: 800px; }
 .xl { max-width: 1100px; }
+
+/* ========== MOBILE: BOTTOM SHEET ========== */
+/* On small viewports a centered dialog is awkward and greedy. Convert to a
+   near-fullscreen bottom sheet that respects touch ergonomics and the
+   iOS/Android safe-area insets. */
+@media (max-width: 639px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 88dvh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .footer {
+    background-color: var(--color-surface);
+  }
+
+  /* Larger touch targets while modal is full-width on mobile */
+  .closeButton {
+    padding: var(--spacing-3);
+    font-size: 1.75rem;
+  }
+}

@@ -24,22 +24,18 @@ export default function ApprovalHandler() {
     const token = searchParams.get('token') ?? '';
     const action = parseAction(searchParams.get('action'));
 
-    const [loading, setLoading] = useState(true);
-    const [result, setResult] = useState<ApprovalResult | null>(null);
+    const isMissingParams = !ticketId || !token;
+    const [loading, setLoading] = useState(!isMissingParams);
+    const [result, setResult] = useState<ApprovalResult | null>(
+        isMissingParams ? {
+            success: false,
+            message: 'Enlace inválido o incompleto. Revisa tu correo y vuelve a intentarlo.',
+        } : null
+    );
     const started = useRef(false);
 
     useEffect(() => {
-        if (started.current) return;
-
-        if (!ticketId || !token) {
-            started.current = true;
-            setLoading(false);
-            setResult({
-                success: false,
-                message: 'Enlace inválido o incompleto. Revisa tu correo y vuelve a intentarlo.',
-            });
-            return;
-        }
+        if (isMissingParams || started.current) return;
 
         started.current = true;
         let cancelled = false;
@@ -59,7 +55,7 @@ export default function ApprovalHandler() {
         return () => {
             cancelled = true;
         };
-    }, [ticketId, token, action]);
+    }, [ticketId, token, action, isMissingParams]);
 
     return (
         <main id="main-content" className={styles['page']}>

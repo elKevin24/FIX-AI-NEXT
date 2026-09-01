@@ -1,0 +1,51 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.info {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.info strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.count {
+  margin-left: 0.5rem;
+  color: var(--color-text-tertiary);
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ========== MOBILE: STACK ========== */
+/* On small screens the summary text and buttons stack into a vertical,
+   full-width action row so nothing overflows or crowds. */
+@media (max-width: 639px) {
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .info {
+    text-align: center;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

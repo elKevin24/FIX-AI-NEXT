@@ -202,6 +202,34 @@
   --spacing-24: 6rem;
   /* 96px */
 
+  /* ========== RESPONSIVE / LAYOUT TOKENS ========== */
+  /* Unified breakpoint scale (mobile-first). Reuse these so media queries
+     stay consistent across the system instead of hard-coded pixel values. */
+  --breakpoint-sm: 640px;
+  /* Mobile → Tablet */
+  --breakpoint-md: 768px;
+  /* Tablet → Desktop (dominant convention) */
+  --breakpoint-lg: 1024px;
+  /* Desktop → Large Desktop */
+  --breakpoint-xl: 1440px;
+
+  /* Fluid page gutters — reduce wasted space on desktop, keep touch-padding on mobile */
+  --spacing-page: clamp(0.75rem, 2.5vw, 1.5rem);
+  --spacing-page-sm: clamp(0.5rem, 1.5vw, 1rem);
+  /* Gap between stacked sections/panels */
+  --content-gap: clamp(1rem, 2.5vw, 1.5rem);
+  /* Max content width for page containers */
+  --container-max-width: 1280px;
+  /* Standard app header height */
+  --header-height: 64px;
+  /* Flat sidebar width on desktop */
+  --sidebar-width: 240px;
+  /* 240px - matches Sidebar.module.css desktop */
+
+  /* Fluid type scale (only where it adds value: headings on mobile) */
+  --font-size-h1-fluid: clamp(1.5rem, 5vw, 2.25rem);
+  --font-size-h2-fluid: clamp(1.375rem, 4vw, 1.875rem);
+
   /* ========== BORDER RADIUS ========== */
   --radius-sm: 0.25rem;
   /* 4px */
@@ -635,11 +663,11 @@ a:hover {
 
 .container {
   width: 100%;
-  max-width: 1280px;
+  max-width: var(--container-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--spacing-6);
-  padding-right: var(--spacing-6);
+  padding-left: var(--spacing-page);
+  padding-right: var(--spacing-page);
 }
 
 .container-sm {

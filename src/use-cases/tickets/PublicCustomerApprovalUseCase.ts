@@ -139,15 +139,23 @@ export class PublicCustomerApprovalUseCase {
                     }
                 });
 
+                // Obtener autor para la nota del sistema
+                const noteAuthorId = publicTicket.createdById || 
+                    publicTicket.assignedToId || 
+                    publicTicket.tenant?.adminUserId || 
+                    (tx.user ? (await tx.user.findFirst({ where: { tenantId: publicTicket.tenantId }, select: { id: true } }))?.id : undefined);
+
                 // Registrar nota publica en el ticket
-                await tx.ticketNote.create({
-                    data: {
-                        ticketId: publicTicket.id,
-                        content: 'Presupuesto aprobado por el cliente desde el portal publico con token verificado.',
-                        isInternal: false,
-                        tenantId: publicTicket.tenantId,
-                    }
-                });
+                if (noteAuthorId) {
+                    await tx.ticketNote.create({
+                        data: {
+                            ticketId: publicTicket.id,
+                            authorId: noteAuthorId,
+                            content: 'Presupuesto aprobado por el cliente desde el portal publico con token verificado.',
+                            isInternal: false,
+                        }
+                    });
+                }
 
                 return {
                     success: true,
@@ -183,14 +191,21 @@ export class PublicCustomerApprovalUseCase {
                     }
                 });
 
-                await tx.ticketNote.create({
-                    data: {
-                        ticketId: publicTicket.id,
-                        content: `Presupuesto rechazado por el cliente. Motivo: ${rejectionReason || 'Sin motivo especificado'}`,
-                        isInternal: false,
-                        tenantId: publicTicket.tenantId,
-                    }
-                });
+                const noteAuthorId = publicTicket.createdById || 
+                    publicTicket.assignedToId || 
+                    publicTicket.tenant?.adminUserId || 
+                    (tx.user ? (await tx.user.findFirst({ where: { tenantId: publicTicket.tenantId }, select: { id: true } }))?.id : undefined);
+
+                if (noteAuthorId) {
+                    await tx.ticketNote.create({
+                        data: {
+                            ticketId: publicTicket.id,
+                            authorId: noteAuthorId,
+                            content: `Presupuesto rechazado por el cliente. Motivo: ${rejectionReason || 'Sin motivo especificado'}`,
+                            isInternal: false,
+                        }
+                    });
+                }
 
                 return {
                     success: true,

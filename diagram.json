@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "FIX-AI-NEXT Runtime Architecture",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/elKevin24/FIX-AI-NEXT",
+      "revision": "ceda78d8c10521b8d10f044f84f7c208d7348502"
+    },
+    "views": [
+      {
+        "id": "request-lifecycle",
+        "label": "Flujo Principal de Petición",
+        "focus": ["browser_client", "edge_proxy", "server_actions", "tenant_prisma", "neon_postgres"],
+        "note": "Traza la petición de cliente desde el Edge hasta el almacenamiento aislado en Neon Postgres."
+      },
+      {
+        "id": "security-perimeter",
+        "label": "Perímetro de Seguridad & Auth",
+        "focus": ["browser_client", "edge_proxy", "upstash_redis", "auth_engine", "validation_guard"],
+        "note": "Aislamiento perimetral con Rate Limiting distribuido, NextAuth v5 y validación Zod/RBAC."
+      },
+      {
+        "id": "async-events",
+        "label": "Eventos y Notificaciones",
+        "focus": ["server_actions", "event_bus", "email_service", "external_smtp"],
+        "note": "Desacoplamiento asíncrono de efectos secundarios mediante Event Bus y transporte SMTP."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "browser_client",
+      "type": "frontend",
+      "label": "Next.js Web Client",
+      "sublabel": "React 19 / Nuqs / Zustand",
+      "brand": "react",
+      "tag": "User & Tech Portal",
+      "pos": [40, 290],
+      "size": [150, 60],
+      "sources": [
+        { "path": "src/app/dashboard/layout.tsx", "label": "Dashboard Layout" }
+      ]
+    },
+    {
+      "id": "edge_proxy",
+      "type": "cloud",
+      "label": "Next.js Edge Proxy",
+      "sublabel": "proxy.ts / Middleware",
+      "brand": "next-js",
+      "tag": "Perimeter Gate",
+      "pos": [260, 290],
+      "size": [150, 60],
+      "sources": [
+        { "path": "src/proxy.ts", "line": 103, "label": "Edge Middleware" }
+      ]
+    },
+    {
+      "id": "upstash_redis",
+      "type": "database",
+      "label": "Upstash Redis",
+      "sublabel": "Distributed Rate Limiter",
+      "brand": "redis",
+      "tag": "Sliding Window",
+      "pos": [260, 110],
+      "size": [150, 60],
+      "sources": [
+        { "path": "src/proxy.ts", "line": 28, "label": "Upstash Client" }
+      ]
+    },
+    {
+      "id": "auth_engine",
+      "type": "security",
+      "label": "NextAuth v5 Engine",
+      "sublabel": "Bcrypt / JWT / Lockout",
+      "tag": "Zero-Trust Auth",
+      "pos": [520, 110],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/auth.ts", "line": 97, "label": "NextAuth Config" }
+      ]
+    },
+    {
+      "id": "server_actions",
+      "type": "backend",
+      "label": "App Router & Actions",
+      "sublabel": "Server Actions / REST",
+      "brand": "next-js",
+      "tag": "Business Logic",
+      "pos": [520, 290],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/lib/actions.ts", "label": "Server Actions" }
+      ]
+    },
+    {
+      "id": "validation_guard",
+      "type": "security",
+      "label": "Zod & RBAC Guard",
+      "sublabel": "Schema & Policy Enforcer",
+      "tag": "Input Sanitization",
+      "pos": [780, 110],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/lib/schemas.ts", "label": "Zod Schemas" },
+        { "path": "src/lib/authz.ts", "label": "RBAC Policies" }
+      ]
+    },
+    {
+      "id": "tenant_prisma",
+      "type": "backend",
+      "label": "Tenant Prisma Proxy",
+      "sublabel": "getTenantPrisma Ext",
+      "brand": "prisma",
+      "tag": "Tenant Isolation",
+      "pos": [780, 290],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/lib/tenant-prisma.ts", "line": 35, "label": "Tenant Prisma" }
+      ]
+    },
+    {
+      "id": "neon_postgres",
+      "type": "database",
+      "label": "Neon Serverless DB",
+      "sublabel": "PostgreSQL :5432",
+      "brand": "postgresql",
+      "tag": "Shared Schema",
+      "pos": [1040, 290],
+      "size": [150, 60],
+      "sources": [
+        { "path": "src/lib/prisma.ts", "line": 5, "label": "Neon Adapter" }
+      ]
+    },
+    {
+      "id": "event_bus",
+      "type": "messagebus",
+      "label": "Domain Event Bus",
+      "sublabel": "InMemoryEventEmitter",
+      "tag": "Async Pub/Sub",
+      "pos": [520, 470],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/lib/events/event-emitter.ts", "line": 16, "label": "Event Emitter" }
+      ]
+    },
+    {
+      "id": "email_service",
+      "type": "backend",
+      "label": "Email Notification",
+      "sublabel": "Nodemailer / React Email",
+      "tag": "Async Dispatcher",
+      "pos": [780, 470],
+      "size": [160, 60],
+      "sources": [
+        { "path": "src/lib/email-service.ts", "line": 69, "label": "Send Email" }
+      ]
+    },
+    {
+      "id": "external_smtp",
+      "type": "external",
+      "label": "SMTP Mail Gateway",
+      "sublabel": "Gmail / Custom Relay",
+      "tag": "External Service",
+      "pos": [1040, 470],
+      "size": [150, 60]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Vercel Edge & Cloud Runtime",
+      "wraps": ["edge_proxy", "auth_engine", "server_actions", "validation_guard", "tenant_prisma", "event_bus", "email_service"],
+      "pad": 20
+    },
+    {
+      "kind": "security-group",
+      "label": "Perimeter Security & Rate Limiting",
+      "wraps": ["edge_proxy", "upstash_redis", "auth_engine"],
+      "pad": 14
+    },
+    {
+      "kind": "security-group",
+      "label": "Multi-Tenant Data Boundary",
+      "wraps": ["tenant_prisma", "neon_postgres"],
+      "pad": 14
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-client-edge",
+      "from": "browser_client",
+      "to": "edge_proxy",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-edge-redis",
+      "from": "edge_proxy",
+      "to": "upstash_redis",
+      "label": "Rate Check",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "conn-edge-actions",
+      "from": "edge_proxy",
+      "to": "server_actions",
+      "label": "Authorized Flow",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-actions-auth",
+      "from": "server_actions",
+      "to": "auth_engine",
+      "label": "auth() session",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [600, 220]
+    },
+    {
+      "id": "conn-guard-actions",
+      "from": "validation_guard",
+      "to": "tenant_prisma",
+      "label": "Validated Scope",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [860, 220]
+    },
+    {
+      "id": "conn-actions-tenant",
+      "from": "server_actions",
+      "to": "tenant_prisma",
+      "label": "Scoped Query",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-tenant-db",
+      "from": "tenant_prisma",
+      "to": "neon_postgres",
+      "label": "Tenant SQL",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-actions-events",
+      "from": "server_actions",
+      "to": "event_bus",
+      "label": "emit(event)",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [600, 410]
+    },
+    {
+      "id": "conn-events-email",
+      "from": "event_bus",
+      "to": "email_service",
+      "label": "handleEvent()",
+      "variant": "dashed"
+    },
+    {
+      "id": "conn-email-smtp",
+      "from": "email_service",
+      "to": "external_smtp",
+      "label": "SMTP / TLS",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Flujo Principal & Multi-Tenancy",
+      "items": [
+        "Tráfico HTTPS ingresa por Edge Proxy con normalización y rate limit",
+        "getTenantPrisma inyecta obligatoriamente where: { tenantId } y auditoría",
+        "Neon Serverless Postgres gestiona el almacenamiento con connection pooling"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Seguridad & Zero-Trust",
+      "items": [
+        "Rate limiting distribuido en Upstash Redis por IP para login, búsqueda y exportación",
+        "NextAuth v5 gestiona credenciales con Bcrypt, JWT y bloqueo por intentos fallidos",
+        "Validación Zod estricta en Server Actions previa a cualquier mutación de dominio"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Eventos Asíncronos",
+      "items": [
+        "Event Bus en memoria desacopla la creación/actualización de tickets y ventas POS",
+        "Plantillas React Email renderizadas en tiempo de ejecución para notificaciones",
+        "Despacho asíncrono vía Nodemailer hacia Gateway SMTP externo"
+      ]
+    }
+  ]
+}

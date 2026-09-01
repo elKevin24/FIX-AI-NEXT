@@ -51,7 +51,7 @@
 .select:focus {
     outline: none;
     border-color: var(--color-primary-600);
-    box-shadow: 0 0 0 3px var(--color-primary-100), 0 0 20px rgba(var(--color-primary-600), 0.1);
+    box-shadow: 0 0 0 3px var(--color-primary-100), 0 0 20px var(--color-primary-50);
     background: var(--color-surface);
     transform: translateY(-2px);
 }
@@ -167,7 +167,14 @@
 
 .actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .actions {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
 }

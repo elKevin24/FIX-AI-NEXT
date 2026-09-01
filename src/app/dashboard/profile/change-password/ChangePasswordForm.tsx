@@ -1,11 +1,11 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { changePassword } from '@/lib/user-actions';
+import { changePassword } from '@/lib/actions';
+import { useToast } from '@/contexts/ToastContext';
 import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { Button } from '@/components/ui';
-import { useEffect, useState } from 'react';
 
 interface ChangePasswordFormProps {
     isForced?: boolean;

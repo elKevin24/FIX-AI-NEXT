@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import bcrypt from 'bcryptjs';
@@ -157,6 +158,8 @@ export async function PATCH(
       },
     });
 
+    revalidatePath('/dashboard/users');
+
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('Error updating user:', error);
@@ -215,6 +218,8 @@ export async function DELETE(
     await db.user.delete({
       where: { id },
     });
+
+    revalidatePath('/dashboard/users');
 
     return NextResponse.json(
       { message: 'User deleted successfully' },

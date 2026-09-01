@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 
@@ -78,6 +79,9 @@ export async function POST(request: Request) {
                 customer: true,
             },
         });
+
+        revalidatePath('/dashboard/tickets');
+        revalidatePath('/dashboard');
 
         return NextResponse.json(ticket);
     } catch (error) {

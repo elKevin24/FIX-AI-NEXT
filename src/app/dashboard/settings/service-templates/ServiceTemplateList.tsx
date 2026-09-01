@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ServiceCategory } from '@prisma/client';
 import { toggleTemplateActiveStatus, deleteServiceTemplate, duplicateServiceTemplate } from '@/lib/service-template-actions';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import styles from './service-templates.module.css';
 

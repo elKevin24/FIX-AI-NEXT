@@ -43,7 +43,7 @@ vi.mock('@/lib/notifications', () => ({
   markAllMyNotificationsAsRead: (...args: any[]) => mockMarkAllRead(...args),
 }));
 
-vi.mock('@/context/ToastContext', () => ({
+vi.mock('@/contexts/ToastContext', () => ({
   useToast: () => ({ addToast: mockAddToast }),
 }));
 

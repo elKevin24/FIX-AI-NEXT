@@ -115,6 +115,26 @@
 
 /* ========== RESPONSIVE ========== */
 
+.cardList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+}
+
+.mobileCardItem {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mobileCardItem:active {
+    transform: scale(0.99);
+}
+
 @media (max-width: 768px) {
     .cell, .headerCell {
         padding: 0.75rem 1rem;
