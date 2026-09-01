@@ -2,9 +2,9 @@ name: Security
 
 on:
   pull_request:
-    branches: [master, main]
+    branches: [master, main, develop]
   push:
-    branches: [master, main]
+    branches: [master, main, develop]
 
 jobs:
   # Review dependencies for vulnerabilities on PRs

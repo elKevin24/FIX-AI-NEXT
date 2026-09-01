@@ -2,14 +2,24 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-
+function isAuthorizedCron(request: Request): boolean {
     const cronSecret = process.env['CRON_SECRET'];
     const authHeader = request.headers.get('authorization');
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || !authHeader) return false;
+
+    const expectedHeader = `Bearer ${cronSecret}`;
+    const headerHash = crypto.createHash('sha256').update(authHeader).digest();
+    const expectedHash = crypto.createHash('sha256').update(expectedHeader).digest();
+
+    return crypto.timingSafeEqual(headerHash, expectedHash);
+}
+
+export async function GET(request: Request) {
+    if (!isAuthorizedCron(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

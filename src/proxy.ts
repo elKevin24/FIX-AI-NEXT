@@ -110,6 +110,11 @@ export async function proxy(request: NextRequest) {
     ? lowerPathname.slice(0, -1) 
     : lowerPathname;
 
+  // 0. Request ID Correlation
+  const requestId = request.headers.get('x-request-id') || crypto.randomUUID();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-request-id', requestId);
+
   // 1. Rate limiting
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
 
@@ -119,7 +124,7 @@ export async function proxy(request: NextRequest) {
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many authentication attempts. Please wait.' }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) },
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter), 'x-request-id': requestId },
       });
     }
   }
@@ -130,7 +135,7 @@ export async function proxy(request: NextRequest) {
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many search requests. Please wait.' }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) },
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter), 'x-request-id': requestId },
       });
     }
   }
@@ -141,7 +146,7 @@ export async function proxy(request: NextRequest) {
     if (!rateLimit.allowed) {
       return new NextResponse(JSON.stringify({ error: 'Too many export requests. Please wait.' }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) },
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter), 'x-request-id': requestId },
       });
     }
   }
@@ -156,14 +161,20 @@ export async function proxy(request: NextRequest) {
       const redirectUrl = user.passwordMustChange 
         ? new URL(CHANGE_PASSWORD_PATH, request.url)
         : new URL(DASHBOARD_PATH, request.url);
-      return NextResponse.redirect(redirectUrl);
+      const res = NextResponse.redirect(redirectUrl);
+      res.headers.set('x-request-id', requestId);
+      return res;
     }
-    return NextResponse.next();
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set('x-request-id', requestId);
+    return res;
   }
 
   // 4. Protección de Rutas (Dashboard y API interna)
   const isApi = cleanPathname.startsWith('/api');
-  const isPublicApi = cleanPathname.startsWith('/api/auth') || cleanPathname.startsWith('/api/cron');
+  const isPublicApi = cleanPathname.startsWith('/api/auth') || 
+                      cleanPathname.startsWith('/api/cron') || 
+                      cleanPathname.startsWith('/api/health');
   const isDashboard = cleanPathname.startsWith(DASHBOARD_PATH);
 
   // Si la ruta requiere protección
@@ -173,12 +184,14 @@ export async function proxy(request: NextRequest) {
       if (isApi) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-request-id': requestId },
         });
       }
       const loginRedirect = new URL(LOGIN_PATH, request.url);
       loginRedirect.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginRedirect);
+      const res = NextResponse.redirect(loginRedirect);
+      res.headers.set('x-request-id', requestId);
+      return res;
     }
 
     // Si requiere cambio de contraseña
@@ -190,15 +203,23 @@ export async function proxy(request: NextRequest) {
         if (isApi) {
           return new NextResponse(JSON.stringify({ error: 'Password change required', code: 'PASSWORD_MUST_CHANGE' }), {
             status: 403,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-request-id': requestId },
           });
         }
-        return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, request.url));
+        const res = NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, request.url));
+        res.headers.set('x-request-id', requestId);
+        return res;
       }
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  response.headers.set('x-request-id', requestId);
+  return response;
 }
 
 export const config = {

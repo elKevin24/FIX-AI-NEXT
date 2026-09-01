@@ -279,7 +279,7 @@ export async function runLogsMaintenance() {
     if (session?.user?.role !== 'ADMIN') return { success: false, message: 'Unauthorized' };
 
     try {
-        await prisma.$executeRawUnsafe(`SELECT purge_old_audit_data();`);
+        await prisma.$executeRaw`SELECT purge_old_audit_data();`;
         return { success: true, message: 'Maintenance executed successfully' };
     } catch (error) {
         return { success: false, message: 'Failed to run maintenance' };
