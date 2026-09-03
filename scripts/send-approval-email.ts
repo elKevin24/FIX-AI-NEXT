@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 import { render } from '@react-email/render';
 import { PartsApprovalRequiredEmail } from '../src/emails/PartsApprovalRequired';
 import { sendEmail } from '../src/lib/email-service';

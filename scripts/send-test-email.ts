@@ -1,4 +1,6 @@
-import 'dotenv/config'; // Load env vars
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 import { sendEmail } from '../src/lib/email-service';
 
 async function main() {
