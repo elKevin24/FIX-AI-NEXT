@@ -247,7 +247,7 @@ await prisma.$transaction([
 
 #### Alta Prioridad
 1. **Notificaciones por Email**
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Templates de email profesionales
    - Notificaciones automáticas al cambiar estado
    - Envío de PDFs por email
@@ -463,7 +463,7 @@ npm install @react-pdf/renderer
    - Filtros por rango de fechas
 
 2. **Notificaciones por Email**
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Templates de email profesionales
    - Notificaciones automáticas al cambiar estado
    - Opción de enviar PDFs por email adjunto

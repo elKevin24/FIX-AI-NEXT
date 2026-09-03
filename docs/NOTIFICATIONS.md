@@ -1,11 +1,11 @@
 # Sistema de Notificaciones Automáticas
 
-El sistema envía notificaciones automáticas a los clientes cuando el estado de sus tickets cambia.
+El sistema envía notificaciones automáticas a los clientes y técnicos cuando el estado de sus tickets cambia.
 
 ## 🎯 Características
 
 - ✅ **Notificaciones In-App**: Campana de notificaciones en el dashboard
-- 📧 **Emails Automáticos**: Templates profesionales con HTML responsivo (`@react-email`)
+- 📧 **Emails Automáticos**: Templates profesionales con HTML responsivo vía React Email y Nodemailer
 - 🎨 **Templates por Estado**: Diseños específicos para cada transición
 - 🔔 **Notificación a Técnicos**: Los técnicos reciben notificaciones cuando se les asigna un ticket
 - 🚀 **No-bloqueante**: Los errores de notificación no afectan las operaciones de ticket
@@ -33,96 +33,77 @@ El sistema envía notificaciones automáticas a los clientes cuando el estado de
 - **Destinatario**: Técnico asignado
 - **Contenido**: Información del ticket y cliente
 
-## 🛠️ Configuración (Gmail / SMTP)
+## 🛠️ Configuración del Servicio de Correo (SMTP / Nodemailer)
 
-El envío de correos se realiza exclusivamente con **Nodemailer** a través de **SMTP de Gmail** (app password), usando los templates de `@react-email` para el cuerpo HTML.
+El servicio de emails (`src/lib/email-service.ts`) soporta dos modos:
+1. **SMTP (`EMAIL_PROVIDER=smtp`)**: Envío real vía cualquier servidor SMTP estándar (Gmail, Amazon SES, SendGrid, Mailgun, SMTP propio).
+2. **Log (`EMAIL_PROVIDER=log`)**: Modo por defecto cuando no hay servidor SMTP configurado; simula el envío y registra los emails en la consola para desarrollo y pruebas seguras.
 
-### Paso 1: Crear una App Password de Gmail
+### Variables de Entorno
 
-1. Activa la verificación en 2 pasos de tu cuenta de Google.
-2. Ve a [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
-3. Crea una nueva "Contraseña de aplicación" para la app (por ejemplo, "FIX-AI").
-4. Copia la contraseña de 16 caracteres generada.
-
-### Paso 2: Configurar Variables de Entorno
-
-Edita tu archivo `.env.local`:
+Edita tu archivo `.env`:
 
 ```bash
-# Provider (opcional; se auto-detecta si no está definido)
+# Proveedor de correo (opciones: 'smtp' | 'log')
 EMAIL_PROVIDER=smtp
 
-# SMTP / Gmail
+# Remitente de los correos
+EMAIL_FROM=FIX-AI <noreply@tudominio.com>
+
+# Configuración del servidor SMTP
+SMTP_HOST=smtp.tudominio.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=tu-usuario-smtp
+SMTP_PASS=tu-password-smtp
+```
+
+### Configuración con Gmail (Ejemplo)
+
+1. Ve a tu cuenta de Google > Seguridad > Verificación en dos pasos.
+2. Genera una **Contraseña de Aplicación** (App Password).
+3. Configura tus variables:
+```bash
+EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=youraccount@gmail.com
-SMTP_PASS=tu-app-password-de-16-caracteres
-
-# Email del remitente
-EMAIL_FROM='FIX-AI <youraccount@gmail.com>'
+SMTP_USER=tu_correo@gmail.com
+SMTP_PASS=tu_app_password_de_16_caracteres
+EMAIL_FROM=Mi Taller <tu_correo@gmail.com>
 ```
-
-> **Nota**: No uses tu contraseña normal de Gmail como `SMTP_PASS`. Usa una **App Password** generada con 2FA activado.
-
-### Paso 3: Modo Log (Desarrollo)
-
-Si no se configura ningún proveedor, `email-service.ts` usa el modo `log`: los correos no se envían pero se registran en consola, lo que permite testear flujos sin enviar emails.
 
 ## 🧪 Pruebas
 
+### Probar Envío desde CLI
+
+Puedes ejecutar el script de prueba de envío:
+```bash
+npx tsx scripts/send-test-email.ts
+```
+
 ### Probar Notificaciones In-App
 
-1. Inicia sesión como cliente
-2. Crea un ticket desde el wizard
-3. Verifica la campana de notificaciones (arriba a la derecha)
-4. Deberías ver: "Ticket #XXX creado"
+1. Inicia sesión en el sistema.
+2. Crea o actualiza un ticket desde el dashboard.
+3. Verifica la campana de notificaciones (arriba a la derecha).
 
-### Probar Emails
+### Probar Emails con Tickets
 
-**IMPORTANTE**: Para recibir emails de prueba, el cliente debe tener un email válido.
-
-1. Crea un cliente con tu email personal
-2. Crea un ticket para ese cliente
-3. Revisa tu bandeja de entrada
-4. Cambia el estado del ticket (por ejemplo, a `IN_PROGRESS`)
-5. Deberías recibir un segundo email
-
-### Probar Email con Script CLI
-
-```bash
-npm run send:test-email   # Envía un correo de prueba vía SMTP (Gmail)
-```
+1. Crea un cliente con un email válido.
+2. Crea un ticket asignado a ese cliente.
+3. Si SMTP está configurado, revisa la bandeja de entrada del cliente. Si estás en modo `log`, revisa los registros en la terminal del servidor.
 
 ## 📧 Templates de Email
 
-Los templates viven en `src/emails/` como componentes de `@react-email`:
+Los templates están desarrollados con `@react-email` y Nodemailer en `src/lib/email-service.ts` y componentes de plantilla:
 
-- `TicketCreated.tsx` - Ticket creado
-- `TicketStatusChanged.tsx` - Cambio de estado
-- `TechnicianAssigned.tsx` - Técnico asignado
-- `SLABreach.tsx` - Incumplimiento de SLA
-- `ResetPasswordEmail.tsx` - Restablecimiento de contraseña
-- `PartsApprovalRequired.tsx` - Requiere aprobación de repuestos
-- `LowStock.tsx` - Alerta de stock bajo
-- `components/EmailLayout.tsx` - Layout base compartido
+- Confirmación de creación de ticket
+- Notificación de cambio de estado
+- Aviso de resolución y retiro de equipo
+- Notificación de cierre de ticket
 
-### Personalizar Templates
-
-Edita los componentes en `src/emails/`. El envío se orquesta desde `src/lib/email-service.ts` y `src/lib/ticket-notifications.ts`:
-
-```typescript
-// src/lib/email-service.ts (enviar un email)
-import { render } from '@react-email/render';
-import { sendMail } from 'nodemailer';
-
-const html = await render(<TicketCreated ticket={ticket} />);
-// -> transporter.sendMail({ ... }) vía SMTP/Gmail
-```
-
-## 🔍 Monitoreo
-
-### Ver Logs de Notificaciones
+## 🔍 Monitoreo y Logs
 
 ```bash
 # En desarrollo
@@ -131,107 +112,13 @@ npm run dev
 ```
 
 Los logs incluyen:
-- `✅ [Email Service] Email sent via Gmail/SMTP: <messageId>`
-- `Failed to send notifications: [error]` (no bloquea operaciones)
-
-## 🚨 Solución de Problemas
-
-### No recibo emails
-
-**1. Verifica configuración**
-```bash
-echo $SMTP_USER   # Tu cuenta Gmail
-echo $SMTP_PASS   # Debe ser una App Password de 16 caracteres
-echo $EMAIL_FROM  # Email del remitente
-```
-
-**2. Verifica logs del servidor**
-```bash
-npm run dev
-# Busca: "Failed to send" o "Email sent via Gmail/SMTP"
-```
-
-**3. Verifica el cliente tiene email**
-```typescript
-// En createTicketFromTemplate o acciones de ticket
-if (!customer.email) {
-  console.warn('Customer has no email'); // ⚠️ No se envía email
-}
-```
-
-### Emails van a spam
-
-1. **Verifica SPF y DKIM** en tu dominio (si usas correo propio)
-2. **Usa una cuenta Gmail configurada correctamente**
-3. **Evita contenido spam** (muchos signos !, MAYÚSCULAS, etc.)
-4. **Calienta la cuenta** (envía poco a poco, no muchos correos de golpe)
-
-### Error: "Invalid login" / "Application-specific password required"
-
-```bash
-# SMTP_PASS debe ser una App Password de 16 caracteres, NO tu contraseña normal
-# Genera una en: https://myaccount.google.com/apppasswords
-```
-1. Asegúrate de tener 2FA activado en la cuenta.
-2. Regenera la App Password.
-3. Sustituye `SMTP_PASS` en `.env.local`.
-4. Reinicia el servidor: `npm run dev`.
+- `✅ [Email Service] Email sent via SMTP: <message-id>`
+- `⚠️ [Email Service] No SMTP provider configured. Email not sent, but logged to console.`
+- `❌ [Email Service] SMTP Error: <error>` (no bloquea la operación del ticket)
 
 ## 🔐 Seguridad
 
 - ✅ Emails solo a clientes del mismo tenant
 - ✅ Credenciales SMTP en variables de entorno (nunca en código)
 - ✅ Validación de tenant isolation en todas las notificaciones
-- ✅ Errores de email no exponen información sensible
-
-## 📝 Notas Técnicas
-
-### Flujo de Notificaciones
-
-```typescript
-// 1. Acción de ticket (ej: resolver)
-POST /api/tickets/:id/actions { action: 'resolve', note: '...' }
-
-// 2. Actualización exitosa en DB
-await db.ticket.update({ status: 'RESOLVED' })
-
-// 3. Envío de notificaciones (no bloqueante)
-try {
-  await notifyTicketStatusChange(ticket, { oldStatus, newStatus })
-  // → In-app notification (createNotification)
-  // → Email notification (sendTicketStatusChangedEmail)
-} catch (err) {
-  console.error(err) // Log pero no falla la request
-}
-
-// 4. Response al cliente
-return { success: true, ticket }
-```
-
-### Arquitectura
-
-```
-src/lib/
-├── email-service.ts          # Lógica de envío (Nodemailer / SMTP / Gmail)
-├── ticket-notifications.ts   # Lógica de notificaciones (in-app + email)
-├── sla-actions.ts            # Alertas de SLA (email + in-app)
-└── notifications.ts          # Notificaciones in-app
-
-src/emails/
-├── TicketCreated.tsx         # Templates @react-email
-├── TicketStatusChanged.tsx
-└── ...
-
-src/app/api/tickets/[id]/actions/
-└── route.ts                  # Integration point
-```
-
-## 🚀 Siguientes Pasos
-
-- [ ] Implementar preferencias de notificación por usuario
-- [ ] Agregar templates multiidioma
-- [ ] Implementar rate limiting para prevenir spam
-
----
-
-**¿Necesitas ayuda?** Revisa los logs del servidor o la configuración de Nodemailer/Gmail.
+- ✅ Fallos en el envío de correos no abortan transacciones críticas de base de datos

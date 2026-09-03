@@ -615,7 +615,7 @@ export async function estimateCompletionDate(
 ### Corto Plazo (1-2 semanas) - AHORA SEGURO
 
 1. **Feature 2 - Etapa 2: Notificaciones Automáticas** ⭐
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Implementar notificaciones al cambiar estado
    - Templates de email profesionales
    - **Desbloqueado por:** Tenant isolation + State machine
