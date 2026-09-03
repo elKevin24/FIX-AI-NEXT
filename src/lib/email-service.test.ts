@@ -12,7 +12,6 @@ describe('email-service provider resolution', () => {
   it('usa modo log cuando no hay proveedor configurado', async () => {
     delete process.env['SMTP_HOST'];
     delete process.env['SMTP_USER'];
-    delete process.env['RESEND_API_KEY'];
     delete process.env['EMAIL_PROVIDER'];
 
     const { sendEmail: logSend } = await import('@/lib/email-service');
