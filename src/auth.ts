@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
-import { compare } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 import type { JWT } from "next-auth/jwt";
@@ -137,7 +137,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
 
                 // Verificar contraseña
-                const passwordsMatch = await compare(password, user.password);
+                const passwordsMatch = await bcrypt.compare(password, user.password);
 
                 if (!passwordsMatch) {
                     // Registrar intento fallido (no revelar detalles al usuario)
