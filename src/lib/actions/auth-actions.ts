@@ -31,6 +31,7 @@ export async function authenticate(
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
 import { ResetPasswordEmail } from '@/emails/ResetPasswordEmail';
+import { getBaseUrl } from '@/lib/app-url';
 import { hash } from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -61,7 +62,7 @@ export async function requestPasswordReset(formData: FormData) {
           });
 
           // Enviamos el Raw Token en el correo
-          const resetUrl = `${process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+          const resetUrl = `${getBaseUrl()}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
           
           // Enviamos el correo sin "await" para no bloquear
           await sendEmail({

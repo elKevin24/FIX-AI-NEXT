@@ -7,6 +7,7 @@ import { TicketStatusChangedEmail } from '@/emails/TicketStatusChanged';
 import { TechnicianAssignedEmail } from '@/emails/TechnicianAssigned';
 import { LowStockEmail } from '@/emails/LowStock';
 import { PartsApprovalRequiredEmail } from '@/emails/PartsApprovalRequired';
+import { getBaseUrl } from '@/lib/app-url';
 
 // --- Types ---
 
@@ -55,9 +56,10 @@ export async function notifyPartsApprovalRequired(
     quantity: number,
     priceAtProposal: number,
     total: number,
+    customBaseUrl?: string,
 ) {
     const ticketRef = ticket.ticketNumber;
-    const baseUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app';
+    const baseUrl = getBaseUrl(customBaseUrl);
     const approvalTokenTtlMs = 72 * 60 * 60 * 1000; // 72 horas
 
     // 0. Generar y persistir un token de aprobación de un solo uso (One-Time Token)
@@ -119,7 +121,7 @@ export async function notifyPartsApprovalRequired(
  */
 export async function notifyTicketStatusChange(
     ticket: TicketNotificationData,
-    { oldStatus, newStatus, note }: { oldStatus: string; newStatus: string; note?: string }
+    { oldStatus, newStatus, note, baseUrl }: { oldStatus: string; newStatus: string; note?: string; baseUrl?: string }
 ) {
     const ticketRef = ticket.ticketNumber;
     const statusLabel = STATUS_LABELS[newStatus] || newStatus;
@@ -136,9 +138,9 @@ export async function notifyTicketStatusChange(
         });
     }
 
-
     // 2. Notificar al Cliente (Email)
     if (ticket.customer.email) {
+        const appUrl = getBaseUrl(baseUrl);
         await sendEmail({
             to: ticket.customer.email,
             subject: `[FIX-AI] Actualización de ticket #${ticketRef}`,
@@ -148,7 +150,7 @@ export async function notifyTicketStatusChange(
                 ticketTitle: ticket.title,
                 oldStatus: STATUS_LABELS[oldStatus] || oldStatus,
                 newStatus: statusLabel,
-                ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`,
+                ticketLink: `${appUrl}/tickets/status/${ticket.id}`,
                 note: note
             })
         });
@@ -160,11 +162,13 @@ export async function notifyTicketStatusChange(
  */
 export async function notifyTechnicianAssigned(
     ticket: TicketNotificationData,
-    actorName: string
+    actorName: string,
+    baseUrl?: string
 ) {
     if (!ticket.assignedToId) return;
 
     const ticketRef = ticket.ticketNumber;
+    const appUrl = getBaseUrl(baseUrl);
 
     // 1. In-app
     await createNotification({
@@ -186,7 +190,7 @@ export async function notifyTechnicianAssigned(
                  ticketNumber: ticketRef || '',
                  ticketTitle: ticket.title,
                  assignedBy: actorName,
-                 ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                 ticketLink: `${appUrl}/dashboard/tickets/${ticket.id}`
              })
         });
     }
@@ -195,9 +199,10 @@ export async function notifyTechnicianAssigned(
 /**
  * Notifica cuando se crea un nuevo ticket (Al creador y/o admin)
  */
-export async function notifyTicketCreated(ticket: TicketNotificationData) {
+export async function notifyTicketCreated(ticket: TicketNotificationData, baseUrl?: string) {
     // Implementación opcional: Notificar al cliente que recibimos su equipo
     const ticketRef = ticket.ticketNumber;
+    const appUrl = getBaseUrl(baseUrl);
 
     if (ticket.customer.email) {
         await sendEmail({
@@ -209,7 +214,7 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
                  ticketTitle: ticket.title,
                  deviceType: ticket.deviceType || '',
                  deviceModel: ticket.deviceModel || '',
-                 ticketLink: `${process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app'}/dashboard/tickets/${ticket.id}`
+                 ticketLink: `${appUrl}/tickets/status/${ticket.id}`
             })
         });
     }

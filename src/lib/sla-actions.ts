@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/email-service';
 import { createNotification } from '@/lib/notifications';
 import SLABreachEmail from '@/emails/SLABreach'; 
 import { SLACheckSchema } from '@/lib/schemas';
+import { getBaseUrl } from '@/lib/app-url';
 
 export async function checkSLA(tenantId?: string) {
     console.log('Starting SLA Check...');
@@ -69,7 +70,7 @@ export async function checkSLA(tenantId?: string) {
                          title: ticket.title,
                          status,
                          timeRemaining: msToTime(end - now),
-                         ticketLink: `${process.env['NEXTAUTH_URL'] || 'http://localhost:3000'}/dashboard/tickets/${ticket.id}`
+                         ticketLink: `${getBaseUrl()}/dashboard/tickets/${ticket.id}`
                      })
                  });
                  emailsSent++;

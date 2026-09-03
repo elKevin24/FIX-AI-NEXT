@@ -4,9 +4,10 @@ dotenv.config();
 import { render } from '@react-email/render';
 import { PartsApprovalRequiredEmail } from '../src/emails/PartsApprovalRequired';
 import { sendEmail } from '../src/lib/email-service';
+import { getBaseUrl } from '../src/lib/app-url';
 
-const to = 'busqueda63@hotmail.com';
-const baseUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000';
+const to = process.argv[2] || 'busqueda63@hotmail.com';
+const baseUrl = getBaseUrl(process.argv[3]);
 
 async function main() {
     console.log(`📧 Enviando email de aprobación de repuestos a ${to}...`);
