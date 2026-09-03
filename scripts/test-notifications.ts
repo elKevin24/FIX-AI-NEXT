@@ -41,7 +41,7 @@ async function testNotifications() {
         { oldStatus: 'OPEN', newStatus: 'IN_PROGRESS' }
     );
 
-    console.log('✅ Pruebas completadas. Revisa tu inbox de Gmail o los logs del servidor.');
+    console.log('✅ Pruebas completadas. Revisa tu inbox o logs de correo.');
 }
 
 testNotifications()

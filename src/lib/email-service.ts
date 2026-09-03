@@ -57,14 +57,16 @@ async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) 
 }
 
 function logEmail({ to, subject, text, html }: SendEmailParams) {
-  console.log('⚠️ [Email Service] No SMTP provider configured (set SMTP_USER & SMTP_PASS for Gmail). Email not sent, but logged to console.');
+  console.log('⚠️ [Email Service] No SMTP provider configured (set SMTP_*). Email not sent, but logged to console.');
+  console.log(`[Email Log] To: ${to} | Subject: "${subject}"`);
+  if (text) console.log(`[Email Body] ${text}`);
   if (html) console.log(`[HTML Content Provided: ${html.length} chars]`);
 }
 
 /**
  * Sends an email using Nodemailer (Gmail / SMTP):
- *  - EMAIL_PROVIDER=smtp (or SMTP_USER set) -> nodemailer SMTP (Gmail)
- *  - otherwise                              -> log only
+ *  - EMAIL_PROVIDER=smtp (or SMTP_HOST+SMTP_USER / SMTP_USER+SMTP_PASS set) -> nodemailer SMTP
+ *  - otherwise -> log only
  */
 export async function sendEmail(params: SendEmailParams) {
   const provider = resolveProvider();
