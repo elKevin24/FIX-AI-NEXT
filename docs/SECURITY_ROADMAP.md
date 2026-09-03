@@ -26,7 +26,7 @@ Este roadmap organiza las remediaciones de la auditoría en **5 fases ordenadas 
     2. Confirmar commit y push para que `.env` deje de estar en el árbol de Git.
     3. **Rotación obligatoria:**
        - Regenerar contraseña de usuario `neondb_owner` en Neon Console.
-       - Rotar API Key de Resend (`RESEND_API_KEY`).
+       - Rotar credenciales del servicio de email (`SMTP_PASS`).
        - Rotar Server Secret de Stack Auth (`STACK_SECRET_SERVER_KEY`).
   - **Criterio de Aceptación:** `git ls-files .env` devuelve vacío y las credenciales antiguas son revocadas.
 

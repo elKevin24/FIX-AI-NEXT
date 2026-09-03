@@ -26,6 +26,7 @@
     "neon:superadmin": "npx tsx scripts/seed-superadmin.ts",
     "neon:studio": "npx prisma studio",
     "test:notifications": "npx tsx scripts/test-notifications.ts",
+    "email:test": "npx tsx --conditions=react-server scripts/send-test-email.ts",
     "create:maintenance-templates": "npx tsx scripts/create-maintenance-templates.ts",
     "seed:service-templates": "npx tsx scripts/seed-all-service-templates.ts",
     "check:types": "npx tsc --noEmit",
