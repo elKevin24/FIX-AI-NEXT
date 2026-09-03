@@ -82,7 +82,7 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
     *   ✅ **Perspectiva 1 - Arquitectura en Tiempo de Ejecución (`architecture`):** Topología perimetral (Edge Proxy, Upstash Redis, NextAuth v5, Server Actions, TenantPrisma, Neon DB, Event Bus, Email Service).
     *   🚧 **Perspectiva 2 - Ciclo de Vida del Ticket (`lifecycle`):** Modelado formal de la máquina de estados (`OPEN` → `IN_PROGRESS` → `WAITING_APPROVAL` → `WAITING_FOR_PARTS` → `RESOLVED` → `CLOSED` / `CANCELLED` / `REJECTED`).
     *   ⏳ **Perspectiva 3 - Concurrencia Transaccional POS e Inventario (`sequence`):** Validación en tiempo real, bloqueo y deducción atómica de inventario (`inventory-atomic.ts`), cobro y generación de factura.
-    *   ⏳ **Perspectiva 4 - Linaje de Datos y Auditoría (`dataflow`):** Trazabilidad de mutaciones hacia `AuditLog`, agregaciones analíticas con `recharts` y exportaciones CSV/Excel/PDF.
+    *   ✅ **Perspectiva 4 - Linaje de Datos y Auditoría (`dataflow`):** Trazabilidad de mutaciones hacia `AuditLog`, agregaciones analíticas con `recharts` y exportaciones CSV/Excel/PDF.
 4.  **Evolución del Broker de Eventos:** Migrar `InMemoryEventEmitter` a **Upstash QStash / Redis PubSub** para soportar el despacho asíncrono desacoplado en entornos multi-instancia/serverless puros.
 
 ## 4. Convenciones de Desarrollo

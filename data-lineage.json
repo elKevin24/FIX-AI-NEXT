@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Data Lineage & Audit Analytics",
+    "output": "data-lineage.html",
+    "viewBox": [
+      1080,
+      650
+    ],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "analytics-pipeline",
+        "label": "Canal de Agregación & Métricas",
+        "focus": [
+          "web_client",
+          "action_layer",
+          "neon_db",
+          "report_engine",
+          "recharts_ui"
+        ],
+        "note": "Traza el flujo analítico desde las transacciones operativas hasta los gráficos en el dashboard."
+      },
+      {
+        "id": "audit-traceability",
+        "label": "Trazabilidad & Auditoría",
+        "focus": [
+          "web_client",
+          "action_layer",
+          "audit_engine",
+          "audit_db",
+          "audit_view"
+        ],
+        "note": "Monitorea la captura inmutable de eventos sensibles, mutaciones y accesos con IP y usuario."
+      },
+      {
+        "id": "export-lineage",
+        "label": "Linaje de Exportación",
+        "focus": [
+          "neon_db",
+          "export_service",
+          "file_export"
+        ],
+        "note": "Extracción y transformación de conjuntos de datos masivos para auditorías en CSV, Excel y PDF."
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "Fuentes"
+    },
+    {
+      "label": "Ingesta & Control"
+    },
+    {
+      "label": "Persistencia"
+    },
+    {
+      "label": "Procesamiento"
+    },
+    {
+      "label": "Consumo"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "web_client",
+      "type": "frontend",
+      "label": "Next.js Web Client",
+      "sublabel": "React 19 / POS",
+      "stage": 0,
+      "row": 0,
+      "tag": "Transacciones"
+    },
+    {
+      "id": "api_sources",
+      "type": "cloud",
+      "label": "Cron & Triggers",
+      "sublabel": "SLA / Worker",
+      "stage": 0,
+      "row": 1,
+      "tag": "Automatización"
+    },
+    {
+      "id": "action_layer",
+      "type": "backend",
+      "label": "Server Actions",
+      "sublabel": "Zod & RBAC Guard",
+      "stage": 1,
+      "row": 0,
+      "tag": "Mutaciones"
+    },
+    {
+      "id": "audit_engine",
+      "type": "security",
+      "label": "Audit Logger",
+      "sublabel": "logAction()",
+      "stage": 1,
+      "row": 2,
+      "tag": "Auditoría"
+    },
+    {
+      "id": "neon_db",
+      "type": "database",
+      "label": "Neon PostgreSQL",
+      "sublabel": "Tickets & Ventas",
+      "stage": 2,
+      "row": 0,
+      "tag": "Multitenant"
+    },
+    {
+      "id": "audit_db",
+      "type": "database",
+      "label": "AuditLog Store",
+      "sublabel": "audit_logs",
+      "stage": 2,
+      "row": 2,
+      "tag": "Inmutable"
+    },
+    {
+      "id": "report_engine",
+      "type": "backend",
+      "label": "Report Aggregator",
+      "sublabel": "groupBy & Sums",
+      "stage": 3,
+      "row": 0,
+      "tag": "Analítica"
+    },
+    {
+      "id": "export_service",
+      "type": "backend",
+      "label": "Export Pipeline",
+      "sublabel": "Stream API",
+      "stage": 3,
+      "row": 1,
+      "tag": "Transformación"
+    },
+    {
+      "id": "recharts_ui",
+      "type": "frontend",
+      "label": "Recharts Dashboard",
+      "sublabel": "Gráficos & KPIs",
+      "stage": 4,
+      "row": 0,
+      "tag": "Dashboards"
+    },
+    {
+      "id": "file_export",
+      "type": "external",
+      "label": "Data Exports",
+      "sublabel": "CSV / XLSX / PDF",
+      "stage": 4,
+      "row": 1,
+      "tag": "Archivos"
+    },
+    {
+      "id": "audit_view",
+      "type": "security",
+      "label": "Audit Explorer",
+      "sublabel": "/audit-logs",
+      "stage": 4,
+      "row": 2,
+      "tag": "Cumplimiento"
+    }
+  ],
+  "flows": [
+    {
+      "id": "client-mutations",
+      "from": "web_client",
+      "to": "action_layer",
+      "label": "mutaciones",
+      "classification": "transacciones",
+      "variant": "emphasis",
+      "route": "straight",
+      "labelDy": -18
+    },
+    {
+      "id": "api-mutations",
+      "from": "api_sources",
+      "to": "action_layer",
+      "label": "cron jobs",
+      "classification": "automatización",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "action-to-neon",
+      "from": "action_layer",
+      "to": "neon_db",
+      "label": "escritura SQL",
+      "classification": "SQL persistente",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "id": "action-to-audit",
+      "from": "action_layer",
+      "to": "audit_engine",
+      "label": "log evento",
+      "classification": "seguridad",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight",
+      "labelDx": 0,
+      "labelDy": 30
+    },
+    {
+      "id": "audit-to-db",
+      "from": "audit_engine",
+      "to": "audit_db",
+      "label": "audit log",
+      "classification": "append-only",
+      "variant": "security",
+      "route": "straight"
+    },
+    {
+      "id": "neon-to-report",
+      "from": "neon_db",
+      "to": "report_engine",
+      "label": "agregaciones",
+      "classification": "read-only",
+      "variant": "emphasis",
+      "route": "straight",
+      "labelDy": -20
+    },
+    {
+      "id": "neon-to-export",
+      "from": "neon_db",
+      "to": "export_service",
+      "label": "dataset",
+      "classification": "extracción",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 20
+    },
+    {
+      "id": "audit-to-view",
+      "from": "audit_db",
+      "to": "audit_view",
+      "label": "auditoría",
+      "classification": "filtro tenant",
+      "variant": "security",
+      "route": "straight"
+    },
+    {
+      "id": "report-to-ui",
+      "from": "report_engine",
+      "to": "recharts_ui",
+      "label": "KPIs",
+      "classification": "métricas",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "id": "export-to-file",
+      "from": "export_service",
+      "to": "file_export",
+      "label": "descargas",
+      "classification": "segura",
+      "variant": "default",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Flujo Analítico & Linaje",
+      "items": [
+        "Mutaciones operativas registradas mediante getTenantPrisma con aislamiento multi-inquilino",
+        "Agregaciones SQL optimizadas (groupBy / aggregate) para dashboards ejecutivos con Recharts"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Auditoría & Cumplimiento",
+      "items": [
+        "Trazabilidad inmutable con AuditLog: captura de actor, tenant, dirección IP y metadatos",
+        "Descarga controlada (RBAC ADMIN) en CSV, Excel (xlsx) y PDF para auditorías formales"
+      ]
+    }
+  ]
+}
