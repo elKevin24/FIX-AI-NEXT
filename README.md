@@ -57,25 +57,15 @@ Acceso público simplificado para que los clientes consulten el estado de sus eq
 1. El cliente es notificado (o consulta el estado en línea).
 2. El equipo es entregado y el ticket se marca como "Cerrado".
 
-## 🗺️ Estado y Roadmap
+## 🗺️ Próximas Funcionalidades (Roadmap)
 
-Evolución de la plataforma (verificado contra el código):
+Estamos trabajando constantemente para mejorar la plataforma:
 
-- [x] **Gestión de Inventario**: control de stock de repuestos y punto de venta (POS).
-- [x] **Facturación**: módulo integrado para cobros y facturas.
-- [x] **Reportes y Métricas**: panel de reportes con ingresos, tickets e inventario.
-- [ ] **Notificaciones Automáticas**: alertas por correo/SMS/WhatsApp sobre cambios de estado.
-- [ ] **Portal de Autoservicio Avanzado**: aprobación de presupuestos desde el portal público.
-- [ ] **Soporte Multi-idioma**: interfaz disponible en varios idiomas.
-
-El detalle completo por área (seguridad, frontend/a11y/performance, workflow de tickets, temas, triggers) vive en el [Roadmap Central](./docs/ROADMAP_MASTER.md).
-
----
-
-## 📚 Documentación
-
-- **[Índice de documentación](./docs/INDEX.md)** — guía completa del proyecto.
-- **[Roadmap Central](./docs/ROADMAP_MASTER.md)** — estado agregado de todos los roadmaps, verificado contra el código.
+- [ ] **Notificaciones Automáticas**: Alertas por correo electrónico o SMS sobre cambios de estado.
+- [ ] **Gestión de Inventario**: Control de stock de repuestos en tiempo real.
+- [ ] **Facturación**: Módulo integrado para cobros y facturas.
+- [ ] **Reportes y Métricas**: Paneles visuales para analizar el rendimiento del taller.
+- [ ] **Soporte Multi-idioma**: Interfaz disponible en varios idiomas.
 
 ---
 

@@ -11,11 +11,7 @@ const themes: { value: Theme; label: string; icon: string }[] = [
     { value: 'dark-colorblind', label: 'Dark Colorblind', icon: '👁️' },
 ];
 
-export interface ThemeSwitcherProps {
-    placement?: 'top' | 'bottom';
-}
-
-export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps = {}) {
+export default function ThemeSwitcher() {
     const { theme, setTheme } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
@@ -77,9 +73,7 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
             case 'Enter':
             case ' ':
                 e.preventDefault();
-                if (themes[focusedIndex]) {
-                    handleThemeChange(themes[focusedIndex]!.value);
-                }
+                handleThemeChange(themes[focusedIndex].value);
                 break;
             case 'Escape':
                 e.preventDefault();
@@ -116,9 +110,9 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
 
     return (
         <>
-            <div className={styles['themeSwitcher']} ref={dropdownRef}>
+            <div className={styles.themeSwitcher} ref={dropdownRef}>
                 <button
-                    className={styles['themeButton']}
+                    className={styles.themeButton}
                     onClick={() => {
                         if (!isOpen) {
                              const currentIndex = themes.findIndex(t => t.value === theme);
@@ -132,14 +126,14 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
                     aria-expanded={isOpen}
                     suppressHydrationWarning
                 >
-                    <span className={styles['icon']} suppressHydrationWarning>
-                        {currentTheme?.icon}
+                    <span className={styles.icon} suppressHydrationWarning>
+                        {currentTheme.icon}
                     </span>
-                    <span className={styles['label']} suppressHydrationWarning>
-                        {currentTheme?.label}
+                    <span className={styles.label} suppressHydrationWarning>
+                        {currentTheme.label}
                     </span>
                     <svg
-                        className={`${styles['chevron']} ${isOpen ? styles['chevronOpen'] : ''}`}
+                        className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
                         width="16"
                         height="16"
                         viewBox="0 0 16 16"
@@ -158,11 +152,11 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
                 </button>
 
                 {isOpen && (
-                    <ul
-                        id="theme-listbox"
-                        className={`${styles.dropdown} ${placement === 'bottom' ? styles.dropdownBottom : styles.dropdownTop}`}
-                        role="listbox"
+                    <div
+                        role="menu"
+                        aria-orientation="vertical"
                         aria-label="Selección de tema"
+                        className={styles.dropdown}
                         onKeyDown={handleKeyDown}
                     >
                         {themes.map((t, index) => (
@@ -173,16 +167,16 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
                                 }}
                                 role="menuitem"
                                 tabIndex={focusedIndex === index ? 0 : -1}
-                                className={`${styles['themeOption']} ${t.value === theme ? styles['themeOptionActive'] : ''
+                                className={`${styles.themeOption} ${t.value === theme ? styles.themeOptionActive : ''
                                     }`}
                                 onClick={() => handleThemeChange(t.value)}
                                 aria-current={t.value === theme ? 'true' : undefined}
                             >
-                                <span className={styles['optionIcon']}>{t.icon}</span>
-                                <span className={styles['optionLabel']}>{t.label}</span>
+                                <span className={styles.optionIcon}>{t.icon}</span>
+                                <span className={styles.optionLabel}>{t.label}</span>
                                 {t.value === theme && (
                                     <svg
-                                        className={styles['checkIcon']}
+                                        className={styles.checkIcon}
                                         width="16"
                                         height="16"
                                         viewBox="0 0 16 16"
@@ -201,7 +195,7 @@ export default function ThemeSwitcher({ placement = 'top' }: ThemeSwitcherProps 
                                 )}
                             </button>
                         ))}
-                    </ul>
+                    </div>
                 )}
             </div>
 

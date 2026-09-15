@@ -1,0 +1,269 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e58] [cursor=pointer]:
+    - generic [ref=e61]:
+      - text: Rendering
+      - generic [ref=e62]:
+        - generic [ref=e63]: .
+        - generic [ref=e64]: .
+        - generic [ref=e65]: .
+  - alert [ref=e57]
+  - generic [ref=e66]:
+    - complementary [ref=e67]:
+      - heading "FIX-AI" [level=2] [ref=e70]
+      - navigation [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]: General
+          - link "Inicio" [ref=e74] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Tickets" [ref=e77] [cursor=pointer]:
+            - /url: /dashboard/tickets
+          - link "Pool de Tickets" [ref=e80] [cursor=pointer]:
+            - /url: /dashboard/tickets/pool
+        - generic [ref=e83]:
+          - generic [ref=e84]: Operaciones
+          - link "Repuestos" [ref=e85] [cursor=pointer]:
+            - /url: /dashboard/parts
+          - link "Carga de Trabajo" [ref=e88] [cursor=pointer]:
+            - /url: /dashboard/technicians/workload
+          - link "Plantillas" [ref=e91] [cursor=pointer]:
+            - /url: /dashboard/settings/service-templates
+          - link "Clientes" [ref=e95] [cursor=pointer]:
+            - /url: /dashboard/customers
+        - generic [ref=e98]:
+          - generic [ref=e99]: Ventas & POS
+          - link "Punto de Venta" [ref=e100] [cursor=pointer]:
+            - /url: /dashboard/pos
+          - link "Caja" [ref=e103] [cursor=pointer]:
+            - /url: /dashboard/cash-register
+          - link "Facturación" [ref=e106] [cursor=pointer]:
+            - /url: /dashboard/invoices
+          - link "Cotizaciones" [ref=e109] [cursor=pointer]:
+            - /url: /dashboard/pos/quotations
+          - link "Devoluciones" [ref=e112] [cursor=pointer]:
+            - /url: /dashboard/pos/returns
+        - generic [ref=e115]:
+          - generic [ref=e116]: Administración
+          - link "Reportes" [ref=e117] [cursor=pointer]:
+            - /url: /dashboard/reports
+          - link "Usuarios" [ref=e121] [cursor=pointer]:
+            - /url: /dashboard/users
+          - link "Configuración" [ref=e124] [cursor=pointer]:
+            - /url: /dashboard/settings
+      - generic [ref=e128]:
+        - button "Cambiar tema" [ref=e131] [cursor=pointer]:
+          - generic [ref=e132]: 🌓
+          - generic [ref=e133]: Auto (Sistema)
+        - button "Cerrar Sesión" [ref=e138] [cursor=pointer]
+    - main [ref=e142]:
+      - button "Notificaciones" [ref=e145] [cursor=pointer]
+      - generic [ref=e149]:
+        - generic:
+          - generic [ref=e150]:
+            - heading "Dashboard" [level=1] [ref=e151]
+            - generic [ref=e152]: Bienvenido de vuelta, Carlos Rodriguez
+          - textbox "Buscar tickets, clientes, repuestos..." [ref=e156]
+        - generic [ref=e157]:
+          - generic [ref=e160]:
+            - heading "Tickets Activos" [level=3] [ref=e161]
+            - paragraph [ref=e162]: "54"
+            - paragraph [ref=e163]: Abiertos + En Progreso
+          - generic [ref=e166]:
+            - heading "Esperando Repuestos" [level=3] [ref=e167]
+            - paragraph [ref=e168]: "1"
+            - paragraph [ref=e169]: Inventario pendiente
+          - generic [ref=e172]:
+            - heading "Completados Hoy" [level=3] [ref=e173]
+            - paragraph [ref=e174]: "1"
+            - paragraph [ref=e175]: Tickets resueltos
+          - generic [ref=e178]:
+            - heading "Total Clientes" [level=3] [ref=e179]
+            - paragraph [ref=e180]: "50"
+            - paragraph [ref=e181]: En base de datos
+        - generic [ref=e182]:
+          - generic [ref=e185]:
+            - heading "Ingresos Totales" [level=3] [ref=e186]
+            - paragraph [ref=e187]: Q3,587.00
+            - paragraph [ref=e188]: Facturación + POS
+          - generic [ref=e191]:
+            - heading "Cuentas por Cobrar" [level=3] [ref=e192]
+            - paragraph [ref=e193]: Q701.20
+            - paragraph [ref=e194]: Facturas pendientes
+          - generic [ref=e197]:
+            - heading "Ventas POS" [level=3] [ref=e198]
+            - paragraph [ref=e199]: "0"
+            - paragraph [ref=e200]: Ventas directas
+          - generic [ref=e203]:
+            - heading "Mano de Obra" [level=3] [ref=e204]
+            - paragraph [ref=e205]: Q3,650.00
+            - paragraph [ref=e206]: Ingresos por servicio
+        - generic [ref=e207]:
+          - generic [ref=e208]:
+            - heading "Tickets por Estado" [level=2] [ref=e209]
+            - generic [ref=e212]:
+              - list [ref=e214]:
+                - listitem [ref=e215]:
+                  - img "Abierto legend icon" [ref=e216]
+                  - text: Abierto
+                - listitem [ref=e218]:
+                  - img "Cerrado legend icon" [ref=e219]
+                  - text: Cerrado
+                - listitem [ref=e221]:
+                  - img "En Progreso legend icon" [ref=e222]
+                  - text: En Progreso
+                - listitem [ref=e224]:
+                  - img "Esperando Repuestos legend icon" [ref=e225]
+                  - text: Esperando Repuestos
+                - listitem [ref=e227]:
+                  - img "Resuelto legend icon" [ref=e228]
+                  - text: Resuelto
+                - listitem [ref=e230]:
+                  - img "WAITING_APPROVAL legend icon" [ref=e231]
+                  - text: WAITING_APPROVAL
+              - application [ref=e233]
+          - generic [ref=e234]:
+            - heading "Tickets Urgentes 2" [level=2] [ref=e235]:
+              - text: Tickets Urgentes
+              - generic [ref=e236]: "2"
+            - generic [ref=e238]:
+              - link "Reparación de TV Samsung 55\" Juan Pérez HIGH En Progreso 13 días" [ref=e239] [cursor=pointer]:
+                - /url: /dashboard/tickets/5444f84f-e222-479e-84f3-b0dd55be559b
+                - generic [ref=e240]:
+                  - generic [ref=e241]:
+                    - heading "Reparación de TV Samsung 55\"" [level=4] [ref=e242]
+                    - paragraph [ref=e243]: Juan Pérez
+                  - generic [ref=e244]: HIGH
+                - generic [ref=e245]:
+                  - generic [ref=e246]: En Progreso
+                  - generic [ref=e247]: 13 días
+              - link "Laptop HP - No carga batería Pedro Sánchez HIGH Abierto 13 días" [ref=e248] [cursor=pointer]:
+                - /url: /dashboard/tickets/dffd09bc-c1bb-4c01-ba7b-24120f5ff97b
+                - generic [ref=e249]:
+                  - generic [ref=e250]:
+                    - heading "Laptop HP - No carga batería" [level=4] [ref=e251]
+                    - paragraph [ref=e252]: Pedro Sánchez
+                  - generic [ref=e253]: HIGH
+                - generic [ref=e254]:
+                  - generic [ref=e255]: Abierto
+                  - generic [ref=e256]: 13 días
+        - generic [ref=e257]:
+          - heading "Productividad por Técnico" [level=2] [ref=e258]
+          - generic [ref=e259]:
+            - generic [ref=e262]:
+              - list [ref=e264]:
+                - listitem [ref=e265]:
+                  - img "Completados legend icon" [ref=e266]
+                  - text: Completados
+                - listitem [ref=e268]:
+                  - img "En Progreso legend icon" [ref=e269]
+                  - text: En Progreso
+              - application [ref=e271]:
+                - generic [ref=e285]:
+                  - generic [ref=e286]:
+                    - generic [ref=e287]: Lucia Fernandez
+                    - generic [ref=e289]: Miguel Torres
+                    - generic [ref=e291]: Super Admin Kev
+                    - generic [ref=e293]: Carlos Rodriguez
+                  - generic [ref=e295]:
+                    - generic [ref=e296]: "0"
+                    - generic [ref=e298]: "0.25"
+                    - generic [ref=e300]: "0.5"
+                    - generic [ref=e302]: "0.75"
+                    - generic [ref=e304]: "1"
+            - table [ref=e307]:
+              - rowgroup [ref=e308]:
+                - row [ref=e309]:
+                  - columnheader "Técnico" [ref=e310]
+                  - columnheader "Completados" [ref=e311]
+                  - columnheader "En Progreso" [ref=e312]
+                  - columnheader "Tiempo Promedio" [ref=e313]
+              - rowgroup [ref=e314]:
+                - row [ref=e315]:
+                  - cell "Lucia Fernandez lucia@electrofix.com" [ref=e316]:
+                    - generic [ref=e317]:
+                      - generic [ref=e318]: Lucia Fernandez
+                      - generic [ref=e319]: lucia@electrofix.com
+                  - cell "0" [ref=e320]
+                  - cell "1" [ref=e321]
+                  - cell "-" [ref=e322]
+                - row [ref=e323]:
+                  - cell "Miguel Torres miguel@electrofix.com" [ref=e324]:
+                    - generic [ref=e325]:
+                      - generic [ref=e326]: Miguel Torres
+                      - generic [ref=e327]: miguel@electrofix.com
+                  - cell "0" [ref=e328]
+                  - cell "1" [ref=e329]
+                  - cell "-" [ref=e330]
+                - row [ref=e331]:
+                  - cell "Super Admin Kev adminkev@example.com" [ref=e332]:
+                    - generic [ref=e333]:
+                      - generic [ref=e334]: Super Admin Kev
+                      - generic [ref=e335]: adminkev@example.com
+                  - cell "0" [ref=e336]
+                  - cell "0" [ref=e337]
+                  - cell "-" [ref=e338]
+                - row [ref=e339]:
+                  - cell "Carlos Rodriguez admin@electrofix.com" [ref=e340]:
+                    - generic [ref=e341]:
+                      - generic [ref=e342]: Carlos Rodriguez
+                      - generic [ref=e343]: admin@electrofix.com
+                  - cell "0" [ref=e344]
+                  - cell "0" [ref=e345]
+                  - cell "-" [ref=e346]
+        - generic [ref=e347]:
+          - heading "Tickets Recientes" [level=2] [ref=e348]
+          - table [ref=e351]:
+            - rowgroup [ref=e352]:
+              - row [ref=e353]:
+                - columnheader "ID" [ref=e354] [cursor=pointer]
+                - columnheader "Problema" [ref=e356] [cursor=pointer]
+                - columnheader "Cliente" [ref=e358] [cursor=pointer]
+                - columnheader "Estado" [ref=e360] [cursor=pointer]
+                - columnheader "Técnico" [ref=e362] [cursor=pointer]
+                - columnheader "Fecha" [ref=e364] [cursor=pointer]
+            - rowgroup [ref=e366]:
+              - row [ref=e367]:
+                - cell [ref=e368]:
+                  - link "TK-000018" [ref=e369] [cursor=pointer]:
+                    - /url: /dashboard/tickets/49780629-d1ec-4696-8020-41ed538d8484
+                - cell "Mantenimiento" [ref=e370]
+                - cell "Kevin Cordon" [ref=e371]
+                - cell "OPEN" [ref=e372]
+                - cell "Sin asignar" [ref=e374]
+                - cell "17/8/2026" [ref=e375]
+              - row [ref=e376]:
+                - cell [ref=e377]:
+                  - link "TK-000017" [ref=e378] [cursor=pointer]:
+                    - /url: /dashboard/tickets/c89340ab-2196-4317-8c4d-c386afa67cc2
+                - cell "E2E Device Broken Screen 1787014759701" [ref=e379]
+                - cell "E2E Customer 1787014759701" [ref=e380]
+                - cell "IN PROGRESS" [ref=e381]
+                - cell "Sin asignar" [ref=e383]
+                - cell "17/8/2026" [ref=e384]
+              - row [ref=e385]:
+                - cell [ref=e386]:
+                  - link "TK-000016" [ref=e387] [cursor=pointer]:
+                    - /url: /dashboard/tickets/699dff30-4846-4e38-b72f-3a4079dc5095
+                - cell "Pantalla Rota 1787014421815" [ref=e388]
+                - cell "E2E Lifecycle 1787014421815" [ref=e389]
+                - cell "WAITING APPROVAL" [ref=e390]
+                - cell "Sin asignar" [ref=e392]
+                - cell "17/8/2026" [ref=e393]
+              - row [ref=e394]:
+                - cell [ref=e395]:
+                  - link "TK-000015" [ref=e396] [cursor=pointer]:
+                    - /url: /dashboard/tickets/088fbf31-32fc-4917-a701-9b8ec9b75fe1
+                - cell "Pantalla Rota 1787014206528" [ref=e397]
+                - cell "E2E Lifecycle 1787014206528" [ref=e398]
+                - cell "RESOLVED" [ref=e399]
+                - cell "Sin asignar" [ref=e401]
+                - cell "17/8/2026" [ref=e402]
+              - row [ref=e403]:
+                - cell [ref=e404]:
+                  - link "TK-000014" [ref=e405] [cursor=pointer]:
+                    - /url: /dashboard/tickets/2e31370d-c91b-41fe-886d-3d1fa8e865fe
+                - cell "E2E Device Broken Screen 1787014171526" [ref=e406]
+                - cell "E2E Customer 1787014171526" [ref=e407]
+                - cell "IN PROGRESS" [ref=e408]
+                - cell "Sin asignar" [ref=e410]
+                - cell "17/8/2026" [ref=e411]
+  - generic [ref=e412]: "0"

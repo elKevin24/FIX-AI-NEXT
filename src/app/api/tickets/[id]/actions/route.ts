@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { TicketStatus, UserRole } from '@prisma/client';
+import { TicketStatus, UserRole } from '@/generated/prisma';
 import {
   requireTicketActionPermission,
   TicketAction,
@@ -548,6 +548,9 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error performing ticket action:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

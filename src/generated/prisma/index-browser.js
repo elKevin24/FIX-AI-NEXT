@@ -24,12 +24,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.9.1
- * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
+ * Prisma Client JS version: 7.4.2
+ * Query Engine version: 94a226be1cf2967af2541cca5529f0f7ba866919
  */
 Prisma.prismaVersion = {
-  client: "7.9.1",
-  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
+  client: "7.4.2",
+  engine: "94a226be1cf2967af2541cca5529f0f7ba866919"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -248,10 +248,6 @@ exports.Prisma.PurchaseItemScalarFieldEnum = {
 exports.Prisma.PartUsageScalarFieldEnum = {
   id: 'id',
   quantity: 'quantity',
-  approved: 'approved',
-  approvedAt: 'approvedAt',
-  approvedById: 'approvedById',
-  priceAtProposal: 'priceAtProposal',
   ticketId: 'ticketId',
   partId: 'partId',
   createdAt: 'createdAt'
@@ -630,13 +626,11 @@ exports.TechnicianStatus = exports.$Enums.TechnicianStatus = {
 
 exports.TicketStatus = exports.$Enums.TicketStatus = {
   OPEN: 'OPEN',
-  WAITING_APPROVAL: 'WAITING_APPROVAL',
   IN_PROGRESS: 'IN_PROGRESS',
   WAITING_FOR_PARTS: 'WAITING_FOR_PARTS',
   RESOLVED: 'RESOLVED',
   CLOSED: 'CLOSED',
-  CANCELLED: 'CANCELLED',
-  REJECTED: 'REJECTED'
+  CANCELLED: 'CANCELLED'
 };
 
 exports.TicketPriority = exports.$Enums.TicketPriority = {
@@ -670,8 +664,6 @@ exports.AuditAction = exports.$Enums.AuditAction = {
   TICKET_DELETED: 'TICKET_DELETED',
   TICKET_STATUS_CHANGED: 'TICKET_STATUS_CHANGED',
   TICKET_ASSIGNED: 'TICKET_ASSIGNED',
-  PARTS_APPROVED: 'PARTS_APPROVED',
-  PARTS_REJECTED: 'PARTS_REJECTED',
   CONFIG_CHANGED: 'CONFIG_CHANGED',
   TENANT_CONFIG_CHANGED: 'TENANT_CONFIG_CHANGED',
   EXPORT_DATA: 'EXPORT_DATA',

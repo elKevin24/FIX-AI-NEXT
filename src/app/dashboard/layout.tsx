@@ -24,20 +24,20 @@ export default async function DashboardLayout({
             <button 
                 style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'var(--color-surface)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    padding: '0.875rem',
+                    background: 'rgba(255, 255, 255, 0.3)',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
                     borderRadius: '0.75rem',
                     cursor: 'pointer',
                     color: '#dc2626',
-                    fontSize: '0.9rem',
+                    fontSize: '0.95rem',
                     fontWeight: 600,
                     transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.5rem',
-                    boxSizing: 'border-box'
+                    gap: '0.5rem'
                 }}
             >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -52,12 +52,12 @@ export default async function DashboardLayout({
 
     return (
         <ToastProvider>
-            <div className={styles['container']}>
+            <div className={styles.container}>
                 <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-                <div className={styles['mainContent']}>
+                <main className={styles.mainContent}>
                     <TopNav />
                     {children}
-                </div>
+                </main>
                 <ToastContainer />
             </div>
         </ToastProvider>

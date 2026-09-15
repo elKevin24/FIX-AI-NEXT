@@ -1,5 +1,7 @@
-import { prisma } from '../src/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 async function createSuperAdmin() {
     console.log('🚀 Creando Super Admin (adminkev@example.com)...');
@@ -27,7 +29,7 @@ async function createSuperAdmin() {
 
     // 3. Crear o actualizar usuario
     await prisma.user.upsert({
-        where: { unique_email_per_tenant: { email: 'adminkev@example.com', tenantId: tenant.id } },
+        where: { email: 'adminkev@example.com' },
         update: {
             role: 'ADMIN',
             password, // Actualizamos password para asegurar que sea el conocido

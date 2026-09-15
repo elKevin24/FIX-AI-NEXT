@@ -2,7 +2,7 @@
 
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import PresenceIndicator from './PresenceIndicator';
-import { TechnicianStatus } from '@prisma/client';
+import { TechnicianStatus } from '@/generated/prisma';
 
 export default function OnlineUsersList({ tenantId }: { tenantId?: string }) {
   const users = useOnlineUsers(tenantId);

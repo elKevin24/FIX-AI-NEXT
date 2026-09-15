@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { CreditNoteStatus, PaymentMethod } from '@/generated/prisma';
 import { getTenantSettingsForDocuments } from './tenant-settings-actions';
 
 // ============= SCHEMAS =============
@@ -304,19 +304,19 @@ export async function getCreditNotes(filters?: {
     const where: Record<string, unknown> = {};
 
     if (filters?.status) {
-        where['status'] = filters.status;
+        where.status = filters.status;
     }
 
     if (filters?.search) {
-        where['OR'] = [
+        where.OR = [
             { creditNoteNumber: { contains: filters.search, mode: 'insensitive' } },
         ];
     }
 
     if (filters?.startDate || filters?.endDate) {
-        where['createdAt'] = {} as Record<string, Date>;
-        if (filters.startDate) (where['createdAt'] as Record<string, Date>)['gte'] = filters.startDate;
-        if (filters.endDate) (where['createdAt'] as Record<string, Date>)['lte'] = filters.endDate;
+        where.createdAt = {} as Record<string, Date>;
+        if (filters.startDate) (where.createdAt as Record<string, Date>).gte = filters.startDate;
+        if (filters.endDate) (where.createdAt as Record<string, Date>).lte = filters.endDate;
     }
 
     const creditNotes = await db.creditNote.findMany({

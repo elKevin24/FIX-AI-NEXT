@@ -1,5 +1,5 @@
-import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { AuditAction } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { AuditAction } from '@/generated/prisma';
 
 export interface TimelineEvent {
     id: string;
@@ -15,9 +15,8 @@ export interface TimelineEvent {
 }
 
 export async function getTicketTimeline(ticketId: string, tenantId: string): Promise<TimelineEvent[]> {
-    const db = getTenantPrisma(tenantId);
     // 1. Fetch Ticket Notes
-    const notes = await db.ticketNote.findMany({
+    const notes = await prisma.ticketNote.findMany({
         where: {
             ticketId: ticketId,
         },
@@ -36,7 +35,7 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
 
     // 2. Fetch Audit Logs related to this ticket
     // New schema uses entityId for the relation
-    const logs = await db.auditLog.findMany({
+    const logs = await prisma.auditLog.findMany({
         where: {
             tenantId: tenantId,
             entityId: ticketId,
@@ -56,7 +55,7 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
     });
 
     // 3. Normalize and Merge
-    const normalizedNotes: TimelineEvent[] = notes.map((note: any) => ({
+    const normalizedNotes: TimelineEvent[] = notes.map(note => ({
         id: note.id,
         type: 'NOTE',
         date: note.createdAt,
@@ -67,7 +66,7 @@ export async function getTicketTimeline(ticketId: string, tenantId: string): Pro
         content: note.content,
     }));
 
-    const normalizedLogs: TimelineEvent[] = logs.map((log: any) => {
+    const normalizedLogs: TimelineEvent[] = logs.map(log => {
         const { content, type } = parseLogMessage(log.action, log.metadata);
         return {
             id: log.id,

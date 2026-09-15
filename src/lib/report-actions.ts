@@ -2,8 +2,7 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { InvoiceStatus, POSSaleStatus } from '@prisma/client';
-import { DateRangeSchema } from '@/lib/schemas';
+import { InvoiceStatus, POSSaleStatus } from '@/generated/prisma';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {
   const session = await auth();
@@ -11,23 +10,12 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     throw new Error('No autorizado');
   }
 
-  // RBAC: Solo ADMIN puede ver reportes financieros y de rendimiento
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Solo los administradores pueden generar reportes');
-  }
-
-  // Validación Zod de fechas (convertir Date → ISO string para el schema)
-  const validatedDates = DateRangeSchema.parse({
-    startDate: startDate?.toISOString(),
-    endDate: endDate?.toISOString(),
-  });
-
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const tenantId = session.user.tenantId;
 
   // Default to last 30 days if not provided
-  const end = validatedDates.endDate || new Date();
-  const start = validatedDates.startDate || new Date(new Date().setDate(end.getDate() - 30));
+  const end = endDate || new Date();
+  const start = startDate || new Date(new Date().setDate(end.getDate() - 30));
 
   const dateFilter = {
     gte: start,
@@ -120,7 +108,9 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     }),
 
     // 8. Top Selling Parts
-    db.pOSSaleItem.findMany({
+    db.pOSSaleItem.groupBy({
+        by: ['partName'],
+        _sum: { quantity: true, total: true },
         where: {
             sale: {
                 tenantId,
@@ -128,7 +118,10 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
                 createdAt: dateFilter
             }
         },
-        include: { part: true }
+        orderBy: {
+            _sum: { total: 'desc' }
+        },
+        take: 5
     })
   ]);
 
@@ -160,7 +153,7 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
   const historyMap = new Map<string, { date: string, invoice: number, pos: number }>();
   
   const addToHistory = (date: Date, type: 'invoice' | 'pos', amount: number) => {
-      const key = date.toISOString().split('T')[0] as string;
+      const key = date.toISOString().split('T')[0];
       if (!historyMap.has(key)) {
           historyMap.set(key, { date: key, invoice: 0, pos: 0 });
       }
@@ -192,23 +185,11 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
         totalQuantity: inventoryStats._sum.quantity || 0,
         lowStockParts: 0, // Removed detailed low stock count for performance, use aggregate if needed
         totalStockValue: 0, // Need cost aggregation if we want this, skipped for perf optimization
-        topSelling: (() => {
-            const map = new Map<string, { name: string, quantity: number, total: number }>();
-            topParts.forEach((item: any) => {
-                const name = item.part?.name || 'Producto Desconocido';
-                const qty = item.quantity;
-                const total = (Number(item.quantity) * Number(item.unitPrice)) - Number(item.discount);
-                if (!map.has(name)) {
-                    map.set(name, { name, quantity: 0, total: 0 });
-                }
-                const entry = map.get(name)!;
-                entry.quantity += qty;
-                entry.total += total;
-            });
-            return Array.from(map.values())
-                .sort((a, b) => b.total - a.total)
-                .slice(0, 5);
-        })()
+        topSelling: topParts.map((p: any) => ({
+            name: p.partName,
+            quantity: p._sum.quantity,
+            total: Number(p._sum.total)
+        }))
     }
   };
 }

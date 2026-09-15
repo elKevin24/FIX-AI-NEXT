@@ -1,65 +1,52 @@
-/* ========================================
-   WORKLOAD SUMMARY - Liquid Glass Minimalista
-   Design System Compliant
-   ======================================== */
-
 .summary {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  margin-bottom: var(--spacing-8);
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
 }
 
 .statCard {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: var(--spacing-4);
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s;
 }
 
 .statCard:hover {
-  border-color: var(--color-border-medium);
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
 
 .statIcon {
-  font-size: 1.5rem;
-  width: 44px;
-  height: 44px;
+  font-size: 2rem;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface-hover);
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
 }
 
 .iconGreen {
-  background: var(--color-success-50);
-  border-color: var(--color-success-200);
+  background: #d1fae5;
 }
 
 .iconRed {
-  background: var(--color-error-50);
-  border-color: var(--color-error-200);
+  background: #fee2e2;
 }
 
 .iconGray {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border-light);
+  background: #f3f4f6;
 }
 
 .statContent {
@@ -67,61 +54,53 @@
 }
 
 .statValue {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: 1;
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-1);
 }
 
 .statLabel {
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary);
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .capacitySection {
-  padding: 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-4);
 }
 
 .capacityHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-4);
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
 }
 
 .capacityHeader h3 {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: -0.01em;
 }
 
 .capacityStats {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--spacing-4);
   flex-wrap: wrap;
 }
 
 .capacityStat {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  font-weight: 600;
-  background: var(--color-surface-hover);
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  border: 1px solid var(--color-border-light);
+  font-weight: var(--font-weight-medium);
 }
 
 .progressBarContainer {
@@ -129,11 +108,11 @@
 }
 
 .progressBar {
-  height: 20px;
-  background: var(--color-surface-hover);
-  border-radius: 9999px;
+  height: 32px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-full);
   overflow: hidden;
-  border: 1px solid var(--color-border-light);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .progressFill {
@@ -142,44 +121,40 @@
   align-items: center;
   justify-content: center;
   transition: width 0.5s ease;
-  border-radius: 9999px;
+  position: relative;
 }
 
 .progressText {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  color: var(--color-on-progress-high);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .utilizationLow {
-  background: linear-gradient(90deg, var(--color-success-500), var(--color-success-600));
+  background: linear-gradient(90deg, #10b981, #059669);
 }
 
-.utilizationLow .progressText { color: var(--color-on-progress-low); }
-.utilizationMedium .progressText { color: var(--color-on-progress-medium); }
-
 .utilizationMedium {
-  background: linear-gradient(90deg, var(--color-warning-400), var(--color-warning-500));
+  background: linear-gradient(90deg, #f59e0b, #d97706);
 }
 
 .utilizationHigh {
-  background: linear-gradient(90deg, var(--color-error-500), var(--color-error-600));
+  background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
 .alertSection {
-  margin-top: 0;
+  margin-top: var(--spacing-4);
 }
 
 .alert {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(12px);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-warning-400);
-  box-shadow: var(--shadow-sm);
+  gap: var(--spacing-4);
+  padding: var(--spacing-5);
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid #fbbf24;
 }
 
 .alertIcon {
@@ -190,41 +165,34 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: var(--spacing-1);
 }
 
 .alertContent strong {
-  color: var(--color-text-primary);
-  font-weight: 700;
-  font-size: 0.9375rem;
+  color: #92400e;
+  font-weight: var(--font-weight-semibold);
 }
 
 .alertWarning {
-  color: var(--color-warning-600);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: #b45309;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .alertButton {
-  padding: 0.4rem 1rem;
-  background: var(--color-primary-600);
-  color: var(--color-on-primary) !important;
-  border-radius: 0.625rem;
+  padding: var(--spacing-2) var(--spacing-4);
+  background: #f59e0b;
+  color: white;
+  border-radius: var(--radius-md);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
   transition: all 0.2s;
-  white-space: nowrap;
 }
 
 .alertButton:hover {
-  background: var(--color-primary-700);
+  background: #d97706;
   transform: translateY(-1px);
-}
-
-.alertButton:focus-visible {
-  outline: 3px solid var(--color-primary-500);
-  outline-offset: 3px;
 }
 
 @media (max-width: 768px) {
@@ -235,6 +203,10 @@
   .capacityHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .capacityStats {
+    width: 100%;
   }
 
   .alert {

@@ -3,17 +3,10 @@ import { redirect, notFound } from 'next/navigation';
 import TicketDetailView from './TicketDetailView';
 import { getTicketTimeline } from '@/lib/timeline';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { serializeDecimal } from '@/lib/utils';
-import { isSuperAdmin } from '@/lib/authz';
 
 interface Props {
     params: Promise<{ id: string }>;
 }
-
-export const metadata = {
-    title: 'Detalle de Ticket',
-    description: 'Consulta y gestiona el estado, notas y repuestos de una orden de servicio.',
-};
 
 export default async function TicketDetailPage({ params }: Props) {
     const { id } = await params;
@@ -24,15 +17,14 @@ export default async function TicketDetailPage({ params }: Props) {
     }
 
     const { tenantId, id: userId, role } = session.user;
-    const isSuperAdminUser = isSuperAdmin(session.user);
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const isAdmin = role === 'ADMIN';
 
     // 1. Get DB Context
     // Use getTenantPrisma to automatically enforce tenant isolation
     const db = getTenantPrisma(tenantId, userId);
 
-    const data = await (async () => {
-        try {
+    try {
         // 2. Fetch Ticket with STRICT Tenant Isolation
         // CRITICAL SECURITY: Always use getTenantPrisma to enforce tenant filtering
         // Using findFirst with explicit tenantId check eliminates race condition window
@@ -90,17 +82,17 @@ export default async function TicketDetailPage({ params }: Props) {
         });
 
         // 4. Serialize for Client Component
-        const serializedParts = serializeDecimal(availableParts.map((part: any) => ({
+        const serializedParts = availableParts.map((part: any) => ({
             id: part.id,
             name: part.name,
             sku: part.sku,
             quantity: part.quantity,
-            cost: part.cost,
-            price: part.price,
+            cost: Number(part.cost),
+            price: Number(part.price),
             category: part.category,
             location: part.location,
             minStock: part.minStock,
-        })));
+        }));
 
         const serializedServices = availableServices.map((service: any) => ({
             id: service.id,
@@ -108,41 +100,34 @@ export default async function TicketDetailPage({ params }: Props) {
             laborCost: service.laborCost ? Number(service.laborCost) : 0,
         }));
 
-        const serializedTicketServices = serializeDecimal(ticket.services?.map((s: any) => ({
+        const serializedTicketServices = ticket.services?.map((s: any) => ({
             ...s,
             laborCost: s.laborCost ? Number(s.laborCost) : 0,
-        })) || []);
+        })) || [];
 
+        // 5. Get Timeline
         const timelineEvents = await getTicketTimeline(ticket.id, ticket.tenantId);
 
-        return {
-            ticket: serializeDecimal({
-                ...ticket,
-                services: serializedTicketServices,
-            }),
-            availableUsers: availableUsers.map((u: any) => ({...u, role: u.role as string})),
-            serializedParts,
-            serializedServices,
-            timelineEvents,
-        };
+        return (
+            <TicketDetailView
+                ticket={{
+                    ...ticket,
+                    services: serializedTicketServices,
+                }}
+                availableUsers={availableUsers.map((u: any) => ({...u, role: u.role as string}))} // Simple cast
+                availableParts={serializedParts}
+                availableServices={serializedServices}
+                isSuperAdmin={isSuperAdmin}
+                isAdmin={isAdmin}
+                currentUserId={userId}
+                timelineEvents={timelineEvents}
+            />
+        );
+
     } catch (error) {
         console.error('Error fetching ticket details:', error);
         notFound();
     }
-})();
-
-    return (
-        <TicketDetailView
-            ticket={data.ticket}
-            availableUsers={data.availableUsers}
-            availableParts={data.serializedParts}
-            availableServices={data.serializedServices}
-            isSuperAdmin={isSuperAdminUser}
-            isAdmin={isAdmin}
-            currentUserId={userId}
-            timelineEvents={data.timelineEvents}
-        />
-    );
 }
 
 function makeTicketInclude() {

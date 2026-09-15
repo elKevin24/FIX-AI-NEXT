@@ -4,25 +4,25 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: color-mix(in srgb, var(--color-gray-900) 60%, transparent);
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--modal-z-backdrop, var(--z-modal-backdrop));
+  z-index: 1040; /* var(--z-modal-backdrop) */
   animation: fadeIn 0.2s ease-out;
 }
 
 .modal {
-  background: var(--modal-bg, var(--color-surface));
-  border: 1px solid var(--modal-border, var(--color-border-light));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  z-index: var(--modal-z-content, var(--z-modal));
+  z-index: 1050; /* var(--z-modal) */
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;

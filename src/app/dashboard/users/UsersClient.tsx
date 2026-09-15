@@ -1,5 +1,4 @@
 'use client';
-import styles from './users.module.css';
 
 import React, { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -8,7 +7,7 @@ import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
 import { ROLE_LABELS, ROLE_COLORS, hasPermission, canModifyUser } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 
 interface UserData {
     id: string;
@@ -53,11 +52,11 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
         }
         if (user.name) {
             const parts = user.name.split(' ');
-            return parts.length > 1 && parts[0] && parts[1]
-                ? `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
-                : (user.name[0] ?? '').toUpperCase();
+            return parts.length > 1
+                ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+                : user.name[0].toUpperCase();
         }
-        return (user.email?.[0] ?? 'U').toUpperCase();
+        return user.email[0].toUpperCase();
     };
 
     const columns: ColumnDef<UserData>[] = [
@@ -70,23 +69,27 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
                 const initials = getInitials(user);
 
                 return (
-                    <div className={styles['userCell']}>
-                        <div className={`${styles['avatarCircle']} ${user.isActive ? styles['avatarActive'] : styles['avatarInactive']}`}>
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                            user.isActive
+                                ? 'bg-primary-100 text-primary-700'
+                                : 'bg-gray-200 text-gray-500'
+                        }`}>
                             {initials}
                         </div>
-                        <div className={styles['userCellInfo']}>
-                            <div className={styles['userNameRow']}>
-                                <span className={user.isActive ? styles['userNameText'] : styles['userNameInactive']}>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className={`font-bold ${user.isActive ? 'text-gray-800' : 'text-gray-400'}`}>
                                     {displayName}
                                 </span>
                                 {!user.isActive && (
-                                    <Badge variant="gray" className={styles['badgeText']}>Inactivo</Badge>
+                                    <Badge variant="gray" className="text-xs">Inactivo</Badge>
                                 )}
                                 {user.passwordMustChange && user.isActive && (
-                                    <Badge variant="warning" className={styles['badgeText']}>Cambiar clave</Badge>
+                                    <Badge variant="warning" className="text-xs">Cambiar clave</Badge>
                                 )}
                             </div>
-                            <span className={styles['userEmailText']}>{user.email}</span>
+                            <span className="text-xs text-gray-500 font-mono">{user.email}</span>
                         </div>
                     </div>
                 );

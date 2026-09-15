@@ -4,8 +4,6 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
-import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/context/ToastContext';
 import {
     CreditNoteListItem,
@@ -16,14 +14,10 @@ import {
     searchSalesForReturn,
     getPOSSaleForReturn,
 } from '@/lib/credit-note-actions';
-import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { CreditNoteStatus, PaymentMethod } from '@/generated/prisma';
 import styles from './returns.module.css';
-import PageHeader from '@/components/PageHeader';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
+// Types
 type SaleSearchResult = {
     id: string;
     saleNumber: string;
@@ -58,10 +52,6 @@ interface Props {
     };
 }
 
-// ============================================================================
-// COMPONENT
-// ============================================================================
-
 export function ReturnsClient({ initialCreditNotes, stats }: Props) {
     const router = useRouter();
     const { addToast } = useToast();
@@ -71,7 +61,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<CreditNoteStatus | ''>('');
     const [loading, setLoading] = useState(false);
-    const [liveMessage, setLiveMessage] = useState('');
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -125,32 +114,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
         };
     }, [returnItems, selectedSale]);
 
-    // Helpers
-    const formatCurrency = (amount: number) => `Q${amount.toFixed(2)}`;
-    const formatDate = (date: Date) =>
-        new Date(date).toLocaleDateString('es-GT', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-
-    const announce = (msg: string) => {
-        setLiveMessage('');
-        requestAnimationFrame(() => setLiveMessage(msg));
-    };
-
-    const getPaymentLabel = (method: PaymentMethod | null | undefined) => {
-        if (!method) return 'Pendiente';
-        const labels: Record<PaymentMethod, string> = {
-            CASH: 'Efectivo',
-            CARD: 'Tarjeta',
-            TRANSFER: 'Transferencia',
-            CHECK: 'Cheque',
-            OTHER: 'Otro',
-        };
-        return labels[method];
-    };
-
     // Handlers
     const handleSaleSearch = async (search: string) => {
         setSaleSearch(search);
@@ -185,7 +148,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             );
             setSaleSearch('');
             setSaleSearchResults([]);
-            announce(`Venta ${sale.saleNumber} seleccionada`);
         } catch (error) {
             addToast(
                 error instanceof Error ? error.message : 'Error al cargar venta',
@@ -271,7 +233,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             setShowCreateModal(false);
             resetForm();
             router.refresh();
-            announce('Nota de crédito creada exitosamente');
         } catch (error) {
             addToast(
                 error instanceof Error ? error.message : 'Error al crear nota de crédito',
@@ -318,7 +279,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             setRefundMethod('CASH');
             setRefundReference('');
             router.refresh();
-            announce('Reembolso procesado exitosamente');
         } catch (error) {
             addToast(
                 error instanceof Error ? error.message : 'Error al procesar reembolso',
@@ -339,7 +299,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             addToast('Nota de crédito cancelada', 'SUCCESS');
             setShowDetailModal(false);
             router.refresh();
-            announce('Nota de crédito cancelada');
         } catch (error) {
             addToast(
                 error instanceof Error ? error.message : 'Error al cancelar',
@@ -350,7 +309,7 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
         }
     };
 
-    // Status badge
+    // Status badge config
     const getStatusBadge = (status: CreditNoteStatus) => {
         const config: Record<
             CreditNoteStatus,
@@ -364,61 +323,64 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
         return <Badge variant={variant}>{label}</Badge>;
     };
 
-    return (
-        <div className={styles['container']}>
-            {/* Aria live region */}
-            <div className={styles['srOnly']} aria-live="polite" aria-atomic="true">
-                {liveMessage}
-            </div>
+    const formatCurrency = (amount: number) => `Q${amount.toFixed(2)}`;
+    const formatDate = (date: Date) =>
+        new Date(date).toLocaleDateString('es-GT', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
 
+    return (
+        <div className={styles.container}>
             {/* Header */}
-            <PageHeader
-                title="Devoluciones y Notas de Crédito"
-                subtitle="Gestión de devoluciones y reembolsos"
-                actions={
+            <div className={styles.header}>
+                <div className={styles.titleSection}>
+                    <h1>Devoluciones y Notas de Crédito</h1>
+                    <p>Gestión de devoluciones y reembolsos</p>
+                </div>
+                <div className={styles.actions}>
                     <Button onClick={() => setShowCreateModal(true)}>
                         + Nueva Devolución
                     </Button>
-                }
-            />
+                </div>
+            </div>
 
             {/* Stats */}
-            <div className={styles['statsGrid']}>
-                <div className={styles['statCard']}>
-                    <h2>Total NC</h2>
-                    <div className={styles['value']}>{stats.totalCreditNotes}</div>
+            <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <h3>Total NC</h3>
+                    <div className={styles.value}>{stats.totalCreditNotes}</div>
                 </div>
-                <div className={`${styles['statCard']} ${styles['warning']}`}>
-                    <h2>Pendientes</h2>
-                    <div className={styles['value']}>{stats.pendingCreditNotes}</div>
+                <div className={`${styles.statCard} ${styles.warning}`}>
+                    <h3>Pendientes</h3>
+                    <div className={styles.value}>{stats.pendingCreditNotes}</div>
                 </div>
-                <div className={styles['statCard']}>
-                    <h2>Procesadas (mes)</h2>
-                    <div className={styles['value']}>{stats.processedThisMonth}</div>
+                <div className={styles.statCard}>
+                    <h3>Procesadas (mes)</h3>
+                    <div className={styles.value}>{stats.processedThisMonth}</div>
                 </div>
-                <div className={`${styles['statCard']} ${styles['error']}`}>
-                    <h2>Total Reembolsado</h2>
-                    <div className={styles['value']}>
+                <div className={`${styles.statCard} ${styles.error}`}>
+                    <h3>Total Reembolsado</h3>
+                    <div className={styles.value}>
                         {formatCurrency(stats.totalRefundedAmount)}
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className={styles['filtersBar']}>
+            <div className={styles.filtersBar}>
                 <input
                     type="text"
                     placeholder="Buscar por número o cliente..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={styles['searchInput']}
-                    aria-label="Buscar nota de crédito por número o cliente"
+                    className={styles.searchInput}
                 />
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as CreditNoteStatus | '')}
-                    className={styles['filterSelect']}
-                    aria-label="Filtrar por estado"
+                    className={styles.filterSelect}
                 >
                     <option value="">Todos los estados</option>
                     <option value="PENDING">Pendiente</option>
@@ -428,567 +390,597 @@ export function ReturnsClient({ initialCreditNotes, stats }: Props) {
             </div>
 
             {/* Table */}
-            <div className={styles['tableContainer']}>
-                <div className={styles['tableWrapper']}>
-                    <table className={styles['table']}>
-                      <caption className="sr-only">Notas de crédito recientes</caption>
-                        <thead>
+            <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Nota de Crédito</th>
+                            <th>Venta Original</th>
+                            <th>Motivo</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredCreditNotes.length === 0 ? (
                             <tr>
-                                <th scope="col">Nota de Crédito</th>
-                                <th scope="col">Venta Original</th>
-                                <th scope="col">Motivo</th>
-                                <th scope="col">Total</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col">Acciones</th>
+                                <td colSpan={7}>
+                                    <div className={styles.emptyState}>
+                                        <h3>No hay notas de crédito</h3>
+                                        <p>Crea una nueva devolución para comenzar</p>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {filteredCreditNotes.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7}>
-                                        <div className={styles['emptyState']}>
-                                            <h2>No hay notas de crédito</h2>
-                                            <p>Crea una nueva devolución para comenzar</p>
-                                            <Button onClick={() => setShowCreateModal(true)}>
-                                                + Nueva Devolución
-                                            </Button>
+                        ) : (
+                            filteredCreditNotes.map((cn) => (
+                                <tr key={cn.id}>
+                                    <td>
+                                        <span className={styles.creditNoteNumber}>
+                                            {cn.creditNoteNumber}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className={styles.saleInfo}>
+                                            <span className={styles.saleNumber}>
+                                                {cn.posSale.saleNumber}
+                                            </span>
+                                            <span className={styles.customerName}>
+                                                {cn.posSale.customerName || 'Consumidor Final'}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span className={styles.reason} title={cn.reason}>
+                                            {cn.reason}
+                                        </span>
+                                    </td>
+                                    <td className={styles.amount}>
+                                        -{formatCurrency(cn.total)}
+                                    </td>
+                                    <td>{getStatusBadge(cn.status)}</td>
+                                    <td>{formatDate(cn.createdAt)}</td>
+                                    <td>
+                                        <div className={styles.actionsCell}>
+                                            <button
+                                                className={styles.actionBtn}
+                                                onClick={() => handleViewDetail(cn)}
+                                            >
+                                                Ver
+                                            </button>
+                                            {cn.status === 'PENDING' && (
+                                                <button
+                                                    className={`${styles.actionBtn} ${styles.primary}`}
+                                                    onClick={() => handleViewDetail(cn)}
+                                                >
+                                                    Procesar
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
-                            ) : (
-                                filteredCreditNotes.map((cn) => (
-                                    <tr key={cn.id}>
-                                        <td>
-                                            <span className={styles['creditNoteNumber']}>
-                                                {cn.creditNoteNumber}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className={styles['saleInfo']}>
-                                                <span className={styles['saleNumber']}>
-                                                    {cn.posSale.saleNumber}
-                                                </span>
-                                                <span className={styles['customerName']}>
-                                                    {cn.posSale.customerName || 'Consumidor Final'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className={styles['reason']} title={cn.reason}>
-                                                {cn.reason}
-                                            </span>
-                                        </td>
-                                        <td className={styles['amount']}>
-                                            -{formatCurrency(cn.total)}
-                                        </td>
-                                        <td>{getStatusBadge(cn.status)}</td>
-                                        <td>{formatDate(cn.createdAt)}</td>
-                                        <td>
-                                            <div className={styles['actionsCell']}>
-                                                <button
-                                                    className={styles['actionBtn']}
-                                                    onClick={() => handleViewDetail(cn)}
-                                                    aria-label={`Ver nota de crédito ${cn.creditNoteNumber}`}
-                                                >
-                                                    Ver
-                                                </button>
-                                                {cn.status === 'PENDING' && (
-                                                    <button
-                                                        className={`${styles['actionBtn']} ${styles['primary']}`}
-                                                        onClick={() => handleViewDetail(cn)}
-                                                        aria-label={`Procesar nota de crédito ${cn.creditNoteNumber}`}
-                                                    >
-                                                        Procesar
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
-            {/* ===== CREATE MODAL ===== */}
-            <Modal
-                isOpen={showCreateModal}
-                onClose={() => { setShowCreateModal(false); resetForm(); }}
-                title="Nueva Devolución"
-                size="lg"
-                footer={
-                    <>
-                        <Button
-                            variant="secondary"
-                            onClick={() => { setShowCreateModal(false); resetForm(); }}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleCreateCreditNote}
-                            disabled={loading || !selectedSale || total === 0}
-                            isLoading={loading}
-                        >
-                            Crear Nota de Crédito
-                        </Button>
-                    </>
-                }
-            >
-                {/* Sale Search */}
-                {!selectedSale && (
-                    <div className={styles['searchSection']}>
-                        <h2>Buscar Venta Original</h2>
-                        <input
-                            type="text"
-                            placeholder="Buscar por número de venta o cliente..."
-                            value={saleSearch}
-                            onChange={(e) => handleSaleSearch(e.target.value)}
-                            className={styles['searchInput']}
-                            aria-label="Buscar venta por número o cliente"
-                        />
-                        {saleSearchResults.length > 0 && (
-                            <div className={styles['searchResults']}>
-                                {saleSearchResults.map((sale) => (
-                                    <button
-                                        key={sale.id}
-                                        type="button"
-                                        className={styles['searchResult']}
-                                        onClick={() => handleSelectSale(sale.id)}
-                                        aria-label={`Seleccionar venta ${sale.saleNumber}, ${sale.customerName || 'Consumidor Final'}, ${formatCurrency(sale.total)}`}
-                                    >
-                                        <div className={styles['searchResultInfo']}>
-                                            <span className={styles['searchResultNumber']}>
-                                                {sale.saleNumber}
-                                            </span>
-                                            <span className={styles['searchResultCustomer']}>
-                                                {sale.customerName || 'Consumidor Final'} •{' '}
-                                                {formatDate(sale.createdAt)}
+            {/* Create Modal */}
+            {showCreateModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>Nueva Devolución</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    resetForm();
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            {/* Sale Search */}
+                            {!selectedSale && (
+                                <div className={styles.searchSection}>
+                                    <h3>Buscar Venta Original</h3>
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por número de venta o cliente..."
+                                        value={saleSearch}
+                                        onChange={(e) => handleSaleSearch(e.target.value)}
+                                        className={styles.searchInput}
+                                    />
+                                    {saleSearchResults.length > 0 && (
+                                        <div className={styles.searchResults}>
+                                            {saleSearchResults.map((sale) => (
+                                                <div
+                                                    key={sale.id}
+                                                    className={styles.searchResult}
+                                                    onClick={() => handleSelectSale(sale.id)}
+                                                >
+                                                    <div className={styles.searchResultInfo}>
+                                                        <span className={styles.searchResultNumber}>
+                                                            {sale.saleNumber}
+                                                        </span>
+                                                        <span className={styles.searchResultCustomer}>
+                                                            {sale.customerName || 'Consumidor Final'} •{' '}
+                                                            {formatDate(sale.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                    <span className={styles.searchResultTotal}>
+                                                        {formatCurrency(sale.total)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Selected Sale Details */}
+                            {selectedSale && (
+                                <>
+                                    <div className={styles.saleDetails}>
+                                        <h3>
+                                            Venta: {selectedSale.saleNumber}
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => {
+                                                    setSelectedSale(null);
+                                                    setReturnItems([]);
+                                                }}
+                                                style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                            >
+                                                Cambiar
+                                            </Button>
+                                        </h3>
+                                        <div className={styles.saleDetailsGrid}>
+                                            <div className={styles.saleDetailRow}>
+                                                <label>Cliente:</label>
+                                                <span>
+                                                    {selectedSale.customer?.name ||
+                                                        selectedSale.customerName ||
+                                                        'Consumidor Final'}
+                                                </span>
+                                            </div>
+                                            <div className={styles.saleDetailRow}>
+                                                <label>Fecha:</label>
+                                                <span>{formatDate(selectedSale.createdAt)}</span>
+                                            </div>
+                                            <div className={styles.saleDetailRow}>
+                                                <label>Total Original:</label>
+                                                <span>{formatCurrency(selectedSale.total)}</span>
+                                            </div>
+                                            <div className={styles.saleDetailRow}>
+                                                <label>Estado:</label>
+                                                <span>{selectedSale.status}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Items Selection */}
+                                    <div className={styles.itemsSection}>
+                                        <h3>Productos a Devolver</h3>
+                                        <table className={styles.itemsTable}>
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Producto</th>
+                                                    <th>Comprado</th>
+                                                    <th>Disponible</th>
+                                                    <th>Devolver</th>
+                                                    <th>Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                                                                <tbody>
+                                                                                    {returnItems.map((item: any) => (
+                                                                                        <tr key={item.partId}>                                                        <td>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={item.selected}
+                                                                onChange={() =>
+                                                                    toggleItemSelection(item.partId)
+                                                                }
+                                                                disabled={item.availableForReturn === 0}
+                                                                className={styles.itemCheckbox}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <div>{item.partName}</div>
+                                                            <small>{item.partSku}</small>
+                                                        </td>
+                                                        <td>{item.originalQuantity}</td>
+                                                        <td>
+                                                            {item.availableForReturn === 0 ? (
+                                                                <span className={styles.noAvailable}>
+                                                                    Ya devuelto
+                                                                </span>
+                                                            ) : (
+                                                                item.availableForReturn
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max={item.availableForReturn}
+                                                                value={item.returnQuantity}
+                                                                onChange={(e) =>
+                                                                    updateReturnQuantity(
+                                                                        item.partId,
+                                                                        parseInt(e.target.value) || 0
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    !item.selected ||
+                                                                    item.availableForReturn === 0
+                                                                }
+                                                                className={styles.itemInput}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            {item.selected && item.returnQuantity > 0
+                                                                ? formatCurrency(
+                                                                      item.unitPrice *
+                                                                          item.returnQuantity
+                                                                  )
+                                                                : '-'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Totals */}
+                                    <div className={styles.totalsSection}>
+                                        <div className={styles.totalsBox}>
+                                            <div className={styles.totalsRow}>
+                                                <span>Subtotal:</span>
+                                                <span>{formatCurrency(subtotal)}</span>
+                                            </div>
+                                            <div className={styles.totalsRow}>
+                                                <span>IVA ({selectedSale.taxRate}%):</span>
+                                                <span>{formatCurrency(taxAmount)}</span>
+                                            </div>
+                                            <div className={`${styles.totalsRow} ${styles.total}`}>
+                                                <span>Total a Reembolsar:</span>
+                                                <span>{formatCurrency(total)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Reason */}
+                                    <div className={styles.formGroup}>
+                                        <label>
+                                            Motivo de la Devolución{' '}
+                                            <span className={styles.required}>*</span>
+                                        </label>
+                                        <textarea
+                                            value={returnReason}
+                                            onChange={(e) => setReturnReason(e.target.value)}
+                                            rows={2}
+                                            placeholder="Ej: Producto defectuoso, Error en compra..."
+                                        />
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label>Notas Adicionales</label>
+                                        <textarea
+                                            value={returnNotes}
+                                            onChange={(e) => setReturnNotes(e.target.value)}
+                                            rows={2}
+                                            placeholder="Observaciones adicionales..."
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <Button
+                                variant="secondary"
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    resetForm();
+                                }}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={handleCreateCreditNote}
+                                disabled={loading || !selectedSale || total === 0}
+                            >
+                                {loading ? 'Creando...' : 'Crear Nota de Crédito'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Detail Modal */}
+            {showDetailModal && selectedCreditNote && (
+                <div className={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>Nota de Crédito {selectedCreditNote.creditNoteNumber}</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => setShowDetailModal(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <div className={styles.detailGrid}>
+                                <div className={styles.detailSection}>
+                                    <h3>Información</h3>
+                                    <div className={styles.detailRow}>
+                                        <label>Estado:</label>
+                                        <span>
+                                            {getStatusBadge(selectedCreditNote.status)}
+                                        </span>
+                                    </div>
+                                    <div className={styles.detailRow}>
+                                        <label>Venta Original:</label>
+                                        <span>{selectedCreditNote.posSale.saleNumber}</span>
+                                    </div>
+                                    <div className={styles.detailRow}>
+                                        <label>Cliente:</label>
+                                        <span>
+                                            {selectedCreditNote.posSale.customer?.name ||
+                                                selectedCreditNote.posSale.customerName ||
+                                                'Consumidor Final'}
+                                        </span>
+                                    </div>
+                                    <div className={styles.detailRow}>
+                                        <label>Creada:</label>
+                                        <span>{formatDate(selectedCreditNote.createdAt)}</span>
+                                    </div>
+                                    <div className={styles.detailRow}>
+                                        <label>Creada por:</label>
+                                        <span>{selectedCreditNote.createdBy?.name}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.detailSection}>
+                                    <h3>Reembolso</h3>
+                                    <div className={styles.detailRow}>
+                                        <label>Método:</label>
+                                        <span>
+                                            {selectedCreditNote.refundMethod
+                                                ? selectedCreditNote.refundMethod === 'CASH'
+                                                    ? 'Efectivo'
+                                                    : selectedCreditNote.refundMethod === 'CARD'
+                                                    ? 'Tarjeta'
+                                                    : 'Transferencia'
+                                                : 'Pendiente'}
+                                        </span>
+                                    </div>
+                                    {selectedCreditNote.refundReference && (
+                                        <div className={styles.detailRow}>
+                                            <label>Referencia:</label>
+                                            <span>{selectedCreditNote.refundReference}</span>
+                                        </div>
+                                    )}
+                                    {selectedCreditNote.processedAt && (
+                                        <div className={styles.detailRow}>
+                                            <label>Procesada:</label>
+                                            <span>
+                                                {formatDate(selectedCreditNote.processedAt)}
                                             </span>
                                         </div>
-                                        <span className={styles['searchResultTotal']}>
-                                            {formatCurrency(sale.total)}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Selected Sale Details */}
-                {selectedSale && (
-                    <>
-                        <div className={styles['saleDetails']}>
-                            <h2>
-                                Venta: {selectedSale.saleNumber}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        setSelectedSale(null);
-                                        setReturnItems([]);
-                                    }}
-                                >
-                                    Cambiar
-                                </Button>
-                            </h2>
-                            <div className={styles['saleDetailsGrid']}>
-                                <div className={styles['saleDetailRow']}>
-                                    <span>Cliente:</span>
-                                    <span>
-                                        {selectedSale.customer?.name ||
-                                            selectedSale.customerName ||
-                                            'Consumidor Final'}
-                                    </span>
-                                </div>
-                                <div className={styles['saleDetailRow']}>
-                                    <span>Fecha:</span>
-                                    <span>{formatDate(selectedSale.createdAt)}</span>
-                                </div>
-                                <div className={styles['saleDetailRow']}>
-                                    <span>Total Original:</span>
-                                    <span>{formatCurrency(selectedSale.total)}</span>
-                                </div>
-                                <div className={styles['saleDetailRow']}>
-                                    <span>Estado:</span>
-                                    <span>{selectedSale.status}</span>
+                                    )}
+                                    {selectedCreditNote.processedBy && (
+                                        <div className={styles.detailRow}>
+                                            <label>Procesada por:</label>
+                                            <span>{selectedCreditNote.processedBy.name}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Items Selection */}
-                        <div className={styles['itemsSection']}>
-                            <h2>Productos a Devolver</h2>
-                            <table className={styles['itemsTable']}>
-                              <caption className="sr-only">Productos a devolver de la venta original</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col"></th>
-                                        <th scope="col">Producto</th>
-                                        <th scope="col">Comprado</th>
-                                        <th scope="col">Disponible</th>
-                                        <th scope="col">Devolver</th>
-                                        <th scope="col">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {returnItems.map((item: any) => (
-                                        <tr key={item.partId}>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={item.selected}
-                                                    onChange={() =>
-                                                        toggleItemSelection(item.partId)
-                                                    }
-                                                    disabled={item.availableForReturn === 0}
-                                                    className={styles['itemCheckbox']}
-                                                    aria-label={`Seleccionar ${item.partName} para devolución`}
-                                                />
-                                            </td>
-                                            <td>
-                                                <div>{item.partName}</div>
-                                                <small>{item.partSku}</small>
-                                            </td>
-                                            <td>{item.originalQuantity}</td>
-                                            <td>
-                                                {item.availableForReturn === 0 ? (
-                                                    <span className={styles['noAvailable']}>
-                                                        Ya devuelto
-                                                    </span>
-                                                ) : (
-                                                    item.availableForReturn
-                                                )}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    max={item.availableForReturn}
-                                                    value={item.returnQuantity}
-                                                    onChange={(e) =>
-                                                        updateReturnQuantity(
-                                                            item.partId,
-                                                            parseInt(e.target.value) || 0
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        !item.selected ||
-                                                        item.availableForReturn === 0
-                                                    }
-                                                    className={styles['itemInput']}
-                                                    aria-label={`Cantidad a devolver de ${item.partName}`}
-                                                />
-                                            </td>
-                                            <td>
-                                                {item.selected && item.returnQuantity > 0
-                                                    ? formatCurrency(
-                                                          item.unitPrice *
-                                                              item.returnQuantity
-                                                      )
-                                                    : '-'}
-                                            </td>
+                            <div className={styles.detailSection}>
+                                <h3>Motivo</h3>
+                                <p>{selectedCreditNote.reason}</p>
+                            </div>
+
+                            {/* Items */}
+                            <div className={styles.itemsSection}>
+                                <h3>Productos Devueltos</h3>
+                                <table className={styles.itemsTable}>
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Unit.</th>
+                                            <th>Subtotal</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        {selectedCreditNote.items.map((item: any) => (
+                                            <tr key={item.id}>
+                                                <td>
+                                                    <div>{item.part.name}</div>
+                                                    <small>{item.part.sku}</small>
+                                                </td>
+                                                <td>{item.quantity}</td>
+                                                <td>{formatCurrency(item.unitPrice)}</td>
+                                                <td>
+                                                    {formatCurrency(
+                                                        item.unitPrice * item.quantity
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {/* Totals */}
-                        <div className={styles['totalsSection']}>
-                            <div className={styles['totalsBox']} role="region" aria-label="Resumen de devolución">
-                                <div className={styles['totalsRow']}>
-                                    <span>Subtotal:</span>
-                                    <span>{formatCurrency(subtotal)}</span>
-                                </div>
-                                <div className={styles['totalsRow']}>
-                                    <span>IVA ({selectedSale.taxRate}%):</span>
-                                    <span>{formatCurrency(taxAmount)}</span>
-                                </div>
-                                <div className={`${styles['totalsRow']} ${styles['total']}`}>
-                                    <span>Total a Reembolsar:</span>
-                                    <span>{formatCurrency(total)}</span>
+                            {/* Totals */}
+                            <div className={styles.totalsSection}>
+                                <div className={styles.totalsBox}>
+                                    <div className={styles.totalsRow}>
+                                        <span>Subtotal:</span>
+                                        <span>
+                                            {formatCurrency(selectedCreditNote.subtotal)}
+                                        </span>
+                                    </div>
+                                    <div className={styles.totalsRow}>
+                                        <span>IVA ({selectedCreditNote.taxRate}%):</span>
+                                        <span>
+                                            {formatCurrency(selectedCreditNote.taxAmount)}
+                                        </span>
+                                    </div>
+                                    <div className={`${styles.totalsRow} ${styles.total}`}>
+                                        <span>Total Reembolso:</span>
+                                        <span>
+                                            {formatCurrency(selectedCreditNote.total)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Reason */}
-                        <div className={styles['formGroup']}>
-                            <label htmlFor="returnReason">
-                                Motivo de la Devolución{' '}
-                                <span className={styles['required']}>*</span>
-                            </label>
-                            <textarea
-                                id="returnReason"
-                                value={returnReason}
-                                onChange={(e) => setReturnReason(e.target.value)}
-                                rows={2}
-                                placeholder="Ej: Producto defectuoso, Error en compra..."
-                            />
-                        </div>
-
-                        <div className={styles['formGroup']}>
-                            <label htmlFor="returnNotes">Notas Adicionales</label>
-                            <textarea
-                                id="returnNotes"
-                                value={returnNotes}
-                                onChange={(e) => setReturnNotes(e.target.value)}
-                                rows={2}
-                                placeholder="Observaciones adicionales..."
-                            />
-                        </div>
-                    </>
-                )}
-            </Modal>
-
-            {/* ===== DETAIL MODAL ===== */}
-            <Modal
-                isOpen={showDetailModal}
-                onClose={() => setShowDetailModal(false)}
-                title={selectedCreditNote ? `Nota de Crédito ${selectedCreditNote.creditNoteNumber}` : ''}
-                size="lg"
-                footer={
-                    <>
-                        {selectedCreditNote?.status === 'PENDING' && (
-                            <>
-                                <Button
-                                    variant="danger"
-                                    onClick={() =>
-                                        handleCancelCreditNote(selectedCreditNote.id)
-                                    }
-                                    disabled={loading}
-                                    isLoading={loading}
-                                >
-                                    Cancelar NC
-                                </Button>
-                                <Button
-                                    onClick={() => openRefundModal(selectedCreditNote)}
-                                    disabled={loading}
-                                >
-                                    Procesar Reembolso
-                                </Button>
-                            </>
-                        )}
-                        <Button
-                            variant="secondary"
-                            onClick={() => setShowDetailModal(false)}
-                        >
-                            Cerrar
-                        </Button>
-                    </>
-                }
-            >
-                {selectedCreditNote && (
-                    <>
-                        <div className={styles['detailGrid']}>
-                            <div className={styles['detailSection']}>
-                                <h2>Información</h2>
-                                <div className={styles['detailRow']}>
-                                    <span>Estado:</span>
-                                    <span>{getStatusBadge(selectedCreditNote.status)}</span>
+                            {selectedCreditNote.notes && (
+                                <div className={styles.detailSection}>
+                                    <h3>Notas</h3>
+                                    <p>{selectedCreditNote.notes}</p>
                                 </div>
-                                <div className={styles['detailRow']}>
-                                    <span>Venta Original:</span>
-                                    <span>{selectedCreditNote.posSale.saleNumber}</span>
+                            )}
+                        </div>
+                        <div className={styles.modalFooter}>
+                            {selectedCreditNote.status === 'PENDING' && (
+                                <>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() =>
+                                            handleCancelCreditNote(selectedCreditNote.id)
+                                        }
+                                        disabled={loading}
+                                    >
+                                        Cancelar NC
+                                    </Button>
+                                    <Button
+                                        onClick={() => openRefundModal(selectedCreditNote)}
+                                        disabled={loading}
+                                    >
+                                        Procesar Reembolso
+                                    </Button>
+                                </>
+                            )}
+                            <Button
+                                variant="secondary"
+                                onClick={() => setShowDetailModal(false)}
+                            >
+                                Cerrar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Refund Modal */}
+            {showRefundModal && selectedCreditNote && (
+                <div
+                    className={styles.modalOverlay}
+                    onClick={() => setShowRefundModal(false)}
+                >
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>Procesar Reembolso</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => setShowRefundModal(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <div className={styles.detailSection}>
+                                <h3>Nota de Crédito</h3>
+                                <div className={styles.detailRow}>
+                                    <label>Número:</label>
+                                    <span>{selectedCreditNote.creditNoteNumber}</span>
                                 </div>
-                                <div className={styles['detailRow']}>
-                                    <span>Cliente:</span>
+                                <div className={styles.detailRow}>
+                                    <label>Cliente:</label>
                                     <span>
                                         {selectedCreditNote.posSale.customer?.name ||
                                             selectedCreditNote.posSale.customerName ||
                                             'Consumidor Final'}
                                     </span>
                                 </div>
-                                <div className={styles['detailRow']}>
-                                    <span>Creada:</span>
-                                    <span>{formatDate(selectedCreditNote.createdAt)}</span>
-                                </div>
-                                <div className={styles['detailRow']}>
-                                    <span>Creada por:</span>
-                                    <span>{selectedCreditNote.createdBy?.name}</span>
-                                </div>
-                            </div>
-                            <div className={styles['detailSection']}>
-                                <h2>Reembolso</h2>
-                                <div className={styles['detailRow']}>
-                                    <span>Método:</span>
-                                    <span>{getPaymentLabel(selectedCreditNote.refundMethod)}</span>
-                                </div>
-                                {selectedCreditNote.refundReference && (
-                                    <div className={styles['detailRow']}>
-                                        <span>Referencia:</span>
-                                        <span>{selectedCreditNote.refundReference}</span>
-                                    </div>
-                                )}
-                                {selectedCreditNote.processedAt && (
-                                    <div className={styles['detailRow']}>
-                                        <span>Procesada:</span>
-                                        <span>{formatDate(selectedCreditNote.processedAt)}</span>
-                                    </div>
-                                )}
-                                {selectedCreditNote.processedBy && (
-                                    <div className={styles['detailRow']}>
-                                        <span>Procesada por:</span>
-                                        <span>{selectedCreditNote.processedBy.name}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className={styles['detailSection']}>
-                            <h2>Motivo</h2>
-                            <p>{selectedCreditNote.reason}</p>
-                        </div>
-
-                        {/* Items */}
-                        <div className={styles['itemsSection']}>
-                            <h2>Productos Devueltos</h2>
-                            <table className={styles['itemsTable']}>
-                              <caption className="sr-only">Productos devueltos en la nota</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Producto</th>
-                                        <th scope="col">Cantidad</th>
-                                        <th scope="col">Precio Unit.</th>
-                                        <th scope="col">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedCreditNote.items.map((item: any) => (
-                                        <tr key={item.id}>
-                                            <td>
-                                                <div>{item.part.name}</div>
-                                                <small>{item.part.sku}</small>
-                                            </td>
-                                            <td>{item.quantity}</td>
-                                            <td>{formatCurrency(item.unitPrice)}</td>
-                                            <td>
-                                                {formatCurrency(
-                                                    item.unitPrice * item.quantity
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Totals */}
-                        <div className={styles['totalsSection']}>
-                            <div className={styles['totalsBox']} role="region" aria-label="Resumen de totales">
-                                <div className={styles['totalsRow']}>
-                                    <span>Subtotal:</span>
-                                    <span>{formatCurrency(selectedCreditNote.subtotal)}</span>
-                                </div>
-                                <div className={styles['totalsRow']}>
-                                    <span>IVA ({selectedCreditNote.taxRate}%):</span>
-                                    <span>{formatCurrency(selectedCreditNote.taxAmount)}</span>
-                                </div>
-                                <div className={`${styles['totalsRow']} ${styles['total']}`}>
-                                    <span>Total Reembolso:</span>
-                                    <span>{formatCurrency(selectedCreditNote.total)}</span>
+                                <div className={styles.detailRow}>
+                                    <label>Total a Reembolsar:</label>
+                                    <span
+                                        style={{ fontWeight: 700, color: '#dc2626', fontSize: '1.125rem' }}
+                                    >
+                                        {formatCurrency(selectedCreditNote.total)}
+                                    </span>
                                 </div>
                             </div>
+
+                            <div className={styles.refundSection}>
+                                <h3>Método de Reembolso</h3>
+                                <div className={styles.refundMethods}>
+                                    <button
+                                        className={`${styles.refundMethodBtn} ${
+                                            refundMethod === 'CASH' ? styles.active : ''
+                                        }`}
+                                        onClick={() => setRefundMethod('CASH')}
+                                    >
+                                        <div className={styles.icon}>💵</div>
+                                        Efectivo
+                                    </button>
+                                    <button
+                                        className={`${styles.refundMethodBtn} ${
+                                            refundMethod === 'CARD' ? styles.active : ''
+                                        }`}
+                                        onClick={() => setRefundMethod('CARD')}
+                                    >
+                                        <div className={styles.icon}>💳</div>
+                                        Tarjeta
+                                    </button>
+                                    <button
+                                        className={`${styles.refundMethodBtn} ${
+                                            refundMethod === 'TRANSFER' ? styles.active : ''
+                                        }`}
+                                        onClick={() => setRefundMethod('TRANSFER')}
+                                    >
+                                        <div className={styles.icon}>🏦</div>
+                                        Transferencia
+                                    </button>
+                                </div>
+                            </div>
+
+                            {refundMethod !== 'CASH' && (
+                                <div className={styles.formGroup}>
+                                    <label>Referencia de Transacción</label>
+                                    <input
+                                        type="text"
+                                        value={refundReference}
+                                        onChange={(e) => setRefundReference(e.target.value)}
+                                        placeholder="Número de autorización o referencia..."
+                                    />
+                                </div>
+                            )}
                         </div>
-
-                        {selectedCreditNote.notes && (
-                            <div className={styles['detailSection']}>
-                                <h2>Notas</h2>
-                                <p>{selectedCreditNote.notes}</p>
-                            </div>
-                        )}
-                    </>
-                )}
-            </Modal>
-
-            {/* ===== REFUND MODAL ===== */}
-            <Modal
-                isOpen={showRefundModal}
-                onClose={() => setShowRefundModal(false)}
-                title="Procesar Reembolso"
-                size="md"
-                footer={
-                    <>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setShowRefundModal(false)}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleProcessRefund}
-                            disabled={loading}
-                            isLoading={loading}
-                        >
-                            Confirmar Reembolso
-                        </Button>
-                    </>
-                }
-            >
-                {selectedCreditNote && (
-                    <>
-                        <div className={styles['detailSection']}>
-                            <h2>Nota de Crédito</h2>
-                            <div className={styles['detailRow']}>
-                                <span>Número:</span>
-                                <span>{selectedCreditNote.creditNoteNumber}</span>
-                            </div>
-                            <div className={styles['detailRow']}>
-                                <span>Cliente:</span>
-                                <span>
-                                    {selectedCreditNote.posSale.customer?.name ||
-                                        selectedCreditNote.posSale.customerName ||
-                                        'Consumidor Final'}
-                                </span>
-                            </div>
-                            <div className={styles['detailRow']}>
-                                <span>Total a Reembolsar:</span>
-                                <span className={styles['refundTotal']}>
-                                    {formatCurrency(selectedCreditNote.total)}
-                                </span>
-                            </div>
+                        <div className={styles.modalFooter}>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setShowRefundModal(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleProcessRefund} disabled={loading}>
+                                {loading ? 'Procesando...' : 'Confirmar Reembolso'}
+                            </Button>
                         </div>
-
-                        <div className={styles['refundSection']}>
-                            <h2>Método de Reembolso</h2>
-                            <div className={styles['refundMethods']}>
-                                {(['CASH', 'CARD', 'TRANSFER'] as PaymentMethod[]).map(
-                                    (method) => (
-                                        <button
-                                            key={method}
-                                            className={`${styles['refundMethodBtn']} ${
-                                                refundMethod === method
-                                                    ? styles['active']
-                                                    : ''
-                                            }`}
-                                            onClick={() => setRefundMethod(method)}
-                                            aria-pressed={refundMethod === method}
-                                            aria-label={`Seleccionar método: ${getPaymentLabel(method)}`}
-                                        >
-                                            {getPaymentLabel(method)}
-                                        </button>
-                                    )
-                                )}
-                            </div>
-                        </div>
-
-                        {refundMethod !== 'CASH' && (
-                            <div className={styles['formGroup']}>
-                                <label htmlFor="refundReference">Referencia de Transacción</label>
-                                <input
-                                    id="refundReference"
-                                    type="text"
-                                    value={refundReference}
-                                    onChange={(e) => setRefundReference(e.target.value)}
-                                    placeholder="Número de autorización o referencia..."
-                                />
-                            </div>
-                        )}
-                    </>
-                )}
-            </Modal>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { deactivateUser, reactivateUser } from '@/lib/user-actions';
-import { useToast } from '@/context/ToastContext';
 import styles from './users.module.css';
 
 interface DeleteUserButtonProps {
@@ -21,7 +20,6 @@ export default function DeleteUserButton({
 }: DeleteUserButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { addToast } = useToast();
 
   const handleToggleActive = async () => {
     const action = isActive ? 'desactivar' : 'reactivar';
@@ -50,7 +48,7 @@ export default function DeleteUserButton({
       router.refresh();
     } catch (error) {
       console.error(`Error ${action} user:`, error);
-      addToast(error instanceof Error ? error.message : `Error al ${action} usuario`, 'ERROR');
+      alert(error instanceof Error ? error.message : `Error al ${action} usuario`);
     } finally {
       setIsLoading(false);
     }
@@ -61,11 +59,11 @@ export default function DeleteUserButton({
       <button
         onClick={handleToggleActive}
         disabled={isLoading}
-        className={`${className || ''} ${styles['btnDelete']}`}
+        className={`${className || ''} ${styles.btnDelete}`}
         title={isLoading ? 'Procesando...' : 'Desactivar Usuario'}
       >
         {isLoading ? (
-          <span className={styles['spinner']} />
+          <span className={styles.spinner} />
         ) : (
           <>
             <BanIcon />
@@ -80,11 +78,11 @@ export default function DeleteUserButton({
     <button
       onClick={handleToggleActive}
       disabled={isLoading}
-      className={`${className || ''} ${styles['btnReactivate']}`}
+      className={`${className || ''} ${styles.btnReactivate}`}
       title={isLoading ? 'Procesando...' : 'Reactivar Usuario'}
     >
       {isLoading ? (
-        <span className={styles['spinner']} />
+        <span className={styles.spinner} />
       ) : (
         <>
           <CheckIcon />

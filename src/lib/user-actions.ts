@@ -13,7 +13,7 @@
  */
 
 import { auth } from '@/auth';
-import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { prisma } from '@/lib/prisma';
 import bcryptjs from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -27,7 +27,7 @@ import {
   AuthorizationError,
   getAssignableRoles,
 } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
@@ -121,7 +121,7 @@ export async function createUser(
     }
 
     // 5. Verificar email único dentro del tenant
-    const existingUser = await getTenantPrisma(tenantId, session.user.id).user.findFirst({
+    const existingUser = await prisma.user.findFirst({
       where: { email, tenantId },
     });
 
@@ -155,7 +155,7 @@ export async function createUser(
     const hashedPassword = await bcryptjs.hash(finalPassword!, 12);
 
     // 8. Crear usuario
-    const newUser = await getTenantPrisma(tenantId, session.user.id).user.create({
+    const newUser = await prisma.user.create({
       data: {
         email,
         firstName,
@@ -172,7 +172,7 @@ export async function createUser(
     });
 
     // 9. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'USER_CREATED',
         module: 'USERS',
@@ -247,7 +247,7 @@ export async function updateUser(
     const { userId, email, firstName, lastName, role } = validatedFields.data;
 
     // 3. Obtener usuario objetivo
-    const targetUser = await getTenantPrisma(tenantId, session.user.id).user.findUnique({
+    const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -283,7 +283,7 @@ export async function updateUser(
 
       // No permitir degradar al último admin
       if (targetUser.role === 'ADMIN' && role !== 'ADMIN') {
-        const adminCount = await getTenantPrisma(tenantId, session.user.id).user.count({
+        const adminCount = await prisma.user.count({
           where: { tenantId, role: 'ADMIN', isActive: true },
         });
         if (adminCount <= 1) {
@@ -297,7 +297,7 @@ export async function updateUser(
 
     // 7. Verificar email único si se está cambiando
     if (email && email !== targetUser.email) {
-      const existingUser = await getTenantPrisma(tenantId, session.user.id).user.findFirst({
+      const existingUser = await prisma.user.findFirst({
         where: { email, tenantId, NOT: { id: userId } },
       });
       if (existingUser) {
@@ -314,22 +314,22 @@ export async function updateUser(
       updatedById: actorId,
     };
 
-    if (email) updateData['email'] = email;
-    if (firstName) updateData['firstName'] = firstName;
-    if (lastName) updateData['lastName'] = lastName;
+    if (email) updateData.email = email;
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
     if (firstName || lastName) {
-      updateData['name'] = `${firstName || targetUser.firstName || ''} ${lastName || targetUser.lastName || ''}`.trim();
+      updateData.name = `${firstName || targetUser.firstName || ''} ${lastName || targetUser.lastName || ''}`.trim();
     }
-    if (role) updateData['role'] = role;
+    if (role) updateData.role = role;
 
     // 9. Actualizar usuario
-    const updatedUser = await getTenantPrisma(tenantId, session.user.id).user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
 
     // 10. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'USER_UPDATED',
         module: 'USERS',
@@ -392,7 +392,7 @@ export async function deactivateUser(
     }
 
     // 5. Obtener usuario objetivo
-    const targetUser = await getTenantPrisma(tenantId, session.user.id).user.findUnique({
+    const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -413,7 +413,7 @@ export async function deactivateUser(
 
     // 8. No permitir desactivar al último ADMIN
     if (targetUser.role === 'ADMIN') {
-      const adminCount = await getTenantPrisma(tenantId, session.user.id).user.count({
+      const adminCount = await prisma.user.count({
         where: { tenantId, role: 'ADMIN', isActive: true },
       });
       if (adminCount <= 1) {
@@ -425,7 +425,7 @@ export async function deactivateUser(
     }
 
     // 9. Desactivar usuario
-    await getTenantPrisma(tenantId, session.user.id).user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: {
         isActive: false,
@@ -434,7 +434,7 @@ export async function deactivateUser(
     });
 
     // 10. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'USER_DEACTIVATED',
         module: 'USERS',
@@ -490,7 +490,7 @@ export async function reactivateUser(
     }
 
     // 4. Obtener usuario objetivo
-    const targetUser = await getTenantPrisma(tenantId, session.user.id).user.findUnique({
+    const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -507,7 +507,7 @@ export async function reactivateUser(
     }
 
     // 7. Reactivar usuario
-    await getTenantPrisma(tenantId, session.user.id).user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: {
         isActive: true,
@@ -519,7 +519,7 @@ export async function reactivateUser(
     });
 
     // 8. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'USER_REACTIVATED',
         module: 'USERS',
@@ -591,7 +591,7 @@ export async function resetPassword(
     const { newPassword } = validatedFields.data;
 
     // 4. Obtener usuario objetivo
-    const targetUser = await getTenantPrisma(tenantId, session.user.id).user.findUnique({
+    const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -628,7 +628,7 @@ export async function resetPassword(
     // 7. Hashear y actualizar
     const hashedPassword = await bcryptjs.hash(finalPassword!, 12);
 
-    await getTenantPrisma(tenantId, session.user.id).user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: {
         password: hashedPassword,
@@ -640,7 +640,7 @@ export async function resetPassword(
     });
 
     // 8. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'PASSWORD_RESET',
         module: 'USERS',
@@ -708,7 +708,7 @@ export async function changePassword(
     const { currentPassword, newPassword } = validatedFields.data;
 
     // 3. Obtener usuario
-    const user = await getTenantPrisma(tenantId, session.user.id).user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -739,7 +739,7 @@ export async function changePassword(
     // 6. Hashear y actualizar
     const hashedPassword = await bcryptjs.hash(newPassword, 12);
 
-    await getTenantPrisma(tenantId, session.user.id).user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: {
         password: hashedPassword,
@@ -749,7 +749,7 @@ export async function changePassword(
     });
 
     // 7. Registrar en audit log
-    await getTenantPrisma(tenantId, session.user.id).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         action: 'PASSWORD_CHANGED',
         module: 'USERS',
@@ -814,15 +814,15 @@ export async function getUsers(options?: {
     };
 
     if (!options?.includeInactive) {
-      whereClause['isActive'] = true;
+      whereClause.isActive = true;
     }
 
     if (options?.role) {
-      whereClause['role'] = options.role;
+      whereClause.role = options.role;
     }
 
     if (options?.search) {
-      whereClause['OR'] = [
+      whereClause.OR = [
         { email: { contains: options.search, mode: 'insensitive' } },
         { firstName: { contains: options.search, mode: 'insensitive' } },
         { lastName: { contains: options.search, mode: 'insensitive' } },
@@ -830,7 +830,7 @@ export async function getUsers(options?: {
       ];
     }
 
-    const users = await getTenantPrisma(tenantId, session.user.id).user.findMany({
+    const users = await prisma.user.findMany({
       where: whereClause,
       select: {
         id: true,

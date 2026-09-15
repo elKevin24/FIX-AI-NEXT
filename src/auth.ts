@@ -4,11 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
-import type { JWT } from "next-auth/jwt";
-import { initializeNotificationSystem } from '@/lib/events/init';
-
-// Initialize notification system on module load
-initializeNotificationSystem();
 
 /**
  * Busca usuario por email y tenant.
@@ -19,9 +14,10 @@ async function getUser(email: string) {
     try {
         // Buscar usuario por email (puede haber múltiples en diferentes tenants)
         // En login, el usuario solo provee email, así que buscamos el primero activo
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
             where: {
                 email,
+                isActive: true, // Solo usuarios activos pueden hacer login
             },
             include: { tenant: true },
         });
@@ -109,54 +105,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!parsedCredentials.success) {
                     // Mensaje genérico para no revelar info
-                    console.log("Invalid credentials format:", parsedCredentials.error);
+                    console.log("Invalid credentials format");
                     return null;
                 }
 
                 const { email, password } = parsedCredentials.data;
-                console.log("[NextAuth] Authorize attempt");
-                
-                let user;
-                try {
-                  user = await getUser(email);
-                  console.log(`[NextAuth] getUser returned:`, !!user);
-                } catch (err) {
-                  console.error(`[NextAuth] Error in getUser:`, err);
-                  return null;
-                }
+                const user = await getUser(email);
 
                 // Mensaje genérico: no revelar si el email existe o no
                 if (!user) {
-                    console.log("[NextAuth] Authentication failed: user not found");
+                    console.log("Authentication failed");
                     return null;
                 }
 
                 // Verificar si la cuenta está activa
                 if (!user.isActive) {
-                    console.log("[NextAuth] Account deactivated");
+                    console.log("Account deactivated");
                     return null;
                 }
 
                 // Verificar si la cuenta está bloqueada
                 if (isAccountLocked(user.lockedUntil)) {
-                    console.log("[NextAuth] Account temporarily locked");
+                    console.log("Account temporarily locked");
                     return null;
                 }
 
                 // Verificar contraseña
-                console.log(`[NextAuth] Comparing passwords...`);
                 const passwordsMatch = await compare(password, user.password);
-                console.log(`[NextAuth] Passwords match:`, passwordsMatch);
 
                 if (!passwordsMatch) {
                     // Registrar intento fallido (no revelar detalles al usuario)
                     await recordFailedLogin(user.id);
-                    console.log("[NextAuth] Authentication failed: invalid password");
+                    console.log("Authentication failed");
                     return null;
                 }
 
                 // Login exitoso - resetear contadores
-                console.log("[NextAuth] Login successful");
                 await recordSuccessfulLogin(user.id);
 
                 // Retornar usuario con campos adicionales para la sesión
@@ -178,17 +162,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.id = token.sub;
             }
             if (token.role && session.user) {
-                session.user['role'] = token.role as "ADMIN" | "MANAGER" | "TECHNICIAN" | "VIEWER";
+                session.user.role = token.role as "ADMIN" | "MANAGER" | "TECHNICIAN" | "VIEWER";
             }
             if (token.tenantId && session.user) {
-                session.user['tenantId'] = token.tenantId as string;
+                session.user.tenantId = token.tenantId as string;
             }
             if (typeof token.passwordMustChange === 'boolean' && session.user) {
-                session.user['passwordMustChange'] = token.passwordMustChange;
+                session.user.passwordMustChange = token.passwordMustChange;
             }
             return session;
         },
-        async jwt({ token, user, trigger }: { token: JWT; user: any; trigger?: string }) {
+        async jwt({ token, user, trigger }) {
             if (user) {
                 token.role = user.role;
                 token.tenantId = user.tenantId;

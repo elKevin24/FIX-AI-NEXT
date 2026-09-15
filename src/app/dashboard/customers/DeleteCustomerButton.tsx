@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
 
 interface DeleteCustomerButtonProps {
   customerId: string;
@@ -13,10 +12,9 @@ interface DeleteCustomerButtonProps {
 export default function DeleteCustomerButton({ customerId, customerName }: DeleteCustomerButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
-  const { addToast } = useToast();
 
   const handleDelete = async () => {
-    if (!confirm(`¿Estás seguro de eliminar a ${customerName}? Esta acción no se puede deshacer.`)) {
+    if (!confirm(`Are you sure you want to delete ${customerName}? This action cannot be undone.`)) {
       return;
     }
 
@@ -35,7 +33,7 @@ export default function DeleteCustomerButton({ customerId, customerName }: Delet
       router.refresh();
     } catch (error) {
       console.error('Error deleting customer:', error);
-      addToast(error instanceof Error ? error.message : 'Error al eliminar cliente', 'ERROR');
+      alert(error instanceof Error ? error.message : 'Failed to delete customer');
     } finally {
       setIsDeleting(false);
     }

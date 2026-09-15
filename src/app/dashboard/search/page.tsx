@@ -1,15 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { isSuperAdmin } from '@/lib/authz';
 import { redirect } from 'next/navigation';
 import styles from '../tickets/tickets.module.css';
-import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
-
-export const metadata = {
-    title: 'Búsqueda',
-    description: 'Busca tickets, clientes y dispositivos en todo el taller.',
-};
 
 interface Props {
     searchParams: Promise<{ q?: string }>;
@@ -24,8 +17,8 @@ export default async function SearchPage({ searchParams }: Props) {
         redirect('/login');
     }
 
-    const superAdmin = isSuperAdmin(session.user);
-    const tenantFilter = superAdmin ? {} : { tenantId: session.user.tenantId };
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const tenantFilter = isSuperAdmin ? {} : { tenantId: session.user.tenantId };
 
     // Check if query is a valid UUID
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
@@ -85,11 +78,15 @@ export default async function SearchPage({ searchParams }: Props) {
     const totalResults = tickets.length + customers.length;
 
     return (
-        <div className={styles['container']}>
-            <PageHeader
-                title="Resultados de Búsqueda"
-                superAdmin={superAdmin}
-            />
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h1>Resultados de Búsqueda</h1>
+                {isSuperAdmin && (
+                    <span className={styles.superAdminBadge}>
+                        👑 Super Admin
+                    </span>
+                )}
+            </div>
 
             <div style={{ marginBottom: '1.5rem', color: '#666' }}>
                 {query ? (
@@ -105,17 +102,16 @@ export default async function SearchPage({ searchParams }: Props) {
             {tickets.length > 0 && (
                 <>
                     <h2 style={{ marginBottom: '1rem' }}>Tickets ({tickets.length})</h2>
-                    <div className={styles['tableContainer']} style={{ marginBottom: '2rem' }}>
-                        <table className={styles['table']}>
-                          <caption className="sr-only">Resultados de búsqueda: tickets</caption>
+                    <div className={styles.tableContainer} style={{ marginBottom: '2rem' }}>
+                        <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Título</th>
-                                    <th scope="col">Cliente</th>
-                                    <th scope="col">Estado</th>
-                                    <th scope="col">Asignado a</th>
-                                    <th scope="col">Acciones</th>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
+                                    <th>Asignado a</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -125,13 +121,13 @@ export default async function SearchPage({ searchParams }: Props) {
                                         <td>{ticket.title}</td>
                                         <td>{ticket.customer.name}</td>
                                         <td>
-                                            <span className={`${styles['status']} ${styles[ticket.status.toLowerCase()]}`}>
+                                            <span className={`${styles.status} ${styles[ticket.status.toLowerCase()]}`}>
                                                 {getStatusLabel(ticket.status)}
                                             </span>
                                         </td>
                                         <td>{ticket.assignedTo?.name || 'Sin asignar'}</td>
                                         <td>
-                                            <Link href={`/dashboard/tickets/${ticket.id}`} className={styles['viewLink']}>
+                                            <Link href={`/dashboard/tickets/${ticket.id}`} className={styles.viewLink}>
                                                 Ver
                                             </Link>
                                         </td>
@@ -147,16 +143,15 @@ export default async function SearchPage({ searchParams }: Props) {
             {customers.length > 0 && (
                 <>
                     <h2 style={{ marginBottom: '1rem' }}>Clientes ({customers.length})</h2>
-                    <div className={styles['tableContainer']}>
-                        <table className={styles['table']}>
-                          <caption className="sr-only">Resultados de búsqueda: clientes</caption>
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th scope="col">Nombre</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">Teléfono</th>
-                                    <th scope="col">Tickets</th>
-                                    <th scope="col">Acciones</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Tickets</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -167,7 +162,7 @@ export default async function SearchPage({ searchParams }: Props) {
                                         <td>{customer.phone || '-'}</td>
                                         <td>{customer._count.tickets}</td>
                                         <td>
-                                            <Link href={`/dashboard/customers/${customer.id}/edit`} className={styles['viewLink']}>
+                                            <Link href={`/dashboard/customers/${customer.id}/edit`} className={styles.viewLink}>
                                                 Ver
                                             </Link>
                                         </td>
@@ -180,7 +175,7 @@ export default async function SearchPage({ searchParams }: Props) {
             )}
 
             {query.length >= 2 && totalResults === 0 && (
-                <div className={styles['tableContainer']} style={{ padding: '3rem', textAlign: 'center' }}>
+                <div className={styles.tableContainer} style={{ padding: '3rem', textAlign: 'center' }}>
                     <p style={{ color: '#666', fontSize: '1.1rem' }}>
                         No se encontraron resultados para &quot;{query}&quot;
                     </p>

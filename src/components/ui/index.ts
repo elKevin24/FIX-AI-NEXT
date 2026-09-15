@@ -20,11 +20,4 @@ export type { SelectProps, SelectOption } from './Select';
 export { Alert } from './Alert';
 export type { AlertProps } from './Alert';
 
-export { EmptyState } from './EmptyState';
-export { Skeleton } from './Skeleton';
-export { FilterGroup } from './FilterGroup';
-export { default as ThemeSwitcher } from './ThemeSwitcher';
-export type { EmptyStateProps } from './EmptyState';
-
 export { default as SearchInputGroup } from './SearchInputGroup';
-export { DataTable } from './DataTable';

@@ -4,16 +4,7 @@ import securityPlugin from "eslint-plugin-security";
 /** @type {import('eslint').Linter.FlatConfig[]} */
 const eslintConfig = [
   {
-    ignores: [
-      ".next/**",
-      "node_modules/**",
-      "dist/**",
-      "build/**",
-      "src/generated/**",
-      "playwright-report/**",
-      "test-results/**",
-      "coverage/**",
-    ],
+    ignores: [".next/**", "node_modules/**", "dist/**", "build/**"],
   },
   ...nextPlugin,
   securityPlugin.configs.recommended,

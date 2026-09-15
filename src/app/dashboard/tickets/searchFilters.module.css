@@ -1,79 +1,83 @@
+/* ========================================
+   SEARCH FILTERS - CSS Grid Layout
+   Perfect Alignment Guaranteed
+   ======================================== */
 
-.filters {
-    margin-bottom: 2rem;
+.gridContainer {
+  display: grid;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0 0 0;
+  margin-bottom: 0.25rem; /* Muy pegado a la tabla */
+  align-items: start;
+  width: 100%;
 }
-.filtersCard {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+.searchLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
 }
-.filtersCardBody {
-    padding: 1.5rem;
+
+/* ========== ITEMS ========== */
+
+.searchItem {
+  min-width: 0; /* Prevenir overflow en grid */
 }
-.filtersRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
+
+.filterItem {
+  min-width: 0;
 }
-.filterGroup {
-    flex: 1;
-    min-width: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+
+.actionItem {
+  padding-bottom: 2px;
+  align-self: end; /* El botón debe alinearse con los inputs abajo, no con los labels */
 }
-.filterGroupTitle {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--color-border-light);
-    padding-bottom: 0.5rem;
-    margin: 0;
+
+/* ========== RESPONSIVE GRID ========== */
+
+/* Mobile (< 640px): 1 columna */
+@media (max-width: 639px) {
+  .gridContainer {
+    grid-template-columns: 1fr;
+  }
 }
-.filterGroupContent {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+
+/* Tablet (640px - 1023px): 2 columnas, o layout mixto */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .gridContainer {
+    grid-template-columns: 1fr 1fr; /* 2 columnas */
+  }
+  
+  .searchItem {
+    grid-column: 1 / -1; /* Buscador full width arriba */
+  }
 }
-.flexRow {
-    display: flex;
-    gap: 0.75rem;
-}
-.flexRow > * {
-    flex: 1;
-}
-.filtersActions {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-top: 1px solid var(--color-border-light);
-    padding-top: 1rem;
-    margin-top: 1rem;
+
+/* Desktop (>= 1024px): Layout Flex fluido */
+@media (min-width: 1024px) {
+  .gridContainer {
+    display: flex; /* Cambio a Flex para llenar espacio automáticamente */
+    flex-direction: row;
+    align-items: flex-start; /* Alineación superior para etiquetas */
     gap: 1rem;
-}
-.activeFilters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    flex: 1;
-}
-.filterBadge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-primary-700);
-    background-color: var(--color-primary-50);
-    border: 1px solid var(--color-primary-200);
-    border-radius: 9999px;
-}
-.actionButtons {
-    display: flex;
-    gap: 0.75rem;
-    flex-shrink: 0;
+  }
+
+  .searchItem {
+    flex: 2; /* Buscador ocupa doble espacio */
+    min-width: 250px;
+  }
+
+  .filterItem {
+    flex: 1; /* Filtros se reparten el espacio restante equitativamente */
+    min-width: 150px;
+  }
+
+  .actionItem {
+    flex: 0 0 auto; /* Botón ocupa solo lo que necesita */
+    align-self: flex-end; /* Alineado abajo con los inputs */
+    padding-bottom: 2px;
+    margin-bottom: 1.25rem; /* Compensar el margin-bottom interno del .group de Select para alinear el botón */
+  }
 }

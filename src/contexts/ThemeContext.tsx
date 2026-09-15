@@ -35,13 +35,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Read initial theme from DOM (set by blocking script)
     const getInitialTheme = (): Theme => {
         if (typeof window !== 'undefined') {
-            try {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme && ['light', 'dark', 'dark-colorblind', 'auto'].includes(savedTheme)) {
-                    return savedTheme as Theme;
-                }
-            } catch {
-                // localStorage unavailable (privacy mode, storage restrictions) - fall back to auto
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme && ['light', 'dark', 'dark-colorblind', 'auto'].includes(savedTheme)) {
+                return savedTheme as Theme;
             }
         }
         return 'auto'; // Default to auto

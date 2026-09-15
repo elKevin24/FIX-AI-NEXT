@@ -1,7 +1,7 @@
 .container {
-  min-height: auto;
-  padding: 0 1rem 2rem 1rem;
-  background: var(--color-bg-primary);
+  min-height: 100vh;
+  padding: 0 1rem 2rem 1rem; /* Eliminado padding superior excesivo */
+  background: var(--color-bg-primary); /* Consistencia con el resto del dashboard */
 }
 
 .wizard {
@@ -29,16 +29,15 @@
 }
 
 .title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #1f2937;
   margin-bottom: 0.5rem;
-  letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: var(--color-text-secondary);
+  color: #6b7280;
 }
 
 /* Progress Steps */
@@ -54,12 +53,12 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-gray-600);
+  color: #9ca3af;
   transition: color 0.3s;
 }
 
 .stepActive {
-  color: var(--color-primary-600);
+  color: #3b82f6;
   font-weight: 600;
 }
 
@@ -68,7 +67,7 @@
   height: 40px;
   border-radius: 50%;
   background: #e5e7eb;
-  color: var(--color-text-secondary);
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,7 +140,7 @@
 
 .newCustomerHint {
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: #6b7280;
   margin-bottom: 1rem;
   font-style: italic;
 }
@@ -191,7 +190,7 @@
 
 .partQty {
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: #6b7280;
 }
 
 .requiredBadge {
@@ -240,7 +239,7 @@
 
 .partStock {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: #6b7280;
   margin-left: auto;
 }
 

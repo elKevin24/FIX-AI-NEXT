@@ -30,9 +30,9 @@
 }
 
 .header h1 {
-  font-size: 1.75rem;
+  font-size: 1.875rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-gray-800);
   margin: 0;
   letter-spacing: -0.02em;
 }

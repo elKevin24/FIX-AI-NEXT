@@ -1,11 +1,11 @@
 'use server';
 
-import { requireTenantSession, assertNotViewer } from '@/lib/auth-context';
+import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { QuotationStatus, PaymentMethod } from '@prisma/client';
-import { getTaxRate } from './tenant-settings-actions';
+import { QuotationStatus, PaymentMethod } from '@/generated/prisma';
+import { getTaxRate, getTenantSettingsForDocuments } from './tenant-settings-actions';
 
 // ============= SCHEMAS =============
 
@@ -88,9 +88,10 @@ async function generateQuotationNumber(db: ReturnType<typeof getTenantPrisma>): 
  * Create a new quotation
  */
 export async function createQuotation(data: z.infer<typeof CreateQuotationSchema>) {
-    const { tenantId, userId, userRole, db } = await requireTenantSession();
-    await assertNotViewer(userRole, 'crear cotizaciones');
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
 
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
     const validated = CreateQuotationSchema.parse(data);
 
     // Get tax rate
@@ -147,8 +148,8 @@ export async function createQuotation(data: z.infer<typeof CreateQuotationSchema
             notes: validated.notes || null,
             validUntil,
             status: 'DRAFT',
-            createdById: userId,
-            tenantId,
+            createdById: session.user.id,
+            tenantId: session.user.tenantId,
             items: {
                 create: itemsWithCalcs,
             },
@@ -174,20 +175,23 @@ export async function getQuotations(filters?: {
     startDate?: Date;
     endDate?: Date;
 }) {
-    const { tenantId, db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const where: Record<string, unknown> = {};
 
     if (filters?.status) {
-        where['status'] = filters.status;
+        where.status = filters.status;
     }
 
     if (filters?.customerId) {
-        where['customerId'] = filters.customerId;
+        where.customerId = filters.customerId;
     }
 
     if (filters?.search) {
-        where['OR'] = [
+        where.OR = [
             { quotationNumber: { contains: filters.search, mode: 'insensitive' } },
             { customerName: { contains: filters.search, mode: 'insensitive' } },
             { customer: { name: { contains: filters.search, mode: 'insensitive' } } },
@@ -195,9 +199,9 @@ export async function getQuotations(filters?: {
     }
 
     if (filters?.startDate || filters?.endDate) {
-        where['createdAt'] = {} as Record<string, Date>;
-        if (filters.startDate) (where['createdAt'] as Record<string, Date>)['gte'] = filters.startDate;
-        if (filters.endDate) (where['createdAt'] as Record<string, Date>)['lte'] = filters.endDate;
+        where.createdAt = {} as Record<string, Date>;
+        if (filters.startDate) (where.createdAt as Record<string, Date>).gte = filters.startDate;
+        if (filters.endDate) (where.createdAt as Record<string, Date>).lte = filters.endDate;
     }
 
     const quotations = await db.pOSQuotation.findMany({
@@ -232,7 +236,10 @@ export async function getQuotations(filters?: {
  * Get a single quotation by ID with all details
  */
 export async function getQuotationById(id: string) {
-    const { db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const quotation = await db.pOSQuotation.findUnique({
         where: { id },
@@ -275,7 +282,10 @@ export async function getQuotationById(id: string) {
  * Update quotation status
  */
 export async function updateQuotationStatus(id: string, status: QuotationStatus) {
-    const { db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const quotation = await db.pOSQuotation.findUnique({
         where: { id },
@@ -314,7 +324,10 @@ export async function updateQuotationStatus(id: string, status: QuotationStatus)
  * Convert quotation to POS sale
  */
 export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleSchema>) {
-    const { tenantId, userId, db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
     const validated = ConvertToSaleSchema.parse(data);
 
     const quotation = await db.pOSQuotation.findUnique({
@@ -378,8 +391,8 @@ export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleS
             total: quotation.total,
             notes: `Convertido de cotización ${quotation.quotationNumber}`,
             status: 'COMPLETED',
-            createdById: userId,
-            tenantId,
+            createdById: session.user.id,
+            tenantId: session.user.tenantId,
             cashRegisterId: validated.cashRegisterId || null,
             quotationId: quotation.id,
             items: {
@@ -400,7 +413,15 @@ export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleS
         },
     });
 
-    // Stock decrement handled by DB trigger trg_update_stock_on_pos_item
+    // Update stock
+    // REMOVED: Handled by DB trigger trg_update_stock_on_pos_item
+    // for (const item of quotation.items) {
+    //     await db.part.update({
+    //         where: { id: item.partId },
+    //         data: { quantity: { decrement: item.quantity } },
+    //     });
+    // }
+
     // Update quotation status
     await db.pOSQuotation.update({
         where: { id: quotation.id },
@@ -416,7 +437,10 @@ export async function convertQuotationToSale(data: z.infer<typeof ConvertToSaleS
  * Duplicate a quotation
  */
 export async function duplicateQuotation(id: string) {
-    const { tenantId, userId, db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const original = await db.pOSQuotation.findUnique({
         where: { id },
@@ -447,8 +471,8 @@ export async function duplicateQuotation(id: string) {
             notes: `Duplicado de ${original.quotationNumber}`,
             validUntil,
             status: 'DRAFT',
-            createdById: userId,
-            tenantId,
+            createdById: session.user.id,
+            tenantId: session.user.tenantId,
             items: {
                 create: original.items.map((item: typeof original.items[number]) => ({
                     partId: item.partId,
@@ -471,7 +495,10 @@ export async function duplicateQuotation(id: string) {
  * Delete a quotation (only drafts)
  */
 export async function deleteQuotation(id: string) {
-    const { db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const quotation = await db.pOSQuotation.findUnique({
         where: { id },
@@ -498,7 +525,10 @@ export async function deleteQuotation(id: string) {
  * Get quotation stats
  */
 export async function getQuotationStats() {
-    const { db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) throw new Error('No autorizado');
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -547,7 +577,10 @@ export async function getQuotationStats() {
  * Mark expired quotations
  */
 export async function markExpiredQuotations() {
-    const { db } = await requireTenantSession();
+    const session = await auth();
+    if (!session?.user?.tenantId) return { success: true, expiredCount: 0 };
+
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
     const result = await db.pOSQuotation.updateMany({
         where: {
@@ -562,4 +595,17 @@ export async function markExpiredQuotations() {
     }
 
     return { success: true, expiredCount: result.count };
+}
+
+/**
+ * Get data for quotation PDF/print
+ */
+export async function getQuotationForPrint(id: string) {
+    const quotation = await getQuotationById(id);
+    const settings = await getTenantSettingsForDocuments();
+
+    return {
+        quotation,
+        business: settings,
+    };
 }

@@ -78,12 +78,11 @@ export default function TechnicianMetrics({ data }: Props) {
                     borderSpacing: 0,
                     fontSize: '0.875rem'
                 }}>
-                  <caption className="sr-only">Métricas detalladas por técnico</caption>
                     <thead>
                         <tr style={{
                             backgroundColor: '#f8fafc',
                         }}>
-                            <th scope="col" style={{
+                            <th style={{
                                 padding: '0.75rem 1rem',
                                 textAlign: 'left',
                                 fontWeight: 600,
@@ -91,21 +90,21 @@ export default function TechnicianMetrics({ data }: Props) {
                                 borderBottom: '1px solid #e2e8f0',
                                 borderTopLeftRadius: '0.5rem'
                             }}>Técnico</th>
-                            <th scope="col" style={{
+                            <th style={{
                                 padding: '0.75rem 1rem',
                                 textAlign: 'center',
                                 fontWeight: 600,
                                 color: '#475569',
                                 borderBottom: '1px solid #e2e8f0'
                             }}>Completados</th>
-                            <th scope="col" style={{
+                            <th style={{
                                 padding: '0.75rem 1rem',
                                 textAlign: 'center',
                                 fontWeight: 600,
                                 color: '#475569',
                                 borderBottom: '1px solid #e2e8f0'
                             }}>En Progreso</th>
-                            <th scope="col" style={{
+                            <th style={{
                                 padding: '0.75rem 1rem',
                                 textAlign: 'center',
                                 fontWeight: 600,

@@ -3,12 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
-import { Prisma } from '@prisma/client';
-import { isSuperAdmin } from '@/lib/authz';
+import { Prisma } from '@/generated/prisma';
 import TicketSearchFilters from './TicketSearchFilters';
 import { Button } from '@/components/ui';
-import ExportButton from '@/components/ui/ExportButton';
-import PageHeader from '@/components/PageHeader';
 import styles from './tickets.module.css';
 import TicketsClient from './TicketsClient';
 
@@ -20,21 +17,9 @@ interface TicketsPageProps {
         status?: string;
         priority?: string;
         assignedTo?: string;
-        dateFrom?: string;
-        dateTo?: string;
-        deviceType?: string;
         page?: string;
     }>;
 }
-
-export const metadata = {
-  title: 'Gestión de Tickets',
-  description: 'Administra órdenes de servicio, asigna técnicos y da seguimiento al estado de reparaciones del taller.',
-  openGraph: {
-    title: 'Gestión de Tickets | FIX Workshop',
-    description: 'Administra órdenes de servicio, asigna técnicos y da seguimiento al estado de reparaciones del taller.',
-  },
-};
 
 export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     const session = await auth();
@@ -44,17 +29,15 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     }
 
     const params = await searchParams;
-    const { search, status, priority, assignedTo, dateFrom, dateTo, deviceType, page } = params;
-    const startDate = dateFrom ? new Date(`${dateFrom}T00:00:00`) : undefined;
-    const endDate = dateTo ? new Date(`${dateTo}T23:59:59.999`) : undefined;
+    const { search, status, priority, assignedTo, page } = params;
     
     // Configuración de Paginación
     const currentPage = Number(page) || 1;
     const pageSize = 20;
     const offset = (currentPage - 1) * pageSize;
 
-    // Super Admin: evaluación centralizada y segura
-    const isSuperAdminUser = isSuperAdmin(session.user);
+    // Super Admin: adminkev@example.com puede ver TODO
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const tenantId = session.user.tenantId;
 
     // Construir el where clause base para filtros estándar
@@ -62,15 +45,13 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     if (status) where.status = status;
     if (priority) where.priority = priority;
     if (assignedTo) where.assignedTo = { email: { contains: assignedTo, mode: 'insensitive' } };
-    if (deviceType) where.deviceType = deviceType;
-    if (startDate || endDate) where.createdAt = { ...(startDate ? { gte: startDate } : {}), ...(endDate ? { lte: endDate } : {}) };
 
     let tickets;
     let totalItems = 0;
 
     if (search && search.trim().length >= 2) {
         // BÚSQUEDA INTELIGENTE (Fuzzy Search con Trigramas)
-        const db = isSuperAdminUser ? prisma : getTenantPrisma(tenantId!);
+        const db = isSuperAdmin ? prisma : getTenantPrisma(tenantId!);
         
         // 1. Obtener conteo total para paginación
         // Nota: Es una estimación rápida o conteo exacto de la query filtrada
@@ -78,15 +59,10 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
             SELECT COUNT(*)::int as total
             FROM tickets t
             LEFT JOIN customers c ON t."customerId" = c.id
-            LEFT JOIN users u ON t."assignedToId" = u.id
             WHERE 1=1
-              ${isSuperAdminUser ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
+              ${isSuperAdmin ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
               ${status ? Prisma.sql`AND t.status = ${status}::"TicketStatus"` : Prisma.empty}
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
-              ${assignedTo ? Prisma.sql`AND (u.name ILIKE ${'%' + assignedTo + '%'} OR u.email ILIKE ${'%' + assignedTo + '%'})` : Prisma.empty}
-              ${deviceType ? Prisma.sql`AND t."deviceType" = ${deviceType}` : Prisma.empty}
-              ${startDate ? Prisma.sql`AND t."createdAt" >= ${startDate}` : Prisma.empty}
-              ${endDate ? Prisma.sql`AND t."createdAt" <= ${endDate}` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
                 t."ticket_key" % ${search} OR 
@@ -107,13 +83,9 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
             LEFT JOIN customers c ON t."customerId" = c.id
             LEFT JOIN users u ON t."assignedToId" = u.id
             WHERE 1=1
-              ${isSuperAdminUser ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
+              ${isSuperAdmin ? Prisma.empty : Prisma.sql`AND t."tenantId" = ${tenantId}`}
               ${status ? Prisma.sql`AND t.status = ${status}::"TicketStatus"` : Prisma.empty}
               ${priority ? Prisma.sql`AND t.priority = ${priority}::"TicketPriority"` : Prisma.empty}
-              ${assignedTo ? Prisma.sql`AND (u.name ILIKE ${'%' + assignedTo + '%'} OR u.email ILIKE ${'%' + assignedTo + '%'})` : Prisma.empty}
-              ${deviceType ? Prisma.sql`AND t."deviceType" = ${deviceType}` : Prisma.empty}
-              ${startDate ? Prisma.sql`AND t."createdAt" >= ${startDate}` : Prisma.empty}
-              ${endDate ? Prisma.sql`AND t."createdAt" <= ${endDate}` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
                 t."ticket_key" % ${search} OR 
@@ -137,7 +109,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         // 1. Conteo
         // Si no es superadmin, getTenantPrisma ya filtra, pero findMany necesita where explicito si usamos el cliente raw, 
         // pero aquí usamos la abstracción
-        if (isSuperAdminUser) {
+        if (isSuperAdmin) {
              totalItems = await prisma.ticket.count({ where });
              tickets = await prisma.ticket.findMany({
                 where,
@@ -162,26 +134,32 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     return (
-        <div className={styles['container']}>
-            <PageHeader
-                title="Tickets"
-                subtitle="Gestiona las órdenes de servicio y su estado"
-                superAdmin={isSuperAdminUser}
-                actions={
-                    <>
-                        <ExportButton type="tickets" />
-                        <Button as={Link} href="/dashboard/tickets/create" variant="primary">
-                            + Nuevo Ticket
-                        </Button>
-                    </>
-                }
-            />
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.headerContent}>
+                    <h1>Tickets</h1>
+                    <p>Gestiona las órdenes de servicio y su estado</p>
+                </div>
+                {isSuperAdmin && (
+                    <span className={styles.superAdminBadge}>
+                        👑 Super Admin
+                    </span>
+                )}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button as="a" href="/api/export/tickets" variant="secondary">
+                        📥 Exportar CSV
+                    </Button>
+                    <Button as={Link} href="/dashboard/tickets/create" variant="primary">
+                        + Nuevo Ticket
+                    </Button>
+                </div>
+            </div>
 
             <Suspense fallback={<div>Cargando filtros...</div>}>
                 <TicketSearchFilters />
             </Suspense>
 
-            <TicketsClient data={tickets as any} isSuperAdmin={isSuperAdminUser} />
+            <TicketsClient data={tickets as any} isSuperAdmin={isSuperAdmin} />
 
             <PaginationControls
                 currentPage={currentPage}

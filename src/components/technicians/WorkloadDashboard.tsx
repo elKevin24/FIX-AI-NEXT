@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Button } from '@/components/ui';
-import PageHeader from '@/components/PageHeader';
+import { useEffect, useState } from 'react';
 import styles from './WorkloadDashboard.module.css';
 import { TechnicianCard } from './TechnicianCard';
 import { WorkloadSummary } from './WorkloadSummary';
@@ -69,50 +67,33 @@ export function WorkloadDashboard() {
   const [sortBy, setSortBy] = useState<'name' | 'workload' | 'utilization'>('utilization');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  const fetchWorkload = useCallback(async () => {
+  useEffect(() => {
+    fetchWorkload();
+  }, []);
+
+  const fetchWorkload = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/technicians/workload');
-      if (!res.ok) throw new Error('Failed to fetch workload data');
-      const workloadData = await res.json();
+      const response = await fetch('/api/technicians/workload');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch workload data');
+      }
+
+      const workloadData = await response.json();
       setData(workloadData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    let ignore = false;
-    fetch('/api/technicians/workload')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch workload data');
-        return res.json();
-      })
-      .then((workloadData) => {
-        if (!ignore) {
-          setData(workloadData);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) {
-          setError(err instanceof Error ? err.message : 'An error occurred');
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  };
 
   if (loading) {
     return (
-      <div className={styles['container']}>
-        <div className={styles['loading']} role="status" aria-live="polite">
-          <div className={styles['spinner']} aria-hidden="true"></div>
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
           <p>Loading workload data...</p>
         </div>
       </div>
@@ -121,12 +102,12 @@ export function WorkloadDashboard() {
 
   if (error) {
     return (
-      <div className={styles['container']}>
-        <div className={styles['error']} role="alert">
+      <div className={styles.container}>
+        <div className={styles.error}>
           <p>Error: {error}</p>
-          <Button type="button" variant="danger" onClick={fetchWorkload}>
+          <button onClick={fetchWorkload} className={styles.retryButton}>
             Retry
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -163,28 +144,26 @@ export function WorkloadDashboard() {
   });
 
   return (
-    <div className={styles['container']}>
-      <PageHeader
-        title="Technician Workload"
-        subtitle="Monitor and manage technician capacity and assignments"
-        actions={
-          <Button type="button" variant="secondary" onClick={fetchWorkload}>
-            🔄 Refresh
-          </Button>
-        }
-      />
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div>
+          <h1>Technician Workload</h1>
+          <p>Monitor and manage technician capacity and assignments</p>
+        </div>
+        <button onClick={fetchWorkload} className={styles.refreshButton}>
+          🔄 Refresh
+        </button>
+      </header>
 
       <WorkloadSummary summary={data.summary} />
 
-      <div className={styles['controls']}>
-        <div className={styles['filterGroup']}>
-          <label htmlFor="workload-status-filter">Filter:</label>
+      <div className={styles.controls}>
+        <div className={styles.filterGroup}>
+          <label>Filter:</label>
           <select
-            id="workload-status-filter"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className={styles['select']}
-            aria-label="Filter technicians by availability"
+            className={styles.select}
           >
             <option value="all">All Technicians</option>
             <option value="available">Available Only</option>
@@ -193,14 +172,12 @@ export function WorkloadDashboard() {
           </select>
         </div>
 
-        <div className={styles['filterGroup']}>
-          <label htmlFor="workload-sort">Sort by:</label>
+        <div className={styles.filterGroup}>
+          <label>Sort by:</label>
           <select
-            id="workload-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className={styles['select']}
-            aria-label="Sort technicians"
+            className={styles.select}
           >
             <option value="utilization">Utilization</option>
             <option value="workload">Workload</option>
@@ -209,9 +186,9 @@ export function WorkloadDashboard() {
         </div>
       </div>
 
-      <div className={styles['techniciansGrid']}>
+      <div className={styles.techniciansGrid}>
         {filteredTechnicians.length === 0 ? (
-          <div className={styles['emptyState']}>
+          <div className={styles.emptyState}>
             <p>No technicians found with the selected filters.</p>
           </div>
         ) : (

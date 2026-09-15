@@ -4,12 +4,8 @@ import { getInvoices } from '@/lib/invoice-actions';
 import InvoicesClient from './InvoicesClient';
 
 export const metadata = {
-  title: 'Facturación',
-  description: 'Gestiona facturas, pagos y notas de crédito de tu taller electromecánico.',
-  openGraph: {
-    title: 'Facturación | FIX Workshop',
-    description: 'Gestiona facturas, pagos y notas de crédito de tu taller electromecánico.',
-  },
+  title: 'Facturación | FIX-AI',
+  description: 'Gestiona las facturas y pagos de tu taller.',
 };
 
 export default async function InvoicesPage() {

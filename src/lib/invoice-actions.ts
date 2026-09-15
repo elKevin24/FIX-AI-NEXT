@@ -1,9 +1,10 @@
 'use server';
 
-import { requireTenantSession, assertNotViewer } from '@/lib/auth-context';
+import { auth } from '@/auth';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { InvoiceStatus, PaymentMethod } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { InvoiceStatus, PaymentMethod } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { registerInvoicePaymentInCash } from './cash-register-actions';
 import { getTaxRate } from './tenant-settings-actions';
 import { GenerateInvoiceSchema, RegisterPaymentSchema } from '@/lib/schemas';
@@ -29,25 +30,6 @@ export interface PaymentData {
 }
 
 // ============================================================================
-// PRIVATE HELPERS
-// ============================================================================
-
-/**
- * Generates the next sequential document number for invoice/payment series.
- * Example: 'INV-0003' -> 'INV-0004'. Returns prefix + '0001' for first document.
- */
-function computeNextSequentialNumber(lastNumber: string | null | undefined, prefix: string): string {
-  const paddingLength = 4;
-  if (!lastNumber) return `${prefix}-${'0001'}`;
-
-  const parts = lastNumber.split('-');
-  const sequenceDigits = parseInt(parts[parts.length - 1] || '0', 10);
-  const next = isNaN(sequenceDigits) ? 1 : sequenceDigits + 1;
-
-  return `${prefix}-${String(next).padStart(paddingLength, '0')}`;
-}
-
-// ============================================================================
 // INVOICE GENERATION
 // ============================================================================
 
@@ -56,14 +38,21 @@ function computeNextSequentialNumber(lastNumber: string | null | undefined, pref
  * Calcula automáticamente los costos de partes y mano de obra
  */
 export async function generateInvoiceFromTicket(rawData: InvoiceData) {
-  const { tenantId, userId, userRole, db } = await requireTenantSession();
-  await assertNotViewer(userRole, 'generar facturas');
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden generar facturas');
+  }
 
   const validatedFields = GenerateInvoiceSchema.safeParse(rawData);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
   }
   const data = validatedFields.data;
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
   // Verificar que el ticket existe y está cerrado
   const ticket = await db.ticket.findUnique({
@@ -85,7 +74,7 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
     throw new Error('Ticket no encontrado');
   }
 
-  if (ticket.tenantId !== tenantId) {
+  if (ticket.tenantId !== session.user.tenantId) {
     throw new Error('No autorizado');
   }
 
@@ -109,17 +98,12 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
     laborCost = Number(ticket.serviceTemplate.laborCost);
   }
 
-  // 2. Costo de partes (precio de venta).
-  //    Solo se facturan repuestos aprobados. El precio propuesto (priceAtProposal)
-  //    tiene prioridad, con fallback al precio actual del catálogo.
+  // 2. Costo de partes (precio de venta)
   let partsCost = 0;
   let partsMarkup = 0;
 
   for (const partUsage of ticket.partsUsed) {
-    if (partUsage.approved === false) continue;
-
-    const unitPrice = Number(partUsage.priceAtProposal ?? partUsage.part.price);
-    const partPrice = unitPrice * partUsage.quantity;
+    const partPrice = Number(partUsage.part.price) * partUsage.quantity;
     const partCost = Number(partUsage.part.cost) * partUsage.quantity;
     partsCost += partPrice;
     partsMarkup += (partPrice - partCost);
@@ -143,13 +127,18 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
   // GENERAR NÚMERO DE FACTURA
   // ========================================================================
 
+  // Obtener el último número de factura del tenant
   const lastInvoice = await db.invoice.findFirst({
-    where: { tenantId },
+    where: { tenantId: session.user.tenantId },
     orderBy: { createdAt: 'desc' },
     select: { invoiceNumber: true },
   });
 
-  const invoiceNumber = computeNextSequentialNumber(lastInvoice?.invoiceNumber, 'INV');
+  let invoiceNumber = 'INV-0001';
+  if (lastInvoice?.invoiceNumber) {
+    const lastNumber = parseInt(lastInvoice.invoiceNumber.split('-')[1]);
+    invoiceNumber = `INV-${String(lastNumber + 1).padStart(4, '0')}`;
+  }
 
   // ========================================================================
   // CREAR FACTURA
@@ -183,9 +172,9 @@ export async function generateInvoiceFromTicket(rawData: InvoiceData) {
       paymentTerms: data.paymentTerms || 'Pago al retirar equipo',
 
       // Auditoría
-      tenantId,
-      createdById: userId,
-      updatedById: userId,
+      tenantId: session.user.tenantId,
+      createdById: session.user.id,
+      updatedById: session.user.id,
     },
     include: {
       customer: true,
@@ -209,9 +198,16 @@ export async function getInvoices(filters?: {
   from?: Date;
   to?: Date;
 }) {
-  const { tenantId, db } = await requireTenantSession();
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    return [];
+  }
 
-  const where: Prisma.InvoiceWhereInput = { tenantId };
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const where: any = {
+    tenantId: session.user.tenantId,
+  };
 
   if (filters?.status) {
     where.status = filters.status;
@@ -222,13 +218,16 @@ export async function getInvoices(filters?: {
   }
 
   if (filters?.from || filters?.to) {
-    where.issuedAt = {
-      ...(filters.from ? { gte: filters.from } : {}),
-      ...(filters.to ? { lte: filters.to } : {}),
-    };
+    where.issuedAt = {};
+    if (filters.from) {
+      where.issuedAt.gte = filters.from;
+    }
+    if (filters.to) {
+      where.issuedAt.lte = filters.to;
+    }
   }
 
-  const invoices: any[] = await db.invoice.findMany({
+  const invoices = await db.invoice.findMany({
     where,
     include: {
       customer: true,
@@ -252,19 +251,20 @@ export async function getInvoices(filters?: {
     },
   });
 
-  return invoices.map((invoice) => ({
-    ...invoice,
-    laborCost: Number(invoice.laborCost),
-    partsCost: Number(invoice.partsCost),
-    partsMarkup: Number(invoice.partsMarkup),
-    subtotal: Number(invoice.subtotal),
-    taxRate: Number(invoice.taxRate),
-    taxAmount: Number(invoice.taxAmount),
-    discountAmount: Number(invoice.discountAmount),
-    total: Number(invoice.total),
-    payments: invoice.payments.map((payment: any) => ({
-      ...payment,
-      amount: Number(payment.amount),
+  // Convert Decimals to numbers for client components
+  return invoices.map((inv: any) => ({
+    ...inv,
+    laborCost: Number(inv.laborCost),
+    partsCost: Number(inv.partsCost),
+    partsMarkup: Number(inv.partsMarkup),
+    subtotal: Number(inv.subtotal),
+    taxRate: Number(inv.taxRate),
+    taxAmount: Number(inv.taxAmount),
+    discountAmount: Number(inv.discountAmount),
+    total: Number(inv.total),
+    payments: inv.payments.map((p: any) => ({
+      ...p,
+      amount: Number(p.amount),
     })),
   }));
 }
@@ -273,10 +273,18 @@ export async function getInvoices(filters?: {
  * Obtiene una factura por ID
  */
 export async function getInvoiceById(id: string) {
-  const { tenantId, db } = await requireTenantSession();
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
 
-  return db.invoice.findFirst({
-    where: { id, tenantId },
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const invoice = await db.invoice.findFirst({
+    where: {
+      id,
+      tenantId: session.user.tenantId,
+    },
     include: {
       customer: true,
       ticket: {
@@ -309,6 +317,8 @@ export async function getInvoiceById(id: string) {
       },
     },
   });
+
+  return invoice;
 }
 
 // ============================================================================
@@ -319,21 +329,31 @@ export async function getInvoiceById(id: string) {
  * Registra un pago para una factura
  */
 export async function registerPayment(rawData: PaymentData) {
-  const { tenantId, userId, userRole, db } = await requireTenantSession();
-  await assertNotViewer(userRole, 'registrar pagos');
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden registrar pagos');
+  }
 
   const validatedFields = RegisterPaymentSchema.safeParse(rawData);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
   }
   const data = validatedFields.data;
 
-  const invoice: any = await db.invoice.findUnique({
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  // Verificar que la factura existe
+  const invoice = await db.invoice.findUnique({
     where: { id: data.invoiceId },
-    include: { payments: true },
+    include: {
+      payments: true,
+    },
   });
 
-  if (!invoice || invoice.tenantId !== tenantId) {
+  if (!invoice || invoice.tenantId !== session.user.tenantId) {
     throw new Error('Factura no encontrada');
   }
 
@@ -345,9 +365,10 @@ export async function registerPayment(rawData: PaymentData) {
     throw new Error('No se puede registrar pago en una factura cancelada');
   }
 
+  // Calcular total pagado hasta ahora
   const totalPaid = invoice.payments.reduce(
-    (sum: number, payment: any) => sum + Number(payment.amount),
-    0,
+    (sum: number, p: any) => sum + Number(p.amount),
+    0
   );
 
   const remaining = Number(invoice.total) - totalPaid;
@@ -358,47 +379,63 @@ export async function registerPayment(rawData: PaymentData) {
     );
   }
 
-  // Generate sequential payment number
+  // Generar número de pago
   const lastPayment = await db.payment.findFirst({
-    where: { tenantId },
+    where: { tenantId: session.user.tenantId },
     orderBy: { createdAt: 'desc' },
     select: { paymentNumber: true },
   });
 
-  const nextPaymentNumber = computeNextSequentialNumber(lastPayment?.paymentNumber, 'PAY');
+  let paymentNumber = 'PAY-0001';
+  if (lastPayment?.paymentNumber) {
+    const lastNumber = parseInt(lastPayment.paymentNumber.split('-')[1]);
+    paymentNumber = `PAY-${String(lastNumber + 1).padStart(4, '0')}`;
+  }
 
-  const result = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+  // Crear pago en transacción
+  const result = await db.$transaction(async (tx: any) => {
+    // Crear pago
     const payment = await tx.payment.create({
       data: {
-        paymentNumber: nextPaymentNumber,
+        paymentNumber,
         invoiceId: data.invoiceId,
         amount: new Prisma.Decimal(data.amount),
         paymentMethod: data.paymentMethod,
         transactionRef: data.transactionRef,
         notes: data.notes,
-        tenantId,
-        receivedById: userId,
+        tenantId: session.user.tenantId,
+        receivedById: session.user.id,
       },
     });
 
+    // Calcular nuevo total pagado
     const newTotalPaid = totalPaid + data.amount;
     const isFullyPaid = newTotalPaid >= Number(invoice.total);
 
+    // Actualizar estado de factura
     const updatedInvoice = await tx.invoice.update({
       where: { id: data.invoiceId },
       data: {
         status: isFullyPaid ? InvoiceStatus.PAID : InvoiceStatus.PENDING,
         paidAt: isFullyPaid ? new Date() : invoice.paidAt,
-        updatedById: userId,
+        updatedById: session.user.id,
       },
-      include: { payments: true, customer: true, ticket: true },
+      include: {
+        payments: true,
+        customer: true,
+        ticket: true,
+      },
     });
 
-    // IMPORTANT: Must propagate errors to rollback the transaction.
-    // A payment cannot be considered successful if the cash register entry fails —
-    // that would create a financial inconsistency (invoice PAID, cash not updated).
+    // Si el pago es en efectivo, registrar en caja registradora
     if (data.paymentMethod === PaymentMethod.CASH) {
-      await registerInvoicePaymentInCash(data.invoiceId, data.amount);
+      try {
+        await registerInvoicePaymentInCash(data.invoiceId, data.amount);
+      } catch (error) {
+        console.error('Error al registrar pago en caja:', error);
+        // No lanzamos error para no revertir el pago de la factura, 
+        // pero idealmente deberíamos informar al usuario.
+      }
     }
 
     return { payment, invoice: updatedInvoice };
@@ -414,15 +451,24 @@ export async function registerPayment(rawData: PaymentData) {
  * Cancela una factura (solo si no tiene pagos)
  */
 export async function cancelInvoice(invoiceId: string, reason: string) {
-  const { tenantId, userId, userRole, db } = await requireTenantSession();
-  await assertNotViewer(userRole, 'cancelar facturas');
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+  if (session.user.role === 'VIEWER') {
+    throw new Error('Los observadores no pueden cancelar facturas');
+  }
+
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
   const invoice = await db.invoice.findUnique({
     where: { id: invoiceId },
-    include: { payments: true },
+    include: {
+      payments: true,
+    },
   });
 
-  if (!invoice || invoice.tenantId !== tenantId) {
+  if (!invoice || invoice.tenantId !== session.user.tenantId) {
     throw new Error('Factura no encontrada');
   }
 
@@ -439,7 +485,7 @@ export async function cancelInvoice(invoiceId: string, reason: string) {
       notes: invoice.notes
         ? `${invoice.notes}\n\nCANCELADA: ${reason}`
         : `CANCELADA: ${reason}`,
-      updatedById: userId,
+      updatedById: session.user.id,
     },
   });
 
@@ -457,45 +503,70 @@ export async function cancelInvoice(invoiceId: string, reason: string) {
  * Obtiene estadísticas financieras del tenant
  */
 export async function getFinancialStats(filters?: { from?: Date; to?: Date }) {
-  const { tenantId, db } = await requireTenantSession();
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    return null;
+  }
 
-  const where: Prisma.InvoiceWhereInput = {
-    tenantId,
+  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+
+  const where: any = {
+    tenantId: session.user.tenantId,
     status: { not: InvoiceStatus.CANCELLED },
   };
 
   if (filters?.from || filters?.to) {
-    where.issuedAt = {
-      ...(filters.from ? { gte: filters.from } : {}),
-      ...(filters.to ? { lte: filters.to } : {}),
-    };
+    where.issuedAt = {};
+    if (filters.from) {
+      where.issuedAt.gte = filters.from;
+    }
+    if (filters.to) {
+      where.issuedAt.lte = filters.to;
+    }
   }
 
-  const invoices: any[] = await db.invoice.findMany({
+  const invoices = await db.invoice.findMany({
     where,
     include: {
       payments: true,
     },
   });
 
-  const totalInvoiced = invoices.reduce((sum: number, invoice) => sum + Number(invoice.total), 0);
+  // Calcular métricas
+  const totalInvoiced = invoices.reduce(
+    (sum: number, inv: any) => sum + Number(inv.total),
+    0
+  );
 
-  const totalPaid = invoices.reduce((sum: number, invoice) => {
-    const paid = invoice.payments.reduce((s: number, payment: any) => s + Number(payment.amount), 0);
+  const totalPaid = invoices.reduce((sum: number, inv: any) => {
+    const paid = inv.payments.reduce((s: number, p: any) => s + Number(p.amount), 0);
     return sum + paid;
   }, 0);
 
   const totalPending = totalInvoiced - totalPaid;
 
-  const totalLaborIncome = invoices.reduce((sum: number, invoice) => sum + Number(invoice.laborCost), 0);
-  const totalPartsIncome = invoices.reduce((sum: number, invoice) => sum + Number(invoice.partsCost), 0);
-  const totalPartsProfit = invoices.reduce((sum: number, invoice) => sum + Number(invoice.partsMarkup), 0);
+  const totalLaborIncome = invoices.reduce(
+    (sum: number, inv: any) => sum + Number(inv.laborCost),
+    0
+  );
+
+  const totalPartsIncome = invoices.reduce(
+    (sum: number, inv: any) => sum + Number(inv.partsCost),
+    0
+  );
+
+  const totalPartsProfit = invoices.reduce(
+    (sum: number, inv: any) => sum + Number(inv.partsMarkup),
+    0
+  );
 
   const invoicesByStatus = {
-    paid: invoices.filter((invoice) => invoice.status === InvoiceStatus.PAID).length,
-    pending: invoices.filter((invoice) => invoice.status === InvoiceStatus.PENDING).length,
-    overdue: invoices.filter((invoice) => invoice.status === InvoiceStatus.OVERDUE).length,
-    draft: invoices.filter((invoice) => invoice.status === InvoiceStatus.DRAFT).length,
+    paid: invoices.filter((inv: any) => inv.status === InvoiceStatus.PAID).length,
+    pending: invoices.filter((inv: any) => inv.status === InvoiceStatus.PENDING)
+      .length,
+    overdue: invoices.filter((inv: any) => inv.status === InvoiceStatus.OVERDUE)
+      .length,
+    draft: invoices.filter((inv: any) => inv.status === InvoiceStatus.DRAFT).length,
   };
 
   return {

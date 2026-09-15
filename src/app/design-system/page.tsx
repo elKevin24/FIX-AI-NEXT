@@ -1,11 +1,5 @@
-import { Button, Card, CardHeader, CardTitle, CardBody, Badge, Input, Textarea, Select, Alert, Skeleton, FilterGroup, ThemeSwitcher } from '@/components/ui';
+import { Button, Card, CardHeader, CardTitle, CardBody, Badge, Input, Textarea, Select, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
-
-export const metadata = {
-  title: 'Design System',
-  description: 'Guía interna de componentes y estilos del sistema.',
-  robots: { index: false, follow: false },
-};
 
 export default function DesignSystemPage() {
   const statusOptions: SelectOption[] = [
@@ -16,16 +10,11 @@ export default function DesignSystemPage() {
 
   return (
     <div className="container" style={{ paddingTop: 'var(--spacing-8)', paddingBottom: 'var(--spacing-8)' }}>
-      <header style={{ marginBottom: 'var(--spacing-12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1>Design System</h1>
-          <p className="text-secondary" style={{ fontSize: 'var(--font-size-lg)', marginTop: 'var(--spacing-4)' }}>
-            FIX-AI NEXT - Professional Multi-Tenant Workshop Management
-          </p>
-        </div>
-        <div>
-          <ThemeSwitcher placement="bottom" />
-        </div>
+      <header style={{ marginBottom: 'var(--spacing-12)' }}>
+        <h1>Design System</h1>
+        <p className="text-secondary" style={{ fontSize: 'var(--font-size-lg)', marginTop: 'var(--spacing-4)' }}>
+          FIX-AI NEXT - Professional Multi-Tenant Workshop Management
+        </p>
       </header>
 
       {/* Color Palette */}
@@ -43,25 +32,6 @@ export default function DesignSystemPage() {
                   backgroundColor: `var(--color-primary-${shade})`,
                   borderRadius: 'var(--radius-base)',
                   marginBottom: 'var(--spacing-2)',
-                }}
-              />
-              <div style={{ fontSize: 'var(--font-size-xs)' }}>{shade}</div>
-            </div>
-          ))}
-        </div>
-
-        <h3 style={{ marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-xl)' }}>Grays / Neutrals</h3>
-        <div className="flex gap-4" style={{ marginBottom: 'var(--spacing-8)', flexWrap: 'wrap' }}>
-          {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((shade) => (
-            <div key={shade} style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  backgroundColor: `var(--color-gray-${shade})`,
-                  borderRadius: 'var(--radius-base)',
-                  marginBottom: 'var(--spacing-2)',
-                  border: '1px solid var(--color-border-light)'
                 }}
               />
               <div style={{ fontSize: 'var(--font-size-xs)' }}>{shade}</div>
@@ -126,7 +96,7 @@ export default function DesignSystemPage() {
       <section style={{ marginBottom: 'var(--spacing-12)' }}>
         <h2 style={{ marginBottom: 'var(--spacing-6)' }}>Typography</h2>
         <div style={{ marginBottom: 'var(--spacing-8)' }}>
-          <h2>Heading 1 - The quick brown fox</h2>
+          <h1>Heading 1 - The quick brown fox</h1>
           <h2>Heading 2 - The quick brown fox</h2>
           <h3>Heading 3 - The quick brown fox</h3>
           <h4>Heading 4 - The quick brown fox</h4>
@@ -223,20 +193,6 @@ export default function DesignSystemPage() {
             helper="Choose the current status of the ticket"
           />
 
-          <Select
-            label="Priority (Disabled)"
-            options={[{value: 'high', label: 'High'}]}
-            placeholder="Select priority"
-            disabled
-          />
-
-          <Select
-            label="Assigned To (Error)"
-            options={[{value: 'john', label: 'John Doe'}]}
-            placeholder="Select technician"
-            error="Please select a technician"
-          />
-
           <Textarea
             label="Description"
             placeholder="Describe the issue..."
@@ -244,82 +200,6 @@ export default function DesignSystemPage() {
             rows={4}
           />
         </div>
-      </section>
-
-      {/* Micro-animations & Feedback */}
-      <section style={{ marginBottom: 'var(--spacing-12)' }}>
-        <h2 style={{ marginBottom: 'var(--spacing-6)' }}>Micro-animations & Feedback</h2>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-6)' }}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Button Loading State</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <div className="flex gap-4">
-                <Button variant="primary" isLoading>Saving...</Button>
-                <Button variant="outline" isLoading>Loading</Button>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Skeleton Loader (Shimmer)</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <Skeleton variant="circular" width={48} height={48} />
-                <div style={{ flex: 1 }}>
-                  <Skeleton variant="text" width="60%" />
-                  <Skeleton variant="text" width="40%" />
-                </div>
-              </div>
-              <div style={{ marginTop: '1rem' }}>
-                <Skeleton variant="rectangular" height={80} />
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-      </section>
-
-      {/* Cognitive Grouping (Miller's Law) */}
-      <section style={{ marginBottom: 'var(--spacing-12)' }}>
-        <h2 style={{ marginBottom: 'var(--spacing-6)' }}>Cognitive Grouping (Miller's Law)</h2>
-        <p className="text-secondary" style={{ marginBottom: 'var(--spacing-6)' }}>
-          En lugar de mostrar un formulario masivo, agrupamos los inputs en bloques de 3 a 5 elementos lógicos.
-        </p>
-        <Card>
-          <CardBody>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
-              
-              <FilterGroup 
-                title="1. Búsqueda Principal" 
-                description="Filtros más utilizados para encontrar tickets rápidamente."
-              >
-                <Input label="Término de búsqueda" placeholder="ID, cliente, dispositivo..." />
-                <Select label="Estado del Ticket" options={statusOptions} placeholder="Todos" />
-                <Select label="Prioridad" options={[{value: 'high', label: 'Alta'}, {value: 'low', label: 'Baja'}]} placeholder="Todas" />
-              </FilterGroup>
-
-              <FilterGroup 
-                title="2. Rango de Fechas" 
-                description="Delimita la búsqueda en el tiempo."
-              >
-                <Input type="date" label="Fecha Desde" />
-                <Input type="date" label="Fecha Hasta" />
-              </FilterGroup>
-
-              <FilterGroup 
-                title="3. Detalles Operativos" 
-                description="Filtros adicionales para asignar responsabilidades."
-              >
-                <Input label="Técnico asignado" placeholder="Nombre o correo" />
-                <Select label="Dispositivo" options={[{value: 'pc', label: 'PC'}, {value: 'mobile', label: 'Móvil'}]} placeholder="Cualquiera" />
-              </FilterGroup>
-
-            </div>
-          </CardBody>
-        </Card>
       </section>
 
       {/* Cards */}

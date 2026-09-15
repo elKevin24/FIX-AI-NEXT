@@ -1,8 +1,9 @@
 /* SimpleTicketForm - Minimalista y Compacto */
 
 .container {
-    min-height: auto;
+    min-height: 100vh;
     padding: 0 0.5rem 2rem;
+    /* Reduced padding */
     position: relative;
     overflow-x: hidden;
 }
@@ -62,22 +63,18 @@
 
 /* Contenido Principal */
 .content {
-    max-width: 1400px;
+    max-width: 800px;
+    /* Reduced max-width */
     margin: 0 auto;
-    width: 100%;
     padding: 0;
 }
 
 /* Header */
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.5rem;
-    margin-top: -1.5rem;
+    text-align: center;
     margin-bottom: 0.5rem;
-    flex-wrap: wrap;
+    padding: 0;
+    margin-top: -1.5rem; /* Zero Waste Alignment */
     position: relative;
     z-index: 10;
     pointer-events: none;
@@ -87,24 +84,13 @@
     pointer-events: auto;
 }
 
-.headerContent {
-    display: flex;
-    flex-direction: column;
-}
-
 .title {
-    font-size: 1.75rem;
+    font-size: 1.4rem;
+    /* Reduced font size */
     font-weight: 700;
     color: var(--color-text-primary);
     margin: 0;
     letter-spacing: -0.02em;
-}
-
-.subtitle {
-    color: var(--color-text-tertiary);
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 500;
 }
 
 /* Form Layout */
@@ -355,7 +341,7 @@
 
     .content {
         max-width: 900px;
-        padding-top: 2rem;
+        /* Slightly wider on desktop */
     }
 
     .header {
@@ -365,6 +351,7 @@
 
     .title {
         font-size: 1.75rem;
+        /* Slightly smaller */
     }
 
     .form {

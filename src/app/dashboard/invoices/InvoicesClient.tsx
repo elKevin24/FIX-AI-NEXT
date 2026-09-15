@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataTable, EmptyState, Button } from '@/components/ui';
-import { Badge } from '@/components/ui';
+import { DataTable } from '@/components/ui/DataTable';
+import { Badge, Button } from '@/components/ui';
 import ExportButton from '@/components/ui/ExportButton';
-import PageHeader from '@/components/PageHeader';
 import styles from './invoices.module.css';
 
 interface Invoice {
@@ -26,22 +25,6 @@ interface Invoice {
 
 interface InvoicesClientProps {
   initialInvoices: Invoice[];
-}
-
-function InvoiceIcon() {
-  return (
-    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  );
-}
-
-function FilterIcon() {
-  return (
-    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-    </svg>
-  );
 }
 
 export default function InvoicesClient({ initialInvoices }: InvoicesClientProps) {
@@ -139,50 +122,50 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
     },
   ];
 
-  const hasActiveFilters = filterStatus !== 'all' || searchTerm !== '';
-
   return (
-    <div className={styles['container']}>
-      <PageHeader
-        title="Facturación"
-        subtitle="Consulta y gestiona las facturas generadas a partir de tickets."
-        actions={<ExportButton type="invoices" />}
-      />
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1>Facturación</h1>
+          <p>Consulta y gestiona las facturas generadas a partir de tickets.</p>
+        </div>
+        <ExportButton type="invoices" />
+      </header>
 
-      <section className={styles['statsGrid']}>
-        <div className={styles['statCard']}>
-          <span className={styles['statLabel']}>Total Facturado</span>
-          <span className={styles['statValue']}>{formatCurrency(stats.total)}</span>
+      <section className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Total Facturado</span>
+          <span className={styles.statValue}>{formatCurrency(stats.total)}</span>
         </div>
-        <div className={styles['statCard']}>
-          <span className={styles['statLabel']}>Cobrado</span>
-          <span className={`${styles['statValue']} ${styles['valuePaid']}`}>{formatCurrency(stats.paid)}</span>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Cobrado</span>
+          <span className={`${styles.statValue} ${styles.valuePaid}`}>{formatCurrency(stats.paid)}</span>
         </div>
-        <div className={styles['statCard']}>
-          <span className={styles['statLabel']}>Pendiente</span>
-          <span className={`${styles['statValue']} ${styles['valuePending']}`}>{formatCurrency(stats.pending)}</span>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Pendiente</span>
+          <span className={`${styles.statValue} ${styles.valuePending}`}>{formatCurrency(stats.pending)}</span>
         </div>
-        <div className={styles['statCard']}>
-          <span className={styles['statLabel']}>Cant. Facturas</span>
-          <span className={styles['statValue']}>{stats.count}</span>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Cant. Facturas</span>
+          <span className={styles.statValue}>{stats.count}</span>
         </div>
       </section>
 
-      <div className={styles['filters']}>
-        <div className={styles['filterGroup']}>
+      <div className={styles.filters}>
+        <div className={styles.filterGroup}>
           <label>Buscar</label>
           <input 
             type="text" 
             placeholder="No. Factura o Cliente..." 
-            className={styles['input']}
+            className={styles.input}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className={styles['filterGroup']}>
+        <div className={styles.filterGroup}>
           <label>Estado</label>
           <select 
-            className={styles['select']}
+            className={styles.select}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -194,26 +177,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
         </div>
       </div>
 
-      {invoices.length === 0 ? (
-        <EmptyState
-          icon={<InvoiceIcon />}
-          title="No hay facturas"
-          description="Aún no se han generado facturas. Las facturas se crean automáticamente al facturar tickets."
-        />
-      ) : hasActiveFilters && filteredInvoices.length === 0 ? (
-        <EmptyState
-          icon={<FilterIcon />}
-          title="Sin resultados"
-          description="No se encontraron facturas con los filtros aplicados. Intenta ajustar la búsqueda o los filtros."
-          action={
-            <Button variant="secondary" onClick={() => { setFilterStatus('all'); setSearchTerm(''); }}>
-              Limpiar Filtros
-            </Button>
-          }
-        />
-      ) : (
-        <DataTable columns={columns} data={filteredInvoices} />
-      )}
+      <DataTable columns={columns} data={filteredInvoices} />
     </div>
   );
 }

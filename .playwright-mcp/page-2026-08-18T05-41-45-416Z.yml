@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - link "← Back to Home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: ←
+        - text: Back to Home
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading "FIX Workshop" [level=1] [ref=e12]
+          - paragraph [ref=e13]: Bienvenido a tu sistema de gestión
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: Correo electrónico
+            - textbox "Correo electrónico" [ref=e18]:
+              - /placeholder: admin@example.com
+          - generic [ref=e19]:
+            - generic [ref=e20]:
+              - generic [ref=e21]: Contraseña
+              - link "¿Olvidaste tu contraseña?" [ref=e22] [cursor=pointer]:
+                - /url: "#"
+            - generic [ref=e23]:
+              - textbox "Contraseña" [ref=e24]:
+                - /placeholder: ••••••••
+              - button "Mostrar contraseña" [ref=e25] [cursor=pointer]
+          - button "Iniciar sesión" [ref=e28] [cursor=pointer]
+        - generic [ref=e32]: O continúa con
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: "Credenciales de demostración:"
+          - generic [ref=e37]:
+            - generic [ref=e38] [cursor=pointer]:
+              - paragraph [ref=e39]: Admin
+              - paragraph [ref=e40]: admin@example.com
+              - paragraph [ref=e41]: password123
+            - generic [ref=e42] [cursor=pointer]:
+              - paragraph [ref=e43]: Técnico
+              - paragraph [ref=e44]: tech@example.com
+              - paragraph [ref=e45]: password123
+        - paragraph [ref=e46]:
+          - text: ¿Problemas para acceder?
+          - link "Contacta soporte" [ref=e47] [cursor=pointer]:
+            - /url: "#"
+  - button "Open Next.js Dev Tools" [ref=e53] [cursor=pointer]

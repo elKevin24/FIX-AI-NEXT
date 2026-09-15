@@ -9,73 +9,6 @@
     width: 100%;
 }
 
-/* ========== PARTS FILTERS - Glass Card ========== */
-.inventoryFilters { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-
-.inventoryFilterSection {
-  padding: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  border-radius: 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm);
-}
-
-.filterHeading {
-  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-  margin-bottom: 0.75rem; color: var(--color-text-primary); font-weight: 700;
-}
-.filterHeading h2 { margin: 0; font-size: 0.95rem; letter-spacing: -0.01em; }
-.filterHeading span { color: var(--color-text-tertiary); font-size: 0.8125rem; font-weight: 500; }
-
-.inventoryFilterGrid {
-  display: grid; gap: 0.75rem 1rem; align-items: end; width: 100%;
-}
-
-@media (min-width: 640px) and (max-width: 1023px) {
-  .inventoryFilterGrid { grid-template-columns: 1fr 1fr; }
-}
-@media (min-width: 1024px) {
-  .inventoryFilterGrid { display: flex; flex-direction: row; align-items: flex-end; gap: 1rem; }
-  .inventoryFilterGrid > *:first-child { flex: 2; min-width: 240px; }
-}
-
-.stockToggle {
-  display: flex; min-height: 2.5rem; align-items: center; gap: 0.5rem;
-  color: var(--color-text-primary); font-size: 0.875rem; font-weight: 600;
-  white-space: nowrap;
-}
-.stockToggle input { width: 1.125rem; height: 1.125rem; accent-color: var(--color-primary-600); }
-
-/* ========== ADVANCED FILTERS ========== */
-.inventoryAdvancedFilters {
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--color-border-light);
-  border-radius: 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm);
-  border-top: 1px solid var(--color-border-light);
-}
-.inventoryAdvancedFilters summary {
-  cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--color-text-primary);
-  list-style: none; padding: 0.25rem 0;
-}
-.inventoryAdvancedFilters summary::-webkit-details-marker { display: none; }
-.inventoryAdvancedFilters summary:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; border-radius: 0.25rem; }
-
-/* ========== ACTIVE FILTER BADGES ========== */
-.activeFilterBadges {
-  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem;
-}
-.activeFilterBadge {
-  border-radius: 999px; padding: 0.25rem 0.625rem;
-  background: var(--color-primary-50); color: var(--color-primary-700);
-  border: 1px solid var(--color-primary-200); font-size: 0.75rem; font-weight: 700;
-}
-
 /* ========== HEADER ========== */
 
 .header {
@@ -97,10 +30,10 @@
 
 .headerContent h1 {
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-primary);
     margin: 0 0 0.375rem 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }
 
 .lowStockWarning {
@@ -312,92 +245,4 @@
     .table {
         min-width: 800px;
     }
-}
-
-.filters {
-    margin-bottom: 2rem;
-}
-.filtersCard {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-.filtersCardBody {
-    padding: 1.5rem;
-}
-.filtersRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-.filterGroup {
-    flex: 1;
-    min-width: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.filterGroupTitle {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--color-border-light);
-    padding-bottom: 0.5rem;
-    margin: 0;
-}
-.filterGroupContent {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.flexRow {
-    display: flex;
-    gap: 0.75rem;
-}
-.flexRow > * {
-    flex: 1;
-}
-.filtersActions {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-top: 1px solid var(--color-border-light);
-    padding-top: 1rem;
-    margin-top: 1rem;
-    gap: 1rem;
-}
-.activeFilters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    flex: 1;
-}
-.filterBadge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-primary-700);
-    background-color: var(--color-primary-50);
-    border: 1px solid var(--color-primary-200);
-    border-radius: 9999px;
-}
-.actionButtons {
-    display: flex;
-    gap: 0.75rem;
-    flex-shrink: 0;
-}
-.stockToggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--color-gray-700);
-    cursor: pointer;
-    margin-top: 0.5rem;
 }

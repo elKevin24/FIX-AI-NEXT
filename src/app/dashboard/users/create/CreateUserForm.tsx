@@ -2,14 +2,13 @@
 
 import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
 import { Input, Select, Button, Alert } from '@/components/ui';
 import type { SelectOption } from '@/components/ui';
 import styles from '@/components/ui/Form.module.css';
 import { createUser } from '@/lib/user-actions';
 import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { ROLE_LABELS, ROLE_DESCRIPTIONS, getSelectableRoles } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/generated/prisma';
 
 interface CreateUserFormProps {
   currentUserRole?: UserRole;
@@ -17,7 +16,6 @@ interface CreateUserFormProps {
 
 export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUserFormProps) {
   const router = useRouter();
-  const { addToast } = useToast();
   const [state, formAction, isPending] = useActionState(createUser, {
     success: false,
     message: '',
@@ -35,8 +33,8 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
   useEffect(() => {
     if (state.success) {
       // Show temporary password if generated
-      if (state.data?.['temporaryPassword']) {
-        addToast(`Contraseña temporal: ${state.data['temporaryPassword']}`, 'SUCCESS', 'Usuario creado exitosamente');
+      if (state.data?.temporaryPassword) {
+        alert(`Usuario creado exitosamente!\n\nContraseña temporal: ${state.data.temporaryPassword}\n\nEl usuario deberá cambiarla en su primer inicio de sesión.`);
       }
       router.push('/dashboard/users');
       router.refresh();
@@ -58,7 +56,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
           type="text"
           placeholder="Juan"
           required
-          error={state.errors?.['firstName']?.[0]}
+          error={state.errors?.firstName?.[0]}
         />
 
         <Input
@@ -67,7 +65,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
           type="text"
           placeholder="Pérez"
           required
-          error={state.errors?.['lastName']?.[0]}
+          error={state.errors?.lastName?.[0]}
         />
       </div>
 
@@ -78,7 +76,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         placeholder="juan.perez@ejemplo.com"
         helper="El usuario iniciará sesión con este correo"
         required
-        error={state.errors?.['email']?.[0]}
+        error={state.errors?.email?.[0]}
       />
 
       <div className="my-4">
@@ -107,7 +105,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mínimo 8 caracteres"
-            error={state.errors?.['password']?.[0]}
+            error={state.errors?.password?.[0]}
           />
           <div className="mt-2 text-xs text-gray-500 space-y-1">
             <p className="font-medium">Requisitos de contraseña:</p>
@@ -141,7 +139,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         </ul>
       </div>
 
-      <div className={styles['actions']}>
+      <div className={styles.actions}>
         <Button
           type="button"
           variant="secondary"

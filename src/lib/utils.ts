@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/generated/prisma';
 
 /**
  * Convierte objetos Prisma.Decimal de Prisma a números simples de JavaScript.

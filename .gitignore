@@ -42,24 +42,10 @@ next-env.d.ts
 *.log
 dev.log
 
-# Playwright
-/playwright-report/
-/test-results/
-# Ignorar solo la carpeta de Playwright MCP
-.playwright-mcp/
-
-# Temp / utility scripts
-check-db.ts
-test-auth.ts
-test-auth2.ts
-test-db.ts
-src/app/api/temp-users/
-
 # Tool-specific files
 .claude/
 
 .gemini/
 gha-creds-*.json
 /generated/
-src/generated/
 *.txt

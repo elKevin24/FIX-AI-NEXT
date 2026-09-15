@@ -1,12 +1,11 @@
 import { auth } from "@/auth";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
-import { isSuperAdmin } from "@/lib/authz";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
 import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
-import PageHeader from '@/components/PageHeader';
+import GlobalSearch from '@/components/GlobalSearch';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
@@ -22,23 +21,12 @@ enum TicketPriority {
 
 enum TicketStatus {
   OPEN = 'OPEN',
-  WAITING_APPROVAL = 'WAITING_APPROVAL',
   IN_PROGRESS = 'IN_PROGRESS',
   WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
   RESOLVED = 'RESOLVED',
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
-  REJECTED = 'REJECTED',
 }
-
-export const metadata = {
-  title: 'Panel Principal',
-  description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
-  openGraph: {
-    title: 'Dashboard | FIX Workshop',
-    description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
-  },
-};
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -47,9 +35,9 @@ export default async function DashboardPage() {
         redirect('/login');
     }
 
-    const isSuperAdminUser = isSuperAdmin(session.user);
+    const isSuperAdmin = session.user.email === 'adminkev@example.com';
     const tenantId = session.user.tenantId;
-    const tenantPrisma = getTenantPrisma(tenantId, session.user.id);
+    const tenantPrisma = getTenantPrisma(tenantId);
 
     // Fetch all statistics in parallel
     const [
@@ -64,11 +52,11 @@ export default async function DashboardPage() {
         financialStats,
         posStats,
     ] = await Promise.all([
-        // Active tickets (OPEN + WAITING_APPROVAL + IN_PROGRESS)
+        // Active tickets (OPEN + IN_PROGRESS)
         tenantPrisma.ticket.count({
             where: {
                 tenantId, // Explicitly kept as count() is not intercepted by current wrapper
-                status: { in: [TicketStatus.OPEN, TicketStatus.WAITING_APPROVAL, TicketStatus.IN_PROGRESS] },
+                status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] },
             },
         }),
         // Tickets waiting for parts
@@ -105,7 +93,7 @@ export default async function DashboardPage() {
             where: {
                 // tenantId auto-injected by findMany wrapper
                 priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
-                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED] },
+                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
             },
             include: {
                 customer: {
@@ -197,7 +185,7 @@ export default async function DashboardPage() {
         ).length;
 
         const inProgress = tech.assignedTickets.filter((t: any) =>
-            t.status === TicketStatus.OPEN || t.status === TicketStatus.WAITING_APPROVAL || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
+            t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
         ).length;
 
         // Calculate average days to complete
@@ -227,98 +215,107 @@ export default async function DashboardPage() {
     });
 
     return (
-        <div className={styles['dashboard']}>
-            <PageHeader
-                title="Dashboard"
-                subtitle={`Bienvenido de vuelta, ${session?.user?.name || session?.user?.email}`}
-                search
-                superAdmin={isSuperAdminUser}
-            />
+        <div className={styles.dashboard}>
+            <header className={styles.header}>
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Bienvenido de vuelta, {session?.user?.name || session?.user?.email}</p>
+                </div>
+                {isSuperAdmin && (
+                    <span className={styles.superAdminBadge}>👑 Super Admin</span>
+                )}
+            </header>
 
-            
+            <div className={styles.searchBar}>
+                <GlobalSearch />
+            </div>
+
             {/* Stats Grid */}
-            <div className={styles['statsGrid']}>
+            <div className={styles.statsGrid}>
                 <StatCard 
                     title="Tickets Activos"
                     value={activeTickets}
                     label="Abiertos + En Progreso"
                     icon="📊"
-                    variant="info"
+                    iconBgColor="#dbeafe"
+                    iconColor="#1e40af"
                 />
                 <StatCard 
                     title="Esperando Repuestos"
                     value={pendingParts}
                     label="Inventario pendiente"
                     icon="⏳"
-                    variant="warning"
+                    iconBgColor="#fef3c7"
+                    iconColor="#92400e"
                 />
                 <StatCard 
                     title="Completados Hoy"
                     value={completedToday}
                     label="Tickets resueltos"
                     icon="✓"
-                    variant="success"
+                    iconBgColor="#d1fae5"
+                    iconColor="#065f46"
                 />
                 <StatCard 
                     title="Total Clientes"
                     value={totalCustomers}
                     label="En base de datos"
                     icon="👥"
-                    variant="default"
+                    iconBgColor="#e0e7ff"
+                    iconColor="#3730a3"
                 />
             </div>
 
-            
             {/* Financial Stats Grid */}
-            <div className={styles['statsGrid']}>
+            <div className={styles.statsGrid}>
                 <StatCard 
                     title="Ingresos Totales"
                     value={formatCurrency(totalIncome)}
                     label="Facturación + POS"
-                    
-                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                    variant="success"
+                    icon="💰"
+                    iconBgColor="#dcfce7"
+                    iconColor="#166534"
                 />
                 <StatCard 
                     title="Cuentas por Cobrar"
                     value={formatCurrency(pendingCollection)}
                     label="Facturas pendientes"
-                    
-                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>}
-                    variant="danger"
+                    icon="📋"
+                    iconBgColor="#fef2f2"
+                    iconColor="#991b1b"
                 />
                 <StatCard 
                     title="Ventas POS"
                     value={posStats?.salesCount || 0}
                     label="Ventas directas"
-                    
-                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 5.43-11.45L2 6"></path></svg>}
-                    variant="info"
+                    icon="🛒"
+                    iconBgColor="#f0f9ff"
+                    iconColor="#075985"
                 />
                 <StatCard 
                     title="Mano de Obra"
                     value={formatCurrency(financialStats?.totalLaborIncome || 0)}
                     label="Ingresos por servicio"
-                    
-                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>}
-                    variant="warning"
+                    icon="🔧"
+                    iconBgColor="#faf5ff"
+                    iconColor="#6b21a8"
                 />
             </div>
 
             {/* Charts and Widgets Grid */}
-            <div className={styles['chartsGrid']}>
+            <div className={styles.chartsGrid}>
                 {/* Tickets by Status */}
-                <div className={styles['chartCard']}>
-                    <h2 className={styles['chartTitle']}>Tickets por Estado</h2>
+                <div className={styles.chartCard}>
+                    <h2 className={styles.chartTitle}>Tickets por Estado</h2>
                     <TicketsByStatusChart data={statusChartData} />
                 </div>
 
                 {/* Urgent Tickets */}
-                <div className={styles['chartCard']}>
-                    <h2 className={styles['chartTitle']}>
+                <div className={styles.chartCard}>
+                    <h2 className={styles.chartTitle}>
                         Tickets Urgentes
                         {urgentTickets.length > 0 && (
-                            <span className={styles['urgentBadge']}>{urgentTickets.length}</span>
+                            <span className={styles.urgentBadge}>{urgentTickets.length}</span>
                         )}
                     </h2>
                     <UrgentTicketsWidget tickets={urgentTickets} />
@@ -327,16 +324,16 @@ export default async function DashboardPage() {
 
             {/* Technician Metrics */}
             {technicianMetrics.length > 0 && (
-                <div className={styles['fullWidthCard']}>
-                    <h2 className={styles['chartTitle']}>Productividad por Técnico</h2>
+                <div className={styles.fullWidthCard}>
+                    <h2 className={styles.chartTitle}>Productividad por Técnico</h2>
                     <TechnicianMetrics data={technicianMetrics} />
                 </div>
             )}
 
             {/* Recent Tickets */}
             {recentTickets.length > 0 && (
-                <div className={styles['fullWidthCard']}>
-                    <h2 className={styles['chartTitle']}>Tickets Recientes</h2>
+                <div className={styles.fullWidthCard}>
+                    <h2 className={styles.chartTitle}>Tickets Recientes</h2>
                     <RecentTicketsTable data={recentTickets as any} />
                 </div>
             )}

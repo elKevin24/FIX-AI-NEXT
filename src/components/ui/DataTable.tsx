@@ -16,7 +16,6 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
     onRowClick?: (row: TData) => void;
     isLoading?: boolean;
-    caption?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -24,11 +23,9 @@ export function DataTable<TData, TValue>({
     data,
     onRowClick,
     isLoading = false,
-    caption,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
 
-    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -41,40 +38,36 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className={styles['wrapper']}>
-            <div className={styles['tableContainer']}>
-                <table className={styles['table']}>
-                    {caption && <caption className="sr-only">{caption}</caption>}
+        <div className={styles.wrapper}>
+            <div className={styles.tableContainer}>
+                <table className={styles.table}>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className={styles['headerRow']}>
-                                {headerGroup.headers.map((header) => {
-                                    const meta = header.column.columnDef.meta as any;
-                                    return (
-                                        <th scope="col" 
-                                            key={header.id} 
-                                            className={`${styles['headerCell']} ${meta?.className || ''}`}
-                                            onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                                            style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
-                                        >
-                                            <div className={styles['headerContent']}>
-                                                {flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                                {header.column.getIsSorted() === 'asc' && ' 🔼'}
-                                                {header.column.getIsSorted() === 'desc' && ' 🔽'}
-                                            </div>
-                                        </th>
-                                    );
-                                })}
+                            <tr key={headerGroup.id} className={styles.headerRow}>
+                                {headerGroup.headers.map((header) => (
+                                    <th 
+                                        key={header.id} 
+                                        className={styles.headerCell}
+                                        onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                                        style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                    >
+                                        <div className={styles.headerContent}>
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                            {header.column.getIsSorted() === 'asc' && ' 🔼'}
+                                            {header.column.getIsSorted() === 'desc' && ' 🔽'}
+                                        </div>
+                                    </th>
+                                ))}
                             </tr>
                         ))}
                     </thead>
                     <tbody>
                         {isLoading ? (
-                            <tr className={styles['loadingRow']}>
-                                <td colSpan={columns.length} className={styles['emptyCell']}>
+                            <tr className={styles.loadingRow}>
+                                <td colSpan={columns.length} className={styles.emptyCell}>
                                     Cargando datos...
                                 </td>
                             </tr>
@@ -82,22 +75,19 @@ export function DataTable<TData, TValue>({
                             table.getRowModel().rows.map((row) => (
                                 <tr 
                                     key={row.id} 
-                                    className={`${styles['row']} ${onRowClick ? styles['clickableRow'] : ''}`}
+                                    className={`${styles.row} ${onRowClick ? styles.clickableRow : ''}`}
                                     onClick={() => onRowClick?.(row.original)}
                                 >
-                                    {row.getVisibleCells().map((cell) => {
-                                        const meta = cell.column.columnDef.meta as any;
-                                        return (
-                                            <td key={cell.id} className={`${styles['cell']} ${meta?.className || ''}`}>
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </td>
-                                        );
-                                    })}
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td key={cell.id} className={styles.cell}>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
+                                    ))}
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className={styles['emptyCell']}>
+                                <td colSpan={columns.length} className={styles.emptyCell}>
                                     No hay resultados disponibles.
                                 </td>
                             </tr>

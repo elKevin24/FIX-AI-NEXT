@@ -3,10 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
 import styles from './AttachmentsSection.module.css';
-
-import Image from 'next/image';
 
 interface Attachment {
     id: string;
@@ -30,7 +27,6 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
-    const { addToast } = useToast();
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -54,7 +50,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
             router.refresh();
         } catch (error) {
             console.error(error);
-            addToast('Error al subir el archivo', 'ERROR');
+            alert('Error uploading file');
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -62,7 +58,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     };
 
     const handleDelete = async (attachmentId: string) => {
-        if (!confirm('¿Estás seguro de eliminar este adjunto?')) return;
+        if (!confirm('Are you sure you want to delete this attachment?')) return;
 
         try {
             const res = await fetch(`/api/tickets/${ticketId}/attachments`, {
@@ -76,7 +72,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
             router.refresh();
         } catch (error) {
             console.error(error);
-            addToast('Error al eliminar el archivo', 'ERROR');
+            alert('Error deleting file');
         }
     };
 
@@ -89,9 +85,9 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
     };
 
     return (
-        <div className={styles['container']}>
-            <div className={styles['header']}>
-                <h3 className={styles['title']}>Attachments ({initialAttachments.length})</h3>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h3 className={styles.title}>Attachments ({initialAttachments.length})</h3>
                 <button 
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
@@ -108,40 +104,33 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
                 />
             </div>
 
-            <div className={styles['grid']}>
+            <div className={styles.grid}>
                 {initialAttachments.map((att) => (
-                    <div key={att.id} className={styles['card']}>
-                        <a href={att.url} target="_blank" rel="noopener noreferrer" className={styles['link']}>
-                            <div className={styles['preview']}>
+                    <div key={att.id} className={styles.card}>
+                        <a href={att.url} target="_blank" rel="noopener noreferrer" className={styles.link}>
+                            <div className={styles.preview}>
                                 {att.mimeType.startsWith('image/') ? (
-                                    <Image 
-                                        src={att.url} 
-                                        alt={att.filename} 
-                                        width={200}
-                                        height={150}
-                                        loading="lazy"
-                                        className={styles['imagePreview']} 
-                                    />
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img src={att.url} alt={att.filename} className={styles.imagePreview} />
                                 ) : (
                                     <span style={{fontSize: '2rem'}}>📄</span>
                                 )}
                             </div>
                         </a>
-                        <div className={styles['info']}>
-                            <div className={styles['filename']} title={att.filename}>{att.filename}</div>
-                            <div className={styles['meta']}>
+                        <div className={styles.info}>
+                            <div className={styles.filename} title={att.filename}>{att.filename}</div>
+                            <div className={styles.meta}>
                                 <span>{formatSize(att.size)}</span>
                                 <span title={att.uploadedBy.name || 'Unknown'}>{att.uploadedBy.name?.split(' ')[0] || 'User'}</span>
                             </div>
                         </div>
                         <button 
-                            className={styles['deleteBtn']}
+                            className={styles.deleteBtn}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(att.id);
                             }}
                             title="Delete"
-                            aria-label="Eliminar adjunto"
                         >
                             ×
                         </button>

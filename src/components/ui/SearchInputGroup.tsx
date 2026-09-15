@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Ref } from 'react';
+import React from 'react';
 import styles from './SearchInputGroup.module.css';
 
 interface SearchInputGroupProps {
@@ -12,8 +12,6 @@ interface SearchInputGroupProps {
     isLoading?: boolean;
     error?: boolean;
     disabled?: boolean;
-    inputRef?: Ref<HTMLInputElement>;
-    ariaLabel?: string;
 }
 
 export default function SearchInputGroup({
@@ -25,8 +23,6 @@ export default function SearchInputGroup({
     isLoading = false,
     error = false,
     disabled = false,
-    inputRef,
-    ariaLabel = 'Buscar',
 }: SearchInputGroupProps) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && !disabled && !isLoading) {
@@ -35,30 +31,33 @@ export default function SearchInputGroup({
         }
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!disabled && !isLoading) {
+            onSearch();
+        }
+    };
+
     return (
-        <div style={{ width: '100%' }}>
-            <div className={`${styles['searchGroup']} ${error ? styles['error'] : ''}`}>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <div className={`${styles.searchGroup} ${error ? styles.error : ''}`}>
                 <input
                     type="text"
-                    className={styles['searchInput']}
+                    className={styles.searchInput}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     disabled={disabled || isLoading}
-                    ref={inputRef}
-                    aria-label={ariaLabel}
                 />
                 <button
-                    type="button"
-                    className={styles['searchButton']}
+                    type="submit"
+                    className={styles.searchButton}
                     disabled={disabled || isLoading}
-                    aria-label={buttonText}
-                    onClick={() => { if (!disabled && !isLoading) onSearch(); }}
                 >
                     {isLoading ? 'Buscando...' : buttonText}
                 </button>
             </div>
-        </div>
+        </form>
     );
 }

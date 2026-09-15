@@ -11,12 +11,8 @@ export async function generateMetadata({
     
     const ticket = await getTicketById(id);
     return {
-        title: `Ticket ${id.substring(0, 8)} - ${ticket.title} | FIX Workshop`,
-        description: `Estado del ticket: ${ticket.status} - ${ticket.title}. Consulta el avance de tu reparación en FIX Workshop.`,
-        openGraph: {
-            title: `Ticket ${id.substring(0, 8)} - ${ticket.title} | FIX Workshop`,
-            description: `Estado del ticket: ${ticket.status} - ${ticket.title}. Consulta el avance de tu reparación en FIX Workshop.`,
-        },
+        title: `Ticket ${id.substring(0, 8)} - ${ticket.title}`,
+        description: `Estado del ticket: ${ticket.status} - ${ticket.title}`,
     };
 }
 

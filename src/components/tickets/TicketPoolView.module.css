@@ -1,219 +1,184 @@
-/* ========================================
-   TICKET POOL VIEW - Liquid Glass Minimalista
-   Design System Compliant
-   ======================================== */
-
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding: var(--spacing-6);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: -1.5rem;
-  margin-bottom: 0.25rem;
-  gap: 1rem;
-  position: relative;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.header > * {
-  pointer-events: auto;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-6);
+  gap: var(--spacing-4);
 }
 
 .title {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: -0.02em;
+  margin: 0 0 var(--spacing-1) 0;
 }
 
 .subtitle {
-  font-size: 0.9rem;
-  color: var(--color-text-tertiary);
-  margin: 0.25rem 0 0 0;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 .refreshButton {
-  padding: 0.5rem 1rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(12px);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0.75rem;
-  font-weight: 600;
-  font-size: 0.875rem;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: var(--shadow-xs);
+  white-space: nowrap;
 }
 
 .refreshButton:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-primary-500);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .loading {
   text-align: center;
-  padding: 4rem;
-  color: var(--color-text-tertiary);
-  font-size: 1rem;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
 }
 
 /* Workload Card */
 .workloadCard {
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-6);
 }
 
 .workloadHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: var(--spacing-4);
 }
 
 .workloadTitle {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: -0.01em;
 }
 
 .statusBadge {
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.6875rem;
-  font-weight: 700;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
 }
 
 .statusAVAILABLE {
-  background: var(--color-success-50);
-  color: var(--color-success-700);
-  border: 1px solid var(--color-success-200);
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .statusUNAVAILABLE {
-  background: var(--color-surface-hover);
-  color: var(--color-text-tertiary);
-  border: 1px solid var(--color-border-light);
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .statusON_VACATION {
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
-  border: 1px solid var(--color-primary-200);
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 .statusON_LEAVE {
-  background: var(--color-warning-50);
-  color: var(--color-warning-700);
-  border: 1px solid var(--color-warning-200);
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .statusIN_TRAINING {
-  background: var(--color-secondary-50);
-  color: var(--color-secondary-700);
-  border: 1px solid var(--color-secondary-100);
+  background: #f3e8ff;
+  color: #6b21a8;
 }
 
 .statusSICK_LEAVE {
-  background: var(--color-error-50);
-  color: var(--color-error-700);
-  border: 1px solid var(--color-error-200);
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .workloadStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
 }
 
 .workloadStat {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--spacing-1);
 }
 
 .workloadLabel {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .workloadValue {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
 .progressBar {
-  height: 8px;
-  background: var(--color-surface-hover);
-  border-radius: 9999px;
+  height: 12px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-full);
   overflow: hidden;
-  border: 1px solid var(--color-border-light);
+  margin-bottom: var(--spacing-3);
 }
 
 .progressFill {
   height: 100%;
   transition: width 0.5s ease;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
 }
 
 .utilizationLow {
-  background: linear-gradient(90deg, var(--color-success-500), var(--color-success-600));
+  background: linear-gradient(90deg, #10b981, #059669);
 }
 
 .utilizationMedium {
-  background: linear-gradient(90deg, var(--color-warning-400), var(--color-warning-500));
+  background: linear-gradient(90deg, #f59e0b, #d97706);
 }
 
 .utilizationHigh {
-  background: linear-gradient(90deg, var(--color-error-500), var(--color-error-600));
+  background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
 .warningMessage {
-  padding: 0.625rem 0.875rem;
-  background: var(--color-warning-50);
-  border: 1px solid var(--color-warning-200);
-  border-radius: 0.75rem;
-  color: var(--color-warning-700);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  padding: var(--spacing-3);
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-md);
+  color: #92400e;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Filters */
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  box-shadow: var(--shadow-sm);
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
 }
 
 .searchBox {
@@ -222,277 +187,271 @@
 
 .searchInput {
   width: 100%;
-  padding: 0.625rem 1rem;
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
-  background: var(--color-surface);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   transition: all 0.2s;
-  outline: none;
 }
 
 .searchInput:focus {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .priorityFilters {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   flex-wrap: wrap;
 }
 
 .filterButton {
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--color-border-light);
-  background: var(--color-surface-hover);
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
-  border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filterButton:hover {
-  border-color: var(--color-border-strong);
-  color: var(--color-text-primary);
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
 }
 
 .filterButtonActive {
-  border-color: var(--color-primary-600) !important;
-  background: var(--color-primary-600) !important;
-  color: white !important;
-  font-weight: 700;
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: var(--font-weight-bold);
 }
 
 .filterUrgent.filterButtonActive {
-  background: var(--color-error-600) !important;
-  border-color: var(--color-error-600) !important;
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #991b1b;
 }
 
 .filterHigh.filterButtonActive {
-  background: var(--color-warning-600) !important;
-  border-color: var(--color-warning-600) !important;
+  background: #fed7aa;
+  border-color: #ea580c;
+  color: #9a3412;
 }
 
 .filterMedium.filterButtonActive {
-  background: var(--color-primary-600) !important;
-  border-color: var(--color-primary-600) !important;
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
 }
 
 .filterLow.filterButtonActive {
-  background: var(--color-gray-700) !important;
-  border-color: var(--color-gray-700) !important;
+  background: #f3f4f6;
+  border-color: #6b7280;
+  color: #374151;
 }
 
 /* Tickets List */
 .ticketsList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
 }
 
 .ticketCard {
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-5);
+  transition: all 0.3s;
 }
 
 .ticketCard:hover {
-  border-color: var(--color-border-medium);
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
 
 .ticketHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  margin-bottom: var(--spacing-4);
 }
 
 .ticketMeta {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   flex-wrap: wrap;
   align-items: center;
 }
 
 .priorityBadge {
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
 }
 
 .priorityUrgent {
-  background: var(--color-error-50);
-  color: var(--color-error-700);
-  border: 1px solid var(--color-error-200);
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .priorityHigh {
-  background: var(--color-warning-50);
-  color: var(--color-warning-700);
-  border: 1px solid var(--color-warning-200);
+  background: #fed7aa;
+  color: #9a3412;
 }
 
 .priorityMedium {
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
-  border: 1px solid var(--color-primary-200);
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .priorityLow {
-  background: var(--color-surface-hover);
-  color: var(--color-text-tertiary);
-  border: 1px solid var(--color-border-light);
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .ticketId {
-  font-family: var(--font-family-mono);
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .ageBadge {
-  padding: 0.15rem 0.4rem;
-  border-radius: 0.375rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  background: var(--color-surface-hover);
-  color: var(--color-text-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
 }
 
 .ageOld {
-  background: var(--color-warning-50);
-  color: var(--color-warning-700);
-  border: 1px solid var(--color-warning-200);
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .ageVeryOld {
-  background: var(--color-error-50);
-  color: var(--color-error-700);
-  border: 1px solid var(--color-error-200);
+  background: #fee2e2;
+  color: #991b1b;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .matchBadge {
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  background: var(--color-secondary-50);
-  color: var(--color-secondary-700);
-  border: 1px solid var(--color-secondary-100);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: #f3e8ff;
+  color: #6b21a8;
 }
 
 .ticketBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
+  margin-bottom: var(--spacing-4);
 }
 
 .ticketTitle {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: -0.01em;
+  margin: 0 0 var(--spacing-2) 0;
 }
 
 .ticketDescription {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  line-height: 1.4;
-  margin: 0;
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-4) 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .ticketDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.625rem 0.75rem;
-  background: var(--color-surface-hover);
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border-light);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
 }
 
 .detailItem {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
+  flex-direction: column;
+  gap: var(--spacing-1);
 }
 
 .detailLabel {
-  color: var(--color-text-tertiary);
-  font-weight: 500;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .detailValue {
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
 }
 
 .ticketActions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: auto;
+  gap: var(--spacing-3);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-border);
 }
 
 .viewButton {
   flex: 1;
-  padding: 0.5rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0.625rem;
-  color: var(--color-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-decoration: none;
+  padding: var(--spacing-3);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   text-align: center;
+  text-decoration: none;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
 .viewButton:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 .takeButton {
   flex: 1;
-  padding: 0.5rem;
-  background: var(--color-primary-600);
-  color: white !important;
+  padding: var(--spacing-3);
+  background: var(--color-primary);
   border: none;
-  border-radius: 0.625rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .takeButton:hover:not(:disabled) {
-  background: var(--color-primary-700);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .takeButton:disabled {
@@ -500,30 +459,27 @@
   cursor: not-allowed;
 }
 
+/* Empty State */
 .emptyState {
-  padding: 4rem 1.5rem;
   text-align: center;
-  background: var(--color-surface);
-  backdrop-filter: blur(12px);
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-border-light);
+  padding: var(--spacing-10);
 }
 
 .emptyIcon {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 64px;
+  margin-bottom: var(--spacing-4);
 }
 
 .emptyTitle {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 var(--spacing-2) 0;
 }
 
 .emptyText {
-  font-size: 0.875rem;
-  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 

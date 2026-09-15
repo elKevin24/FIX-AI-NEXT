@@ -3,16 +3,6 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import SLASettingsForm from './SLASettingsForm';
-import PageHeader from '@/components/PageHeader';
-
-export const metadata = {
-    title: 'Configuración SLA',
-    description: 'Umbrales y notificaciones de Acuerdos de Nivel de Servicio (SLA) para tickets.',
-    openGraph: {
-        title: 'Configuración SLA | FIX Workshop',
-        description: 'Umbrales y notificaciones de Acuerdos de Nivel de Servicio (SLA) para tickets.',
-    },
-};
 
 export default async function SLASettingsPage() {
     const session = await auth();
@@ -25,11 +15,9 @@ export default async function SLASettingsPage() {
     });
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-            <PageHeader
-                title="Configuración SLA"
-                subtitle="Configura las alertas de Service Level Agreement (SLA) para tus tickets."
-            />
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">SLA Configuration</h1>
+            <p className="mb-6 text-gray-600">Configure Service Level Agreement (SLA) alerts for your tickets.</p>
             
             <div className="bg-white p-6 rounded-lg shadow max-w-2xl">
                 <SLASettingsForm 

@@ -3,11 +3,6 @@ import { getPartsForPOS, getCustomersForPOS } from '@/lib/pos-actions';
 import { getTenantSettings } from '@/lib/tenant-settings-actions';
 import { QuotationsClient } from './QuotationsClient';
 
-export const metadata = {
-  title: 'Cotizaciones',
-  description: 'Crea y da seguimiento a cotizaciones de venta para tus clientes.',
-};
-
 export const dynamic = 'force-dynamic';
 
 export default async function QuotationsPage() {
@@ -26,8 +21,8 @@ export default async function QuotationsPage() {
         <QuotationsClient
             initialQuotations={quotations}
             stats={stats}
-            parts={parts as any}
-            customers={customers as any}
+            parts={parts}
+            customers={customers}
             taxRate={settings?.taxRate ? Number(settings.taxRate) : 12}
         />
     );

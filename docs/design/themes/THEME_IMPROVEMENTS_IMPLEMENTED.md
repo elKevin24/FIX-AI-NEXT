@@ -316,7 +316,7 @@ useEffect(() => {
 
 ### Documentación Relacionada
 - `docs/design/themes/THEME_SYSTEM_EVALUATION.md` - Evaluación original
-- `docs/THEME_IMPROVEMENTS_ROADMAP.md` - Roadmap completo
+- `docs/design/themes/THEME_IMPROVEMENTS_ROADMAP.md` - Roadmap completo
 - `docs/design/themes/THEME_ARCHITECTURE_DIAGRAM.md` - Arquitectura
 
 ### Referencias WCAG

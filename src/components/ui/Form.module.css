@@ -16,25 +16,9 @@
 }
 
 .input,
+.textarea,
 .select {
     width: 100%;
-    box-sizing: border-box;
-    height: 48px;
-    padding: 0 1rem;
-    font-family: var(--font-family-base);
-    font-size: 0.9375rem;
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 0.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-xs);
-    font-weight: 500;
-}
-
-.textarea {
-    width: 100%;
-    box-sizing: border-box;
     padding: 0.75rem 1rem;
     font-family: var(--font-family-base);
     font-size: 0.9375rem;
@@ -45,29 +29,6 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-xs);
     font-weight: 500;
-}
-
-/* Calendar/Date Input Styling */
-.input[type="date"] {
-    appearance: none;
-    -webkit-appearance: none;
-    color: var(--color-text-primary);
-    min-height: 48px; /* Match standard input height */
-    position: relative;
-}
-
-.input[type="date"]::-webkit-calendar-picker-indicator {
-    background-color: transparent;
-    padding: 0.2rem;
-    cursor: pointer;
-    border-radius: 0.25rem;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-}
-
-.input[type="date"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    background-color: var(--color-surface-hover);
 }
 
 .input::placeholder,
@@ -81,6 +42,8 @@
 .textarea:hover,
 .select:hover {
     border-color: var(--color-border-strong);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .input:focus,
@@ -88,8 +51,9 @@
 .select:focus {
     outline: none;
     border-color: var(--color-primary-600);
-    box-shadow: 0 0 0 2px var(--color-primary-100);
+    box-shadow: 0 0 0 3px var(--color-primary-100), 0 0 20px rgba(var(--color-primary-600), 0.1);
     background: var(--color-surface);
+    transform: translateY(-2px);
 }
 
 .input:disabled,
@@ -144,24 +108,9 @@
 }
 
 .formInput,
+.formTextarea,
 .formSelect {
     width: 100%;
-    box-sizing: border-box;
-    height: 48px;
-    padding: 0 1rem;
-    font-family: var(--font-family-base);
-    font-size: 0.9375rem;
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.formTextarea {
-    width: 100%;
-    box-sizing: border-box;
     padding: 0.75rem 1rem;
     font-family: var(--font-family-base);
     font-size: 0.9375rem;

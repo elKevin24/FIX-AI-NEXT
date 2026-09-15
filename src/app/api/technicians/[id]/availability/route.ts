@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { logAction } from '@/lib/audit-actions';
-import { TechnicianStatus } from '@prisma/client';
+import { AuditModule, TechnicianStatus } from '@/generated/prisma';
 
 export async function GET(
   req: NextRequest,
@@ -59,25 +59,20 @@ export async function GET(
       );
     }
 
-    const currentWorkload = technician._count.assignedTickets;
-    const maxConcurrentTickets = technician.maxConcurrentTickets || 5;
-    const availableSlots = Math.max(0, maxConcurrentTickets - currentWorkload);
-    const utilizationPercent = maxConcurrentTickets > 0 
-      ? Math.min(100, Math.round((currentWorkload / maxConcurrentTickets) * 100))
-      : 0;
-    const isAvailable = technician.status === 'AVAILABLE' && availableSlots > 0;
-
     return NextResponse.json({
       ...technician,
-      currentWorkload,
-      maxConcurrentTickets,
-      availableSlots,
-      utilizationPercent,
-      isAvailable,
+      currentWorkload: technician._count.assignedTickets,
+      availableSlots: Math.max(
+        0,
+        technician.maxConcurrentTickets - technician._count.assignedTickets
+      ),
     });
   } catch (error) {
     console.error('Error fetching technician availability:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -143,7 +138,10 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating technician availability:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -224,6 +222,9 @@ export async function POST(
     return NextResponse.json(unavailability, { status: 201 });
   } catch (error) {
     console.error('Error creating unavailability period:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

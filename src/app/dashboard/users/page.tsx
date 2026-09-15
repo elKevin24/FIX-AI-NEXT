@@ -4,19 +4,9 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import UsersClient from './UsersClient';
-import PageHeader from '@/components/PageHeader';
 import styles from './users.module.css';
 import { hasPermission } from '@/lib/auth-utils';
-import type { UserRole } from '@prisma/client';
-
-export const metadata = {
-    title: 'Gestión de Usuarios',
-    description: 'Administración de técnicos, administradores y personal del taller.',
-    openGraph: {
-        title: 'Usuarios | FIX Workshop',
-        description: 'Administración de técnicos, administradores y personal del taller.',
-    },
-};
+import type { UserRole } from '@/generated/prisma';
 
 export default async function UsersPage() {
     const session = await auth();
@@ -31,7 +21,7 @@ export default async function UsersPage() {
 
     if (!canManage) {
         return (
-            <div className={styles['container']}>
+            <div className={styles.container}>
                 <div className="text-center py-12">
                     <h2 className="text-xl font-semibold text-gray-800">Acceso denegado</h2>
                     <p className="text-gray-600 mt-2">No tienes permisos para gestionar usuarios.</p>
@@ -73,18 +63,18 @@ export default async function UsersPage() {
     const canCreate = hasPermission(session.user.role as UserRole, 'canCreateUsers');
 
     return (
-        <div className={styles['container']}>
-            <PageHeader
-                title="Usuarios"
-                subtitle="Gestiona el equipo del tenant"
-                actions={
-                    canCreate && (
-                        <Button as={Link} href="/dashboard/users/create" variant="primary">
-                            + Nuevo Usuario
-                        </Button>
-                    )
-                }
-            />
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.headerContent}>
+                    <h1>Usuarios</h1>
+                    <p>Gestiona el equipo del tenant</p>
+                </div>
+                {canCreate && (
+                    <Button as={Link} href="/dashboard/users/create" variant="primary">
+                        + Nuevo Usuario
+                    </Button>
+                )}
+            </div>
 
             <UsersClient
                 data={users}

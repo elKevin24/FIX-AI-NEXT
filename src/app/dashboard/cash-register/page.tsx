@@ -5,12 +5,8 @@ import CashRegisterClient from './CashRegisterClient';
 import { serializeDecimal } from '@/lib/utils';
 
 export const metadata = {
-  title: 'Caja Registradora',
-  description: 'Control de flujo de efectivo, aperturas y cierres de caja diario del taller.',
-  openGraph: {
-    title: 'Caja Registradora | FIX Workshop',
-    description: 'Control de flujo de efectivo, aperturas y cierres de caja diario del taller.',
-  },
+  title: 'Caja Registradora | FIX-AI',
+  description: 'Control de flujo de efectivo y cierres de caja diario.',
 };
 
 export default async function CashRegisterPage() {

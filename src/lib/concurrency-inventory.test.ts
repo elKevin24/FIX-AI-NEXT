@@ -15,13 +15,10 @@ describe('Concurrency & Inventory', () => {
 
         const mockTransaction = vi.fn().mockResolvedValue({ id: 'ticket-1' });
         
-        const templateId = '550e8400-e29b-41d4-a716-446655440000';
-        const customerId = '550e8400-e29b-41d4-a716-446655440001';
-
         const mockDb = {
             serviceTemplate: {
                 findUnique: vi.fn().mockResolvedValue({
-                    id: templateId,
+                    id: 'template-1',
                     tenantId: 'tenant-1',
                     isActive: true,
                     defaultTitle: 'Test',
@@ -31,10 +28,10 @@ describe('Concurrency & Inventory', () => {
                 })
             },
             customer: {
-                findUnique: vi.fn().mockResolvedValue({ id: customerId, tenantId: 'tenant-1' })
+                findUnique: vi.fn().mockResolvedValue({ id: 'customer-1', tenantId: 'tenant-1' })
             },
             ticket: {
-                findUnique: vi.fn().mockResolvedValue({ id: 'ticket-1', tenantId: 'tenant-1', customer: { id: customerId } })
+                findUnique: vi.fn().mockResolvedValue({ id: 'ticket-1', tenantId: 'tenant-1', customer: { id: 'customer-1' } })
             },
             $transaction: mockTransaction
         };
@@ -42,8 +39,8 @@ describe('Concurrency & Inventory', () => {
         (getTenantPrisma as any).mockReturnValue(mockDb);
 
         const formData = new FormData();
-        formData.append('templateId', templateId);
-        formData.append('customerId', customerId);
+        formData.append('templateId', 'template-1');
+        formData.append('customerId', 'customer-1');
 
         await createTicketFromTemplate(formData);
 

@@ -1,11 +1,9 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { Prisma } from '@prisma/client';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
-import PageHeader from '@/components/PageHeader';
 import styles from './parts.module.css';
 import PartsClient from './PartsClient';
 import PartSearchFilters from './PartSearchFilters';
@@ -15,21 +13,9 @@ import PaginationControls from '@/components/ui/PaginationControls';
 interface PartsPageProps {
     searchParams: Promise<{
         search?: string;
-        lowStock?: string;
-        category?: string;
-        location?: string;
         page?: string;
     }>;
 }
-
-export const metadata = {
-    title: 'Inventario de Repuestos',
-    description: 'Control de repuestos, stock mínimo, categorías y valor de inventario.',
-    openGraph: {
-        title: 'Inventario | FIX Workshop',
-        description: 'Control de repuestos, stock mínimo, categorías y valor de inventario.',
-    },
-};
 
 export default async function PartsPage({ searchParams }: PartsPageProps) {
     const session = await auth();
@@ -39,8 +25,7 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     }
 
     const params = await searchParams;
-    const { search, lowStock, category, location, page } = params;
-    const onlyLowStock = lowStock === 'true';
+    const { search, page } = params;
     const tenantId = session.user.tenantId;
     const db = getTenantPrisma(tenantId, session.user.id);
 
@@ -63,9 +48,6 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 sku % ${search} OR
                 category ILIKE ${'%' + search + '%'} 
               )
-              ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
-              ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
-              ${onlyLowStock ? Prisma.sql`AND quantity <= "minStock"` : Prisma.empty}
         `;
         totalItems = countResult[0]?.total || 0;
 
@@ -79,34 +61,21 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 sku % ${search} OR
                 category ILIKE ${'%' + search + '%'} 
               )
-              ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
-              ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
-              ${onlyLowStock ? Prisma.sql`AND quantity <= "minStock"` : Prisma.empty}
             ORDER BY similarity(name, ${search}) DESC
             LIMIT ${pageSize} OFFSET ${offset};
         `;
     } else {
-        const where = {
-            ...(category ? { category: { contains: category, mode: 'insensitive' as const } } : {}),
-            ...(location ? { location: { contains: location, mode: 'insensitive' as const } } : {}),
-        };
-        if (onlyLowStock) {
-            const lowStockParts = await db.$queryRaw<any[]>`
-                SELECT * FROM parts WHERE "tenantId" = ${tenantId}
-                ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
-                ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
-                AND quantity <= "minStock" ORDER BY "updatedAt" DESC LIMIT ${pageSize} OFFSET ${offset}`;
-            const countResult = await db.$queryRaw<any[]>`
-                SELECT COUNT(*)::int as total FROM parts WHERE "tenantId" = ${tenantId}
-                ${category ? Prisma.sql`AND category ILIKE ${'%' + category + '%'}` : Prisma.empty}
-                ${location ? Prisma.sql`AND location ILIKE ${'%' + location + '%'}` : Prisma.empty}
-                AND quantity <= "minStock"`;
-            parts = lowStockParts;
-            totalItems = countResult[0]?.total || 0;
-        } else {
-            totalItems = await db.part.count({ where });
-            parts = await db.part.findMany({ where, orderBy: { updatedAt: 'desc' }, take: pageSize, skip: offset });
-        }
+        // 1. Conteo Total
+        totalItems = await db.part.count();
+
+        // 2. Lista Paginada
+        parts = await db.part.findMany({
+            orderBy: {
+                updatedAt: 'desc',
+            },
+            take: pageSize,
+            skip: offset,
+        });
     }
 
     // Calcular estadísticas (SIEMPRE sobre el total global, no paginado)
@@ -135,41 +104,37 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     return (
-        <div className={styles['container']}>
-            <PageHeader
-                title="Inventario"
-                subtitle={
-                    <>
-                        Gestiona repuestos y control de stock
-                        {lowStockCount > 0 && (
-                            <span className={styles['lowStockWarning']}>
-                                ⚠️ Hay {lowStockCount} producto(s) con stock bajo
-                            </span>
-                        )}
-                    </>
-                }
-                actions={
-                    <>
-                        <ExportButton type="parts" />
-                        <Button as={Link} href="/dashboard/parts/create" variant="primary">
-                            + Nuevo Repuesto
-                        </Button>
-                    </>
-                }
-            />
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.headerContent}>
+                    <h1>Inventario</h1>
+                    <p>Gestiona repuestos y control de stock</p>
+                    {lowStockCount > 0 && (
+                        <p className={styles.lowStockWarning}>
+                            ⚠️ Hay {lowStockCount} producto(s) con stock bajo
+                        </p>
+                    )}
+                </div>
+                <div className="flex gap-2 items-center">
+                    <ExportButton type="parts" />
+                    <Button as={Link} href="/dashboard/parts/create" variant="primary">
+                        + Nuevo Repuesto
+                    </Button>
+                </div>
+            </div>
 
-            <div className={styles['statsGrid']}>
-                <div className={styles['statCard']}>
-                    <span className={styles['statLabel']}>Total Items</span>
-                    <p className={styles['statValue']}>{allPartsCount}</p>
+            <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>Total Items</span>
+                    <p className={styles.statValue}>{allPartsCount}</p>
                 </div>
-                <div className={`${styles['statCard']} ${lowStockCount > 0 ? styles['lowStock'] : ''}`}>
-                    <span className={styles['statLabel']}>Stock Bajo</span>
-                    <p className={styles['statValue']}>{lowStockCount}</p>
+                <div className={`${styles.statCard} ${lowStockCount > 0 ? styles.lowStock : ''}`}>
+                    <span className={styles.statLabel}>Stock Bajo</span>
+                    <p className={styles.statValue}>{lowStockCount}</p>
                 </div>
-                <div className={styles['statCard']}>
-                    <span className={styles['statLabel']}>Valor Inventario (Costo)</span>
-                    <p className={styles['statValue']}>Q{totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}</p>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>Valor Inventario (Costo)</span>
+                    <p className={styles.statValue}>Q{totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}</p>
                 </div>
             </div>
 

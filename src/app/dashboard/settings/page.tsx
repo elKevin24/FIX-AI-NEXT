@@ -1,17 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import PageHeader from '@/components/PageHeader';
 import styles from '../page.module.css';
-
-export const metadata = {
-    title: 'Configuración General',
-    description: 'Ajustes del taller, perfil de usuario, datos de facturación y preferencias.',
-    openGraph: {
-        title: 'Configuración | FIX Workshop',
-        description: 'Ajustes del taller, perfil de usuario, datos de facturación y preferencias.',
-    },
-};
 
 export default async function SettingsPage() {
     const session = await auth();
@@ -21,11 +11,13 @@ export default async function SettingsPage() {
     }
 
     return (
-        <div className={styles['dashboard']}>
-            <PageHeader title="Configuración" />
+        <div className={styles.dashboard}>
+            <header className={styles.header}>
+                <h1>Configuración</h1>
+            </header>
 
-            <div className={styles['statsGrid']}>
-                <div className={styles['card']}>
+            <div className={styles.statsGrid}>
+                <div className={styles.card}>
                     <h3>Información del Usuario</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p><strong>Nombre:</strong> {session.user.name || 'N/A'}</p>
@@ -34,14 +26,14 @@ export default async function SettingsPage() {
                     </div>
                 </div>
 
-                <div className={styles['card']}>
+                <div className={styles.card}>
                     <h3>Información del Tenant</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p><strong>Tenant ID:</strong> {session.user.tenantId}</p>
                     </div>
                 </div>
 
-                <Link href="/dashboard/settings/business" className={styles['card']} style={{ textDecoration: 'none' }}>
+                <Link href="/dashboard/settings/business" className={styles.card} style={{ textDecoration: 'none' }}>
                     <h3>Datos del Negocio</h3>
                     <div style={{ marginTop: '1rem' }}>
                         <p style={{ color: 'var(--text-secondary)' }}>
@@ -54,7 +46,7 @@ export default async function SettingsPage() {
                 </Link>
 
                 {session.user.role === 'ADMIN' && (
-                    <Link href="/dashboard/settings/service-templates" className={styles['card']} style={{ textDecoration: 'none' }}>
+                    <Link href="/dashboard/settings/service-templates" className={styles.card} style={{ textDecoration: 'none' }}>
                         <h3>Plantillas de Servicio</h3>
                         <div style={{ marginTop: '1rem' }}>
                             <p style={{ color: 'var(--text-secondary)' }}>

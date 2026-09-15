@@ -2,12 +2,6 @@ import { auth } from "@/auth";
 import { getAuditLogs } from "@/lib/audit-actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import PageHeader from "@/components/PageHeader";
-
-export const metadata = {
-    title: "Registros de Auditoría",
-    description: "Consulta el historial de acciones y cambios realizados en el sistema.",
-};
 
 export default async function AuditLogsPage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -20,33 +14,30 @@ export default async function AuditLogsPage(props: {
     }
 
     const tenantId = session.user.tenantId;
-    const limit = Number(searchParams['limit']) || 50;
-    const offset = Number(searchParams['offset']) || 0;
+    const limit = Number(searchParams.limit) || 50;
+    const offset = Number(searchParams.offset) || 0;
 
     const { logs, total } = await getAuditLogs(tenantId, limit, offset, {
-        action: searchParams['action'] as any
+        action: searchParams.action as any
     });
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-            <PageHeader
-                title="Audit Logs"
-                actions={
-                    <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        Total: {total} registros
-                    </div>
-                }
-            />
+        <div style={{ padding: '2rem' }}>
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h1 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Audit Logs</h1>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                    Total: {total} registros
+                </div>
+            </div>
 
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                  <caption className="sr-only">Registro de auditoría del sistema</caption>
                     <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                         <tr>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Fecha</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Usuario</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Acción</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Detalles</th>
+                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Fecha</th>
+                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Usuario</th>
+                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Acción</th>
+                            <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Detalles</th>
                         </tr>
                     </thead>
                     <tbody>

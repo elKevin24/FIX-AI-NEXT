@@ -1,16 +1,15 @@
 /* ========================================
-   TICKETS MODULE - Liquid Glass Design
-   WCAG 2.1 AA Compliant
+   TICKETS MODULE - Minimalist Premium
+   CSS Modules - Design System Compliant
    ======================================== */
 
 .container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: 0; /* Eliminamos el gap global para control manual preciso */
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    /* Padding eliminado para igualar ancho con Dashboard */
 }
 
 /* ========== HEADER & GENERAL ========== */
@@ -19,49 +18,43 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-4);
-    margin-bottom: var(--spacing-1);
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem; /* Espacio controlado entre Header y Buscador */
     flex-wrap: wrap;
     position: relative;
     z-index: 10;
-    margin-top: calc(-1 * var(--spacing-6));
+    margin-top: -1.5rem;
     pointer-events: none;
 }
 
 .header > * {
-    pointer-events: auto;
+    pointer-events: auto; /* Hijos clickeables */
 }
 
 .header h1 {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-gray-800);
     margin: 0;
     letter-spacing: -0.02em;
 }
 
 .headerContent p {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-    margin-top: var(--spacing-1);
-    font-weight: var(--font-weight-medium);
-}
-
-.headerActions {
-    display: flex;
-    gap: var(--spacing-2);
-    align-items: center;
+    font-size: 0.9375rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.25rem;
 }
 
 .superAdminBadge {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacing-1);
-    padding: var(--spacing-1) var(--spacing-3);
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
     background: var(--color-warning-500);
     color: white;
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-bold);
+    font-size: 0.75rem;
+    font-weight: 700;
     border-radius: var(--radius-base);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -70,8 +63,8 @@
 /* ========== SECTION STYLES (Ticket Detail) ========== */
 
 .section {
-    padding: var(--spacing-8);
-    margin-top: var(--spacing-6);
+    padding: 2rem;
+    margin-top: 1.5rem;
     background: var(--color-surface);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
@@ -81,13 +74,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-6);
+    margin-bottom: 1.5rem;
 }
 
 .sectionTitle {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-gray-800);
     margin: 0;
 }
 
@@ -98,15 +91,10 @@
     width: 100%;
 }
 
-.tableWrapper:focus-visible {
-    outline: 2px solid var(--color-primary-500);
-    outline-offset: -2px;
-}
-
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--font-size-sm);
+    font-size: 0.875rem;
 }
 
 .tableHeaderRow {
@@ -115,14 +103,13 @@
 }
 
 .table th {
-    padding: var(--spacing-3) var(--spacing-4);
+    padding: 0.75rem 1rem;
     text-align: left;
-    font-weight: var(--font-weight-semibold);
+    font-weight: 600;
     color: var(--color-text-secondary);
     text-transform: uppercase;
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     letter-spacing: 0.05em;
-    white-space: nowrap;
 }
 
 .tableRow {
@@ -134,7 +121,7 @@
 }
 
 .table td {
-    padding: var(--spacing-4);
+    padding: 1rem;
     color: var(--color-text-secondary);
 }
 
@@ -147,18 +134,18 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-5);
+    gap: 1.25rem;
 }
 
 .formGroup {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-2);
+    gap: 0.5rem;
 }
 
 .inlineForm {
-    margin-bottom: var(--spacing-8);
-    padding: var(--spacing-6);
+    margin-bottom: 2rem;
+    padding: 1.5rem;
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-base);
     border: 1px solid var(--color-border-medium);
@@ -167,7 +154,7 @@
 .gridForm {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--spacing-4);
+    gap: 1rem;
     align-items: end;
 }
 
@@ -179,26 +166,25 @@
 
 .label {
     display: block;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--color-text-primary);
 }
 
 .input, .select, .textarea {
     width: 100%;
-    padding: var(--spacing-2);
+    padding: 0.625rem;
     border: 1px solid var(--color-border-medium);
     border-radius: var(--radius-base);
     color: var(--color-text-primary);
     background: var(--color-surface);
-    font-size: var(--font-size-sm);
-    transition: border-color var(--transition-fast);
+    font-size: 0.875rem;
 }
 
-.input:focus-visible, .select:focus-visible, .textarea:focus-visible {
-    outline: 2px solid var(--color-primary-500);
-    outline-offset: 2px;
-    border-color: var(--color-primary-600);
+.input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
 }
 
 .input:disabled {
@@ -209,13 +195,13 @@
 /* ========== SUMMARY & TOTALS ========== */
 
 .summaryCard {
-    margin-top: var(--spacing-6);
-    padding: var(--spacing-5);
+    margin-top: 1.5rem;
+    padding: 1.25rem;
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-base);
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-4);
+    gap: 1rem;
     max-width: 400px;
     margin-left: auto;
 }
@@ -223,21 +209,21 @@
 .summaryItem {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-1);
+    gap: 0.25rem;
 }
 
 .summaryLabel {
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     color: var(--color-text-tertiary);
     text-transform: uppercase;
-    font-weight: var(--font-weight-semibold);
+    font-weight: 600;
     letter-spacing: 0.02em;
 }
 
 .summaryValue {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-gray-800);
 }
 
 /* ========== UTILITY CLASSES ========== */
@@ -249,18 +235,18 @@
 .textMuted { color: var(--color-text-tertiary); }
 
 .errorMessage {
-    margin-top: var(--spacing-4);
-    padding: var(--spacing-3);
+    margin-top: 1rem;
+    padding: 0.75rem;
     background-color: var(--color-error-50);
     color: var(--color-error-700);
     border-radius: var(--radius-base);
     border: 1px solid var(--color-error-200);
-    font-size: var(--font-size-sm);
+    font-size: 0.875rem;
 }
 
 .dangerZone {
-    margin-top: var(--spacing-8);
-    padding: var(--spacing-6);
+    margin-top: 2rem;
+    padding: 1.5rem;
     border: 1px solid var(--color-error-200);
     border-radius: var(--radius-lg);
     background-color: var(--color-surface);
@@ -268,58 +254,80 @@
 
 .dangerTitle {
     color: var(--color-error-600);
-    margin-bottom: var(--spacing-4);
-    font-weight: var(--font-weight-bold);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.dangerBtn {
+    padding: 0.625rem 1.25rem;
+    background-color: var(--color-error-600);
+    color: white;
+    border-radius: var(--radius-base);
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.dangerBtn:hover {
+    background-color: var(--color-error-700);
+}
+
+.cancelBtn {
+    padding: 0.625rem 1.25rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border-medium);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-base);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancelBtn:hover {
+    background-color: var(--color-bg-secondary);
 }
 
 .actions {
     display: flex;
-    gap: var(--spacing-3);
+    gap: 0.75rem;
 }
 
 .gridTwoColumns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-4);
+    gap: 1rem;
 }
 
 @media (max-width: 640px) {
     .gridTwoColumns {
         grid-template-columns: 1fr;
     }
-
+    
     .summaryCard {
         max-width: 100%;
     }
 }
 
 .emptyState {
-    padding: var(--spacing-12) var(--spacing-6);
+    padding: 3rem 1.5rem;
     text-align: center;
     color: var(--color-text-tertiary);
-}
-
-.emptyState h3 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    margin-bottom: var(--spacing-2);
 }
 
 .viewLink {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: var(--spacing-1-5) var(--spacing-3);
+    padding: 0.375rem 0.75rem;
     background: var(--color-bg-secondary);
     color: var(--color-primary-600);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    font-size: 0.8125rem;
+    font-weight: 600;
     text-decoration: none;
-    border-radius: var(--radius-base);
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border-medium);
-    transition: all var(--transition-fast);
-    min-height: 40px;
+    transition: all 0.2s;
 }
 
 .viewLink:hover {
@@ -327,30 +335,25 @@
     border-color: var(--color-primary-600);
 }
 
-.viewLink:focus-visible {
-    outline: 2px solid var(--color-primary-500);
-    outline-offset: 2px;
-}
-
 /* ========== TIMELINE & LOGS ========== */
 
 .timeline {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
-    margin-top: var(--spacing-4);
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 .logEntry {
-    padding: var(--spacing-5);
+    padding: 1.25rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border-light);
     background-color: var(--color-bg-primary);
-    transition: transform var(--transition-fast);
+    transition: transform 0.2s;
 }
 
 .logEntry:hover {
-    transform: translateX(var(--spacing-1));
+    transform: translateX(4px);
 }
 
 .logEntryNote {
@@ -363,6 +366,7 @@
     border-left: 4px solid var(--color-info-400);
 }
 
+
 .logEntryStatus {
     background-color: var(--color-success-50);
     border-left: 4px solid var(--color-success-400);
@@ -373,6 +377,7 @@
     border-left: 4px solid var(--color-warning-400);
 }
 
+
 .logEntryService {
     background-color: var(--color-primary-50);
     border-left: 4px solid var(--color-primary-400);
@@ -382,68 +387,68 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: var(--spacing-3);
+    margin-bottom: 0.75rem;
 }
 
 .logMeta {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
+    gap: 0.75rem;
 }
 
 .authorName {
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary);
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--color-gray-800);
 }
 
 .systemTag {
     font-size: 0.625rem;
     background-color: var(--color-info-600);
     color: white;
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     text-transform: uppercase;
-    font-weight: var(--font-weight-extrabold);
+    font-weight: 800;
 }
 
 .statusTag {
     font-size: 0.625rem;
     background-color: var(--color-success-600);
     color: white;
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     text-transform: uppercase;
-    font-weight: var(--font-weight-extrabold);
+    font-weight: 800;
 }
 
 .inventoryTag {
     font-size: 0.625rem;
     background-color: var(--color-warning-600);
     color: white;
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     text-transform: uppercase;
-    font-weight: var(--font-weight-extrabold);
+    font-weight: 800;
 }
 
 .serviceTag {
     font-size: 0.625rem;
     background-color: var(--color-primary-600);
     color: white;
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     text-transform: uppercase;
-    font-weight: var(--font-weight-extrabold);
+    font-weight: 800;
 }
 
 .logDate {
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     color: var(--color-text-tertiary);
 }
 
 .logContent {
-    font-size: var(--font-size-sm);
+    font-size: 0.875rem;
     line-height: 1.6;
     color: var(--color-text-secondary);
     white-space: pre-wrap;

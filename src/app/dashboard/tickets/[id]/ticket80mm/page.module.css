@@ -3,7 +3,7 @@
  */
 
 .container {
-    min-height: auto;
+    min-height: 100vh;
     background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
     padding: 24px;
 }
@@ -36,11 +36,10 @@
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 28px;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: #1f2937;
     margin: 0 0 8px 0;
-    letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -120,7 +119,7 @@
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: 22px;
     }
 
     .subtitle {

@@ -4,12 +4,7 @@ import { getInvoiceById } from '@/lib/invoice-actions';
 import InvoiceDetailClient from './InvoiceDetailClient';
 
 export const metadata = {
-  title: 'Detalle de Factura',
-  description: 'Consulta los detalles, ítems y estado de pago de una factura específica.',
-  openGraph: {
-    title: 'Detalle de Factura | FIX Workshop',
-    description: 'Consulta los detalles, ítems y estado de pago de una factura específica.',
-  },
+  title: 'Detalle de Factura | FIX-AI',
 };
 
 interface PageProps {
