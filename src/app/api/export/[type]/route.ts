@@ -13,6 +13,10 @@ export async function GET(
         return new NextResponse('Unauthorized', { status: 401 });
     }
 
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+    return new NextResponse('Forbidden: Insufficient permissions for data export', { status: 403 });
+  }
+
     const { type } = await params;
     const { searchParams } = new URL(request.url);
     const startDateStr = searchParams.get('startDate');

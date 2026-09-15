@@ -7,7 +7,7 @@ import NextAuth, { DefaultSession } from "next-auth";
  * - TECHNICIAN: Creates and responds to assigned tickets
  * - VIEWER: Read-only access
  */
-export type UserRole = 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
 
 declare module "next-auth" {
     interface Session {

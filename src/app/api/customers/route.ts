@@ -112,10 +112,7 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error fetching customers:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch customers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -170,9 +167,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newCustomer, { status: 201 });
   } catch (error) {
     console.error('Error creating customer:', error);
-    return NextResponse.json(
-      { error: 'Failed to create customer' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

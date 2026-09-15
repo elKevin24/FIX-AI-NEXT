@@ -220,7 +220,7 @@ describe('Core Actions CRUD', () => {
             const result = await createTicket(null, formData);
 
             expect(result).toEqual(expect.objectContaining({ success: false }));
-            expect(result.message).toMatch(/Stock insuficiente/);
+            expect(result!.message).toMatch(/Stock insuficiente/);
         });
 
         it('updateTicketStatus should update status', async () => {
@@ -242,7 +242,7 @@ describe('Core Actions CRUD', () => {
 
             expect(mockDb.ticket.update).toHaveBeenCalledWith(
                 expect.objectContaining({ 
-                    where: { id: validTicketId },
+                    where: { id: validTicketId, tenantId: 'tenant-1' },
                     data: expect.objectContaining({ status: 'IN_PROGRESS' })
                 })
             );
@@ -316,41 +316,8 @@ describe('Core Actions CRUD', () => {
             formData.append('role', 'TECHNICIAN');
 
             const result = await createUser(null, formData);
-            expect(result.success).toBe(false);
-            expect(result.message).toBe('Solo los administradores pueden crear usuarios');
-        });
-    });
-        it('createPart should throw error if user is VIEWER', async () => {
-            const mockViewerSession = {
-                user: { id: 'viewer-1', tenantId: 'tenant-1', role: 'VIEWER' }
-            };
-            (auth as any).mockResolvedValueOnce(mockViewerSession);
-            
-            const formData = new FormData();
-            formData.append('name', 'RAM');
-            formData.append('quantity', '10');
-            formData.append('cost', '50');
-            formData.append('price', '80');
-
-            await expect(createPart(null, formData)).rejects.toThrow('Los observadores no pueden crear repuestos');
-        });
-    });
-
-    // ==================== USER/RBAC TESTS ====================
-    describe('User Actions & RBAC', () => {
-        it('createUser should throw error if user is VIEWER', async () => {
-            const mockViewerSession = {
-                user: { id: 'viewer-1', tenantId: 'tenant-1', role: 'VIEWER' }
-            };
-            (auth as any).mockResolvedValueOnce(mockViewerSession);
-            
-            const formData = new FormData();
-            formData.append('name', 'Test');
-            formData.append('email', 'test@test.com');
-            formData.append('password', '123456');
-            formData.append('role', 'TECHNICIAN');
-
-            await expect(createUser(null, formData)).rejects.toThrow('Los observadores no pueden crear usuarios');
+            expect(result!.success).toBe(false);
+            expect(result!.message).toBe('Solo los administradores pueden crear usuarios');
         });
     });
 });

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceCategory } from '@/generated/prisma';
+import { ServiceCategory } from '@prisma/client';
 
 // ============================================================================
 // TICKET SCHEMAS
@@ -58,6 +58,29 @@ export const UpdateTicketSchema = z.object({
   accessories: z.string().optional().nullable(),
   checkInNotes: z.string().max(500, 'Las notas de ingreso son demasiado largas.').optional().nullable(),
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
+});
+
+export const UpdateTicketStatusSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'], {
+    errorMap: () => ({ message: 'Estado de ticket inválido.' })
+  }),
+  note: z.string().optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.status === 'CANCELLED') {
+    if (!data.note || data.note.trim().length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['note'],
+        message: 'Debes ingresar un motivo de cancelación de al menos 10 caracteres.',
+      });
+    }
+  }
+});
+
+export const DeleteTicketSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  reason: z.string().min(10, 'El motivo de eliminación debe tener al menos 10 caracteres.'),
 });
 
 // ============================================================================
@@ -254,4 +277,91 @@ export const RegisterPaymentSchema = z.object({
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
   transactionRef: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
+});
+
+export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
+export type UpdateTicketInput = z.infer<typeof UpdateTicketSchema>;
+export type CreateCustomerInput = z.infer<typeof CreateCustomerSchema>;
+export type UpdateCustomerInput = z.infer<typeof UpdateCustomerSchema>;
+export type CreatePartInput = z.infer<typeof CreatePartSchema>;
+export type UpdatePartInput = z.infer<typeof UpdatePartSchema>;
+export type CreateUserInput = z.infer<typeof CreateUserSchema>;
+export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+// ============================================================================
+// REPORTS SCHEMAS
+// ============================================================================
+
+export const DateRangeSchema = z.object({
+  startDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+  endDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: "La fecha de fin debe ser posterior a la fecha de inicio",
+  path: ["endDate"],
+});
+
+// ============================================================================
+// NOTIFICATIONS SCHEMAS
+// ============================================================================
+
+export const NotificationFilterSchema = z.object({
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(20),
+});
+
+export const NotificationIdSchema = z.object({
+  id: z.string().uuid('ID de notificación inválido'),
+});
+
+// ============================================================================
+// SLA SCHEMAS
+// ============================================================================
+
+export const SLACheckSchema = z.object({
+  tenantId: z.string().uuid('ID de tenant inválido').optional(), // Opcional para correr el SLA limitadamente
+});
+
+export const UpdateSLASettingsSchema = z.object({
+  slaWarningPercent: z.number().min(1, 'Debe ser al menos 1%').max(99, 'No puede superar el 99%'),
+  slaCriticalPercent: z.number().min(1, 'Debe ser al menos 1%').max(100, 'No puede superar el 100%'),
+  slaEmailEnabled: z.boolean(),
+  slaInAppEnabled: z.boolean(),
+}).refine(data => data.slaWarningPercent < data.slaCriticalPercent, {
+  message: 'El porcentaje de advertencia debe ser menor al porcentaje crítico',
+  path: ['slaWarningPercent'],
+});
+
+// ============================================================================
+// QUOTATION EXPORT SCHEMAS
+// ============================================================================
+
+export const QuotationExportSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  status: z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELLED']).optional(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
+  path: ['endDate'],
+});
+
+export const UpdateTenantSettingsSchema = z.object({
+  businessName: z.string().min(1, 'El nombre del negocio es requerido').nullable().optional(),
+  businessNIT: z.string().nullable().optional(),
+  businessAddress: z.string().nullable().optional(),
+  businessPhone: z.string().nullable().optional(),
+  businessEmail: z.string().email('Formato de email inválido').nullable().optional().or(z.literal('')),
+  taxRate: z.number().min(0, 'La tasa no puede ser negativa').max(100, 'La tasa no puede exceder 100%').optional(),
+  taxName: z.string().optional(),
+  currency: z.string().optional(),
+  defaultPaymentTerms: z.string().nullable().optional(),
+  invoiceFooter: z.string().nullable().optional(),
 });

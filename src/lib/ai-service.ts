@@ -1,14 +1,5 @@
+import 'server-only';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const apiKey = process.env.GOOGLE_AI_API_KEY;
-
-let genAI: GoogleGenerativeAI | null = null;
-
-if (apiKey) {
-  genAI = new GoogleGenerativeAI(apiKey);
-} else {
-  console.warn("⚠️ GOOGLE_AI_API_KEY is not set. AI features will be disabled.");
-}
 
 interface GenerateTextParams {
   prompt: string;
@@ -17,20 +8,22 @@ interface GenerateTextParams {
 }
 
 /**
- * Generates text using Google's Gemini models.
- * Returns null if the API key is not configured.
+ * Generates text using Google's Gemini models if an API key is present.
+ * Returns null if no API key is configured.
  */
 export async function generateAIResponse({ 
   prompt, 
   modelName = "gemini-1.5-flash",
   temperature = 0.7 
 }: GenerateTextParams): Promise<string | null> {
-  if (!genAI) {
-    console.error("❌ [AI Service] Attempted to generate text but API Key is missing.");
+  const apiKey = process.env['GEMINI_API_KEY'] || process.env['GOOGLE_AI_API_KEY'];
+  
+  if (!apiKey) {
     return null;
   }
 
   try {
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
       model: modelName,
       generationConfig: {

@@ -1,7 +1,13 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui';
+import { Card, CardBody } from '@/components/ui';
 import CreateUserForm from './CreateUserForm';
+import PageHeader from '@/components/PageHeader';
+
+export const metadata = {
+  title: 'Nuevo Usuario',
+  description: 'Crea una cuenta de técnico, recepcionista o administrador del taller.',
+};
 
 export default async function CreateUserPage() {
   const session = await auth();
@@ -16,14 +22,12 @@ export default async function CreateUserPage() {
   }
 
   return (
-    <div style={{ padding: 'var(--spacing-6)', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <PageHeader
+        title="Nuevo Usuario"
+        subtitle="Crea una nueva cuenta de usuario para tu taller"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Add New User</CardTitle>
-          <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
-            Create a new user account for your workshop
-          </p>
-        </CardHeader>
         <CardBody>
           <CreateUserForm />
         </CardBody>

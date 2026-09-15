@@ -88,69 +88,69 @@ export default function NotificationBell() {
 
     return (
         <div 
-            className={styles.container} 
+            className={styles['container']} 
             ref={containerRef}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
             <button 
-                className={styles.bellButton}
+                className={styles['bellButton']}
                 aria-label="Notificaciones"
                 title="Notificaciones"
                 onClick={() => setIsOpen(!isOpen)} // Mantiene compatibilidad click/touch
             >
                 <BellIcon />
                 {unreadCount > 0 && (
-                    <span className={styles.unreadBadge}>
+                    <span className={styles['unreadBadge']}>
                         {unreadCount}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div className={styles.dropdown}>
-                    <div className={styles.header}>
-                        <h3 className={styles.title}>Notificaciones</h3>
+                <div className={styles['dropdown']}>
+                    <div className={styles['header']}>
+                        <h3 className={styles['title']}>Notificaciones</h3>
                         {unreadCount > 0 && (
-                            <button onClick={handleMarkAllRead} className={styles.markAllRead}>
+                            <button onClick={handleMarkAllRead} className={styles['markAllRead']}>
                                 Marcar leídas
                             </button>
                         )}
                     </div>
                     
-                    <div className={styles.list}>
+                    <div className={styles['list']}>
                         {notifications.length === 0 ? (
-                            <p className={styles.emptyState}>No tienes notificaciones.</p>
+                            <p className={styles['emptyState']}>No tienes notificaciones.</p>
                         ) : (
                             notifications.map(notification => (
                                 <div 
                                     key={notification.id} 
-                                    className={`${styles.notificationItem} ${!notification.isRead ? styles.unread : ''}`}
+                                    className={`${styles['notificationItem']} ${!notification.isRead ? styles['unread'] : ''}`}
                                 >
-                                    <div className={styles.itemHeader}>
-                                        <span className={`${styles.itemTitle} ${getNotificationTypeClass(notification.type, styles)}`}>
+                                    <div className={styles['itemHeader']}>
+                                        <span className={`${styles['itemTitle']} ${getNotificationTypeClass(notification.type, styles)}`}>
                                             {notification.title}
                                         </span>
                                         {!notification.isRead && (
                                             <button 
                                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                                className={styles.closeBtn}
+                                                className={styles['closeBtn']}
                                                 title="Marcar como leída"
                                             >
                                                 ×
                                             </button>
                                         )}
                                     </div>
-                                    <p className={styles.message}>{notification.message}</p>
-                                    <div className={styles.itemFooter}>
-                                        <span className={styles.date}>
+                                    <p className={styles['message']}>{notification.message}</p>
+                                    <div className={styles['itemFooter']}>
+                                        <span className={styles['date']}>
                                             {new Date(notification.createdAt).toLocaleDateString()}
                                         </span>
                                         {notification.link && (
                                             <Link 
                                                 href={notification.link}
                                                 onClick={() => setIsOpen(false)}
-                                                className={styles.detailsLink}
+                                                className={styles['detailsLink']}
                                             >
                                                 Ver detalles &rarr;
                                             </Link>
@@ -163,7 +163,7 @@ export default function NotificationBell() {
                     <Link 
                         href="/dashboard/notifications" 
                         onClick={() => setIsOpen(false)}
-                        className={styles.viewAll}
+                        className={styles['viewAll']}
                     >
                         Ver todas las notificaciones
                     </Link>
@@ -175,10 +175,10 @@ export default function NotificationBell() {
 
 function getNotificationTypeClass(type: string, styles: any) {
     switch (type) {
-        case 'WARNING': return styles.typeWarning;
-        case 'ERROR': return styles.typeError;
-        case 'SUCCESS': return styles.typeSuccess;
-        default: return styles.typeInfo;
+        case 'WARNING': return styles['typeWarning'];
+        case 'ERROR': return styles['typeError'];
+        case 'SUCCESS': return styles['typeSuccess'];
+        default: return styles['typeInfo'];
     }
 }
 

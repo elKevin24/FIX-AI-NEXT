@@ -24,8 +24,20 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     box-shadow: var(--shadow-lg);
-    overflow-y: auto;
-    overflow-x: visible;
+    overflow: hidden;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: 4px;
 }
 
 .sidebar.open {
@@ -67,9 +79,39 @@
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    /* More spacing between links */
+    gap: 1.25rem;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) transparent;
+    padding-right: 0.25rem;
+}
+
+.nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nav::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: 4px;
+}
+
+.navSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.navSectionTitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.15rem;
+    user-select: none;
 }
 
 .navLink {

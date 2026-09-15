@@ -4,8 +4,12 @@ import { getTemplateAnalytics } from '@/lib/service-template-actions';
 import TemplateAnalyticsClient from './TemplateAnalyticsClient';
 
 export const metadata = {
-  title: 'Analytics de Plantillas | Dashboard',
-  description: 'Métricas y estadísticas de uso de plantillas de servicio',
+  title: 'Analytics de Plantillas',
+  description: 'Métricas de uso, frecuencia y rendimiento de las plantillas de servicio del taller.',
+  openGraph: {
+    title: 'Analytics de Plantillas | FIX Workshop',
+    description: 'Métricas de uso, frecuencia y rendimiento de las plantillas de servicio del taller.',
+  },
 };
 
 export default async function TemplateAnalyticsPage() {

@@ -3,11 +3,15 @@ import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
 import { createNotification } from '@/lib/notifications';
 import SLABreachEmail from '@/emails/SLABreach'; 
+import { SLACheckSchema } from '@/lib/schemas';
 
-export async function checkSLA() {
+export async function checkSLA(tenantId?: string) {
     console.log('Starting SLA Check...');
     
+    const parsed = SLACheckSchema.parse({ tenantId });
+    
     const tenants = await prisma.tenant.findMany({
+        where: parsed.tenantId ? { id: parsed.tenantId } : undefined,
         include: { settings: true }
     });
     
@@ -65,7 +69,7 @@ export async function checkSLA() {
                          title: ticket.title,
                          status,
                          timeRemaining: msToTime(end - now),
-                         ticketLink: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard/tickets/${ticket.id}`
+                         ticketLink: `${process.env['NEXTAUTH_URL'] || 'http://localhost:3000'}/dashboard/tickets/${ticket.id}`
                      })
                  });
                  emailsSent++;

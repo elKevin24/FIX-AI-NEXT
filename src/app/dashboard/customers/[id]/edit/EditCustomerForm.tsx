@@ -3,6 +3,8 @@
 import { useActionState } from 'react';
 import { updateCustomer, deleteCustomer } from '@/lib/actions';
 import styles from '../../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -37,26 +39,29 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
     const hasTickets = customer._count.tickets > 0;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1>Editar Cliente</h1>
-                <Link href="/dashboard/customers" className={styles.viewLink}>
-                    &larr; Volver a clientes
-                </Link>
-            </div>
+        <div className={styles['container']}>
+            <PageHeader
+                title="Editar Cliente"
+                subtitle={`Registro de cliente: ${customer.name}`}
+                actions={
+                    <Button as={Link} href="/dashboard/customers" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                        Volver a Clientes
+                    </Button>
+                }
+            />
 
             {isSuperAdmin && (
-                <div className={styles.superAdminBadge} style={{ width: 'fit-content', marginBottom: '1rem' }}>
+                <div className={styles['superAdminBadge']} style={{ width: 'fit-content', marginBottom: '1rem' }}>
                     Tenant: {customer.tenant.name}
                 </div>
             )}
 
-            <div className={styles.tableContainer} style={{ padding: '2rem' }}>
-                <form action={updateAction} className={styles.form} style={{ maxWidth: '32rem' }}>
+            <div className={styles['tableContainer']} style={{ padding: '2rem' }}>
+                <form action={updateAction} className={styles['form']} style={{ maxWidth: '32rem' }}>
                     <input type="hidden" name="customerId" value={customer.id} />
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="name" className={styles.label}>Nombre *</label>
+                    <div className={styles['formGroup']}>
+                        <label htmlFor="name" className={styles['label']}>Nombre *</label>
                         <input
                             id="name"
                             name="name"
@@ -64,151 +69,155 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                             required
                             defaultValue={customer.name}
                             placeholder="Nombre completo del cliente"
-                            className={styles.input}
+                            className={styles['input']}
                         />
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="email" className={styles.label}>Email</label>
+                    <div className={styles['formGroup']}>
+                        <label htmlFor="email" className={styles['label']}>Email</label>
                         <input
                             id="email"
                             name="email"
                             type="email"
                             defaultValue={customer.email || ''}
                             placeholder="cliente@ejemplo.com"
-                            className={styles.input}
+                            className={styles['input']}
                         />
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="phone" className={styles.label}>Teléfono</label>
+                    <div className={styles['formGroup']}>
+                        <label htmlFor="phone" className={styles['label']}>Teléfono</label>
                         <input
                             id="phone"
                             name="phone"
                             type="tel"
                             defaultValue={customer.phone || ''}
                             placeholder="+52 555 123 4567"
-                            className={styles.input}
+                            className={styles['input']}
                         />
                     </div>
 
-                    <div className={styles.gridTwoColumns}>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="dpi" className={styles.label}>DPI (ID)</label>
+                    <div className={styles['gridTwoColumns']}>
+                        <div className={styles['formGroup']}>
+                            <label htmlFor="dpi" className={styles['label']}>DPI (ID)</label>
                             <input
                                 id="dpi"
                                 name="dpi"
                                 type="text"
                                 defaultValue={customer.dpi || ''}
                                 placeholder="1234 56789 0101"
-                                className={styles.input}
+                                className={styles['input']}
                             />
                         </div>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="nit" className={styles.label}>NIT (Tax ID)</label>
+                        <div className={styles['formGroup']}>
+                            <label htmlFor="nit" className={styles['label']}>NIT (Tax ID)</label>
                             <input
                                 id="nit"
                                 name="nit"
                                 type="text"
                                 defaultValue={customer.nit || ''}
                                 placeholder="123456-7"
-                                className={styles.input}
+                                className={styles['input']}
                             />
                         </div>
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="address" className={styles.label}>Dirección</label>
+                    <div className={styles['formGroup']}>
+                        <label htmlFor="address" className={styles['label']}>Dirección</label>
                         <textarea
                             id="address"
                             name="address"
                             rows={2}
                             defaultValue={customer.address || ''}
                             placeholder="Calle, número, colonia, ciudad..."
-                            className={styles.input}
+                            className={styles['input']}
                             style={{ resize: 'vertical' }}
                         />
                     </div>
 
-                    <div className={styles.resultsInfo} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-base)' }}>
+                    <div className={styles['resultsInfo']} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-base)' }}>
                         <p>Tickets asociados: <strong>{customer._count.tickets}</strong></p>
                     </div>
 
                     <div aria-live="polite">
                         {updateState?.message && (
-                            <p className={styles.errorMessage}>
+                            <p className={styles['errorMessage']}>
                                 {updateState.message}
                             </p>
                         )}
                     </div>
 
-                    <div className={styles.actions}>
-                        <button
+                    <div className={styles['actions']}>
+                        <Button
                             type="submit"
-                            className={styles.createBtn}
-                            disabled={isUpdating}
+                            variant="primary"
+                            size="sm"
+                            isLoading={isUpdating}
                         >
-                            {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
-                        </button>
-                        <Link
+                            Guardar Cambios
+                        </Button>
+                        <Button
+                            as={Link}
                             href="/dashboard/customers"
-                            className={styles.cancelBtn}
-                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                            variant="ghost"
+                            size="sm"
                         >
                             Cancelar
-                        </Link>
+                        </Button>
                     </div>
                 </form>
             </div>
 
             {/* Delete Section - Solo para admins */}
             {isAdmin && (
-                <div className={styles.dangerZone} style={{ marginTop: '2rem' }}>
-                    <h2 className={styles.dangerTitle}>Zona de Peligro</h2>
+                <div className={styles['dangerZone']} style={{ marginTop: '2rem' }}>
+                    <h2 className={styles['dangerTitle']}>Zona de Peligro</h2>
 
                     {hasTickets ? (
-                        <div className={styles.errorMessage} style={{ color: 'var(--color-warning-700)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
-                            No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
+                        <div className={styles['errorMessage']} style={{ color: 'var(--color-warning-800)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
+                            ⚠️ No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
                         </div>
                     ) : !showDeleteConfirm ? (
-                        <button
+                        <Button
                             type="button"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className={styles.dangerBtn}
+                            variant="danger"
+                            size="sm"
                         >
                             Eliminar Cliente
-                        </button>
+                        </Button>
                     ) : (
-                        <div className={styles.formGroup}>
-                            <p style={{ color: 'var(--color-danger-600)' }}>
-                                ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>?
-                                Esta acción no se puede deshacer.
+                        <div className={styles['formGroup']}>
+                            <p style={{ color: 'var(--color-error-600)', margin: '0 0 1rem 0' }}>
+                                ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>? Esta acción no se puede deshacer.
                             </p>
 
                             <form action={deleteAction}>
                                 <input type="hidden" name="customerId" value={customer.id} />
 
                                 {deleteState?.message && (
-                                    <p className={styles.errorMessage}>
+                                    <p className={styles['errorMessage']}>
                                         {deleteState.message}
                                     </p>
                                 )}
 
-                                <div className={styles.actions}>
-                                    <button
+                                <div className={styles['actions']}>
+                                    <Button
                                         type="submit"
-                                        className={styles.dangerBtn}
-                                        disabled={isDeleting}
+                                        variant="danger"
+                                        size="sm"
+                                        isLoading={isDeleting}
                                     >
-                                        {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Cliente'}
-                                    </button>
-                                    <button
+                                        Sí, Eliminar Cliente
+                                    </Button>
+                                    <Button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className={styles.cancelBtn}
+                                        variant="ghost"
+                                        size="sm"
                                     >
                                         Cancelar
-                                    </button>
+                                    </Button>
                                 </div>
                             </form>
                         </div>

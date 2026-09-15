@@ -37,18 +37,25 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
         if (path === '/dashboard') {
             return pathname === '/dashboard';
         }
+        if (path === '/dashboard/tickets') {
+            // Activo en /dashboard/tickets, /dashboard/tickets/create, /dashboard/tickets/[id], pero NO en /dashboard/tickets/pool
+            return (
+                pathname === '/dashboard/tickets' ||
+                (pathname?.startsWith('/dashboard/tickets/') && !pathname.startsWith('/dashboard/tickets/pool'))
+            );
+        }
         return pathname?.startsWith(path);
     };
 
     const getLinkClass = (path: string) => {
-        return `${styles.navLink} ${isActive(path) ? styles.active : ''}`;
+        return `${styles['navLink']} ${isActive(path) ? styles['active'] : ''}`;
     };
 
     return (
         <>
             {/* Mobile Toggle Button */}
             <button
-                className={`${styles.mobileToggle} ${isOpen ? styles.toggleOpen : ''}`}
+                className={`${styles['mobileToggle']} ${isOpen ? styles['toggleOpen'] : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle Menu"
             >
@@ -61,82 +68,101 @@ export default function Sidebar({ logoutButton, userRole }: SidebarProps) {
 
             {/* Overlay */}
             <div
-                className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
+                className={`${styles['overlay']} ${isOpen ? styles['open'] : ''}`}
                 onClick={() => setIsOpen(false)}
             />
 
             {/* Sidebar */}
-            <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
-                <div className={styles.logo}>
-                    <div className={styles.logoIcon} />
+            <aside className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`} aria-label="Menú de navegación">
+                <div className={styles['logo']}>
+                    <div className={styles['logoIcon']} />
                     <h2>FIX-AI</h2>
                 </div>
-                <nav className={styles.nav}>
-                    <Link href="/dashboard" className={getLinkClass('/dashboard')}>
-                        <HomeIcon className={styles.navIcon} />
-                        Inicio
-                    </Link>
-                    <Link href="/dashboard/tickets" className={getLinkClass('/dashboard/tickets')}>
-                        <TicketIcon className={styles.navIcon} />
-                        Tickets
-                    </Link>
-                    <Link href="/dashboard/parts" className={getLinkClass('/dashboard/parts')}>
-                        <CubeIcon className={styles.navIcon} />
-                        Repuestos
-                    </Link>
-                    {userRole === 'ADMIN' && (
-                        <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')}>
-                            <TemplatesIcon className={styles.navIcon} />
-                            Plantillas
+                <nav className={styles['nav']}>
+                    {/* Grupo 1: General (3 ítems) */}
+                    <div className={styles['navSection']}>
+                        <span className={styles['navSectionTitle']}>General</span>
+                        <Link href="/dashboard" className={getLinkClass('/dashboard')}>
+                            <HomeIcon className={styles['navIcon']} />
+                            Inicio
                         </Link>
-                    )}
-                    <Link href="/dashboard/tickets/pool" className={getLinkClass('/dashboard/tickets/pool')}>
-                        <PoolIcon className={styles.navIcon} />
-                        Pool de Tickets
-                    </Link>
-                    <Link href="/dashboard/technicians/workload" className={getLinkClass('/dashboard/technicians/workload')}>
-                        <WorkloadIcon className={styles.navIcon} />
-                        Carga de Trabajo
-                    </Link>
-                    <Link href="/dashboard/reports" className={getLinkClass('/dashboard/reports')}>
-                        <ChartIcon className={styles.navIcon} />
-                        Reportes
-                    </Link>
-                    <Link href="/dashboard/invoices" className={getLinkClass('/dashboard/invoices')}>
-                        <InvoiceIcon className={styles.navIcon} />
-                        Facturación
-                    </Link>
-                    <Link href="/dashboard/cash-register" className={getLinkClass('/dashboard/cash-register')}>
-                        <CashIcon className={styles.navIcon} />
-                        Caja
-                    </Link>
-                    <Link href="/dashboard/pos" className={getLinkClass('/dashboard/pos')}>
-                        <POSIcon className={styles.navIcon} />
-                        Punto de Venta
-                    </Link>
-                    <Link href="/dashboard/pos/quotations" className={getLinkClass('/dashboard/pos/quotations')}>
-                        <QuotationIcon className={styles.navIcon} />
-                        Cotizaciones
-                    </Link>
-                    <Link href="/dashboard/pos/returns" className={getLinkClass('/dashboard/pos/returns')}>
-                        <ReturnIcon className={styles.navIcon} />
-                        Devoluciones
-                    </Link>
-                    <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')}>
-                        <UsersIcon className={styles.navIcon} />
-                        Clientes
-                    </Link>
-                    <Link href="/dashboard/users" className={getLinkClass('/dashboard/users')}>
-                        <UserGroupIcon className={styles.navIcon} />
-                        Usuarios
-                    </Link>
-                    <Link href="/dashboard/settings" className={getLinkClass('/dashboard/settings')}>
-                        <SettingsIcon className={styles.navIcon} />
-                        Configuración
-                    </Link>
+                        <Link href="/dashboard/tickets" className={getLinkClass('/dashboard/tickets')}>
+                            <TicketIcon className={styles['navIcon']} />
+                            Tickets
+                        </Link>
+                        <Link href="/dashboard/tickets/pool" className={getLinkClass('/dashboard/tickets/pool')}>
+                            <PoolIcon className={styles['navIcon']} />
+                            Pool de Tickets
+                        </Link>
+                    </div>
+
+                    {/* Grupo 2: Taller & Operaciones (4 ítems) */}
+                    <div className={styles['navSection']}>
+                        <span className={styles['navSectionTitle']}>Operaciones</span>
+                        <Link href="/dashboard/parts" className={getLinkClass('/dashboard/parts')}>
+                            <CubeIcon className={styles['navIcon']} />
+                            Repuestos
+                        </Link>
+                        <Link href="/dashboard/technicians/workload" className={getLinkClass('/dashboard/technicians/workload')}>
+                            <WorkloadIcon className={styles['navIcon']} />
+                            Carga de Trabajo
+                        </Link>
+                        {userRole === 'ADMIN' && (
+                            <Link href="/dashboard/settings/service-templates" className={getLinkClass('/dashboard/settings/service-templates')}>
+                                <TemplatesIcon className={styles['navIcon']} />
+                                Plantillas
+                            </Link>
+                        )}
+                        <Link href="/dashboard/customers" className={getLinkClass('/dashboard/customers')}>
+                            <UsersIcon className={styles['navIcon']} />
+                            Clientes
+                        </Link>
+                    </div>
+
+                    {/* Grupo 3: Ventas & Punto de Venta (5 ítems) */}
+                    <div className={styles['navSection']}>
+                        <span className={styles['navSectionTitle']}>Ventas & POS</span>
+                        <Link href="/dashboard/pos" className={getLinkClass('/dashboard/pos')}>
+                            <POSIcon className={styles['navIcon']} />
+                            Punto de Venta
+                        </Link>
+                        <Link href="/dashboard/cash-register" className={getLinkClass('/dashboard/cash-register')}>
+                            <CashIcon className={styles['navIcon']} />
+                            Caja
+                        </Link>
+                        <Link href="/dashboard/invoices" className={getLinkClass('/dashboard/invoices')}>
+                            <InvoiceIcon className={styles['navIcon']} />
+                            Facturación
+                        </Link>
+                        <Link href="/dashboard/pos/quotations" className={getLinkClass('/dashboard/pos/quotations')}>
+                            <QuotationIcon className={styles['navIcon']} />
+                            Cotizaciones
+                        </Link>
+                        <Link href="/dashboard/pos/returns" className={getLinkClass('/dashboard/pos/returns')}>
+                            <ReturnIcon className={styles['navIcon']} />
+                            Devoluciones
+                        </Link>
+                    </div>
+
+                    {/* Grupo 4: Administración (3 ítems) */}
+                    <div className={styles['navSection']}>
+                        <span className={styles['navSectionTitle']}>Administración</span>
+                        <Link href="/dashboard/reports" className={getLinkClass('/dashboard/reports')}>
+                            <ChartIcon className={styles['navIcon']} />
+                            Reportes
+                        </Link>
+                        <Link href="/dashboard/users" className={getLinkClass('/dashboard/users')}>
+                            <UserGroupIcon className={styles['navIcon']} />
+                            Usuarios
+                        </Link>
+                        <Link href="/dashboard/settings" className={getLinkClass('/dashboard/settings')}>
+                            <SettingsIcon className={styles['navIcon']} />
+                            Configuración
+                        </Link>
+                    </div>
                 </nav>
-                <div className={styles.userProfile}>
-                    <div className={styles.themeSwitcherWrapper} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className={styles['userProfile']}>
+                    <div className={styles['themeSwitcherWrapper']} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <ThemeSwitcher />
                     </div>
                     {logoutButton}

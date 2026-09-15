@@ -27,6 +27,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
 
       - name: Validate Prisma schema
         run: npx prisma validate
@@ -69,6 +71,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
 
       - name: Run migrations
         run: npx prisma migrate deploy

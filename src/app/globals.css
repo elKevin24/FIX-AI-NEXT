@@ -3,8 +3,6 @@
    Professional Multi-Tenant Workshop Management
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 :root {
   /* ========== COLOR PALETTE ========== */
   /* Optimized for WCAG AA/AAA Contrast */
@@ -29,6 +27,7 @@
   --color-secondary-100: hsl(280, 95%, 93%);
   --color-secondary-500: hsl(280, 70%, 50%);
   --color-secondary-600: hsl(280, 75%, 40%);
+  --color-secondary-700: hsl(280, 75%, 30%);
 
   /* Accent Colors - Vibrant Orange */
   --color-accent-50: hsl(30, 100%, 97%);
@@ -36,29 +35,41 @@
   --color-accent-500: hsl(25, 95%, 50%);
   /* Shifted slightly redder/darker for visibility */
   --color-accent-600: hsl(25, 100%, 40%);
+  --color-accent-700: hsl(25, 100%, 32%);
 
   /* Semantic Colors - Adjusted for Contrast */
 
   /* Success (Green) - Needs to be dark enough for white text */
   --color-success-50: hsl(145, 85%, 97%);
   --color-success-100: hsl(145, 80%, 92%);
+  --color-success-200: hsl(145, 80%, 85%);
+  --color-success-300: hsl(145, 75%, 75%);
+  --color-success-400: hsl(145, 70%, 55%);
   --color-success-500: hsl(145, 70%, 40%);
   /* Darkened */
-  --color-success-600: hsl(145, 80%, 30%);
+  --color-success-600: hsl(145, 80%, 29%);
   --color-success-700: hsl(145, 85%, 20%);
   --color-success-800: hsl(145, 90%, 15%);
 
   /* Warning (Yellow/Amber) - Difficult to use with white text, usually use black text on yellow bg */
   --color-warning-50: hsl(40, 100%, 97%);
   --color-warning-100: hsl(40, 90%, 92%);
+  --color-warning-200: hsl(40, 88%, 85%);
+  --color-warning-400: hsl(35, 90%, 55%);
   --color-warning-500: hsl(35, 90%, 45%);
   /* Darkened to Amber */
   --color-warning-600: hsl(30, 95%, 35%);
+  --color-warning-700: hsl(30, 95%, 28%);
   --color-warning-800: hsl(30, 100%, 20%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(30, 100%, 12%);
 
   /* Error (Red) */
   --color-error-50: hsl(0, 100%, 97%);
   --color-error-100: hsl(0, 90%, 93%);
+  --color-error-200: hsl(0, 88%, 88%);
+  --color-error-300: hsl(355, 85%, 80%);
+  --color-error-400: hsl(355, 82%, 60%);
   --color-error-500: hsl(355, 80%, 50%);
   --color-error-600: hsl(355, 85%, 40%);
   --color-error-700: hsl(355, 90%, 30%);
@@ -67,6 +78,8 @@
   /* Info (Blue/Cyan) */
   --color-info-50: hsl(205, 100%, 97%);
   --color-info-100: hsl(205, 90%, 92%);
+  --color-info-200: hsl(205, 88%, 88%);
+  --color-info-400: hsl(205, 80%, 55%);
   --color-info-500: hsl(205, 75%, 45%);
   --color-info-600: hsl(205, 85%, 35%);
   --color-info-700: hsl(205, 90%, 25%);
@@ -79,7 +92,7 @@
   --color-gray-100: hsl(210, 20%, 95%);
   --color-gray-200: hsl(210, 15%, 90%);
   --color-gray-300: hsl(210, 15%, 80%);
-  --color-gray-400: hsl(210, 15%, 60%);
+  --color-gray-400: hsl(210, 15%, 59%);
   /* Signif. darker for borders (3:1) */
   --color-gray-500: hsl(210, 15%, 45%);
   /* Accessible tertiary text */
@@ -100,11 +113,21 @@
   /* Ratio > 15:1 */
   --color-text-secondary: var(--color-gray-800);
   /* Ratio > 10:1 */
-  --color-text-tertiary: var(--color-gray-600);
-  /* Ratio > 4.5:1 (AA Large / AA Normal) */
+  --color-text-tertiary: var(--color-gray-700);
+  /* Ratio > 7:1 (WCAG AAA) */
   --color-text-inverse: hsl(0, 0%, 100%);
   --color-text-link: var(--color-primary-600);
   /* Ratio > 4.5:1 */
+
+  /* Semantic foregrounds for filled actions. Themes may change the inverse
+     foreground without components needing hard-coded colour overrides. */
+  --color-on-primary: var(--color-text-inverse);
+  --color-on-success: var(--color-text-inverse);
+  --color-on-warning: var(--color-warning-900);
+  --color-on-danger: var(--color-text-inverse);
+  --color-on-progress-low: hsl(210, 30%, 10%);
+  --color-on-progress-medium: var(--color-warning-900);
+  --color-on-progress-high: var(--color-text-inverse);
 
   /* Border Colors - UI Boundaries (Sutiles y minimalistas) */
   --color-border-light: var(--color-gray-200);
@@ -115,7 +138,8 @@
   /* Active states - Moderado */
 
   /* ========== TYPOGRAPHY ========== */
-  --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* --font-inter is injected by next/font (see src/app/layout.tsx) */
+  --font-family-base: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
 
   /* Font Weights */
@@ -214,6 +238,30 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* ========== LEGACY COMPATIBILITY ALIASES ========== */
+  /* Old token names still referenced by legacy module CSS (POS, cash register,
+     technician cards, ticket pool). Resolved against the current design system
+     so they stay theme-aware. */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
@@ -231,8 +279,8 @@
 
   /* Text - Light colors with high contrast */
   --color-text-primary: hsl(210, 20%, 98%);
-  --color-text-secondary: hsl(210, 15%, 85%);
-  --color-text-tertiary: hsl(210, 10%, 65%);
+  --color-text-secondary: hsl(210, 15%, 88%);
+  --color-text-tertiary: hsl(210, 10%, 75%);
   --color-text-inverse: hsl(210, 30%, 10%);
   --color-text-link: hsl(220, 85%, 70%);
 
@@ -252,6 +300,9 @@
   /* Success - Brighter green */
   --color-success-50: hsl(145, 70%, 15%);
   --color-success-100: hsl(145, 65%, 20%);
+  --color-success-200: hsl(145, 65%, 25%);
+  --color-success-300: hsl(145, 65%, 32%);
+  --color-success-400: hsl(145, 62%, 42%);
   --color-success-500: hsl(145, 60%, 50%);
   --color-success-600: hsl(145, 60%, 55%);
   --color-success-700: hsl(145, 65%, 60%);
@@ -260,13 +311,21 @@
   /* Warning - Brighter amber */
   --color-warning-50: hsl(35, 80%, 18%);
   --color-warning-100: hsl(35, 75%, 25%);
+  --color-warning-200: hsl(35, 80%, 30%);
+  --color-warning-400: hsl(35, 85%, 50%);
   --color-warning-500: hsl(35, 90%, 60%);
   --color-warning-600: hsl(35, 90%, 65%);
+  --color-warning-700: hsl(35, 90%, 68%);
   --color-warning-800: hsl(35, 95%, 70%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(35, 100%, 15%);
 
   /* Error - Brighter red */
   --color-error-50: hsl(355, 75%, 18%);
   --color-error-100: hsl(355, 70%, 25%);
+  --color-error-200: hsl(355, 75%, 30%);
+  --color-error-300: hsl(355, 75%, 38%);
+  --color-error-400: hsl(355, 80%, 50%);
   --color-error-500: hsl(355, 80%, 60%);
   --color-error-600: hsl(355, 85%, 65%);
   --color-error-700: hsl(355, 90%, 70%);
@@ -275,10 +334,26 @@
   /* Info - Brighter cyan */
   --color-info-50: hsl(205, 80%, 18%);
   --color-info-100: hsl(205, 75%, 25%);
+  --color-info-200: hsl(205, 80%, 30%);
+  --color-info-400: hsl(205, 85%, 50%);
   --color-info-500: hsl(205, 85%, 60%);
   --color-info-600: hsl(205, 90%, 65%);
   --color-info-700: hsl(205, 95%, 70%);
   --color-info-800: hsl(205, 95%, 75%);
+
+  /* Secondary - Brighter purple */
+  --color-secondary-50: hsl(280, 75%, 15%);
+  --color-secondary-100: hsl(280, 70%, 22%);
+  --color-secondary-500: hsl(280, 80%, 65%);
+  --color-secondary-600: hsl(280, 85%, 70%);
+  --color-secondary-700: hsl(280, 88%, 75%);
+
+  /* Accent - Brighter orange */
+  --color-accent-50: hsl(25, 80%, 15%);
+  --color-accent-100: hsl(25, 75%, 22%);
+  --color-accent-500: hsl(25, 90%, 65%);
+  --color-accent-600: hsl(25, 92%, 70%);
+  --color-accent-700: hsl(25, 95%, 75%);
 
   /* Grays - Adjusted for dark theme */
   --color-gray-50: hsl(210, 20%, 20%);
@@ -299,6 +374,27 @@
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.7);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+
+  /* Legacy compatibility aliases (theme-aware) */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
@@ -318,8 +414,8 @@
 
   /* Text - High contrast for readability */
   --color-text-primary: hsl(213, 12%, 92%);
-  --color-text-secondary: hsl(215, 10%, 71%);
-  --color-text-tertiary: hsl(215, 8%, 56%);
+  --color-text-secondary: hsl(215, 10%, 80%);
+  --color-text-tertiary: hsl(215, 8%, 70%);
   --color-text-inverse: hsl(220, 14%, 11%);
   --color-text-link: hsl(212, 92%, 68%);
 
@@ -339,6 +435,9 @@
   /* Success - BLUE (#3FB950 GitHub green → Blue equivalent) */
   --color-success-50: hsl(212, 75%, 18%);
   --color-success-100: hsl(212, 70%, 24%);
+  --color-success-200: hsl(212, 75%, 30%);
+  --color-success-300: hsl(212, 75%, 38%);
+  --color-success-400: hsl(212, 80%, 50%);
   --color-success-500: hsl(212, 88%, 61%);
   --color-success-600: hsl(212, 88%, 66%);
   --color-success-700: hsl(212, 90%, 71%);
@@ -347,13 +446,21 @@
   /* Warning - Golden Yellow (high visibility) */
   --color-warning-50: hsl(40, 70%, 18%);
   --color-warning-100: hsl(40, 68%, 24%);
+  --color-warning-200: hsl(40, 72%, 30%);
+  --color-warning-400: hsl(40, 85%, 55%);
   --color-warning-500: hsl(40, 96%, 65%);
   --color-warning-600: hsl(40, 96%, 70%);
+  --color-warning-700: hsl(40, 95%, 73%);
   --color-warning-800: hsl(40, 98%, 75%);
+  /* Dark text on amber for WCAG AA */
+  --color-warning-900: hsl(40, 100%, 14%);
 
   /* Error - CORAL/ORANGE (#F85149 GitHub red → Orange) */
   --color-error-50: hsl(6, 75%, 20%);
   --color-error-100: hsl(6, 72%, 26%);
+  --color-error-200: hsl(6, 75%, 32%);
+  --color-error-300: hsl(6, 75%, 40%);
+  --color-error-400: hsl(6, 85%, 52%);
   --color-error-500: hsl(6, 93%, 64%);
   --color-error-600: hsl(6, 93%, 69%);
   --color-error-700: hsl(6, 95%, 74%);
@@ -362,6 +469,8 @@
   /* Info - Purple/Magenta (distinctive) */
   --color-info-50: hsl(275, 75%, 20%);
   --color-info-100: hsl(275, 70%, 26%);
+  --color-info-200: hsl(275, 75%, 32%);
+  --color-info-400: hsl(275, 80%, 52%);
   --color-info-500: hsl(275, 80%, 62%);
   --color-info-600: hsl(275, 82%, 67%);
   --color-info-700: hsl(275, 85%, 72%);
@@ -372,12 +481,14 @@
   --color-secondary-100: hsl(340, 70%, 26%);
   --color-secondary-500: hsl(340, 82%, 62%);
   --color-secondary-600: hsl(340, 84%, 67%);
+  --color-secondary-700: hsl(340, 85%, 72%);
 
   /* Accent - Bright Orange */
   --color-accent-50: hsl(25, 75%, 20%);
   --color-accent-100: hsl(25, 72%, 26%);
   --color-accent-500: hsl(25, 90%, 62%);
   --color-accent-600: hsl(25, 92%, 67%);
+  --color-accent-700: hsl(25, 92%, 72%);
 
   /* Grays - Cool toned */
   --color-gray-50: hsl(220, 12%, 22%);
@@ -398,6 +509,27 @@
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -4px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.9), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.95);
+
+  /* Legacy compatibility aliases (theme-aware) */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --primary: var(--color-primary-600);
+  --primary-color: var(--color-primary-600);
+  --color-primary: var(--color-primary-600);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
+  --danger: var(--color-error-600);
+  --success: var(--color-success-600);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-surface-hover);
+  --border-color: var(--color-border-medium);
+  --border-light: var(--color-border-light);
+  --card-bg: var(--color-surface);
+  --input-bg: var(--color-surface);
+  --color-white: #ffffff;
+  --font-mono: var(--font-family-mono);
 }
 
 /* ========================================
@@ -627,8 +759,8 @@ a:hover {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid transparent;
-  color: var(--color-gray-400);
-  /* Gris oscuro explícito para visibilidad */
+  color: var(--color-gray-800);
+  /* Gris oscuro para contraste WCAG AA */
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.01em;
   border-radius: var(--radius-full);
@@ -1135,6 +1267,30 @@ a:hover {
 }
 
 /* ========================================
+   ACCESSIBILITY: SKIP LINK
+   ======================================== */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--spacing-4);
+  z-index: var(--z-tooltip);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-primary-600);
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--spacing-4);
+  outline: 2px solid var(--color-primary-800);
+  outline-offset: 2px;
+}
+
+/* ========================================
    ACCESSIBILITY: SCREEN READER ONLY
    ======================================== */
 
@@ -1148,6 +1304,22 @@ a:hover {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: var(--spacing-2) var(--spacing-4);
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: var(--color-primary-600);
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-base);
+  z-index: var(--z-tooltip);
 }
 
 /* ========================================
@@ -1175,5 +1347,103 @@ a:hover {
   /* Keep focus styles visible but instant */
   :focus-visible {
     transition: none !important;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY: HIGH CONTRAST MODE
+   WCAG 2.1 Level AA - Success Criterion 1.4.3
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  /* --- Light Theme --- */
+  :root {
+    /* Borders: Stronger contrast for UI boundaries */
+    --color-border-light: var(--color-gray-400);
+    --color-border-medium: var(--color-gray-600);
+    --color-border-strong: var(--color-gray-800);
+    --border-color: var(--color-gray-600);
+    --border-light: var(--color-gray-400);
+
+    /* Focus rings: More visible */
+    --focus-ring-color: var(--color-primary-700);
+    --focus-ring-width: 3px;
+    --focus-ring-offset: 2px;
+
+    /* Interactive elements: Clearer boundaries */
+    --button-border-color: var(--color-gray-500);
+    --input-border-color: var(--color-gray-500);
+    --input-border-focus: var(--color-primary-700);
+    --card-border-color: var(--color-gray-400);
+    --table-border-color: var(--color-gray-500);
+    --separator-color: var(--color-gray-500);
+  }
+
+  /* --- Dark Theme --- */
+  [data-theme="dark"] {
+    --color-text-primary: hsl(0, 0%, 100%);
+    --color-text-secondary: hsl(0, 0%, 93%);
+    --color-text-tertiary: hsl(0, 0%, 85%);
+    --color-text-muted: hsl(0, 0%, 80%);
+
+    /* Borders: High contrast on dark backgrounds */
+    --color-border-light: var(--color-gray-500);
+    --color-border-medium: var(--color-gray-400);
+    --color-border-strong: var(--color-gray-300);
+    --border-color: var(--color-gray-400);
+    --border-light: var(--color-gray-500);
+
+    /* Focus rings: Bright on dark */
+    --focus-ring-color: var(--color-primary-500);
+
+    /* Interactive elements */
+    --button-border-color: var(--color-gray-400);
+    --input-border-color: var(--color-gray-400);
+    --input-border-focus: var(--color-primary-500);
+    --card-border-color: var(--color-gray-500);
+    --table-border-color: var(--color-gray-400);
+    --separator-color: var(--color-gray-400);
+  }
+
+  /* --- Focus Outlines --- */
+  :focus-visible {
+    outline-width: 3px !important;
+    outline-offset: 2px !important;
+  }
+
+  /* --- Inputs & Fields --- */
+  input, select, textarea {
+    border-width: 2px !important;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--input-border-focus) !important;
+    box-shadow: 0 0 0 2px var(--focus-ring-color) !important;
+  }
+
+  /* --- Buttons --- */
+  button:not([type="submit"]) {
+    border-color: var(--button-border-color);
+  }
+
+  /* --- Links --- */
+  a[href] {
+    text-decoration: underline !important;
+    text-decoration-thickness: 1px !important;
+  }
+
+  /* --- Tables --- */
+  table, th, td {
+    border-color: var(--table-border-color) !important;
+  }
+
+  /* --- Cards & Panels --- */
+  [class*="card"], [class*="panel"], [class*="section"] {
+    border-color: var(--card-border-color) !important;
+  }
+
+  /* --- Separators --- */
+  hr, [class*="divider"], [class*="separator"] {
+    border-color: var(--separator-color) !important;
   }
 }

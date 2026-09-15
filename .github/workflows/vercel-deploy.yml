@@ -42,6 +42,8 @@ jobs:
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -80,11 +82,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       # Run migrations AFTER successful build (safer - can rollback deploy if migrations fail)
+      # Use the direct (non-pooled) connection for migrations to avoid pooler issues
       - name: Run Prisma Migrations
         if: steps.env.outputs.environment == 'production'
         run: npm run neon:migrate
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
 
       - name: Find associated PR
         id: find-pr

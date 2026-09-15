@@ -48,17 +48,16 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
   const [editRequired, setEditRequired] = useState(false);
 
   useEffect(() => {
-    loadParts();
+    let ignore = false;
+    getAvailableParts()
+      .then((availableParts) => {
+        if (!ignore) setParts(availableParts);
+      })
+      .catch((err) => console.error('Error loading parts:', err));
+    return () => {
+      ignore = true;
+    };
   }, []);
-
-  const loadParts = async () => {
-    try {
-      const availableParts = await getAvailableParts();
-      setParts(availableParts);
-    } catch (err) {
-      console.error('Error loading parts:', err);
-    }
-  };
 
   const handleAddPart = async () => {
     if (!selectedPartId) {
@@ -143,12 +142,12 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
   );
 
   return (
-    <div className={styles.container} style={{ padding: 0 }}>
+    <div className={styles['container']} style={{ padding: 0 }}>
       {/* Header */}
-      <div className={styles.pageHeader} style={{ marginBottom: '1rem' }}>
+      <div className={styles['pageHeader']} style={{ marginBottom: '1rem' }}>
         <div>
-          <h3 className={styles.sectionHeading}>📦 Partes de la Plantilla</h3>
-          <p className={styles.pageSubtitle} style={{ marginTop: 0 }}>
+          <h3 className={styles['sectionHeading']}>📦 Partes de la Plantilla</h3>
+          <p className={styles['pageSubtitle']} style={{ marginTop: 0 }}>
             Define las partes que se usarán por defecto.
           </p>
         </div>
@@ -156,22 +155,23 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
 
       {/* Error Alert */}
       {error && (
-        <div className={styles.errorMessage} style={{ marginTop: 0 }}>
+        <div className={styles['errorMessage']} style={{ marginTop: 0 }}>
           {error}
         </div>
       )}
 
       {/* Current Parts Table */}
       {defaultParts.length > 0 ? (
-        <div className={styles.tableWrapper}>
-          <table className={styles.partsTable}>
+        <div className={styles['tableWrapper']}>
+          <table className={styles['partsTable']}>
+            <caption className="sr-only">Repuestos predeterminados de la plantilla</caption>
             <thead>
               <tr>
-                <th>Parte</th>
-                <th style={{ textAlign: 'center' }}>Cant.</th>
-                <th>Tipo</th>
-                <th style={{ textAlign: 'center' }}>Stock</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+                <th scope="col">Parte</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Cant.</th>
+                <th scope="col">Tipo</th>
+                <th scope="col" style={{ textAlign: 'center' }}>Stock</th>
+                <th scope="col" style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -180,7 +180,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                   <td>
                     <strong>{dp.part.name}</strong>
                     {dp.part.sku && (
-                      <div className={styles.textMuted} style={{ fontSize: '0.7rem' }}>{dp.part.sku}</div>
+                      <div className={styles['textMuted']} style={{ fontSize: '0.7rem' }}>{dp.part.sku}</div>
                     )}
                   </td>
                   <td style={{ textAlign: 'center' }}>
@@ -190,7 +190,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                         min="1"
                         value={editQuantity}
                         onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                        className={styles.numberInput}
+                        className={styles['numberInput']}
                         style={{ width: '60px', padding: '0.25rem' }}
                       />
                     ) : (
@@ -199,7 +199,7 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                   </td>
                   <td>
                     {editingId === dp.id ? (
-                      <label className={styles.checkboxLabel}>
+                      <label className={styles['checkboxLabel']}>
                         <input
                           type="checkbox"
                           checked={editRequired}
@@ -208,32 +208,32 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
                         <span>Req.</span>
                       </label>
                     ) : (
-                      <span className={`${styles.badge} ${dp.required ? styles.requiredBadge : styles.optionalBadge}`}>
+                      <span className={`${styles['badge']} ${dp.required ? styles['requiredBadge'] : styles['optionalBadge']}`}>
                         {dp.required ? 'Obligatorio' : 'Sugerido'}
                       </span>
                     )}
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    <span className={dp.part.quantity >= dp.quantity ? styles.textSuccess : styles.textDanger}>
+                    <span className={dp.part.quantity >= dp.quantity ? styles['textSuccess'] : styles['textDanger']}>
                       {dp.part.quantity}
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     {editingId === dp.id ? (
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                        <button onClick={() => handleSaveEdit(dp.id)} disabled={loading} className={`${styles.btn} ${styles.btnActivate}`}>
+                        <button onClick={() => handleSaveEdit(dp.id)} disabled={loading} className={`${styles['btn']} ${styles['btnActivate']}`}>
                           OK
                         </button>
-                        <button onClick={handleCancelEdit} className={`${styles.btn} ${styles.btnDuplicate}`}>
+                        <button onClick={handleCancelEdit} className={`${styles['btn']} ${styles['btnDuplicate']}`}>
                           X
                         </button>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                        <button onClick={() => handleStartEdit(dp)} className={`${styles.btn} ${styles.btnEdit}`}>
+                        <button onClick={() => handleStartEdit(dp)} className={`${styles['btn']} ${styles['btnEdit']}`}>
                           Editar
                         </button>
-                        <button onClick={() => handleRemove(dp.id)} disabled={loading} className={`${styles.btn} ${styles.btnDelete}`}>
+                        <button onClick={() => handleRemove(dp.id)} disabled={loading} className={`${styles['btn']} ${styles['btnDelete']}`}>
                           Borrar
                         </button>
                       </div>
@@ -245,20 +245,20 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
           </table>
         </div>
       ) : (
-        <div className={styles.emptyState}>
+        <div className={styles['emptyState']}>
           <p>No hay partes agregadas aún.</p>
         </div>
       )}
 
       {/* Add Part Form */}
       {availableParts.length > 0 && (
-        <div className={styles.formSection}>
-          <h4 className={styles.sectionHeading}>+ Agregar Nueva Parte</h4>
-          <div className={styles.addPartGrid}>
+        <div className={styles['formSection']}>
+          <h4 className={styles['sectionHeading']}>+ Agregar Nueva Parte</h4>
+          <div className={styles['addPartGrid']}>
             <select
               value={selectedPartId}
               onChange={(e) => setSelectedPartId(e.target.value)}
-              className={styles.selectInput}
+              className={styles['selectInput']}
             >
               <option value="">Seleccionar repuesto...</option>
               {availableParts.map((part) => (
@@ -273,10 +273,10 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               placeholder="Cant."
-              className={styles.numberInput}
+              className={styles['numberInput']}
               style={{ width: '100%' }}
             />
-            <label className={styles.checkboxLabel} style={{ background: 'white', padding: '0.5rem 1rem', borderRadius: 'var(--radius-base)', border: '1px solid var(--color-border-medium)' }}>
+            <label className={styles['checkboxLabel']} style={{ background: 'white', padding: '0.5rem 1rem', borderRadius: 'var(--radius-base)', border: '1px solid var(--color-border-medium)' }}>
               <input
                 type="checkbox"
                 checked={required}
@@ -287,13 +287,13 @@ export function TemplatePartsManager({ templateId, defaultParts }: Props) {
             <button
               onClick={handleAddPart}
               disabled={loading || !selectedPartId}
-              className={`${styles.btn} ${styles.mainCreateBtn}`}
+              className={`${styles['btn']} ${styles['mainCreateBtn']}`}
               style={{ padding: '0.625rem 2rem' }}
             >
               {loading ? '...' : 'Agregar'}
             </button>
           </div>
-          <p className={styles.textMuted} style={{ fontSize: '0.75rem', marginTop: '1rem' }}>
+          <p className={styles['textMuted']} style={{ fontSize: '0.75rem', marginTop: '1rem' }}>
             💡 Las partes requeridas se descuentan automáticamente al crear el ticket.
           </p>
         </div>

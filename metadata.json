@@ -1,0 +1,6 @@
+{
+  "name": "FIX Workshop",
+  "description": "Sistema de gestión integral para talleres de electrónica con soporte multi-tenant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

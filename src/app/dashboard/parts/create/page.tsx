@@ -4,97 +4,79 @@ import { useActionState } from 'react';
 import { createPart } from '@/lib/actions';
 import Link from 'next/link';
 import styles from '../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
+import { Button, Input } from '@/components/ui';
 
 export default function CreatePartPage() {
     const [state, formAction, isPending] = useActionState(createPart, null);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1>Nuevo Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles.viewLink}>
-                    ← Volver
-                </Link>
-            </div>
+        <div className={styles['container']}>
+            <PageHeader
+                title="Nuevo Repuesto"
+                subtitle="Registra una nueva pieza o repuesto en el inventario del taller"
+                actions={
+                    <Button as={Link} href="/dashboard/parts" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                        Volver a Repuestos
+                    </Button>
+                }
+            />
 
-            <div className={styles.tableContainer} style={{ maxWidth: '600px', padding: '2rem' }}>
+            <div className={styles['tableContainer']} style={{ maxWidth: '600px', padding: '2rem' }}>
                 <form action={formAction} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="name">Nombre del Repuesto *</label>
-                        <input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required
-                            placeholder="Ej: Pantalla LCD iPhone 13"
-                            className="p-2 border rounded text-black"
-                        />
-                    </div>
+                    <Input
+                        id="name"
+                        name="name"
+                        label="Nombre del Repuesto *"
+                        type="text"
+                        required
+                        placeholder="Ej: Pantalla LCD iPhone 13"
+                    />
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="sku">SKU / Código (Opcional)</label>
-                        <input
-                            id="sku"
-                            name="sku"
-                            type="text"
-                            placeholder="Ej: LCD-IP13-001"
-                            className="p-2 border rounded text-black"
-                        />
-                        <p className="text-sm text-gray-600">
-                            Código de identificación único del repuesto
-                        </p>
-                    </div>
+                    <Input
+                        id="sku"
+                        name="sku"
+                        label="SKU / Código (Opcional)"
+                        type="text"
+                        placeholder="Ej: LCD-IP13-001"
+                        helper="Código de identificación único del repuesto"
+                    />
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="quantity">Cantidad Inicial *</label>
-                        <input
-                            id="quantity"
-                            name="quantity"
+                    <Input
+                        id="quantity"
+                        name="quantity"
+                        label="Cantidad Inicial *"
+                        type="number"
+                        required
+                        min="0"
+                        defaultValue="0"
+                        helper="Cantidad actual en stock"
+                    />
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <Input
+                            id="cost"
+                            name="cost"
+                            label="Costo (USD) *"
                             type="number"
                             required
                             min="0"
-                            defaultValue="0"
-                            className="p-2 border rounded text-black"
+                            step="0.01"
+                            placeholder="0.00"
+                            helper="Precio de compra"
                         />
-                        <p className="text-sm text-gray-600">
-                            Cantidad actual en stock
-                        </p>
-                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="cost">Costo (USD) *</label>
-                            <input
-                                id="cost"
-                                name="cost"
-                                type="number"
-                                required
-                                min="0"
-                                step="0.01"
-                                placeholder="0.00"
-                                className="p-2 border rounded text-black"
-                            />
-                            <p className="text-sm text-gray-600">
-                                Precio de compra
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="price">Precio Venta (USD) *</label>
-                            <input
-                                id="price"
-                                name="price"
-                                type="number"
-                                required
-                                min="0"
-                                step="0.01"
-                                placeholder="0.00"
-                                className="p-2 border rounded text-black"
-                            />
-                            <p className="text-sm text-gray-600">
-                                Precio para el cliente
-                            </p>
-                        </div>
+                        <Input
+                            id="price"
+                            name="price"
+                            label="Precio Venta (USD) *"
+                            type="number"
+                            required
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            helper="Precio para el cliente"
+                        />
                     </div>
 
                     {state?.message && (
@@ -104,19 +86,22 @@ export default function CreatePartPage() {
                     )}
 
                     <div className="flex gap-3 mt-4">
-                        <button
+                        <Button
                             type="submit"
-                            className={styles.createBtn}
-                            disabled={isPending}
+                            variant="primary"
+                            size="sm"
+                            isLoading={isPending}
                         >
-                            {isPending ? 'Creando...' : 'Crear Repuesto'}
-                        </button>
-                        <Link
+                            Crear Repuesto
+                        </Button>
+                        <Button
+                            as={Link}
                             href="/dashboard/parts"
-                            className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                            variant="ghost"
+                            size="sm"
                         >
                             Cancelar
-                        </Link>
+                        </Button>
                     </div>
                 </form>
             </div>

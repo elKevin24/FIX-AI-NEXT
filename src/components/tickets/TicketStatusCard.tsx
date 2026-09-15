@@ -78,18 +78,18 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
+        <div style={styles['container']}>
+            <div style={styles['card']}>
                 
-                <div style={styles.header} className="card-header">
-                    <div style={styles.titleGroup}>
-                        <div style={styles.titleRow}>
-                            <h1 style={styles.title}>{ticket.title || 'Sin Título'}</h1>
+                <div style={styles['header']} className="card-header">
+                    <div style={styles['titleGroup']}>
+                        <div style={styles['titleRow']}>
+                            <h1 style={styles['title']}>{ticket.title || 'Sin Título'}</h1>
                             <span style={getStatusStyle(ticket.status || 'OPEN')}>
                                 {displayStatus}
                             </span>
                         </div>
-                        <div style={styles.metaRow}>
+                        <div style={styles['metaRow']}>
                             <span>ID: <span style={{ color: '#475569' }}>{displayId}</span></span> {/* Slate 600 */}
                             <span>•</span>
                             <span>{tenantName}</span>
@@ -104,45 +104,45 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                     )}
                 </div>
 
-                <div style={styles.grid} className="details-grid">
-                    <div style={styles.cell} className="grid-cell">
-                        <span style={styles.cellLabel}>Creado</span>
-                        <span style={styles.cellValue}>{ticket.createdAt ? formatDate(ticket.createdAt) : '-'}</span>
+                <div style={styles['grid']} className="details-grid">
+                    <div style={styles['cell']} className="grid-cell">
+                        <span style={styles['cellLabel']}>Creado</span>
+                        <span style={styles['cellValue']}>{ticket.createdAt ? formatDate(ticket.createdAt) : '-'}</span>
                     </div>
-                    <div style={styles.cell} className="grid-cell">
-                        <span style={styles.cellLabel}>Actualizado</span>
-                        <span style={styles.cellValue}>{ticket.updatedAt ? formatDate(ticket.updatedAt) : '-'}</span>
+                    <div style={styles['cell']} className="grid-cell">
+                        <span style={styles['cellLabel']}>Actualizado</span>
+                        <span style={styles['cellValue']}>{ticket.updatedAt ? formatDate(ticket.updatedAt) : '-'}</span>
                     </div>
-                    <div style={styles.cell} className="grid-cell">
-                        <span style={styles.cellLabel}>Asignado a</span>
-                        <span style={styles.cellValue}>{ticket.assignedTo?.name || 'Sin asignar'}</span>
+                    <div style={styles['cell']} className="grid-cell">
+                        <span style={styles['cellLabel']}>Asignado a</span>
+                        <span style={styles['cellValue']}>{ticket.assignedTo?.name || 'Sin asignar'}</span>
                     </div>
-                    <div style={styles.cell} className="grid-cell">
-                        <span style={styles.cellLabel}>Modelo</span>
-                        <span style={styles.cellValue}>{(ticket as any).deviceModel || 'N/A'}</span>
+                    <div style={styles['cell']} className="grid-cell">
+                        <span style={styles['cellLabel']}>Modelo</span>
+                        <span style={styles['cellValue']}>{(ticket as any).deviceModel || 'N/A'}</span>
                     </div>
                 </div>
 
-                <div style={styles.body}>
-                    <h3 style={styles.sectionTitle}>Detalle del Problema</h3>
-                    <p style={styles.description}>
+                <div style={styles['body']}>
+                    <h3 style={styles['sectionTitle']}>Detalle del Problema</h3>
+                    <p style={styles['description']}>
                         {ticket.description || 'Sin descripción disponible.'}
                     </p>
 
                     {((ticket as any).accessories || (ticket as any).checkInNotes) && (
-                        <div style={styles.extraSection} className="extra-section">
+                        <div style={styles['extraSection']} className="extra-section">
                             {(ticket as any).accessories && (
                                 <div>
-                                    <h4 style={styles.sectionTitle}>Accesorios</h4>
-                                    <div style={styles.extraBox}>
+                                    <h4 style={styles['sectionTitle']}>Accesorios</h4>
+                                    <div style={styles['extraBox']}>
                                         {(ticket as any).accessories}
                                     </div>
                                 </div>
                             )}
                             {(ticket as any).checkInNotes && (
                                 <div>
-                                    <h4 style={styles.sectionTitle}>Estado Físico</h4>
-                                    <div style={styles.extraBox}>
+                                    <h4 style={styles['sectionTitle']}>Estado Físico</h4>
+                                    <div style={styles['extraBox']}>
                                         {(ticket as any).checkInNotes}
                                     </div>
                                 </div>
@@ -151,9 +151,9 @@ export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant 
                     )}
                 </div>
 
-                <div style={styles.footer} className="card-footer">
+                <div style={styles['footer']} className="card-footer">
                     <span>FIX-AI TRACKER v2.0</span>
-                    <Link href="/login" style={styles.link}>
+                    <Link href="/login" style={styles['link']}>
                         Acceso Personal
                     </Link>
                 </div>

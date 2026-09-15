@@ -35,7 +35,7 @@ Agrega estas variables en tu proyecto de Vercel (Settings → Environment Variab
 
 **DATABASE_URL**
 ```
-postgresql://neondb_owner:***REDACTED***@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:npg_l3O0mWGqFBCY@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
 ```
 
 **AUTH_SECRET** (genera uno nuevo)
@@ -52,7 +52,7 @@ openssl rand -base64 32
 Si quieres poblar la base de datos con datos iniciales:
 
 ```bash
-DATABASE_URL="postgresql://neondb_owner:***REDACTED***@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require" npm run db:seed
+DATABASE_URL="postgresql://neondb_owner:npg_l3O0mWGqFBCY@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require" npm run db:seed
 ```
 
 Esto creará:

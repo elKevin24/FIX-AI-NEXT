@@ -25,8 +25,8 @@ export default function CustomerSearchFilters() {
   }, [searchTerm, pathname, replace, searchParams]);
 
   return (
-    <div className={styles.filtersContainer} style={{ marginBottom: '1.5rem' }}>
-      <div className={styles.searchBox} style={{ position: 'relative', maxWidth: '400px' }}>
+    <div className={styles['filtersContainer']} style={{ marginBottom: '1.5rem' }}>
+      <div className={styles['searchBox']} style={{ position: 'relative', maxWidth: '400px' }}>
         <input
           type="text"
           placeholder="Buscar por nombre, email, teléfono o NIT..."

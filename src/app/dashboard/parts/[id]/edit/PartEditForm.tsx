@@ -4,6 +4,8 @@ import { useActionState, useState } from 'react';
 import { updatePart, deletePart } from '@/lib/actions';
 import Link from 'next/link';
 import styles from '../../../tickets/tickets.module.css';
+import PageHeader from '@/components/PageHeader';
+import { Button, Input } from '@/components/ui';
 
 interface Part {
     id: string;
@@ -30,84 +32,72 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1>Editar Repuesto</h1>
-                <Link href="/dashboard/parts" className={styles.viewLink}>
-                    ← Volver
-                </Link>
-            </div>
+        <div className={styles['container']}>
+            <PageHeader
+                title="Editar Repuesto"
+                subtitle={`Repuesto #${part.id.slice(0, 8)}`}
+                actions={
+                    <Button as={Link} href="/dashboard/parts" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                        Volver a Repuestos
+                    </Button>
+                }
+            />
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                 {/* Main Form */}
-                <div className={styles.tableContainer} style={{ padding: '2rem' }}>
+                <div className={styles['tableContainer']} style={{ padding: '2rem' }}>
                     <form action={updateAction} className="flex flex-col gap-4">
                         <input type="hidden" name="partId" value={part.id} />
 
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="name">Nombre del Repuesto *</label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                required
-                                defaultValue={part.name}
-                                className="p-2 border rounded text-black"
-                            />
-                        </div>
+                        <Input
+                            id="name"
+                            name="name"
+                            label="Nombre del Repuesto *"
+                            type="text"
+                            required
+                            defaultValue={part.name}
+                        />
 
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="sku">SKU / Código</label>
-                            <input
-                                id="sku"
-                                name="sku"
-                                type="text"
-                                defaultValue={part.sku || ''}
-                                className="p-2 border rounded text-black"
-                            />
-                        </div>
+                        <Input
+                            id="sku"
+                            name="sku"
+                            label="SKU / Código"
+                            type="text"
+                            defaultValue={part.sku || ''}
+                        />
 
-                        <div className="flex flex-col gap-2">
-                            <label htmlFor="quantity">Cantidad en Stock *</label>
-                            <input
-                                id="quantity"
-                                name="quantity"
+                        <Input
+                            id="quantity"
+                            name="quantity"
+                            label="Cantidad en Stock *"
+                            type="number"
+                            required
+                            min="0"
+                            defaultValue={part.quantity}
+                        />
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <Input
+                                id="cost"
+                                name="cost"
+                                label="Costo (USD) *"
                                 type="number"
                                 required
                                 min="0"
-                                defaultValue={part.quantity}
-                                className="p-2 border rounded text-black"
+                                step="0.01"
+                                defaultValue={Number(part.cost)}
                             />
-                        </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="cost">Costo (USD) *</label>
-                                <input
-                                    id="cost"
-                                    name="cost"
-                                    type="number"
-                                    required
-                                    min="0"
-                                    step="0.01"
-                                    defaultValue={Number(part.cost)}
-                                    className="p-2 border rounded text-black"
-                                />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <label htmlFor="price">Precio Venta (USD) *</label>
-                                <input
-                                    id="price"
-                                    name="price"
-                                    type="number"
-                                    required
-                                    min="0"
-                                    step="0.01"
-                                    defaultValue={Number(part.price)}
-                                    className="p-2 border rounded text-black"
-                                />
-                            </div>
+                            <Input
+                                id="price"
+                                name="price"
+                                label="Precio Venta (USD) *"
+                                type="number"
+                                required
+                                min="0"
+                                step="0.01"
+                                defaultValue={Number(part.price)}
+                            />
                         </div>
 
                         {updateState?.message && (
@@ -117,74 +107,78 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
                         )}
 
                         <div className="flex gap-3 mt-4">
-                            <button
+                            <Button
                                 type="submit"
-                                className={styles.createBtn}
-                                disabled={isUpdating}
+                                variant="primary"
+                                size="sm"
+                                isLoading={isUpdating}
                             >
-                                {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
-                            </button>
-                            <Link
+                                Guardar Cambios
+                            </Button>
+                            <Button
+                                as={Link}
                                 href="/dashboard/parts"
-                                className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                                variant="ghost"
+                                size="sm"
                             >
                                 Cancelar
-                            </Link>
+                            </Button>
                         </div>
                     </form>
                 </div>
 
                 {/* Sidebar */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {/* Info Card */}
-                    <div className={styles.tableContainer} style={{ padding: '1.5rem' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Información</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    {/* Status Card */}
+                    <div className={styles['tableContainer']} style={{ padding: '1.5rem' }}>
+                        <h3 className={styles['label']} style={{ marginBottom: '1rem' }}>Información</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
                             <div>
-                                <span style={{ color: '#666' }}>Tenant:</span>{' '}
-                                {part.tenant.name}
+                                <span className={styles['textMuted']}>ID:</span>{' '}
+                                <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-secondary)', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>{part.id.slice(0, 8)}</code>
                             </div>
                             <div>
-                                <span style={{ color: '#666' }}>Margen:</span>{' '}
-                                <span style={{
-                                    color: Number(part.price) > Number(part.cost) ? '#10b981' : '#dc2626'
-                                }}>
-                                    {Number(part.cost) > 0
-                                        ? `${((Number(part.price) - Number(part.cost)) / Number(part.cost) * 100).toFixed(1)}%`
-                                        : 'N/A'
-                                    }
-                                </span>
+                                <span className={styles['textMuted']}>Tenant:</span>{' '}
+                                <strong>{part.tenant.name}</strong>
                             </div>
                             <div>
-                                <span style={{ color: '#666' }}>Valor Total:</span>{' '}
-                                ${(Number(part.price) * part.quantity).toFixed(2)}
+                                <span className={styles['textMuted']}>Estado de Stock:</span>{' '}
+                                {part.quantity === 0 ? (
+                                    <span style={{ color: 'var(--color-error-600)', fontWeight: 600 }}>Agotado</span>
+                                ) : part.quantity < 5 ? (
+                                    <span style={{ color: 'var(--color-warning-600)', fontWeight: 600 }}>Stock Bajo</span>
+                                ) : (
+                                    <span style={{ color: 'var(--color-success-600)', fontWeight: 600 }}>En Stock</span>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Delete Zone - Only for admins */}
+                    {/* Delete Section */}
                     {isAdmin && (
-                        <div className={styles.tableContainer} style={{ padding: '1.5rem', borderColor: '#fee2e2' }}>
-                            <h3 style={{ color: '#dc2626', marginBottom: '1rem' }}>Zona de Peligro</h3>
+                        <div className={styles['dangerZone']} style={{ marginTop: 0 }}>
+                            <h3 className={styles['dangerTitle']}>Zona de Peligro</h3>
 
                             {hasUsageRecords && (
-                                <p className="text-sm text-gray-600 mb-3">
-                                    Este repuesto tiene registros de uso y no puede ser eliminado.
+                                <p style={{ fontSize: '0.875rem', color: 'var(--color-warning-800)', marginBottom: '0.75rem' }}>
+                                    ⚠️ Este repuesto tiene registros de uso en tickets y no puede ser eliminado.
                                 </p>
                             )}
 
                             {!showDeleteConfirm ? (
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => setShowDeleteConfirm(true)}
                                     disabled={hasUsageRecords}
-                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    variant="danger"
+                                    size="sm"
+                                    fullWidth
                                 >
                                     Eliminar Repuesto
-                                </button>
+                                </Button>
                             ) : (
-                                <div className="flex flex-col gap-3">
-                                    <p className="text-red-600 text-sm">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <p style={{ color: 'var(--color-error-600)', fontSize: '0.875rem', margin: 0 }}>
                                         ¿Eliminar este repuesto? Esta acción no se puede deshacer.
                                     </p>
 
@@ -192,26 +186,28 @@ export default function PartEditForm({ part, isAdmin, hasUsageRecords }: Props) 
                                         <input type="hidden" name="partId" value={part.id} />
 
                                         {deleteState?.message && (
-                                            <p className="text-red-500 bg-red-50 p-2 rounded border border-red-200 mb-2 text-sm">
+                                            <p className={styles['errorMessage']} style={{ margin: '0.5rem 0' }}>
                                                 {deleteState.message}
                                             </p>
                                         )}
 
-                                        <div className="flex gap-2">
-                                            <button
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                            <Button
                                                 type="submit"
-                                                className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                                                disabled={isDeleting}
+                                                variant="danger"
+                                                size="sm"
+                                                isLoading={isDeleting}
                                             >
-                                                {isDeleting ? 'Eliminando...' : 'Confirmar'}
-                                            </button>
-                                            <button
+                                                Confirmar
+                                            </Button>
+                                            <Button
                                                 type="button"
                                                 onClick={() => setShowDeleteConfirm(false)}
-                                                className="px-3 py-2 border rounded text-gray-600 hover:bg-gray-100 text-sm"
+                                                variant="ghost"
+                                                size="sm"
                                             >
                                                 Cancelar
-                                            </button>
+                                            </Button>
                                         </div>
                                     </form>
                                 </div>

@@ -11,7 +11,7 @@
  * - VIEWER: Solo lectura (Visualizador)
  */
 
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '@prisma/client';
 
 export { UserRole };
 
@@ -19,6 +19,47 @@ export { UserRole };
  * Permisos definidos para cada rol
  */
 export const ROLE_PERMISSIONS = {
+  SUPER_ADMIN: {
+    // User Management
+    canCreateUsers: true,
+    canDeleteUsers: true,
+    canEditUsers: true,
+    canChangeRoles: true,
+    canDeactivateUsers: true,
+
+    // Tenant Management
+    canManageTenantSettings: true,
+
+    // Ticket Viewing
+    canViewAllTickets: true,
+
+    // Ticket Actions
+    canTakeTicket: true,
+    canAssignTickets: true,
+    canStartTicket: true,
+    canResolveTicket: true,
+    canDeliverTicket: true,
+    canCancelTickets: true,
+    canReopenTickets: true,
+    canWaitForParts: true,
+    canResumeFromWaiting: true,
+    canDeleteTickets: true,
+
+    // Inventory
+    canEditParts: true,
+    canDeleteParts: true,
+    canAddPartsToTicket: true,
+
+    // Customer Management
+    canCreateCustomers: true,
+    canEditCustomers: true,
+    canDeleteCustomers: true,
+
+    // Advanced Features
+    canViewReports: true,
+    canManageTemplates: true,
+    canExportData: true,
+  },
   ADMIN: {
     // User Management
     canCreateUsers: true,
@@ -195,10 +236,17 @@ export function hasPermission(role: UserRole, permission: Permission): boolean {
 }
 
 /**
- * Verifica si el usuario es administrador
+ * Verifica si el usuario es super administrador (plataforma)
+ */
+export function isSuperAdmin(role: UserRole): boolean {
+  return role === 'SUPER_ADMIN';
+}
+
+/**
+ * Verifica si el usuario es administrador (incluye super administrador)
  */
 export function isAdmin(role: UserRole): boolean {
-  return role === 'ADMIN';
+  return role === 'ADMIN' || role === 'SUPER_ADMIN';
 }
 
 /**
@@ -235,6 +283,8 @@ export function canManageUsers(role: UserRole): boolean {
  */
 export function getRoleHierarchyLevel(role: UserRole): number {
   switch (role) {
+    case 'SUPER_ADMIN':
+      return 5;
     case 'ADMIN':
       return 4;
     case 'MANAGER':
@@ -250,7 +300,8 @@ export function getRoleHierarchyLevel(role: UserRole): number {
 
 /**
  * Verifica si un rol puede modificar a otro
- * (no puede modificar usuarios de igual o mayor jerarquía, excepto a sí mismo)
+ * (no puede modificar usuarios de igual o mayor jerarquía, excepto a sí mismo.
+ *  SUPER_ADMIN es inmutable para cualquier otro rol)
  */
 export function canModifyUser(
   actorRole: UserRole,
@@ -258,6 +309,7 @@ export function canModifyUser(
   isSelf: boolean
 ): boolean {
   if (isSelf) return true;
+  if (targetRole === 'SUPER_ADMIN') return false;
   const actorLevel = getRoleHierarchyLevel(actorRole);
   const targetLevel = getRoleHierarchyLevel(targetRole);
   return actorLevel > targetLevel;
@@ -396,6 +448,7 @@ export function canPerformTicketAction(
 // ============================================================================
 
 export const ROLE_LABELS: Record<UserRole, string> = {
+  SUPER_ADMIN: 'Super Administrador',
   ADMIN: 'Administrador',
   MANAGER: 'Gerente',
   TECHNICIAN: 'Técnico',
@@ -403,6 +456,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  SUPER_ADMIN: 'Control total de la plataforma y administración global',
   ADMIN: 'Control total del tenant: gestión de usuarios, configuración y todas las operaciones',
   MANAGER: 'Gestiona tickets y usuarios, pero no puede cambiar la configuración del tenant',
   TECHNICIAN: 'Crea y responde tickets asignados, puede agregar partes a tickets',
@@ -410,6 +464,7 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 };
 
 export const ROLE_COLORS: Record<UserRole, { bg: string; text: string }> = {
+  SUPER_ADMIN: { bg: 'bg-amber-100 text-amber-900 border-amber-300', text: 'text-amber-800' },
   ADMIN: { bg: 'bg-red-100', text: 'text-red-800' },
   MANAGER: { bg: 'bg-purple-100', text: 'text-purple-800' },
   TECHNICIAN: { bg: 'bg-blue-100', text: 'text-blue-800' },

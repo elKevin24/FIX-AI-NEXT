@@ -11,8 +11,9 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import TicketActions from '@/components/tickets/TicketActions';
 import { Ticket80mmData } from '@/types/ticket80mm';
 import Link from 'next/link';
+import PageHeader from '@/components/PageHeader';
+import { Button } from '@/components/ui/Button';
 import styles from './page.module.css';
-import { Prisma } from '@/generated/prisma';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -105,18 +106,18 @@ export default async function Ticket80mmPage({ params }: Props) {
     };
 
     return (
-        <main className={styles.container}>
-            <div className={styles.header}>
-                <Link href={`/dashboard/tickets/${id}`} className={styles.backButton}>
-                    ← Volver al Ticket
-                </Link>
-                <h1 className={styles.title}>Ticket 80mm - Orden de Servicio</h1>
-                <p className={styles.subtitle}>
-                    Formato optimizado para impresión térmica y compartir
-                </p>
-            </div>
+        <main className={styles['container']}>
+            <PageHeader
+                title="Ticket 80mm - Orden de Servicio"
+                subtitle="Formato optimizado para impresión térmica y compartir"
+                actions={
+                    <Button as={Link} href={`/dashboard/tickets/${id}`} variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+                        Volver al Ticket
+                    </Button>
+                }
+            />
 
-            <div className={styles.content}>
+            <div className={styles['content']}>
                 <TicketActions
                     ticket={ticketData}
                     showParts={true}
@@ -125,7 +126,7 @@ export default async function Ticket80mmPage({ params }: Props) {
                 />
             </div>
 
-            <div className={styles.instructions}>
+            <div className={styles['instructions']}>
                 <h2>💡 Instrucciones</h2>
                 <ul>
                     <li>

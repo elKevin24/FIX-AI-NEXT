@@ -1,7 +1,7 @@
 .container {
-  min-height: 100vh;
-  padding: 0 1rem 2rem 1rem; /* Eliminado padding superior excesivo */
-  background: var(--color-bg-primary); /* Consistencia con el resto del dashboard */
+  min-height: auto;
+  padding: 0 1rem 2rem 1rem;
+  background: var(--color-bg-primary);
 }
 
 .wizard {
@@ -29,10 +29,11 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {

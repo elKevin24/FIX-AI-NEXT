@@ -8,8 +8,11 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
+    exclude: ['tests/e2e/**', 'node_modules/**'],
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'server-only': path.resolve(__dirname, 'src/test-utils/server-only-stub.ts'),
+      'client-only': path.resolve(__dirname, 'src/test-utils/server-only-stub.ts'),
       '@prisma/client/runtime/library': path.resolve(__dirname, 'node_modules/@prisma/client/runtime/client'),
     },
     server: {
@@ -18,8 +21,19 @@ export default defineConfig({
       },
     },
     env: {
-      RESEND_API_KEY: 're_dummy_123',
       DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy?sslmode=require',
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      all: true,
+      exclude: [
+        '**/*.test.*',
+        '**/*.spec.*',
+        '**/node_modules/**',
+        'vitest.config.ts',
+        'src/**/*.d.ts',
+      ],
     },
   },
 })

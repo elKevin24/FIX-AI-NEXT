@@ -1,8 +1,8 @@
-
 'use client';
 
 import { useActionState } from 'react';
 import { updateSLASettings } from '@/lib/settings-actions';
+import { Button, Input } from '@/components/ui';
 
 interface Settings {
     slaWarningPercent: number;
@@ -16,35 +16,25 @@ export default function SLASettingsForm({ initialSettings }: { initialSettings: 
 
     return (
         <form action={action} className="space-y-6">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Warning Threshold (%)</label>
-                <div className="flex items-center gap-2">
-                    <input 
-                        type="number" 
-                        name="slaWarningPercent" 
-                        defaultValue={initialSettings.slaWarningPercent}
-                        min="1" 
-                        max="100"
-                        className="p-2 border rounded w-32"
-                    />
-                    <span className="text-gray-500 text-sm">Alert when time used exceeds this %</span>
-                </div>
-            </div>
+            <Input 
+                label="Warning Threshold (%)"
+                type="number" 
+                name="slaWarningPercent" 
+                defaultValue={initialSettings.slaWarningPercent}
+                min="1" 
+                max="100"
+                helper="Alert when time used exceeds this %"
+            />
 
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Critical Threshold (%)</label>
-                <div className="flex items-center gap-2">
-                    <input 
-                        type="number" 
-                        name="slaCriticalPercent" 
-                        defaultValue={initialSettings.slaCriticalPercent}
-                        min="1" 
-                        max="100"
-                        className="p-2 border rounded w-32"
-                    />
-                    <span className="text-gray-500 text-sm">Vital alert when time used exceeds this %</span>
-                </div>
-            </div>
+            <Input 
+                label="Critical Threshold (%)"
+                type="number" 
+                name="slaCriticalPercent" 
+                defaultValue={initialSettings.slaCriticalPercent}
+                min="1" 
+                max="100"
+                helper="Vital alert when time used exceeds this %"
+            />
 
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
@@ -76,13 +66,14 @@ export default function SLASettingsForm({ initialSettings }: { initialSettings: 
                 </div>
             )}
 
-            <button 
+            <Button 
                 type="submit" 
-                disabled={isPending}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                variant="primary"
+                size="sm"
+                isLoading={isPending}
             >
-                {isPending ? 'Saving...' : 'Save Configuration'}
-            </button>
+                Guardar Configuración SLA
+            </Button>
         </form>
     );
 }

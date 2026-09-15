@@ -246,83 +246,83 @@ export const DeliveryReceiptPDF: React.FC<DeliveryReceiptData> = ({ ticket }) =>
 
     return (
         <Document>
-            <Page size="A4" style={styles.page}>
+            <Page size="A4" style={styles['page']}>
                 {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.companyName}>{ticket.tenant.name}</Text>
-                    <Text style={styles.documentTitle}>Comprobante de Entrega #{ticket.id.slice(0, 8).toUpperCase()}</Text>
-                    <Text style={styles.completedBadge}>✓ Reparación Completada</Text>
-                    <View style={styles.metadataRow}>
+                <View style={styles['header']}>
+                    <Text style={styles['companyName']}>{ticket.tenant.name}</Text>
+                    <Text style={styles['documentTitle']}>Comprobante de Entrega #{ticket.id.slice(0, 8).toUpperCase()}</Text>
+                    <Text style={styles['completedBadge']}>✓ Reparación Completada</Text>
+                    <View style={styles['metadataRow']}>
                         <Text>Fecha de entrega: {formattedCompletedDate}</Text>
                     </View>
                 </View>
 
                 {/* Resumen de la Reparación */}
-                <View style={styles.summaryBox}>
-                    <Text style={styles.summaryTitle}>Resumen de la Reparación</Text>
-                    <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Tiempo de reparación:</Text>
-                        <Text style={styles.summaryValue}>{repairDuration}</Text>
+                <View style={styles['summaryBox']}>
+                    <Text style={styles['summaryTitle']}>Resumen de la Reparación</Text>
+                    <View style={styles['summaryRow']}>
+                        <Text style={styles['summaryLabel']}>Tiempo de reparación:</Text>
+                        <Text style={styles['summaryValue']}>{repairDuration}</Text>
                     </View>
-                    <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Estado final:</Text>
-                        <Text style={styles.summaryValue}>{getStatusLabel(ticket.status)}</Text>
+                    <View style={styles['summaryRow']}>
+                        <Text style={styles['summaryLabel']}>Estado final:</Text>
+                        <Text style={styles['summaryValue']}>{getStatusLabel(ticket.status)}</Text>
                     </View>
-                    <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Técnico responsable:</Text>
-                        <Text style={styles.summaryValue}>
+                    <View style={styles['summaryRow']}>
+                        <Text style={styles['summaryLabel']}>Técnico responsable:</Text>
+                        <Text style={styles['summaryValue']}>
                             {ticket.assignedTo?.name || ticket.assignedTo?.email || 'No asignado'}
                         </Text>
                     </View>
                 </View>
 
                 {/* Información del Cliente */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Datos del Cliente</Text>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Nombre:</Text>
-                        <Text style={styles.value}>{ticket.customer.name}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Datos del Cliente</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Nombre:</Text>
+                        <Text style={styles['value']}>{ticket.customer.name}</Text>
                     </View>
                     {ticket.customer.phone && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Teléfono:</Text>
-                            <Text style={styles.value}>{ticket.customer.phone}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Teléfono:</Text>
+                            <Text style={styles['value']}>{ticket.customer.phone}</Text>
                         </View>
                     )}
                     {ticket.customer.email && (
-                        <View style={styles.row}>
-                            <Text style={styles.label}>Email:</Text>
-                            <Text style={styles.value}>{ticket.customer.email}</Text>
+                        <View style={styles['row']}>
+                            <Text style={styles['label']}>Email:</Text>
+                            <Text style={styles['value']}>{ticket.customer.email}</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Información del Equipo */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Información del Equipo</Text>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Dispositivo:</Text>
-                        <Text style={styles.value}>{ticket.title}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Información del Equipo</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Dispositivo:</Text>
+                        <Text style={styles['value']}>{ticket.title}</Text>
                     </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Fecha de ingreso:</Text>
-                        <Text style={styles.value}>{formattedCreatedDate}</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Fecha de ingreso:</Text>
+                        <Text style={styles['value']}>{formattedCreatedDate}</Text>
                     </View>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Prioridad:</Text>
-                        <Text style={styles.value}>{getPriorityLabel(ticket.priority)}</Text>
+                    <View style={styles['row']}>
+                        <Text style={styles['label']}>Prioridad:</Text>
+                        <Text style={styles['value']}>{getPriorityLabel(ticket.priority)}</Text>
                     </View>
                 </View>
 
                 {/* Problema Inicial */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Problema Reportado</Text>
-                    <Text style={styles.description}>{ticket.description}</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Problema Reportado</Text>
+                    <Text style={styles['description']}>{ticket.description}</Text>
                 </View>
 
                 {/* Trabajo Realizado (Notas) */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Trabajo Realizado</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Trabajo Realizado</Text>
                     {ticket.notes.length > 0 ? (
                         ticket.notes.slice(0, 5).map((note) => {
                             const noteDate = new Date(note.createdAt).toLocaleDateString('es-ES', {
@@ -334,25 +334,25 @@ export const DeliveryReceiptPDF: React.FC<DeliveryReceiptData> = ({ ticket }) =>
                             });
 
                             return (
-                                <View key={note.id} style={styles.noteItem}>
-                                    <View style={styles.noteHeader}>
-                                        <Text style={styles.noteAuthor}>
+                                <View key={note.id} style={styles['noteItem']}>
+                                    <View style={styles['noteHeader']}>
+                                        <Text style={styles['noteAuthor']}>
                                             {note.author.name || note.author.email}
                                         </Text>
-                                        <Text style={styles.noteDate}>{noteDate}</Text>
+                                        <Text style={styles['noteDate']}>{noteDate}</Text>
                                     </View>
-                                    <Text style={styles.noteContent}>{note.content}</Text>
+                                    <Text style={styles['noteContent']}>{note.content}</Text>
                                 </View>
                             );
                         })
                     ) : (
-                        <Text style={styles.description}>No se registraron notas durante la reparación.</Text>
+                        <Text style={styles['description']}>No se registraron notas durante la reparación.</Text>
                     )}
                 </View>
 
                 {/* Condiciones de Entrega */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Condiciones de Entrega</Text>
+                <View style={styles['section']}>
+                    <Text style={styles['sectionTitle']}>Condiciones de Entrega</Text>
                     <Text style={{ marginBottom: 5, lineHeight: 1.5 }}>
                         • El equipo ha sido probado y verificado su correcto funcionamiento.
                     </Text>
@@ -368,23 +368,23 @@ export const DeliveryReceiptPDF: React.FC<DeliveryReceiptData> = ({ ticket }) =>
                 </View>
 
                 {/* Firmas */}
-                <View style={styles.signatureSection}>
+                <View style={styles['signatureSection']}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
                         Firmas de Conformidad
                     </Text>
                     <Text style={{ fontSize: 9, color: '#6b7280', marginBottom: 15 }}>
                         El cliente firma en conformidad de haber recibido el equipo en perfectas condiciones.
                     </Text>
-                    <View style={styles.signatureBox}>
-                        <View style={styles.signatureItem}>
-                            <View style={styles.signatureLine} />
+                    <View style={styles['signatureBox']}>
+                        <View style={styles['signatureItem']}>
+                            <View style={styles['signatureLine']} />
                             <Text style={{ fontSize: 10, color: '#6b7280' }}>Recibí Conforme</Text>
                             <Text style={{ fontSize: 9, color: '#9ca3af', marginTop: 3 }}>
                                 {ticket.customer.name}
                             </Text>
                         </View>
-                        <View style={styles.signatureItem}>
-                            <View style={styles.signatureLine} />
+                        <View style={styles['signatureItem']}>
+                            <View style={styles['signatureLine']} />
                             <Text style={{ fontSize: 10, color: '#6b7280' }}>Entregó</Text>
                             <Text style={{ fontSize: 9, color: '#9ca3af', marginTop: 3 }}>
                                 {ticket.assignedTo?.name || ticket.assignedTo?.email || 'Taller'}
@@ -394,7 +394,7 @@ export const DeliveryReceiptPDF: React.FC<DeliveryReceiptData> = ({ ticket }) =>
                 </View>
 
                 {/* Footer */}
-                <View style={styles.footer}>
+                <View style={styles['footer']}>
                     <Text style={{ fontSize: 9, color: '#6b7280', textAlign: 'center' }}>
                         Gracias por confiar en {ticket.tenant.name}
                     </Text>

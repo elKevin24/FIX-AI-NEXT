@@ -6,6 +6,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import ExportButton from '@/components/ui/ExportButton';
+import PageHeader from '@/components/PageHeader';
 import styles from './invoices.module.css';
 
 interface Invoice {
@@ -123,49 +124,47 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
   ];
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>Facturación</h1>
-          <p>Consulta y gestiona las facturas generadas a partir de tickets.</p>
-        </div>
-        <ExportButton type="invoices" />
-      </header>
+    <div className={styles['container']}>
+      <PageHeader
+        title="Facturación"
+        subtitle="Consulta y gestiona las facturas generadas a partir de tickets."
+        actions={<ExportButton type="invoices" />}
+      />
 
-      <section className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Total Facturado</span>
-          <span className={styles.statValue}>{formatCurrency(stats.total)}</span>
+      <section className={styles['statsGrid']}>
+        <div className={styles['statCard']}>
+          <span className={styles['statLabel']}>Total Facturado</span>
+          <span className={styles['statValue']}>{formatCurrency(stats.total)}</span>
         </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Cobrado</span>
-          <span className={`${styles.statValue} ${styles.valuePaid}`}>{formatCurrency(stats.paid)}</span>
+        <div className={styles['statCard']}>
+          <span className={styles['statLabel']}>Cobrado</span>
+          <span className={`${styles['statValue']} ${styles['valuePaid']}`}>{formatCurrency(stats.paid)}</span>
         </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Pendiente</span>
-          <span className={`${styles.statValue} ${styles.valuePending}`}>{formatCurrency(stats.pending)}</span>
+        <div className={styles['statCard']}>
+          <span className={styles['statLabel']}>Pendiente</span>
+          <span className={`${styles['statValue']} ${styles['valuePending']}`}>{formatCurrency(stats.pending)}</span>
         </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Cant. Facturas</span>
-          <span className={styles.statValue}>{stats.count}</span>
+        <div className={styles['statCard']}>
+          <span className={styles['statLabel']}>Cant. Facturas</span>
+          <span className={styles['statValue']}>{stats.count}</span>
         </div>
       </section>
 
-      <div className={styles.filters}>
-        <div className={styles.filterGroup}>
+      <div className={styles['filters']}>
+        <div className={styles['filterGroup']}>
           <label>Buscar</label>
           <input 
             type="text" 
             placeholder="No. Factura o Cliente..." 
-            className={styles.input}
+            className={styles['input']}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className={styles.filterGroup}>
+        <div className={styles['filterGroup']}>
           <label>Estado</label>
           <select 
-            className={styles.select}
+            className={styles['select']}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >

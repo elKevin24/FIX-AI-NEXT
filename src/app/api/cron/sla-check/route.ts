@@ -5,7 +5,13 @@ import { sendEmail } from '@/lib/email-service';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env['CRON_SECRET']}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const settings = await prisma.tenantSettings.findMany({
             where: { OR: [{ slaEmailEnabled: true }, { slaInAppEnabled: true }] }
@@ -84,6 +90,6 @@ export async function GET() {
         return NextResponse.json({ success: true, notificationsSent });
     } catch (error: any) {
         console.error('SLA Cron Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

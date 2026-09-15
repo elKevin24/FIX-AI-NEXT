@@ -1,11 +1,12 @@
 import { auth } from "@/auth";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
+import { isSuperAdmin } from "@/lib/authz";
 import { redirect } from "next/navigation";
 import styles from './page.module.css';
 import TicketsByStatusChart from '@/components/dashboard/TicketsByStatusChart';
 import UrgentTicketsWidget from '@/components/dashboard/UrgentTicketsWidget';
 import TechnicianMetrics from '@/components/dashboard/TechnicianMetrics';
-import GlobalSearch from '@/components/GlobalSearch';
+import PageHeader from '@/components/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
@@ -21,12 +22,23 @@ enum TicketPriority {
 
 enum TicketStatus {
   OPEN = 'OPEN',
+  WAITING_APPROVAL = 'WAITING_APPROVAL',
   IN_PROGRESS = 'IN_PROGRESS',
   WAITING_FOR_PARTS = 'WAITING_FOR_PARTS',
   RESOLVED = 'RESOLVED',
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
 }
+
+export const metadata = {
+  title: 'Panel Principal',
+  description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
+  openGraph: {
+    title: 'Dashboard | FIX Workshop',
+    description: 'Vista general del taller: tickets activos, ingresos, productividad de técnicos y métricas en tiempo real.',
+  },
+};
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -35,9 +47,9 @@ export default async function DashboardPage() {
         redirect('/login');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
     const tenantId = session.user.tenantId;
-    const tenantPrisma = getTenantPrisma(tenantId);
+    const tenantPrisma = getTenantPrisma(tenantId, session.user.id);
 
     // Fetch all statistics in parallel
     const [
@@ -52,11 +64,11 @@ export default async function DashboardPage() {
         financialStats,
         posStats,
     ] = await Promise.all([
-        // Active tickets (OPEN + IN_PROGRESS)
+        // Active tickets (OPEN + WAITING_APPROVAL + IN_PROGRESS)
         tenantPrisma.ticket.count({
             where: {
                 tenantId, // Explicitly kept as count() is not intercepted by current wrapper
-                status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] },
+                status: { in: [TicketStatus.OPEN, TicketStatus.WAITING_APPROVAL, TicketStatus.IN_PROGRESS] },
             },
         }),
         // Tickets waiting for parts
@@ -93,7 +105,7 @@ export default async function DashboardPage() {
             where: {
                 // tenantId auto-injected by findMany wrapper
                 priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
-                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED] },
+                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED] },
             },
             include: {
                 customer: {
@@ -185,7 +197,7 @@ export default async function DashboardPage() {
         ).length;
 
         const inProgress = tech.assignedTickets.filter((t: any) =>
-            t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
+            t.status === TicketStatus.OPEN || t.status === TicketStatus.WAITING_APPROVAL || t.status === TicketStatus.IN_PROGRESS || t.status === TicketStatus.WAITING_FOR_PARTS
         ).length;
 
         // Calculate average days to complete
@@ -215,23 +227,16 @@ export default async function DashboardPage() {
     });
 
     return (
-        <div className={styles.dashboard}>
-            <header className={styles.header}>
-                <div>
-                    <h1>Dashboard</h1>
-                    <p>Bienvenido de vuelta, {session?.user?.name || session?.user?.email}</p>
-                </div>
-                {isSuperAdmin && (
-                    <span className={styles.superAdminBadge}>👑 Super Admin</span>
-                )}
-            </header>
-
-            <div className={styles.searchBar}>
-                <GlobalSearch />
-            </div>
+        <div className={styles['dashboard']}>
+            <PageHeader
+                title="Dashboard"
+                subtitle={`Bienvenido de vuelta, ${session?.user?.name || session?.user?.email}`}
+                search
+                superAdmin={isSuperAdminUser}
+            />
 
             {/* Stats Grid */}
-            <div className={styles.statsGrid}>
+            <div className={styles['statsGrid']}>
                 <StatCard 
                     title="Tickets Activos"
                     value={activeTickets}
@@ -267,7 +272,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Financial Stats Grid */}
-            <div className={styles.statsGrid}>
+            <div className={styles['statsGrid']}>
                 <StatCard 
                     title="Ingresos Totales"
                     value={formatCurrency(totalIncome)}
@@ -303,19 +308,19 @@ export default async function DashboardPage() {
             </div>
 
             {/* Charts and Widgets Grid */}
-            <div className={styles.chartsGrid}>
+            <div className={styles['chartsGrid']}>
                 {/* Tickets by Status */}
-                <div className={styles.chartCard}>
-                    <h2 className={styles.chartTitle}>Tickets por Estado</h2>
+                <div className={styles['chartCard']}>
+                    <h2 className={styles['chartTitle']}>Tickets por Estado</h2>
                     <TicketsByStatusChart data={statusChartData} />
                 </div>
 
                 {/* Urgent Tickets */}
-                <div className={styles.chartCard}>
-                    <h2 className={styles.chartTitle}>
+                <div className={styles['chartCard']}>
+                    <h2 className={styles['chartTitle']}>
                         Tickets Urgentes
                         {urgentTickets.length > 0 && (
-                            <span className={styles.urgentBadge}>{urgentTickets.length}</span>
+                            <span className={styles['urgentBadge']}>{urgentTickets.length}</span>
                         )}
                     </h2>
                     <UrgentTicketsWidget tickets={urgentTickets} />
@@ -324,16 +329,16 @@ export default async function DashboardPage() {
 
             {/* Technician Metrics */}
             {technicianMetrics.length > 0 && (
-                <div className={styles.fullWidthCard}>
-                    <h2 className={styles.chartTitle}>Productividad por Técnico</h2>
+                <div className={styles['fullWidthCard']}>
+                    <h2 className={styles['chartTitle']}>Productividad por Técnico</h2>
                     <TechnicianMetrics data={technicianMetrics} />
                 </div>
             )}
 
             {/* Recent Tickets */}
             {recentTickets.length > 0 && (
-                <div className={styles.fullWidthCard}>
-                    <h2 className={styles.chartTitle}>Tickets Recientes</h2>
+                <div className={styles['fullWidthCard']}>
+                    <h2 className={styles['chartTitle']}>Tickets Recientes</h2>
                     <RecentTicketsTable data={recentTickets as any} />
                 </div>
             )}

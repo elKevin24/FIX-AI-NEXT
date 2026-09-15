@@ -8,7 +8,6 @@
 'use client';
 
 import React, { forwardRef, useEffect, useState } from 'react';
-import QRCode from 'qrcode';
 import styles from './Ticket80mm.module.css';
 import {
     Ticket80mmData,
@@ -51,38 +50,38 @@ const formatCurrency = (amount: number | string): string => {
  * Obtiene la clase CSS del badge de estado
  */
 const getStatusBadgeClass = (status: string): string => {
-    const statusMap: Record<string, string> = {
+    const statusMap: Record<string, string | undefined> = {
         // Spanish enum values
-        ABIERTO: styles.statusOpen,
-        EN_PROCESO: styles.statusInProgress,
-        ESPERANDO_REPUESTOS: styles.statusWaitingForParts,
-        RESUELTO: styles.statusResolved,
-        CERRADO: styles.statusClosed,
-        CANCELADO: styles.statusCancelled,
+        ABIERTO: styles['statusOpen'],
+        EN_PROCESO: styles['statusInProgress'],
+        ESPERANDO_REPUESTOS: styles['statusWaitingForParts'],
+        RESUELTO: styles['statusResolved'],
+        CERRADO: styles['statusClosed'],
+        CANCELADO: styles['statusCancelled'],
         // Legacy English values (compat)
-        OPEN: styles.statusOpen,
-        IN_PROGRESS: styles.statusInProgress,
-        WAITING_FOR_PARTS: styles.statusWaitingForParts,
-        RESOLVED: styles.statusResolved,
-        CLOSED: styles.statusClosed,
-        CANCELLED: styles.statusCancelled,
+        OPEN: styles['statusOpen'],
+        IN_PROGRESS: styles['statusInProgress'],
+        WAITING_FOR_PARTS: styles['statusWaitingForParts'],
+        RESOLVED: styles['statusResolved'],
+        CLOSED: styles['statusClosed'],
+        CANCELLED: styles['statusCancelled'],
     };
-    return `${styles.statusBadge} ${statusMap[status] || styles.statusOpen}`;
+    return `${styles['statusBadge'] ?? ''} ${statusMap[status] || styles['statusOpen'] || ''}`;
 };
 
 /**
  * Obtiene la clase CSS del badge de prioridad
  */
 const getPriorityBadgeClass = (priority: string | null): string => {
-    if (!priority) return `${styles.priorityBadge} ${styles.priorityMedium}`;
+    if (!priority) return `${styles['priorityBadge'] ?? ''} ${styles['priorityMedium'] ?? ''}`;
 
-    const priorityMap: Record<string, string> = {
-        LOW: styles.priorityLow,
-        MEDIUM: styles.priorityMedium,
-        HIGH: styles.priorityHigh,
-        URGENT: styles.priorityUrgent,
+    const priorityMap: Record<string, string | undefined> = {
+        LOW: styles['priorityLow'],
+        MEDIUM: styles['priorityMedium'],
+        HIGH: styles['priorityHigh'],
+        URGENT: styles['priorityUrgent'],
     };
-    return `${styles.priorityBadge} ${priorityMap[priority] || styles.priorityMedium}`;
+    return `${styles['priorityBadge'] ?? ''} ${priorityMap[priority] || styles['priorityMedium'] || ''}`;
 };
 
 /**
@@ -134,12 +133,16 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
             return () => clearTimeout(timer);
         }, []);
 
-        // Generar QR Code
+        // Generar QR Code (import dinámico: 'qrcode' no se incluye en el bundle inicial)
         useEffect(() => {
             if (!showQR) return;
 
+            let cancelled = false;
+
             const generateQR = async () => {
                 try {
+                    const QRCode = (await import('qrcode')).default;
+
                     // Determinar URL base
                     const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '');
                     const ticketUrl = `${base}/tickets/status/${ticket.id}`;
@@ -155,39 +158,45 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                         errorCorrectionLevel: 'M',
                     });
 
-                    setQrCodeDataUrl(qrDataUrl);
+                    if (!cancelled) {
+                        setQrCodeDataUrl(qrDataUrl);
+                    }
                 } catch (error) {
                     console.error('Error generando QR code:', error);
                 }
             };
 
             generateQR();
+
+            return () => {
+                cancelled = true;
+            };
         }, [ticket.id, showQR, baseUrl]);
 
         return (
-            <div ref={ref} className={styles.ticket80mm}>
+            <div ref={ref} className={styles['ticket80mm']}>
                 {/* Header */}
-                <div className={styles.header}>
-                    <h1 className={styles.companyName}>{ticket.tenant.name}</h1>
-                    <p className={styles.documentTitle}>ORDEN DE SERVICIO</p>
-                    <p className={styles.ticketId}>#{ticket.ticketKey || ticket.ticketNumber || ticket.id.slice(0, 8).toUpperCase()}</p>
+                <div className={styles['header']}>
+                    <h1 className={styles['companyName']}>{ticket.tenant.name}</h1>
+                    <p className={styles['documentTitle']}>ORDEN DE SERVICIO</p>
+                    <p className={styles['ticketId']}>#{ticket.ticketKey || ticket.ticketNumber || ticket.id.slice(0, 8).toUpperCase()}</p>
 
-                    <div className={styles.metaRow}>
-                        <span className={styles.metaLabel}>Ingreso:</span>
-                        <span className={styles.metaValue}>{formatDate(ticket.createdAt)}</span>
+                    <div className={styles['metaRow']}>
+                        <span className={styles['metaLabel']}>Ingreso:</span>
+                        <span className={styles['metaValue']}>{formatDate(ticket.createdAt)}</span>
                     </div>
                 </div>
 
                 {/* Estado y Prioridad */}
-                <div className={styles.section}>
-                    <div className={styles.dataRow}>
-                        <span className={styles.dataLabel}>Estado:</span>
+                <div className={styles['section']}>
+                    <div className={styles['dataRow']}>
+                        <span className={styles['dataLabel']}>Estado:</span>
                         <span className={getStatusBadgeClass(ticket.status)}>
                             {TICKET_STATUS_LABELS[ticket.status] || ticket.status}
                         </span>
                     </div>
-                    <div className={styles.dataRow}>
-                        <span className={styles.dataLabel}>Prioridad:</span>
+                    <div className={styles['dataRow']}>
+                        <span className={styles['dataLabel']}>Prioridad:</span>
                         <span className={getPriorityBadgeClass(ticket.priority)}>
                             {TICKET_PRIORITY_LABELS[ticket.priority || 'MEDIUM']}
                         </span>
@@ -195,81 +204,81 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                 </div>
 
                 {/* Información del Cliente */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Cliente</h2>
-                    <div className={styles.dataRow}>
-                        <span className={styles.dataLabel}>Nombre:</span>
-                        <span className={styles.dataValue}>{ticket.customer.name}</span>
+                <div className={styles['section']}>
+                    <h2 className={styles['sectionTitle']}>Cliente</h2>
+                    <div className={styles['dataRow']}>
+                        <span className={styles['dataLabel']}>Nombre:</span>
+                        <span className={styles['dataValue']}>{ticket.customer.name}</span>
                     </div>
                     {ticket.customer.phone && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>Teléfono:</span>
-                            <span className={styles.dataValue}>{ticket.customer.phone}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>Teléfono:</span>
+                            <span className={styles['dataValue']}>{ticket.customer.phone}</span>
                         </div>
                     )}
                     {ticket.customer.nit && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>NIT:</span>
-                            <span className={styles.dataValue}>{ticket.customer.nit}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>NIT:</span>
+                            <span className={styles['dataValue']}>{ticket.customer.nit}</span>
                         </div>
                     )}
                     {ticket.customer.dpi && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>DPI:</span>
-                            <span className={styles.dataValue}>{ticket.customer.dpi}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>DPI:</span>
+                            <span className={styles['dataValue']}>{ticket.customer.dpi}</span>
                         </div>
                     )}
                 </div>
 
                 {/* Información del Equipo */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Equipo</h2>
-                    <div className={styles.dataRow}>
-                        <span className={styles.dataLabel}>Tipo:</span>
-                        <span className={styles.dataValue}>{ticket.deviceType || 'PC'}</span>
+                <div className={styles['section']}>
+                    <h2 className={styles['sectionTitle']}>Equipo</h2>
+                    <div className={styles['dataRow']}>
+                        <span className={styles['dataLabel']}>Tipo:</span>
+                        <span className={styles['dataValue']}>{ticket.deviceType || 'PC'}</span>
                     </div>
-                    <div className={styles.dataRow}>
-                        <span className={styles.dataLabel}>Título:</span>
-                        <span className={styles.dataValue}>{ticket.title}</span>
+                    <div className={styles['dataRow']}>
+                        <span className={styles['dataLabel']}>Título:</span>
+                        <span className={styles['dataValue']}>{ticket.title}</span>
                     </div>
                     {ticket.deviceModel && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>Modelo:</span>
-                            <span className={styles.dataValue}>{ticket.deviceModel}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>Modelo:</span>
+                            <span className={styles['dataValue']}>{ticket.deviceModel}</span>
                         </div>
                     )}
                     {ticket.serialNumber && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>S/N:</span>
-                            <span className={styles.dataValue}>{ticket.serialNumber}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>S/N:</span>
+                            <span className={styles['dataValue']}>{ticket.serialNumber}</span>
                         </div>
                     )}
                     {ticket.accessories && (
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>Accesorios:</span>
-                            <span className={styles.dataValue}>{ticket.accessories}</span>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>Accesorios:</span>
+                            <span className={styles['dataValue']}>{ticket.accessories}</span>
                         </div>
                     )}
                 </div>
 
                 {/* Problema Reportado */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Problema Reportado</h2>
-                    <div className={styles.description}>{ticket.description}</div>
+                <div className={styles['section']}>
+                    <h2 className={styles['sectionTitle']}>Problema Reportado</h2>
+                    <div className={styles['description']}>{ticket.description}</div>
                     {ticket.checkInNotes && (
                         <>
-                            <h3 className={styles.sectionTitle} style={{ marginTop: '4px' }}>Notas de Ingreso</h3>
-                            <div className={styles.description}>{ticket.checkInNotes}</div>
+                            <h3 className={styles['sectionTitle']} style={{ marginTop: '4px' }}>Notas de Ingreso</h3>
+                            <div className={styles['description']}>{ticket.checkInNotes}</div>
                         </>
                     )}
                 </div>
 
                 {/* Técnico Asignado */}
                 {ticket.assignedTo && (
-                    <div className={styles.section}>
-                        <div className={styles.dataRow}>
-                            <span className={styles.dataLabel}>Técnico:</span>
-                            <span className={styles.dataValue}>
+                    <div className={styles['section']}>
+                        <div className={styles['dataRow']}>
+                            <span className={styles['dataLabel']}>Técnico:</span>
+                            <span className={styles['dataValue']}>
                                 {ticket.assignedTo.name || ticket.assignedTo.email}
                             </span>
                         </div>
@@ -278,15 +287,16 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* Partes Usadas */}
                 {showParts && ticket.partsUsed && ticket.partsUsed.length > 0 && (
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Repuestos</h2>
-                        <table className={styles.itemsTable}>
+                    <div className={styles['section']}>
+                        <h2 className={styles['sectionTitle']}>Repuestos</h2>
+                        <table className={styles['itemsTable']}>
+                          <caption className="sr-only">Repuestos utilizados</caption>
                             <thead>
                                 <tr>
-                                    <th>Repuesto</th>
-                                    <th className={styles.alignCenter}>Cant.</th>
-                                    <th className={styles.alignRight}>Precio</th>
-                                    <th className={styles.alignRight}>Total</th>
+                                    <th scope="col">Repuesto</th>
+                                    <th scope="col" className={styles['alignCenter']}>Cant.</th>
+                                    <th scope="col" className={styles['alignRight']}>Precio</th>
+                                    <th scope="col" className={styles['alignRight']}>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -299,9 +309,9 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                                     return (
                                         <tr key={partUsage.id}>
                                             <td>{partUsage.part.name}</td>
-                                            <td className={styles.alignCenter}>{partUsage.quantity}</td>
-                                            <td className={styles.alignRight}>{formatCurrency(price)}</td>
-                                            <td className={styles.alignRight}>{formatCurrency(total)}</td>
+                                            <td className={styles['alignCenter']}>{partUsage.quantity}</td>
+                                            <td className={styles['alignRight']}>{formatCurrency(price)}</td>
+                                            <td className={styles['alignRight']}>{formatCurrency(total)}</td>
                                         </tr>
                                     );
                                 })}
@@ -312,13 +322,14 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* Servicios */}
                 {showServices && ticket.services && ticket.services.length > 0 && (
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Servicios</h2>
-                        <table className={styles.itemsTable}>
+                    <div className={styles['section']}>
+                        <h2 className={styles['sectionTitle']}>Servicios</h2>
+                        <table className={styles['itemsTable']}>
+                          <caption className="sr-only">Servicios realizados</caption>
                             <thead>
                                 <tr>
-                                    <th>Servicio</th>
-                                    <th className={styles.alignRight}>Costo</th>
+                                    <th scope="col">Servicio</th>
+                                    <th scope="col" className={styles['alignRight']}>Costo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -330,7 +341,7 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
                                     return (
                                         <tr key={service.id}>
                                             <td>{service.name}</td>
-                                            <td className={styles.alignRight}>{formatCurrency(cost)}</td>
+                                            <td className={styles['alignRight']}>{formatCurrency(cost)}</td>
                                         </tr>
                                     );
                                 })}
@@ -341,39 +352,39 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* Resumen de Costos */}
                 {showCostSummary && (partsCost > 0 || servicesCost > 0) && (
-                    <div className={styles.costSummary}>
+                    <div className={styles['costSummary']}>
                         {partsCost > 0 && (
-                            <div className={styles.costRow}>
-                                <span className={styles.costLabel}>Subtotal Repuestos:</span>
-                                <span className={styles.costValue}>{formatCurrency(partsCost)}</span>
+                            <div className={styles['costRow']}>
+                                <span className={styles['costLabel']}>Subtotal Repuestos:</span>
+                                <span className={styles['costValue']}>{formatCurrency(partsCost)}</span>
                             </div>
                         )}
                         {servicesCost > 0 && (
-                            <div className={styles.costRow}>
-                                <span className={styles.costLabel}>Subtotal Servicios:</span>
-                                <span className={styles.costValue}>{formatCurrency(servicesCost)}</span>
+                            <div className={styles['costRow']}>
+                                <span className={styles['costLabel']}>Subtotal Servicios:</span>
+                                <span className={styles['costValue']}>{formatCurrency(servicesCost)}</span>
                             </div>
                         )}
-                        <div className={`${styles.costRow} ${styles.totalRow}`}>
-                            <span className={styles.costLabel}>TOTAL:</span>
-                            <span className={styles.costValue}>{formatCurrency(totalCost)}</span>
+                        <div className={`${styles['costRow']} ${styles['totalRow']}`}>
+                            <span className={styles['costLabel']}>TOTAL:</span>
+                            <span className={styles['costValue']}>{formatCurrency(totalCost)}</span>
                         </div>
                     </div>
                 )}
 
                 {/* Fechas Importantes */}
                 {(ticket.dueDate || ticket.estimatedCompletionDate) && (
-                    <div className={styles.section}>
+                    <div className={styles['section']}>
                         {ticket.dueDate && (
-                            <div className={styles.dataRow}>
-                                <span className={styles.dataLabel}>Compromiso:</span>
-                                <span className={styles.dataValue}>{formatDate(ticket.dueDate)}</span>
+                            <div className={styles['dataRow']}>
+                                <span className={styles['dataLabel']}>Compromiso:</span>
+                                <span className={styles['dataValue']}>{formatDate(ticket.dueDate)}</span>
                             </div>
                         )}
                         {ticket.estimatedCompletionDate && (
-                            <div className={styles.dataRow}>
-                                <span className={styles.dataLabel}>Est. Finalización:</span>
-                                <span className={styles.dataValue}>{formatDate(ticket.estimatedCompletionDate)}</span>
+                            <div className={styles['dataRow']}>
+                                <span className={styles['dataLabel']}>Est. Finalización:</span>
+                                <span className={styles['dataValue']}>{formatDate(ticket.estimatedCompletionDate)}</span>
                             </div>
                         )}
                     </div>
@@ -381,25 +392,25 @@ const Ticket80mm = forwardRef<HTMLDivElement, Ticket80mmProps>(
 
                 {/* QR Code */}
                 {showQR && qrCodeDataUrl && (
-                    <div className={styles.qrSection}>
-                        <div className={styles.qrContainer}>
+                    <div className={styles['qrSection']}>
+                        <div className={styles['qrContainer']}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={qrCodeDataUrl}
                                 alt={`QR Code - Ticket ${ticket.id}`}
-                                className={styles.qrCode}
+                                className={styles['qrCode']}
                             />
                         </div>
-                        <p className={styles.qrLabel}>Escanea para consultar estado</p>
+                        <p className={styles['qrLabel']}>Escanea para consultar estado</p>
                     </div>
                 )}
 
                 {/* Footer */}
-                <div className={styles.footer}>
-                    <p className={styles.footerLine}>Generado: {generatedDate}</p>
-                    <p className={styles.footerLine}>FIX-AI - Sistema de Gestión de Talleres</p>
+                <div className={styles['footer']}>
+                    <p className={styles['footerLine']}>Generado: {generatedDate}</p>
+                    <p className={styles['footerLine']}>FIX-AI - Sistema de Gestión de Talleres</p>
                     {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED' || ticket.status === 'RESUELTO' || ticket.status === 'CERRADO') ? (
-                        <p className={styles.footerLine} style={{ fontWeight: 600, marginTop: '4px' }}>
+                        <p className={styles['footerLine']} style={{ fontWeight: 600, marginTop: '4px' }}>
                             Garantía: 30 días sobre trabajo realizado
                         </p>
                     ) : null}

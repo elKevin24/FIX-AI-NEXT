@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { TicketPriority, TicketStatus } from '@/generated/prisma';
+import { TicketPriority, TicketStatus } from '@prisma/client';
 
 /**
  * @swagger
@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
                 status: {
                   in: [
                     TicketStatus.OPEN,
+                    TicketStatus.WAITING_APPROVAL,
                     TicketStatus.IN_PROGRESS,
                     TicketStatus.WAITING_FOR_PARTS,
                   ],
@@ -151,9 +152,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching tickets pool:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

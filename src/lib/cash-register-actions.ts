@@ -3,12 +3,13 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@prisma/client';
 import {
   OpenCashRegisterSchema,
   CashTransactionSchema,
   CloseCashRegisterSchema,
 } from '@/lib/schemas';
+import { GenerateCashCutUseCase, CutType } from '@/use-cases/cash-register/GenerateCashCutUseCase';
 
 // ============================================================================
 // TYPES
@@ -51,7 +52,7 @@ export async function openCashRegister(data: CashRegisterData) {
 
   const validatedFields = OpenCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 
@@ -191,7 +192,7 @@ export async function registerCashTransaction(data: CashTransactionData) {
 
   const validatedFields = CashTransactionSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 
@@ -241,7 +242,7 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
 
   const validatedFields = CloseCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
-    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0].message}`);
+    throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
   const validData = validatedFields.data;
 
@@ -430,4 +431,29 @@ export async function registerInvoicePaymentInCash(
   revalidatePath('/dashboard/cash-register');
 
   return transaction;
+}
+
+/**
+ * Server Action para generar arqueos y cortes de caja (Corte X y Corte Z).
+ */
+export async function generateCashCutAction(
+  cashRegisterId: string,
+  cutType: CutType,
+  physicalCashReported?: number,
+) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    throw new Error('No autorizado');
+  }
+
+  const result = await GenerateCashCutUseCase.execute({
+    cashRegisterId,
+    cutType,
+    physicalCashReported,
+    tenantId: session.user.tenantId,
+    userId: session.user.id,
+  });
+
+  revalidatePath('/dashboard/cash-register');
+  return result;
 }

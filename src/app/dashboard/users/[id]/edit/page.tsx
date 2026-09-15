@@ -1,7 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { isSuperAdmin } from '@/lib/authz';
 import { redirect, notFound } from 'next/navigation';
 import EditUserForm from './EditUserForm';
+
+export const metadata = {
+    title: 'Editar Usuario',
+    description: 'Modifica los datos, rol y estado de un miembro del equipo.',
+};
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -15,11 +21,11 @@ export default async function EditUserPage({ params }: Props) {
         redirect('/login');
     }
 
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
         redirect('/dashboard');
     }
 
-    const isSuperAdmin = session.user.email === 'adminkev@example.com';
+    const isSuperAdminUser = isSuperAdmin(session.user);
 
     const user = await prisma.user.findUnique({
         where: { id },
@@ -42,7 +48,7 @@ export default async function EditUserPage({ params }: Props) {
     }
 
     // Check tenant isolation (unless super admin)
-    if (!isSuperAdmin && user.tenantId !== session.user.tenantId) {
+    if (!isSuperAdminUser && user.tenantId !== session.user.tenantId) {
         redirect('/dashboard/users');
     }
 
@@ -50,7 +56,7 @@ export default async function EditUserPage({ params }: Props) {
         <EditUserForm
             user={user}
             currentUserId={session.user.id}
-            isSuperAdmin={isSuperAdmin}
+            isSuperAdmin={isSuperAdminUser}
         />
     );
 }

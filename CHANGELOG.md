@@ -187,10 +187,10 @@ Recepcionista: recep@electrofix.com / password123
 **Configuración**:
 ```env
 # Conexión DIRECTA (para migraciones)
-DATABASE_URL="postgresql://neondb_owner:***REDACTED***@ep-gentle-hill-adon7ba3.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://neondb_owner:npg_l3O0mWGqFBCY@ep-gentle-hill-adon7ba3.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
 # Conexión POOLED (para producción - opcional)
-# DATABASE_URL="postgresql://neondb_owner:***REDACTED***@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
+# DATABASE_URL="postgresql://neondb_owner:npg_l3O0mWGqFBCY@ep-gentle-hill-adon7ba3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
 ```
 
 **Beneficios**:
@@ -247,7 +247,7 @@ await prisma.$transaction([
 
 #### Alta Prioridad
 1. **Notificaciones por Email**
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Templates de email profesionales
    - Notificaciones automáticas al cambiar estado
    - Envío de PDFs por email
@@ -463,7 +463,7 @@ npm install @react-pdf/renderer
    - Filtros por rango de fechas
 
 2. **Notificaciones por Email**
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Templates de email profesionales
    - Notificaciones automáticas al cambiar estado
    - Opción de enviar PDFs por email adjunto

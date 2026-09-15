@@ -7,7 +7,7 @@ import { Badge, Button } from '@/components/ui';
 import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
 import { ROLE_LABELS, ROLE_COLORS, hasPermission, canModifyUser } from '@/lib/auth-utils';
-import type { UserRole } from '@/generated/prisma';
+import type { UserRole } from '@prisma/client';
 
 interface UserData {
     id: string;
@@ -52,11 +52,11 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
         }
         if (user.name) {
             const parts = user.name.split(' ');
-            return parts.length > 1
-                ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-                : user.name[0].toUpperCase();
+            return parts.length > 1 && parts[0] && parts[1]
+                ? `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+                : (user.name[0] ?? '').toUpperCase();
         }
-        return user.email[0].toUpperCase();
+        return (user.email?.[0] ?? 'U').toUpperCase();
     };
 
     const columns: ColumnDef<UserData>[] = [
