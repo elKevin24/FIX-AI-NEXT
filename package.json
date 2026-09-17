@@ -20,6 +20,7 @@
     "db:reset": "docker compose down -v && docker compose up -d",
     "db:seed": "npx prisma db seed",
     "db:migrate": "npx prisma migrate dev",
+    "db:baseline-sync": "npx tsx scripts/sync-migration-baseline.ts",
     "db:studio": "npx prisma studio",
     "neon:migrate": "bash scripts/neon-migrate-retry.sh",
     "neon:seed": "npx prisma db seed",

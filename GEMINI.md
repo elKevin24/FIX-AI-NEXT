@@ -70,14 +70,14 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
     *   Protección y aislamiento de demo en `TicketStatusPage` (`src/app/tickets/status/page.tsx`).
 
 *   **Notificaciones Automatizadas:** Correos integrados con `@react-email` en Server Actions.
-*   **Pruebas Formales (Testing):** Cobertura con Vitest (502+ pruebas) incluyendo componentes, RBAC, POS y acciones críticas.
+*   **Pruebas Formales (Testing):** Cobertura con Vitest (584+ pruebas en 61 suites) incluyendo componentes, RBAC, POS, Use Cases y acciones críticas.
 *   **Reportes Avanzados:** Agrupaciones y métricas en dashboard con `recharts`.
 *   **Punto de Venta (POS):** Control de caja e inventario atómico integrado.
 *   **Rol SUPER_ADMIN Singleton:** Restricción física en BD y blindaje RBAC jerárquico Nivel 5.
+*   **Squash de Migraciones Baseline v2.0:** Consolidación de 27 migraciones acumuladas en una única migración baseline limpia (`prisma/migrations/0_init/migration.sql`), con preservación histórica en `prisma/migrations_archive/` y script de sincronización `npm run db:baseline-sync`.
 
 ### 🚧 En Progreso / Pendiente
-1.  **Squash de Migraciones:** Consolidar las 27 migraciones acumuladas en una única migración limpia antes del release v2.0 definitivo.
-2.  **Refactorización SOLID (Clean Architecture):** Continuar extendiendo el Patrón de Repositorios para los módulos secundarios restantes post-v2.0.
+1.  **Refactorización SOLID (Clean Architecture):** Continuar extendiendo el Patrón de Repositorios para los módulos secundarios restantes post-v2.0.
 
 ## 4. Convenciones de Desarrollo
 
