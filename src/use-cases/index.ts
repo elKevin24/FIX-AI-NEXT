@@ -17,5 +17,8 @@ export * from './users';
 export * from './quotations';
 export * from './pos';
 export * from './credit-notes';
+export * from './reports';
+export * from './tenant-settings';
+export * from './audit';
 
 

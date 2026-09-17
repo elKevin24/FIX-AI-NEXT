@@ -1,73 +1,24 @@
 'use server';
 
+/**
+ * Tenant Settings Server Actions (Thin Controller)
+ * Delegating settings persistence and calculations to TenantSettingsUseCases.
+ */
+
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@prisma/client';
 import { UpdateTenantSettingsSchema } from '@/lib/schemas';
+import {
+  TenantSettingsData,
+  TenantSettings,
+  GetTenantSettingsUseCase,
+  UpdateTenantSettingsUseCase,
+  GetTaxRateUseCase,
+  GetTenantSettingsForDocumentsUseCase,
+} from '@/use-cases/tenant-settings';
 
-// ==================== Types ====================
-
-export interface TenantSettingsData {
-  businessName?: string | null;
-  businessNIT?: string | null;
-  businessAddress?: string | null;
-  businessPhone?: string | null;
-  businessEmail?: string | null;
-  taxRate?: number;
-  taxName?: string;
-  currency?: string;
-  defaultPaymentTerms?: string | null;
-  invoiceFooter?: string | null;
-}
-
-export interface TenantSettings {
-  id: string;
-  tenantId: string;
-  businessName: string | null;
-  businessNIT: string | null;
-  businessAddress: string | null;
-  businessPhone: string | null;
-  businessEmail: string | null;
-  taxRate: number;
-  taxName: string;
-  currency: string;
-  defaultPaymentTerms: string | null;
-  invoiceFooter: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ==================== Helper Functions ====================
-
-function decimalToNumber(value: Prisma.Decimal | null | undefined): number {
-  if (value === null || value === undefined) return 0;
-  return Number(value);
-}
-
-function transformSettings(settings: {
-  id: string;
-  tenantId: string;
-  businessName: string | null;
-  businessNIT: string | null;
-  businessAddress: string | null;
-  businessPhone: string | null;
-  businessEmail: string | null;
-  taxRate: Prisma.Decimal;
-  taxName: string;
-  currency: string;
-  defaultPaymentTerms: string | null;
-  invoiceFooter: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}): TenantSettings {
-  return {
-    ...settings,
-    taxRate: decimalToNumber(settings.taxRate),
-  };
-}
-
-// ==================== Server Actions ====================
+export type { TenantSettingsData, TenantSettings };
 
 /**
  * Get tenant settings, creating default settings if they don't exist
@@ -79,32 +30,7 @@ export async function getTenantSettings(): Promise<TenantSettings | null> {
   }
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
-  // Try to find existing settings
-  let settings = await db.tenantSettings.findUnique({
-    where: { tenantId: session.user.tenantId },
-  });
-
-  // If no settings exist, create default settings
-  if (!settings) {
-    // Get tenant name for default business name
-    const tenant = await db.tenant.findUnique({
-      where: { id: session.user.tenantId },
-      select: { name: true },
-    });
-
-    settings = await db.tenantSettings.create({
-      data: {
-        tenantId: session.user.tenantId,
-        businessName: tenant?.name || null,
-        taxRate: 12, // Default IVA Guatemala
-        taxName: 'IVA',
-        currency: 'GTQ',
-      },
-    });
-  }
-
-  return transformSettings(settings);
+  return await GetTenantSettingsUseCase.execute(session.user.tenantId, db);
 }
 
 /**
@@ -130,57 +56,19 @@ export async function updateTenantSettings(data: TenantSettingsData): Promise<{
     };
   }
 
-  const validData = validatedFields.data;
-
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
   try {
-    // Ensure settings exist
-    const existingSettings = await db.tenantSettings.findUnique({
-      where: { tenantId: session.user.tenantId },
-    });
-
-    let settings;
-    if (existingSettings) {
-      // Update existing settings
-      settings = await db.tenantSettings.update({
-        where: { tenantId: session.user.tenantId },
-        data: {
-          businessName: validData.businessName,
-          businessNIT: validData.businessNIT,
-          businessAddress: validData.businessAddress,
-          businessPhone: validData.businessPhone,
-          businessEmail: validData.businessEmail || null,
-          taxRate: validData.taxRate,
-          taxName: validData.taxName,
-          currency: validData.currency,
-          defaultPaymentTerms: validData.defaultPaymentTerms,
-          invoiceFooter: validData.invoiceFooter,
-        },
-      });
-    } else {
-      // Create new settings
-      settings = await db.tenantSettings.create({
-        data: {
-          tenantId: session.user.tenantId,
-          businessName: validData.businessName || '',
-          businessNIT: validData.businessNIT || '',
-          businessAddress: validData.businessAddress || '',
-          businessPhone: validData.businessPhone || '',
-          businessEmail: validData.businessEmail || null,
-          taxRate: validData.taxRate || 0,
-          taxName: validData.taxName || 'IVA',
-          currency: validData.currency || 'GTQ',
-          defaultPaymentTerms: validData.defaultPaymentTerms || '',
-          invoiceFooter: validData.invoiceFooter || '',
-        },
-      });
-    }
+    const settings = await UpdateTenantSettingsUseCase.execute(
+      validatedFields.data,
+      session.user.tenantId,
+      db
+    );
 
     revalidatePath('/dashboard/settings');
     revalidatePath('/dashboard/settings/business');
 
-    return { success: true, settings: transformSettings(settings) };
+    return { success: true, settings };
   } catch (error) {
     console.error('Error updating tenant settings:', error);
     return { success: false, error: 'Error al actualizar la configuración' };
@@ -198,13 +86,7 @@ export async function getTaxRate(): Promise<number> {
   }
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
-  const settings = await db.tenantSettings.findUnique({
-    where: { tenantId: session.user.tenantId },
-    select: { taxRate: true },
-  });
-
-  return settings ? decimalToNumber(settings.taxRate) : 12;
+  return await GetTaxRateUseCase.execute(session.user.tenantId, db);
 }
 
 /**
@@ -227,26 +109,5 @@ export async function getTenantSettingsForDocuments(): Promise<{
   }
 
   const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
-  const settings = await db.tenantSettings.findUnique({
-    where: { tenantId: session.user.tenantId },
-  });
-
-  const tenant = await db.tenant.findUnique({
-    where: { id: session.user.tenantId },
-    select: { name: true },
-  });
-
-  // Return merged data with fallbacks
-  return {
-    businessName: settings?.businessName || tenant?.name || 'Sin nombre',
-    businessNIT: settings?.businessNIT || null,
-    businessAddress: settings?.businessAddress || null,
-    businessPhone: settings?.businessPhone || null,
-    businessEmail: settings?.businessEmail || null,
-    taxRate: settings ? decimalToNumber(settings.taxRate) : 12,
-    taxName: settings?.taxName || 'IVA',
-    currency: settings?.currency || 'GTQ',
-    invoiceFooter: settings?.invoiceFooter || null,
-  };
+  return await GetTenantSettingsForDocumentsUseCase.execute(session.user.tenantId, db);
 }
