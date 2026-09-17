@@ -92,8 +92,8 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                     if (!isTenantModel(model)) return query(args);
                     const data = { ...(args?.data ?? {}), tenantId };
                     if (userId) {
-                        if (hasCreatedBy(model)) data.createdById = userId;
-                        if (hasUpdatedBy(model)) data.updatedById = userId;
+                        if (hasCreatedBy(model) && !data.createdById && !data.createdBy) data.createdById = userId;
+                        if (hasUpdatedBy(model) && !data.updatedById && !data.updatedBy) data.updatedById = userId;
                     }
                     return query({ ...args, data });
                 },
@@ -105,12 +105,17 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                         ? data.map((item: any) => {
                             const enriched = { ...item, tenantId };
                             if (userId) {
-                                if (hasCreatedBy(model)) enriched.createdById = userId;
-                                if (hasUpdatedBy(model)) enriched.updatedById = userId;
+                                if (hasCreatedBy(model) && !enriched.createdById && !enriched.createdBy) enriched.createdById = userId;
+                                if (hasUpdatedBy(model) && !enriched.updatedById && !enriched.updatedBy) enriched.updatedById = userId;
                             }
                             return enriched;
                         })
-                        : { ...data, tenantId, ...(userId && hasCreatedBy(model) && { createdById: userId }), ...(userId && hasUpdatedBy(model) && { updatedById: userId }) };
+                        : {
+                            ...data,
+                            tenantId,
+                            ...(userId && hasCreatedBy(model) && !data?.createdById && !data?.createdBy && { createdById: userId }),
+                            ...(userId && hasUpdatedBy(model) && !data?.updatedById && !data?.updatedBy && { updatedById: userId }),
+                        };
                     return query({ ...args, data: enrichedData });
                 },
 
@@ -129,7 +134,7 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                     }
                     const data = {
                         ...(args?.data ?? {}),
-                        ...(userId && hasUpdatedBy(model) && { updatedById: userId }),
+                        ...(userId && hasUpdatedBy(model) && !args?.data?.updatedBy && !args?.data?.updatedById && { updatedById: userId }),
                     };
                     return query({ ...args, where: scopedWhere, data });
                 },
@@ -139,7 +144,7 @@ export function getTenantPrisma(tenantId: string, userId?: string): PrismaClient
                     const where = { ...(args?.where ?? {}), tenantId };
                     const data = {
                         ...(args?.data ?? {}),
-                        ...(userId && hasUpdatedBy(model) && { updatedById: userId }),
+                        ...(userId && hasUpdatedBy(model) && !args?.data?.updatedBy && !args?.data?.updatedById && { updatedById: userId }),
                     };
                     return query({ ...args, where, data });
                 },

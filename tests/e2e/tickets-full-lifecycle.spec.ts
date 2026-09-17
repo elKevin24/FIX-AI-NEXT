@@ -84,6 +84,15 @@ test.describe('Full Ticket Lifecycle', () => {
     await page.waitForTimeout(1000);
     await page.reload();
 
+    // Adding a part moves the ticket to WAITING_APPROVAL.
+    // Approve the part so the ticket returns to IN_PROGRESS.
+    const approveBtn = page.locator('button:has-text("Aprobar repuestos")');
+    if (await approveBtn.isVisible().catch(() => false)) {
+      await approveBtn.click();
+      await page.waitForTimeout(1000);
+      await page.reload();
+    }
+
     // ── 6. Add a Service ──
     await page.getByRole('button', { name: '+ Agregar Servicio' }).click();
     const serviceSelect = page.locator('select[name="serviceId"]');
@@ -107,7 +116,7 @@ test.describe('Full Ticket Lifecycle', () => {
 
     // ── 8. Resolve (IN_PROGRESS → RESOLVED) ──
     await page.locator('button:has-text("Marcar Resuelto")').click();
-    await page.fill('textarea#resolve-note', 'Reparación completada: pantalla reemplazada, prueba de funcionamiento exitosa.');
+    await page.locator('textarea[placeholder*="Informe de Resolución"], textarea[placeholder*="Describe brevemente"]').first().fill('Reparación completada: pantalla reemplazada, prueba de funcionamiento exitosa.');
     await page.locator('button:has-text("Marcar como Resuelto")').click();
     await page.waitForTimeout(2000);
     await page.reload();
@@ -144,17 +153,21 @@ test.describe('Full Ticket Lifecycle', () => {
       await page.locator('input[type="number"]').fill(totalAmount.toString());
     }
 
+    // Select TRANSFER so payment doesn't require an open physical cash register
+    await page.locator('div[class*="modal"] select').selectOption('TRANSFER');
+
     await page.locator('button:has-text("Confirmar Pago")').click();
 
     // Verify the invoice shows PAID
     await expect(page.locator('text=PAGADO')).toBeVisible({ timeout: 10000 });
 
     // ── 12. Return to ticket ──
-    await page.goto(`/dashboard/tickets/${ticketId}`, { waitUntil: 'networkidle' });
+    await page.goto(`/dashboard/tickets/${ticketId}`, { waitUntil: 'load' });
 
     // ── 13. Deliver and Close (RESOLVED → CLOSED) ──
     await page.locator('button:has-text("Entregar y Cerrar")').click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
+    await page.reload();
 
     // Verify the delivery receipt PDF link is visible
     await expect(page.locator('a:has-text("Comprobante de Entrega")')).toBeVisible({ timeout: 10000 });

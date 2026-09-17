@@ -46,7 +46,7 @@ export class UpdateTicketStatusUseCase {
                  }
              }
 
-             const updateData: any = { status, updatedBy: { connect: { id: userId } } };
+             const updateData: any = { status, updatedById: userId };
              if (status === 'CANCELLED' && note) {
                  updateData.cancellationReason = note;
              }
