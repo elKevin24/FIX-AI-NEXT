@@ -27,3 +27,23 @@ export function serializeDecimal<T>(data: T): any {
 
   return data;
 }
+
+/**
+ * Formatea un valor numérico como moneda (ej. Q125.00 o $125.00).
+ */
+export function formatCurrency(amount: number | null | undefined, currency: string = 'Q'): string {
+  const numericAmount = Number(amount) || 0;
+  return `${currency}${numericAmount.toFixed(2)}`;
+}
+
+/**
+ * Formatea una fecha en formato corto legible (ej. 16 sep 2026).
+ */
+export function formatDate(date: Date | string | null | undefined, locale: string = 'es-GT'): string {
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString(locale, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
