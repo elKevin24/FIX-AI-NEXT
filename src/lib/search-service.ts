@@ -67,30 +67,30 @@ export async function globalSmartSearch(query: string): Promise<SearchResult[]> 
   const ticketsPromise = db.$queryRaw<{ id: string; ticketKey: string | null; title: string; status: string; deviceModel: string | null; score: number }[]>`
     SELECT 
       id, 
-      "ticket_key" as "ticketKey", 
+      "ticketNumber" as "ticketKey", 
       title, 
       status,
       "deviceModel",
       (
         CASE 
           WHEN title ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
-          WHEN "ticket_key" ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
+          WHEN "ticketNumber" ILIKE ${'%' + sanitizedQuery + '%'} THEN 1.0
           ELSE GREATEST(
             similarity(title, ${sanitizedQuery}), 
-            similarity(COALESCE("ticket_key", ''), ${sanitizedQuery}),
+            similarity(COALESCE("ticketNumber", ''), ${sanitizedQuery}),
             similarity(COALESCE("deviceModel", ''), ${sanitizedQuery})
           )
         END
       ) as score
     FROM tickets
     WHERE "tenantId" = ${tenantId}
-      AND (
-        title % ${sanitizedQuery} OR 
-        title ILIKE ${'%' + sanitizedQuery + '%'} OR
-        "ticket_key" ILIKE ${'%' + sanitizedQuery + '%'} OR 
-        description ILIKE ${'%' + sanitizedQuery + '%'} OR
-        "serialNumber" ILIKE ${'%' + sanitizedQuery + '%'}
-      )
+    AND (
+      title % ${sanitizedQuery} OR 
+      title ILIKE ${'%' + sanitizedQuery + '%'} OR
+      "ticketNumber" ILIKE ${'%' + sanitizedQuery + '%'} OR 
+      description ILIKE ${'%' + sanitizedQuery + '%'} OR
+      "serialNumber" ILIKE ${'%' + sanitizedQuery + '%'}
+    )
     ORDER BY score DESC
     LIMIT 5;
   `;

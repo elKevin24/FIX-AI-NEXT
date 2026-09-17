@@ -89,7 +89,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${endDate ? Prisma.sql`AND t."createdAt" <= ${endDate}` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticket_key" % ${search} OR 
+                t."ticketNumber" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
@@ -116,7 +116,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
               ${endDate ? Prisma.sql`AND t."createdAt" <= ${endDate}` : Prisma.empty}
               AND (
                 t.title % ${search} OR 
-                t."ticket_key" % ${search} OR 
+                t."ticketNumber" % ${search} OR 
                 c.name % ${search} OR
                 t.description % ${search} OR
                 t."serialNumber" ILIKE ${'%' + search + '%'}
