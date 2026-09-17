@@ -12,3 +12,10 @@
 
 export * from './invoices';
 export * from './cash-register';
+export * from './service-templates';
+export * from './users';
+export * from './quotations';
+export * from './pos';
+export * from './credit-notes';
+
+
