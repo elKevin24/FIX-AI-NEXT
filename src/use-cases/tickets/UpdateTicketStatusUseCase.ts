@@ -4,6 +4,7 @@ import { createNotification } from '@/lib/notifications';
 import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
 import type { Prisma, TicketStatus } from '@prisma/client';
 import { NotFoundError, ValidationError, BusinessRuleError } from '@/lib/errors';
+import { canTransitionTo } from '@/lib/ticket-state-machine';
 
 export interface UpdateTicketStatusParams {
     ticketId: string;
@@ -35,6 +36,16 @@ export class UpdateTicketStatusUseCase {
 
         if (!existingTicket) {
              throw new NotFoundError('Ticket', ticketId);
+        }
+
+        // Consult domain state machine
+        if (status !== existingTicket.status) {
+            if (!canTransitionTo(existingTicket.status, status)) {
+                throw new ValidationError(
+                    `Transición no permitida: No se puede cambiar el estado de '${existingTicket.status}' a '${status}'`,
+                    'status'
+                );
+            }
         }
 
         if (status === 'CANCELLED') {

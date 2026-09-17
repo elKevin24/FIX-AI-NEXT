@@ -5,11 +5,12 @@ import { redirect } from 'next/navigation';
 import { CreatePartSchema, UpdatePartSchema } from '@/lib/schemas';
 import { isSuperAdmin } from '@/lib/authz';
 import { CreatePartUseCase, UpdatePartUseCase, DeletePartUseCase } from '@/use-cases/parts/PartUseCases';
+import { ActionState } from '@/lib/types';
 
 /**
  * Create a new part (Server Action)
  */
-export async function createPart(prevState: any, formData: FormData) {
+export async function createPart(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -33,6 +34,8 @@ export async function createPart(prevState: any, formData: FormData) {
         return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
 
+    const superAdmin = isSuperAdmin(session.user);
+
     try {
         await CreatePartUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
     } catch (error) {
@@ -46,7 +49,7 @@ export async function createPart(prevState: any, formData: FormData) {
 /**
  * Update an existing part (Server Action)
  */
-export async function updatePart(prevState: any, formData: FormData) {
+export async function updatePart(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -82,7 +85,7 @@ export async function updatePart(prevState: any, formData: FormData) {
 /**
  * Delete a part (Server Action)
  */
-export async function deletePart(prevState: any, formData: FormData) {
+export async function deletePart(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };

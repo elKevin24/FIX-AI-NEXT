@@ -88,39 +88,64 @@ export const DeleteTicketSchema = z.object({
 // ============================================================================
 
 export const CreateUserSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Formato de email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
+  name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+}).superRefine((data, ctx) => {
+  const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+  const hasFirst = typeof data.firstName === 'string' && data.firstName.trim().length > 0;
+  if (!hasName && !hasFirst) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'El nombre es requerido',
+      path: data.firstName !== undefined ? ['firstName'] : ['name'],
+    });
+  }
+}).transform((data) => {
+  const fullName = (data.name?.trim() || [data.firstName, data.lastName].filter(Boolean).join(' ').trim()) || '';
+  const parts = fullName.split(' ');
+  const firstName = data.firstName?.trim() || parts[0] || '';
+  const lastName = data.lastName?.trim() || parts.slice(1).join(' ') || '';
+  return {
+    email: data.email,
+    role: data.role,
+    name: fullName,
+    firstName,
+    lastName,
+    password: data.password || '',
+  };
 });
 
 export const UpdateUserSchema = z.object({
   userId: z.string().uuid('ID de usuario inválido'),
-  name: z.string().min(1, 'El nombre es requerido'),
-  email: z.string().email('Formato de email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+  email: z.string().email('Formato de email inválido').optional(),
+  name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
-  }),
+  }).optional(),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+}).transform((data) => {
+  const fullName = data.name?.trim() || [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined;
+  const parts = fullName ? fullName.split(' ') : [];
+  const firstName = data.firstName?.trim() || parts[0] || undefined;
+  const lastName = data.lastName?.trim() || parts.slice(1).join(' ') || undefined;
+  return {
+    ...data,
+    name: fullName,
+    firstName,
+    lastName,
+  };
 });
 
-export const UserActionCreateSchema = z.object({
-  email: z.string().email('Email inválido'),
-  firstName: z.string().min(1, 'Nombre requerido').max(100),
-  lastName: z.string().min(1, 'Apellido requerido').max(100),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']),
-  password: z.string().optional(),
-});
-
-export const UserActionUpdateSchema = z.object({
-  userId: z.string().uuid('ID de usuario inválido'),
-  email: z.string().email('Email inválido').optional(),
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
-});
+export const UserActionCreateSchema = CreateUserSchema;
+export const UserActionUpdateSchema = UpdateUserSchema;
 
 export const ResetPasswordSchema = z.object({
   userId: z.string().uuid('ID de usuario inválido'),
@@ -306,8 +331,24 @@ export type CreateCustomerInput = z.infer<typeof CreateCustomerSchema>;
 export type UpdateCustomerInput = z.infer<typeof UpdateCustomerSchema>;
 export type CreatePartInput = z.infer<typeof CreatePartSchema>;
 export type UpdatePartInput = z.infer<typeof UpdatePartSchema>;
-export type CreateUserInput = z.infer<typeof CreateUserSchema>;
-export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface UpdateUserInput {
+  userId: string;
+  name?: string;
+  email?: string;
+  role?: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+}
 // ============================================================================
 // REPORTS SCHEMAS
 // ============================================================================

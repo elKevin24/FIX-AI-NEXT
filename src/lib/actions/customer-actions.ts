@@ -5,11 +5,12 @@ import { redirect } from 'next/navigation';
 import { CreateCustomerSchema, UpdateCustomerSchema } from '@/lib/schemas';
 import { CreateCustomerUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
 import { toClientMessage } from '@/lib/errors';
+import { ActionState } from '@/lib/types';
 
 /**
  * Create a new customer (Server Action)
  */
-export async function createCustomer(prevState: any, formData: FormData) {
+export async function createCustomer(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -38,7 +39,7 @@ export async function createCustomer(prevState: any, formData: FormData) {
 /**
  * Update an existing customer (Server Action)
  */
-export async function updateCustomer(prevState: any, formData: FormData) {
+export async function updateCustomer(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -67,7 +68,7 @@ export async function updateCustomer(prevState: any, formData: FormData) {
 /**
  * Delete a customer (Server Action)
  */
-export async function deleteCustomer(prevState: any, formData: FormData) {
+export async function deleteCustomer(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };

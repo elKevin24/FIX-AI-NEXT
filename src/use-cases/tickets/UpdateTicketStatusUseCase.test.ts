@@ -115,8 +115,21 @@ describe('UpdateTicketStatusUseCase', () => {
     expect(notifyTicketStatusChangeMock).toHaveBeenCalled();
   });
 
-  it('cambia a RESOLVED sin borrar repuestos y notifica el cambio', async () => {
-    const { tx } = makeEnv();
+  it('bloquea transiciones no permitidas por la máquina de estados', async () => {
+    const { db } = makeEnv({ ticket: { ...TICKET, status: 'CLOSED' } });
+
+    await expect(
+      UpdateTicketStatusUseCase.execute({
+        ...BASE_PARAMS,
+        status: 'WAITING_FOR_PARTS' as any,
+      })
+    ).rejects.toThrow('Transición no permitida');
+
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('cambia a RESOLVED desde IN_PROGRESS sin borrar repuestos y notifica el cambio', async () => {
+    const { tx } = makeEnv({ ticket: { ...TICKET, status: 'IN_PROGRESS' } });
 
     const result = await UpdateTicketStatusUseCase.execute({
       ...BASE_PARAMS,

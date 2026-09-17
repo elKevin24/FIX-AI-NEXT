@@ -14,7 +14,5 @@ export { PrismaInvoiceRepository } from './implementations/prisma-invoice.reposi
 export { PrismaCashRegisterRepository } from './implementations/prisma-cash-register.repository';
 export { PrismaAuditLogRepository } from './implementations/prisma-audit-log.repository';
 
-export type { RepositoryContainer } from './container';
-export { createRepositoryContainer, getRepositoryContainer, clearRepositoryContainer } from './container';
 export { TicketStatus, TicketPriority } from './interfaces/ticket.repository.interface';
 export { UserRole } from './interfaces/user.repository.interface';

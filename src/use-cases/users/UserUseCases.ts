@@ -60,14 +60,19 @@ export class UpdateUserUseCase {
             }
         }
 
-        if (data.email !== existingUser.email) {
+        if (data.email && data.email !== existingUser.email) {
              const emailTaken = await userRepo.findByEmail(data.email);
              if (emailTaken) {
                  throw new Error('Ya existe un usuario con este email');
              }
         }
 
-        const updateData: any = {
+        const updateData: {
+            name?: string;
+            email?: string;
+            role?: any;
+            password?: string;
+        } = {
             name: data.name,
             email: data.email,
             role: existingUser.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : data.role,

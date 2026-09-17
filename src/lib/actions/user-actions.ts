@@ -3,13 +3,13 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { CreateUserSchema, UpdateUserSchema } from '@/lib/schemas';
-import { ActionState } from '@/lib/types';
+import { ActionResponse, ActionState } from '@/lib/types';
 import { CreateUserUseCase, UpdateUserUseCase, DeleteUserUseCase } from '@/use-cases/users/UserUseCases';
 
 /**
  * Create a new user (Server Action)
  */
-export async function createUser(prevState: any, formData: FormData): Promise<ActionState> {
+export async function createUser(prevState: ActionState, formData: FormData): Promise<ActionResponse> {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -42,7 +42,7 @@ export async function createUser(prevState: any, formData: FormData): Promise<Ac
 /**
  * Update an existing user (Server Action)
  */
-export async function updateUser(prevState: any, formData: FormData) {
+export async function updateUser(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
@@ -72,7 +72,7 @@ export async function updateUser(prevState: any, formData: FormData) {
 /**
  * Delete a user (Server Action)
  */
-export async function deleteUser(prevState: any, formData: FormData) {
+export async function deleteUser(prevState: ActionState, formData: FormData) {
     const session = await auth();
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };

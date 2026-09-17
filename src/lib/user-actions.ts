@@ -32,26 +32,17 @@ import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/l
 import { buildUserWhereClause } from '@/lib/user-filters';
 
 import {
-  UserActionCreateSchema as CreateUserSchema,
-  UserActionUpdateSchema as UpdateUserSchema,
+  CreateUserSchema,
+  UpdateUserSchema,
   ResetPasswordSchema,
 } from '@/lib/schemas';
+import type { ActionResponse, ActionState } from '@/lib/types';
+export type { ActionResponse, ActionState };
 
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Contraseña actual requerida'),
   newPassword: passwordSchema,
 });
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type ActionState = {
-  success: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-  data?: Record<string, unknown>;
-};
 
 // ============================================================================
 // CREATE USER
@@ -60,7 +51,7 @@ export type ActionState = {
 export async function createUser(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();
@@ -198,7 +189,7 @@ export async function createUser(
 export async function updateUser(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();
@@ -349,7 +340,7 @@ export async function updateUser(
 export async function deactivateUser(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();
@@ -452,7 +443,7 @@ export async function deactivateUser(
 export async function reactivateUser(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();
@@ -537,7 +528,7 @@ export async function reactivateUser(
 export async function resetPassword(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();
@@ -669,7 +660,7 @@ export async function resetPassword(
 export async function changePassword(
   _prevState: ActionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResponse> {
   try {
     // 1. Verificar sesión
     const session = await auth();

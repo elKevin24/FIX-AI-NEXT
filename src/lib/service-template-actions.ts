@@ -14,6 +14,19 @@ import {
   UpdateTemplateDefaultPartSchema
 } from './schemas';
 import { TemplateStockValidation } from './template-utils';
+import { requireTenantSession } from '@/lib/auth-context';
+
+/**
+ * Asserts valid tenant session with ADMIN role for service template actions.
+ * Throws "No autorizado" if no session and "Permiso denegado" if not admin.
+ */
+async function requireTemplateAdminSession() {
+  const session = await requireTenantSession();
+  if (session.userRole !== 'ADMIN') {
+    throw new Error('Permiso denegado');
+  }
+  return session;
+}
 
 /**
  * Validate if there's sufficient stock for all required parts in a template
@@ -134,12 +147,7 @@ function serializeTemplate(template: any) {
 }
 
 export async function getServiceTemplates() {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { db } = await requireTenantSession();
 
   const templates = await db.serviceTemplate.findMany({
     include: {
@@ -168,12 +176,7 @@ export async function getServiceTemplates() {
 // ============================================================================
 
 export async function getActiveServiceTemplates() {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { db } = await requireTenantSession();
 
   const templates = await db.serviceTemplate.findMany({
     where: {
@@ -200,12 +203,7 @@ export async function getActiveServiceTemplates() {
 // ============================================================================
 
 export async function getServiceTemplate(id: string) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { tenantId, db } = await requireTenantSession();
 
   const template = await db.serviceTemplate.findUnique({
     where: {
@@ -230,7 +228,7 @@ export async function getServiceTemplate(id: string) {
   }
 
   // Double check tenant ownership just in case, though client should enforce it
-  if (template.tenantId !== session.user.tenantId) {
+  if (template.tenantId !== tenantId) {
      throw new Error('Acceso denegado');
   }
 
@@ -242,15 +240,7 @@ export async function getServiceTemplate(id: string) {
 // ============================================================================
 
 export async function createServiceTemplate(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  // Solo ADMIN puede crear plantillas
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado. Solo administradores pueden crear plantillas.');
-  }
+  const { tenantId, userId, db } = await requireTemplateAdminSession();
 
   const formDataObj = Object.fromEntries(formData);
 
@@ -270,15 +260,13 @@ export async function createServiceTemplate(formData: FormData) {
 
   const data = validatedFields.data;
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
   const template = await db.serviceTemplate.create({
     data: {
       ...data,
       laborCost: data.laborCost ? Number(data.laborCost) : null,
-      tenantId: session.user.tenantId,
-      createdById: session.user.id,
-      updatedById: session.user.id,
+      tenantId,
+      createdById: userId,
+      updatedById: userId,
     },
   });
 
@@ -291,15 +279,7 @@ export async function createServiceTemplate(formData: FormData) {
 // ============================================================================
 
 export async function updateServiceTemplate(id: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  // Solo ADMIN puede editar completamente
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
+  const { tenantId, userId, db } = await requireTemplateAdminSession();
 
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
@@ -317,14 +297,12 @@ export async function updateServiceTemplate(id: string, formData: FormData) {
 
   const data = validatedFields.data;
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
   // Verificar que la plantilla pertenece al tenant
   const existingTemplate = await db.serviceTemplate.findUnique({
     where: { id },
   });
 
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
+  if (!existingTemplate || existingTemplate.tenantId !== tenantId) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -333,7 +311,7 @@ export async function updateServiceTemplate(id: string, formData: FormData) {
     data: {
       ...data,
       laborCost: data.laborCost ? Number(data.laborCost) : null,
-      updatedById: session.user.id,
+      updatedById: userId,
     },
   });
 
@@ -347,24 +325,14 @@ export async function updateServiceTemplate(id: string, formData: FormData) {
 // ============================================================================
 
 export async function toggleTemplateActiveStatus(id: string, isActive: boolean) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  // Solo ADMIN puede activar/desactivar
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { tenantId, userId, db } = await requireTemplateAdminSession();
 
   // Verificar que la plantilla pertenece al tenant
   const existingTemplate = await db.serviceTemplate.findUnique({
     where: { id },
   });
 
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
+  if (!existingTemplate || existingTemplate.tenantId !== tenantId) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -372,7 +340,7 @@ export async function toggleTemplateActiveStatus(id: string, isActive: boolean) 
     where: { id },
     data: {
       isActive,
-      updatedById: session.user.id,
+      updatedById: userId,
     },
   });
 
@@ -385,17 +353,7 @@ export async function toggleTemplateActiveStatus(id: string, isActive: boolean) 
 // ============================================================================
 
 export async function deleteServiceTemplate(id: string) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  // Solo ADMIN puede eliminar
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { tenantId, db } = await requireTemplateAdminSession();
 
   // Verificar que la plantilla pertenece al tenant
   const existingTemplate = await db.serviceTemplate.findUnique({
@@ -409,7 +367,7 @@ export async function deleteServiceTemplate(id: string) {
     },
   });
 
-  if (!existingTemplate || existingTemplate.tenantId !== session.user.tenantId) {
+  if (!existingTemplate || existingTemplate.tenantId !== tenantId) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -433,17 +391,7 @@ export async function deleteServiceTemplate(id: string) {
 // ============================================================================
 
 export async function duplicateServiceTemplate(id: string) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  // Solo ADMIN puede duplicar
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { tenantId, userId, db } = await requireTemplateAdminSession();
 
   // Obtener plantilla original
   const original = await db.serviceTemplate.findUnique({
@@ -453,7 +401,7 @@ export async function duplicateServiceTemplate(id: string) {
     },
   });
 
-  if (!original || original.tenantId !== session.user.tenantId) {
+  if (!original || original.tenantId !== tenantId) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -470,9 +418,9 @@ export async function duplicateServiceTemplate(id: string) {
       isActive: false, // Las copias empiezan inactivas
       color: original.color,
       icon: original.icon,
-      tenantId: session.user.tenantId,
-      createdById: session.user.id,
-      updatedById: session.user.id,
+      tenantId,
+      createdById: userId,
+      updatedById: userId,
       defaultParts: {
         create: original.defaultParts.map((dp: { partId: string; quantity: number; required: boolean }) => ({
           partId: dp.partId,
@@ -492,10 +440,7 @@ export async function duplicateServiceTemplate(id: string) {
 // ============================================================================
 
 export async function createTicketFromTemplate(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
+  const { tenantId, userId, userRole, db } = await requireTenantSession();
 
   const formDataObj = Object.fromEntries(formData);
 
@@ -516,10 +461,9 @@ export async function createTicketFromTemplate(formData: FormData) {
   }
 
   const { templateId, deviceType, deviceModel, customerId, optionalParts: selectedOptionalPartIds } = validatedFields.data;
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
 
-  const template = await fetchValidatedTemplate(db, templateId, session.user.tenantId);
-  await assertCustomerBelongsToTenant(db, customerId, session.user.tenantId);
+  const template = await fetchValidatedTemplate(db, templateId, tenantId);
+  await assertCustomerBelongsToTenant(db, customerId, tenantId);
 
   const ticket = await db.$transaction(
     async (tx: Prisma.TransactionClient) => {
@@ -531,7 +475,7 @@ export async function createTicketFromTemplate(formData: FormData) {
           deviceType: deviceType || 'PC',
           deviceModel: deviceModel || '',
           customerId,
-          tenantId: session.user.tenantId,
+          tenantId,
           serviceTemplateId: templateId,
           dueDate: template.estimatedDuration
             ? new Date(Date.now() + template.estimatedDuration * 60_000)
@@ -539,9 +483,9 @@ export async function createTicketFromTemplate(formData: FormData) {
           estimatedCompletionDate: template.estimatedDuration
             ? new Date(Date.now() + template.estimatedDuration * 60_000)
             : undefined,
-          assignedToId: session.user.role === 'TECHNICIAN' ? session.user.id : undefined,
-          createdById: session.user.id,
-          updatedById: session.user.id,
+          assignedToId: userRole === 'TECHNICIAN' ? userId : undefined,
+          createdById: userId,
+          updatedById: userId,
         },
       });
 
@@ -686,12 +630,7 @@ async function consumePartsAtomically(
 // ============================================================================
 
 export async function getAvailableParts() {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { db } = await requireTenantSession();
 
   const parts = await db.part.findMany({
     orderBy: {
@@ -707,14 +646,7 @@ export async function getAvailableParts() {
 // ============================================================================
 
 export async function addPartToTemplate(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
+  const { tenantId, db } = await requireTemplateAdminSession();
 
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
@@ -731,14 +663,12 @@ export async function addPartToTemplate(formData: FormData) {
 
   const { templateId, partId, quantity, required } = validatedFields.data;
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
   // Verificar que la plantilla pertenece al tenant
   const template = await db.serviceTemplate.findUnique({
     where: { id: templateId },
   });
 
-  if (!template || template.tenantId !== session.user.tenantId) {
+  if (!template || template.tenantId !== tenantId) {
     throw new Error('Plantilla no encontrada');
   }
 
@@ -747,7 +677,7 @@ export async function addPartToTemplate(formData: FormData) {
     where: { id: partId },
   });
 
-  if (!part || part.tenantId !== session.user.tenantId) {
+  if (!part || part.tenantId !== tenantId) {
     throw new Error('Parte no encontrada');
   }
 
@@ -781,14 +711,7 @@ export async function addPartToTemplate(formData: FormData) {
 }
 
 export async function updateTemplateDefaultPart(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
+  const { tenantId, db } = await requireTemplateAdminSession();
 
   const formDataObj = Object.fromEntries(formData);
   const dataToValidate = {
@@ -806,8 +729,6 @@ export async function updateTemplateDefaultPart(formData: FormData) {
 
   const { id, quantity, required } = validatedFields.data;
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
   // Verificar que existe y pertenece al tenant
   const defaultPart = await db.templateDefaultPart.findUnique({
     where: { id },
@@ -816,7 +737,7 @@ export async function updateTemplateDefaultPart(formData: FormData) {
     },
   });
 
-  if (!defaultPart || defaultPart.template.tenantId !== session.user.tenantId) {
+  if (!defaultPart || defaultPart.template.tenantId !== tenantId) {
     throw new Error('Parte de plantilla no encontrada');
   }
 
@@ -837,16 +758,7 @@ export async function updateTemplateDefaultPart(formData: FormData) {
 }
 
 export async function removePartFromTemplate(id: string) {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { tenantId, db } = await requireTemplateAdminSession();
 
   // Verificar que existe y pertenece al tenant
   const defaultPart = await db.templateDefaultPart.findUnique({
@@ -856,7 +768,7 @@ export async function removePartFromTemplate(id: string) {
     },
   });
 
-  if (!defaultPart || defaultPart.template.tenantId !== session.user.tenantId) {
+  if (!defaultPart || defaultPart.template.tenantId !== tenantId) {
     throw new Error('Parte de plantilla no encontrada');
   }
 
@@ -915,16 +827,7 @@ export interface TemplateAnalytics {
 }
 
 export async function getTemplateAnalytics(startDate?: Date, endDate?: Date): Promise<TemplateAnalytics> {
-  const session = await auth();
-  if (!session?.user?.tenantId) {
-    throw new Error('No autorizado');
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    throw new Error('Permiso denegado');
-  }
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
+  const { db } = await requireTemplateAdminSession();
 
   // Default to last 30 days if no dates provided
   const end = endDate || new Date();

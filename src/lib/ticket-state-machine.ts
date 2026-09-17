@@ -81,6 +81,19 @@ export function isValidTransition(
 }
 
 /**
+ * Valida si es posible transicionar de un estado actual a un estado objetivo
+ */
+export function canTransitionTo(
+  currentStatus: TicketStatus | string,
+  targetStatus: TicketStatus | string
+): boolean {
+  if (currentStatus === targetStatus) return true;
+  const transitions = VALID_TRANSITIONS[currentStatus as TicketStatus];
+  if (!transitions) return false;
+  return Object.values(transitions).includes(targetStatus as TicketStatus);
+}
+
+/**
  * Obtiene el nuevo estado basado en el estado actual y la acción
  * @throws Error si la transición no es válida
  */

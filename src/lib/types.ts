@@ -1,6 +1,8 @@
-export type ActionState<T = null> = {
+export type ActionResponse<T = Record<string, unknown>> = {
     success: boolean;
     message: string;
     errors?: Record<string, string[]>;
     data?: T;
-} | null;
+};
+
+export type ActionState<T = Record<string, unknown>> = ActionResponse<T> | null;
