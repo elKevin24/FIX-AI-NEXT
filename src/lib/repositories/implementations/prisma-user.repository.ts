@@ -1,4 +1,5 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { buildUserWhereClause } from '@/lib/user-filters';
 import { IUserRepository, UserFilters, UserCreateInput, UserUpdateInput } from '../interfaces/user.repository.interface';
 import { UserRole } from '@prisma/client';
 
@@ -25,18 +26,8 @@ export class PrismaUserRepository implements IUserRepository {
 
     async findMany(filters: UserFilters) {
         const { tenantId, role, isActive, search, page = 1, limit = 20 } = filters;
-        
-        const where: any = { tenantId };
-        if (role) where.role = role;
-        if (isActive !== undefined) where.isActive = isActive;
-        if (search) {
-            where.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-                { firstName: { contains: search, mode: 'insensitive' } },
-                { lastName: { contains: search, mode: 'insensitive' } }
-            ];
-        }
+
+        const where = buildUserWhereClause({ tenantId, role, isActive, search });
 
         return this.db.user.findMany({
             where,
@@ -71,18 +62,8 @@ export class PrismaUserRepository implements IUserRepository {
 
     async count(filters: UserFilters): Promise<number> {
         const { tenantId, role, isActive, search } = filters;
-        
-        const where: any = { tenantId };
-        if (role) where.role = role;
-        if (isActive !== undefined) where.isActive = isActive;
-        if (search) {
-            where.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-                { firstName: { contains: search, mode: 'insensitive' } },
-                { lastName: { contains: search, mode: 'insensitive' } }
-            ];
-        }
+
+        const where = buildUserWhereClause({ tenantId, role, isActive, search });
 
         return this.db.user.count({ where });
     }

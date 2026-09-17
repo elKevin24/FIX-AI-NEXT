@@ -29,31 +29,13 @@ import {
 } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 import { validatePassword, generateTemporaryPassword, passwordSchema } from '@/lib/password-utils';
+import { buildUserWhereClause } from '@/lib/user-filters';
 
-// ============================================================================
-// ZOD SCHEMAS
-// ============================================================================
-
-const CreateUserSchema = z.object({
-  email: z.string().email('Email inválido'),
-  firstName: z.string().min(1, 'Nombre requerido').max(100),
-  lastName: z.string().min(1, 'Apellido requerido').max(100),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']),
-  password: z.string().optional(), // Si no se provee, se genera uno temporal
-});
-
-const UpdateUserSchema = z.object({
-  userId: z.string().uuid('ID de usuario inválido'),
-  email: z.string().email('Email inválido').optional(),
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
-});
-
-const ResetPasswordSchema = z.object({
-  userId: z.string().uuid('ID de usuario inválido'),
-  newPassword: z.string().optional(), // Si no se provee, se genera uno temporal
-});
+import {
+  UserActionCreateSchema as CreateUserSchema,
+  UserActionUpdateSchema as UpdateUserSchema,
+  ResetPasswordSchema,
+} from '@/lib/schemas';
 
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Contraseña actual requerida'),
@@ -816,29 +798,15 @@ export async function getUsers(options?: {
       return { success: false, message: 'Sin permiso para ver usuarios' };
     }
 
-    const whereClause: Record<string, unknown> = {
+    const where = buildUserWhereClause({
       tenantId,
-    };
-
-    if (!options?.includeInactive) {
-      whereClause['isActive'] = true;
-    }
-
-    if (options?.role) {
-      whereClause['role'] = options.role;
-    }
-
-    if (options?.search) {
-      whereClause['OR'] = [
-        { email: { contains: options.search, mode: 'insensitive' } },
-        { firstName: { contains: options.search, mode: 'insensitive' } },
-        { lastName: { contains: options.search, mode: 'insensitive' } },
-        { name: { contains: options.search, mode: 'insensitive' } },
-      ];
-    }
+      isActive: options?.includeInactive ? undefined : true,
+      role: options?.role,
+      search: options?.search,
+    });
 
     const users = await getTenantPrisma(tenantId, session.user.id).user.findMany({
-      where: whereClause,
+      where,
       select: {
         id: true,
         email: true,
