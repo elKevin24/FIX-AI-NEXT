@@ -14,7 +14,7 @@ export interface RepositoryContainer {
     user: IUserRepository;
 }
 
-let container: RepositoryContainer | null = null;
+const containerCache = new Map<string, RepositoryContainer>();
 
 export function createRepositoryContainer(tenantId: string, userId: string): RepositoryContainer {
     return {
@@ -26,12 +26,15 @@ export function createRepositoryContainer(tenantId: string, userId: string): Rep
 }
 
 export function getRepositoryContainer(tenantId: string, userId: string): RepositoryContainer {
-    if (!container) {
-        container = createRepositoryContainer(tenantId, userId);
+    const key = `${tenantId}:${userId}`;
+    let instance = containerCache.get(key);
+    if (!instance) {
+        instance = createRepositoryContainer(tenantId, userId);
+        containerCache.set(key, instance);
     }
-    return container;
+    return instance;
 }
 
 export function clearRepositoryContainer() {
-    container = null;
+    containerCache.clear();
 }

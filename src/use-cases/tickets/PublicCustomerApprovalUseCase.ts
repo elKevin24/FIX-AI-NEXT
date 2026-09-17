@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
-import { notifyTicketStatusChange } from "@/lib/ticket-notifications";
 
 export interface PublicCustomerApprovalParams {
     ticketId: string;
@@ -15,21 +14,30 @@ export interface PublicApprovalResult {
     newStatus: string;
 }
 
+export interface PublicCustomerApprovalDependencies {
+    globalDb?: any;
+    tenantDbProvider?: (tenantId: string) => any;
+}
+
 /**
  * Permite al cliente final autorizar o rechazar un presupuesto de reparacion
  * desde el portal publico (/tickets/status).
  * Utiliza transaccion atomica con bloqueo por tenant para garantizar consistencia.
  */
 export class PublicCustomerApprovalUseCase {
-    static async execute({ ticketId, action, rejectionReason }: PublicCustomerApprovalParams): Promise<PublicApprovalResult> {
+    static async execute(
+        { ticketId, action, rejectionReason }: PublicCustomerApprovalParams,
+        deps?: PublicCustomerApprovalDependencies
+    ): Promise<PublicApprovalResult> {
         if (!ticketId || typeof ticketId !== "string") {
             throw new Error("ID de ticket no valido");
         }
 
         const cleanId = ticketId.trim();
+        const globalDb = deps?.globalDb ?? prisma;
 
         // 1. Localizar el ticket sin requerir sesion de dashboard (acceso publico por ID o numero)
-        const publicTicket = await prisma.ticket.findFirst({
+        const publicTicket = await globalDb.ticket.findFirst({
             where: {
                 OR: [
                     { id: cleanId },
@@ -51,10 +59,21 @@ export class PublicCustomerApprovalUseCase {
             throw new Error("Ticket no encontrado");
         }
 
-        const tenantDb = getTenantPrisma(publicTicket.tenantId);
+        const getDb = deps?.tenantDbProvider ?? getTenantPrisma;
+        const tenantDb = getDb(publicTicket.tenantId);
 
         if (action === "APPROVE") {
-            return await tenantDb.$transaction(async (tx: any) => {
+            return await tenantDb.$transaction((tx: any) => 
+                PublicCustomerApprovalUseCase.handleApproval(tx, publicTicket)
+            );
+        } else {
+            return await tenantDb.$transaction((tx: any) => 
+                PublicCustomerApprovalUseCase.handleRejection(tx, publicTicket, rejectionReason)
+            );
+        }
+    }
+
+    private static async handleApproval(tx: any, publicTicket: any): Promise<PublicApprovalResult> {
                 const pendingParts = await tx.partUsage.findMany({
                     where: { ticketId: publicTicket.id, approved: false },
                     include: { part: true }
@@ -125,55 +144,52 @@ export class PublicCustomerApprovalUseCase {
                     }
                 });
 
-                return {
-                    success: true,
-                    message: "Presupuesto aprobado exitosamente. El equipo pasa a reparacion.",
+        return {
+            success: true,
+            message: "Presupuesto aprobado exitosamente. El equipo pasa a reparacion.",
+            ticketId: publicTicket.id,
+            newStatus: "IN_PROGRESS",
+        };
+    }
+
+    private static async handleRejection(tx: any, publicTicket: any, rejectionReason?: string): Promise<PublicApprovalResult> {
+        await tx.ticket.update({
+            where: { id: publicTicket.id },
+            data: {
+                status: "CANCELLED",
+            }
+        });
+
+        await tx.auditLog.create({
+            data: {
+                action: "CUSTOMER_BUDGET_REJECTED",
+                module: "TICKETS",
+                details: JSON.stringify({
                     ticketId: publicTicket.id,
-                    newStatus: "IN_PROGRESS",
-                };
-            });
-        } else {
-            // Rechazo de cotizacion por el cliente
-            return await tenantDb.$transaction(async (tx: any) => {
-                const updatedTicket = await tx.ticket.update({
-                    where: { id: publicTicket.id },
-                    data: {
-                        status: "CANCELLED",
-                    }
-                });
+                    reason: rejectionReason || "Rechazado por el cliente en portal",
+                    source: "PUBLIC_PORTAL"
+                }),
+                tenantId: publicTicket.tenantId,
+                entityType: "Ticket",
+                entityId: publicTicket.id,
+            }
+        });
 
-                await tx.auditLog.create({
-                    data: {
-                        action: "CUSTOMER_BUDGET_REJECTED",
-                        module: "TICKETS",
-                        details: JSON.stringify({
-                            ticketId: publicTicket.id,
-                            reason: rejectionReason || "Rechazado por el cliente en portal",
-                            source: "PUBLIC_PORTAL"
-                        }),
-                        tenantId: publicTicket.tenantId,
-                        entityType: "Ticket",
-                        entityId: publicTicket.id,
-                    }
-                });
+        await tx.ticketNote.create({
+            data: {
+                ticketId: publicTicket.id,
+                content: `Presupuesto rechazado por el cliente. Motivo: ${rejectionReason || 'Sin motivo especificado'}`,
+                isInternal: false,
+                tenantId: publicTicket.tenantId,
+            }
+        });
 
-                await tx.ticketNote.create({
-                    data: {
-                        ticketId: publicTicket.id,
-                        content: `Presupuesto rechazado por el cliente. Motivo: ${rejectionReason || 'Sin motivo especificado'}`,
-                        isInternal: false,
-                        tenantId: publicTicket.tenantId,
-                    }
-                });
-
-                return {
-                    success: true,
-                    message: "Presupuesto rechazado. El servicio ha sido cancelado.",
-                    ticketId: publicTicket.id,
-                    newStatus: "CANCELLED",
-                };
-            });
-        }
+        return {
+            success: true,
+            message: "Presupuesto rechazado. El servicio ha sido cancelado.",
+            ticketId: publicTicket.id,
+            newStatus: "CANCELLED",
+        };
     }
 }
 

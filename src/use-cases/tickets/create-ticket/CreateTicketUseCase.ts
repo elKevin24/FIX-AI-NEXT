@@ -1,9 +1,7 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreateTicketInput } from '@/lib/schemas';
 import { CustomerResolver, CustomerInfo, ResolvedCustomer } from './CustomerResolver';
-import { TicketCreator, CreatedTicket } from './TicketCreator';
-import { PartUsageHandler, PartItem, LowStockAlert } from './PartUsageHandler';
-import { AuditLogger } from './AuditLogger';
+import { LowStockAlert } from './PartUsageHandler';
 import { NotificationDispatcher, TicketNotificationData } from './NotificationDispatcher';
 import { NotFoundError, AuthorizationError, BusinessRuleError } from '@/lib/errors';
 
@@ -32,22 +30,34 @@ export interface CreatedTicketResult {
     lowStockAlerts: LowStockAlert[];
 }
 
+export interface ICustomerResolver {
+    resolve(customerInfo: CustomerInfo): Promise<ResolvedCustomer>;
+}
+
+export interface INotificationDispatcher {
+    dispatchLowStockAlerts(alerts: LowStockAlert[]): Promise<void>;
+    dispatchTicketCreated(ticket: TicketNotificationData): Promise<void>;
+}
+
+export interface CreateTicketDependencies {
+    customerResolver?: ICustomerResolver;
+    notificationDispatcher?: INotificationDispatcher;
+    db?: any;
+}
+
 export class CreateTicketUseCase {
-    private readonly customerResolver: CustomerResolver;
-    private readonly ticketCreator: TicketCreator;
-    private readonly partUsageHandler: PartUsageHandler;
-    private readonly auditLogger: AuditLogger;
-    private readonly notificationDispatcher: NotificationDispatcher;
+    private readonly customerResolver: ICustomerResolver;
+    private readonly notificationDispatcher: INotificationDispatcher;
+    private readonly db: any;
 
     constructor(
         private readonly tenantId: string,
-        private readonly userId: string
+        private readonly userId: string,
+        deps?: CreateTicketDependencies
     ) {
-        this.customerResolver = new CustomerResolver(tenantId, userId);
-        this.ticketCreator = new TicketCreator(tenantId, userId);
-        this.partUsageHandler = new PartUsageHandler(tenantId, userId);
-        this.auditLogger = new AuditLogger(tenantId, userId);
-        this.notificationDispatcher = new NotificationDispatcher(tenantId);
+        this.customerResolver = deps?.customerResolver ?? new CustomerResolver(tenantId, userId);
+        this.notificationDispatcher = deps?.notificationDispatcher ?? new NotificationDispatcher(tenantId);
+        this.db = deps?.db ?? getTenantPrisma(tenantId, userId);
     }
 
     async execute({ ticketData, customerInfo }: CreateTicketParams): Promise<CreatedTicketResult> {
@@ -71,13 +81,13 @@ export class CreateTicketUseCase {
     }
 
     // Static method for backward compatibility
-    static async execute(params: CreateTicketParams): Promise<CreatedTicketResult> {
-        const useCase = new CreateTicketUseCase(params.tenantId, params.userId);
+    static async execute(params: CreateTicketParams, deps?: CreateTicketDependencies): Promise<CreatedTicketResult> {
+        const useCase = new CreateTicketUseCase(params.tenantId, params.userId, deps);
         return useCase.execute(params);
     }
 
     private async createTicketWithParts(ticketData: CreateTicketInput & { customerId: string }): Promise<CreatedTicketResult> {
-        const tenantDb = getTenantPrisma(this.tenantId, this.userId);
+        const tenantDb = this.db;
         
         const transactionResult = await tenantDb.$transaction(async (tx: any) => {
             // Create ticket

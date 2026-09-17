@@ -13,9 +13,20 @@ export interface UpdateTicketStatusParams {
     userId: string;
 }
 
+export interface UpdateTicketStatusDependencies {
+    db?: any;
+    statusNotifier?: typeof notifyTicketStatusChange;
+    techNotifier?: typeof createNotification;
+}
+
 export class UpdateTicketStatusUseCase {
-    static async execute({ ticketId, status, note, tenantId, userId }: UpdateTicketStatusParams) {
-        const tenantDb = getTenantPrisma(tenantId, userId);
+    static async execute(
+        { ticketId, status, note, tenantId, userId }: UpdateTicketStatusParams,
+        deps?: UpdateTicketStatusDependencies
+    ) {
+        const tenantDb = deps?.db ?? getTenantPrisma(tenantId, userId);
+        const notifyStatus = deps?.statusNotifier ?? notifyTicketStatusChange;
+        const notifyTech = deps?.techNotifier ?? createNotification;
         
         const existingTicket = await tenantDb.ticket.findUnique({
             where: { id: ticketId },
@@ -82,7 +93,7 @@ export class UpdateTicketStatusUseCase {
 
         if (status !== existingTicket.status) {
              try {
-                await notifyTicketStatusChange(
+                await notifyStatus(
                     {
                         id: existingTicket.id,
                         ticketNumber: existingTicket.ticketNumber,
@@ -108,7 +119,7 @@ export class UpdateTicketStatusUseCase {
         }
 
         if (existingTicket.assignedToId && existingTicket.assignedToId !== userId) {
-            await createNotification({
+            await notifyTech({
                 userId: existingTicket.assignedToId,
                 tenantId: tenantId,
                 type: 'INFO',
@@ -116,27 +127,6 @@ export class UpdateTicketStatusUseCase {
                 message: `El ticket #${existingTicket.ticketNumber} cambió a estado ${status}`,
                 link: `/dashboard/tickets/${ticketId}`
             });
-        }
-
-        if (status !== existingTicket.status) {
-            try {
-                const updatedFullTicket = await tenantDb.ticket.findUnique({
-                    where: { id: ticketId },
-                    include: { customer: true, assignedTo: true }
-                });
-                
-                if (updatedFullTicket) {
-                    await notifyTicketStatusChange({
-                        ...updatedFullTicket,
-                        ticketNumber: updatedFullTicket.ticketNumber,
-                    }, {
-                        oldStatus: existingTicket.status,
-                        newStatus: status,
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to notify customer of status update:', e);
-            }
         }
 
         return true;

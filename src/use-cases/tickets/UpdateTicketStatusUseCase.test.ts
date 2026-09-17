@@ -160,11 +160,34 @@ describe('UpdateTicketStatusUseCase', () => {
     });
   });
 
-  it('no notifica al técnico asignado si el actor es el propio técnico', async () => {
-    makeEnv({ ticket: { ...TICKET, assignedToId: 'user-1' } });
+  it('permite inyectar db, statusNotifier y techNotifier via DI sin depender de mocks globales', async () => {
+    const customDb = {
+      ticket: { findUnique: vi.fn().mockResolvedValue({ ...TICKET, assignedToId: 'tech-99' }) },
+      $transaction: vi.fn(async (cb: any) => cb({
+        ticket: { update: vi.fn().mockResolvedValue({}) },
+        auditLog: { create: vi.fn().mockResolvedValue({}) },
+      })),
+    };
+    const customStatusNotifier = vi.fn().mockResolvedValue(undefined);
+    const customTechNotifier = vi.fn().mockResolvedValue(undefined);
 
-    await UpdateTicketStatusUseCase.execute({ ...BASE_PARAMS, status: 'IN_PROGRESS' as any });
+    const result = await UpdateTicketStatusUseCase.execute(
+      { ...BASE_PARAMS, status: 'IN_PROGRESS' as any },
+      {
+        db: customDb,
+        statusNotifier: customStatusNotifier as any,
+        techNotifier: customTechNotifier as any,
+      }
+    );
 
-    expect(createNotificationMock).not.toHaveBeenCalled();
+    expect(result).toBe(true);
+    expect(customDb.ticket.findUnique).toHaveBeenCalledWith({
+      where: { id: 'ticket-1' },
+      include: { partsUsed: true, customer: true, assignedTo: true },
+    });
+    expect(customStatusNotifier).toHaveBeenCalled();
+    expect(customTechNotifier).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'tech-99',
+    }));
   });
 });

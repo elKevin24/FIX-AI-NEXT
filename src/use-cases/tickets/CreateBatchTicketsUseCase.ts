@@ -11,21 +11,32 @@ export interface CreateBatchTicketsParams {
     userId: string;
 }
 
+export interface CreateBatchTicketsDependencies {
+    customerResolver?: { resolve(customerInfo: CustomerInfo): Promise<{ id: string; name: string; email?: string | null }> };
+    db?: any;
+    notifier?: (ticket: any) => Promise<void>;
+}
+
 export class CreateBatchTicketsUseCase {
-    private readonly customerResolver: CustomerResolver;
+    private readonly customerResolver: { resolve(customerInfo: CustomerInfo): Promise<{ id: string; name: string; email?: string | null }> };
+    private readonly db: any;
+    private readonly notifier: (ticket: any) => Promise<void>;
 
     constructor(
         private readonly tenantId: string,
-        private readonly userId: string
+        private readonly userId: string,
+        deps?: CreateBatchTicketsDependencies
     ) {
-        this.customerResolver = new CustomerResolver(tenantId, userId);
+        this.customerResolver = deps?.customerResolver ?? new CustomerResolver(tenantId, userId);
+        this.db = deps?.db ?? getTenantPrisma(tenantId, userId);
+        this.notifier = deps?.notifier ?? notifyTicketCreated;
     }
 
     async execute({ ticketsData, customerInfo }: CreateBatchTicketsParams): Promise<string[]> {
         // 1. Resolve or create customer using CustomerResolver
         const customer = await this.customerResolver.resolve(customerInfo);
 
-        const tenantDb = getTenantPrisma(this.tenantId, this.userId);
+        const tenantDb = this.db;
 
         // 2. Insert tickets within an isolated tenant transaction
         const createdTicketIds = await tenantDb.$transaction(
@@ -62,13 +73,13 @@ export class CreateBatchTicketsUseCase {
         return createdTicketIds;
     }
 
-    static async execute(params: CreateBatchTicketsParams): Promise<string[]> {
-        const useCase = new CreateBatchTicketsUseCase(params.tenantId, params.userId);
+    static async execute(params: CreateBatchTicketsParams, deps?: CreateBatchTicketsDependencies): Promise<string[]> {
+        const useCase = new CreateBatchTicketsUseCase(params.tenantId, params.userId, deps);
         return useCase.execute(params);
     }
 
     private async sendBatchNotifications(
-        db: ReturnType<typeof getTenantPrisma>,
+        db: any,
         ticketIds: string[],
     ): Promise<void> {
         try {
