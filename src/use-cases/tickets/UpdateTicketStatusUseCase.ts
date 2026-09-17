@@ -118,23 +118,25 @@ export class UpdateTicketStatusUseCase {
             });
         }
 
-        try {
-            const updatedFullTicket = await tenantDb.ticket.findUnique({
-                where: { id: ticketId },
-                include: { customer: true, assignedTo: true }
-            });
-            
-            if (updatedFullTicket) {
-                await notifyTicketStatusChange({
-                    ...updatedFullTicket,
-                    ticketNumber: updatedFullTicket.ticketNumber,
-                }, {
-                    oldStatus: existingTicket.status,
-                    newStatus: status,
+        if (status !== existingTicket.status) {
+            try {
+                const updatedFullTicket = await tenantDb.ticket.findUnique({
+                    where: { id: ticketId },
+                    include: { customer: true, assignedTo: true }
                 });
+                
+                if (updatedFullTicket) {
+                    await notifyTicketStatusChange({
+                        ...updatedFullTicket,
+                        ticketNumber: updatedFullTicket.ticketNumber,
+                    }, {
+                        oldStatus: existingTicket.status,
+                        newStatus: status,
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to notify customer of status update:', e);
             }
-        } catch (e) {
-            console.error('Failed to notify customer of status update:', e);
         }
 
         return true;

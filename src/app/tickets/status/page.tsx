@@ -49,8 +49,9 @@ export default async function TicketStatusPage({
                 }
             });
         }
-    } catch {
+    } catch (error) {
         // Safe fallback for static rendering or isolated environments
+        console.warn('[TicketStatusPage] Notice: Could not load demo tickets during render:', error);
         demoTickets = [];
     }
 

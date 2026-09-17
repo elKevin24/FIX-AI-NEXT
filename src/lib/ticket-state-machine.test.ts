@@ -23,6 +23,10 @@ describe('Ticket State Machine', () => {
       [TicketStatus.RESOLVED, 'cancel', TicketStatus.CANCELLED],
       [TicketStatus.CLOSED, 'reopen', TicketStatus.IN_PROGRESS],
       [TicketStatus.CANCELLED, 'reopen', TicketStatus.OPEN],
+      [TicketStatus.WAITING_APPROVAL, 'approve', TicketStatus.IN_PROGRESS],
+      [TicketStatus.WAITING_APPROVAL, 'reject', TicketStatus.REJECTED],
+      [TicketStatus.WAITING_APPROVAL, 'cancel', TicketStatus.CANCELLED],
+      [TicketStatus.REJECTED, 'reopen', TicketStatus.OPEN],
     ];
     it.each(valid)('%s → %s → %s', (from, action, to) => {
       expect(isValidTransition(from, action as any)).toBe(true);
@@ -48,6 +52,16 @@ describe('Ticket State Machine', () => {
       [TicketStatus.CLOSED, 'resolve'],
       [TicketStatus.CANCELLED, 'deliver'],
       [TicketStatus.CANCELLED, 'cancel'],
+      [TicketStatus.WAITING_APPROVAL, 'take'],
+      [TicketStatus.WAITING_APPROVAL, 'deliver'],
+      [TicketStatus.WAITING_APPROVAL, 'resolve'],
+      [TicketStatus.WAITING_APPROVAL, 'reopen'],
+      [TicketStatus.WAITING_APPROVAL, 'resume'],
+      [TicketStatus.WAITING_APPROVAL, 'wait_for_parts'],
+      [TicketStatus.REJECTED, 'cancel'],
+      [TicketStatus.REJECTED, 'deliver'],
+      [TicketStatus.REJECTED, 'resolve'],
+      [TicketStatus.REJECTED, 'take'],
     ];
     it.each(invalid)('%s → %s is rejected', (from, action) => {
       expect(isValidTransition(from, action as any)).toBe(false);
@@ -73,6 +87,12 @@ describe('Ticket State Machine', () => {
     });
     it('CANCELLED only allows reopen', () => {
       expect(getValidActions(TicketStatus.CANCELLED)).toEqual(['reopen']);
+    });
+    it('WAITING_APPROVAL allows approve, reject, cancel', () => {
+      expect(getValidActions(TicketStatus.WAITING_APPROVAL).sort()).toEqual(['approve', 'cancel', 'reject']);
+    });
+    it('REJECTED only allows reopen', () => {
+      expect(getValidActions(TicketStatus.REJECTED)).toEqual(['reopen']);
     });
   });
 
@@ -117,6 +137,26 @@ describe('Ticket State Machine', () => {
 
     it('reopen from RESOLVED goes to IN_PROGRESS', () => {
       expect(getNextStatus(TicketStatus.RESOLVED, 'reopen')).toBe(TicketStatus.IN_PROGRESS);
+    });
+
+    it('approval flow: WAITING_APPROVAL → approve → IN_PROGRESS → RESOLVED', () => {
+      let status: TicketStatus = TicketStatus.WAITING_APPROVAL;
+      status = getNextStatus(status, 'approve');
+      expect(status).toBe(TicketStatus.IN_PROGRESS);
+      status = getNextStatus(status, 'resolve');
+      expect(status).toBe(TicketStatus.RESOLVED);
+    });
+
+    it('rejection flow: WAITING_APPROVAL → reject → REJECTED → reopen → OPEN', () => {
+      let status: TicketStatus = TicketStatus.WAITING_APPROVAL;
+      status = getNextStatus(status, 'reject');
+      expect(status).toBe(TicketStatus.REJECTED);
+      status = getNextStatus(status, 'reopen');
+      expect(status).toBe(TicketStatus.OPEN);
+    });
+
+    it('cancellation while waiting approval: WAITING_APPROVAL → cancel → CANCELLED', () => {
+      expect(getNextStatus(TicketStatus.WAITING_APPROVAL, 'cancel')).toBe(TicketStatus.CANCELLED);
     });
   });
 });
