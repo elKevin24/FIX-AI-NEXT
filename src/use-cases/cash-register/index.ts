@@ -4,3 +4,6 @@ export type { OpenCashRegisterInput, OpenCashRegisterOutput } from './OpenCashRe
 
 export { CloseCashRegisterUseCase } from './CloseCashRegisterUseCase';
 export type { CloseCashRegisterInput, CloseCashRegisterOutput } from './CloseCashRegisterUseCase';
+
+export * from './GenerateCashCutUseCase';
+export * from './CashRegisterOperationsUseCases';

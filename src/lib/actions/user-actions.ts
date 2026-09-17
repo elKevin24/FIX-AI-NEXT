@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { CreateUserSchema, UpdateUserSchema } from '@/lib/schemas';
 import { ActionResponse, ActionState } from '@/lib/types';
 import { CreateUserUseCase, UpdateUserUseCase, DeleteUserUseCase } from '@/use-cases/users/UserUseCases';
@@ -66,6 +67,8 @@ export async function updateUser(prevState: ActionState, formData: FormData) {
         return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo actualizar el usuario.' };
     }
 
+    revalidatePath('/dashboard/users');
+    revalidatePath(`/dashboard/users/${validatedFields.data.userId}`);
     redirect('/dashboard/users');
 }
 
@@ -95,5 +98,6 @@ export async function deleteUser(prevState: ActionState, formData: FormData) {
         return { success: false, message: error instanceof Error ? error.message : 'Error de base de datos: No se pudo eliminar el usuario.' };
     }
 
+    revalidatePath('/dashboard/users');
     redirect('/dashboard/users');
 }

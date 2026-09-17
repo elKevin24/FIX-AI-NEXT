@@ -31,6 +31,7 @@ import {
   ResetPasswordUseCase,
   ChangePasswordUseCase,
   GetUsersUseCase,
+  DeleteUserUseCase,
 } from '@/use-cases/users';
 
 export type { ActionResponse, ActionState };
@@ -415,5 +416,39 @@ export async function getUsers(options?: {
   } catch (error: any) {
     console.error('Error getting users:', error);
     return { success: false, message: error.message || 'Error al obtener usuarios' };
+  }
+}
+
+// ============================================================================
+// DELETE USER (Hard Delete)
+// ============================================================================
+
+export async function deleteUser(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id || !session.user.tenantId) {
+      return { success: false, message: 'No autorizado' };
+    }
+
+    const { id: actorId, tenantId, role: actorRole } = session.user;
+    if (actorRole !== 'ADMIN' && (actorRole as string) !== 'SUPER_ADMIN') {
+      return { success: false, message: 'Solo los administradores pueden eliminar usuarios' };
+    }
+
+    const userId = formData.get('userId') as string;
+    if (!userId) {
+      return { success: false, message: 'ID de usuario requerido' };
+    }
+
+    await DeleteUserUseCase.execute(userId, tenantId, actorId);
+
+    revalidatePath('/dashboard/users');
+    return { success: true, message: 'Usuario eliminado exitosamente' };
+  } catch (error: any) {
+    console.error('Error deleting user:', error);
+    return { success: false, message: error.message || 'Error al eliminar usuario' };
   }
 }
