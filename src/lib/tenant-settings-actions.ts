@@ -110,7 +110,12 @@ export async function getTenantSettings(): Promise<TenantSettings | null> {
 /**
  * Update tenant settings
  */
-export async function updateTenantSettings(data: TenantSettingsData): Promise<{ success: boolean; settings?: TenantSettings; error?: string }> {
+export async function updateTenantSettings(data: TenantSettingsData): Promise<{ 
+  success: boolean; 
+  settings?: TenantSettings; 
+  error?: string; 
+  errors?: Record<string, string[] | undefined>;
+}> {
   const session = await auth();
   if (!session?.user?.tenantId) {
     return { success: false, error: 'No autorizado' };
@@ -121,7 +126,6 @@ export async function updateTenantSettings(data: TenantSettingsData): Promise<{ 
     return { 
       success: false, 
       error: 'Datos inválidos', 
-      // @ts-ignore
       errors: validatedFields.error.flatten().fieldErrors 
     };
   }
