@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 import { withSerwist } from "@serwist/turbopack";
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Pragmatic CSP (per Next.js docs "Without Nonces"):
+// allows the inline scripts/styles Next.js emits while blocking objects,
+// base-uri redirection, clickjacking and mixed content in production.
+const cspHeader = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self' https: wss: ws:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  ...(isProduction ? ["upgrade-insecure-requests"] : []),
+].join('; ');
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
@@ -43,17 +62,17 @@ const nextConfig: NextConfig = {
             value: 'on',
           },
           {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
+          {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
+{
+              key: 'Referrer-Policy',
+              value: 'origin-when-cross-origin',
+            },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
