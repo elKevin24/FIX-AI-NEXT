@@ -11,6 +11,9 @@ import type { JWT } from "next-auth/jwt";
  * Ahora usa compound unique (tenantId, email) por lo que necesitamos
  * buscar con ambos o usar el índice apropiado.
  */
+// Pre-computed dummy bcrypt hash (cost factor 12) for constant-time comparison against timing attacks
+const DUMMY_HASH = '$2a$12$e8ukB.Wj/Jz5.1EaM4gXzOKlH.vJvO358oK3Nl70rFj5ZzS2q9J2W';
+
 async function getUser(email: string) {
     try {
         // Buscar usuario por email (puede haber múltiples en diferentes tenants)
@@ -121,8 +124,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   return null;
                 }
 
-                // Mensaje genérico: no revelar si el email existe o no
+                // Mensaje genérico: no revelar si el email existe o no (Timing Attack Protection)
                 if (!user) {
+                    await compare(password, DUMMY_HASH);
                     console.log("[NextAuth] Authentication failed: user not found");
                     return null;
                 }

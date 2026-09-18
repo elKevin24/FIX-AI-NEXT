@@ -1,12 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
+function isValidCronAuth(header: string | null): boolean {
+    const secret = process.env['CRON_SECRET'];
+    if (!header || !secret) return false;
+    const expected = `Bearer ${secret}`;
+    const headerBuf = Buffer.from(header);
+    const expectedBuf = Buffer.from(expected);
+    if (headerBuf.length !== expectedBuf.length) {
+        crypto.timingSafeEqual(headerBuf, headerBuf);
+        return false;
+    }
+    return crypto.timingSafeEqual(headerBuf, expectedBuf);
+}
+
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env['CRON_SECRET']}`) {
+    if (!isValidCronAuth(authHeader)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

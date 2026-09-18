@@ -104,11 +104,12 @@ describe('auth authorize (credentials)', () => {
 
   it('rechaza un email inexistente y no registra auditoría', async () => {
     mocks.userFindUnique.mockResolvedValue(null);
+    mocks.compare.mockResolvedValue(false);
 
     const result = await authorize({ email: 'ghost@electrofix.com', password: 'Whatever1!' });
 
     expect(result).toBeNull();
-    expect(mocks.compare).not.toHaveBeenCalled();
+    expect(mocks.compare).toHaveBeenCalledWith('Whatever1!', expect.any(String));
     expect(mocks.userUpdate).not.toHaveBeenCalled();
   });
 
