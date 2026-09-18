@@ -20,5 +20,21 @@ export * from './credit-notes';
 export * from './reports';
 export * from './tenant-settings';
 export * from './audit';
+export * from './customers/CustomerUseCases';
+export * from './parts/PartUseCases';
+export * from './tickets/CreateTicketUseCase';
+export * from './tickets/CreateBatchTicketsUseCase';
+export * from './tickets/UpdateTicketUseCase';
+export * from './tickets/UpdateTicketStatusUseCase';
+export * from './tickets/DeleteTicketUseCase';
+export * from './tickets/AddTicketNoteUseCase';
+export * from './tickets/DeleteTicketNoteUseCase';
+export * from './tickets/AddPartToTicketUseCase';
+export * from './tickets/ApproveTicketPartsUseCase';
+export * from './tickets/RejectTicketPartsUseCase';
+export * from './tickets/RemovePartFromTicketUseCase';
+export * from './tickets/AddServiceToTicketUseCase';
+export * from './tickets/RemoveServiceFromTicketUseCase';
+export * from './tickets/PublicCustomerApprovalUseCase';
 
 

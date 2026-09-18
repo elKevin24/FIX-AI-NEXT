@@ -142,7 +142,7 @@ describe('UpdateTicketSchema', () => {
 });
 
 describe('CreateUserSchema', () => {
-  const valid = { name: 'Juan', email: 'juan@test.com', password: 'secreto1', role: 'TECHNICIAN' };
+  const valid = { name: 'Juan', email: 'juan@test.com', password: 'Password123!', role: 'TECHNICIAN' };
 
   it('acepta un usuario válido', () => {
     expectValid(CreateUserSchema, valid);
@@ -153,7 +153,7 @@ describe('CreateUserSchema', () => {
   });
 
   it('rechaza contraseña corta', () => {
-    expectInvalid(CreateUserSchema, { ...valid, password: '123' }, 'al menos 6 caracteres');
+    expectInvalid(CreateUserSchema, { ...valid, password: '123' }, 'Mínimo 8 caracteres');
   });
 
   it('rechaza rol inválido', () => {
@@ -173,7 +173,7 @@ describe('UpdateUserSchema', () => {
   });
 
   it('rechaza contraseña corta no vacía', () => {
-    expectInvalid(UpdateUserSchema, { ...valid, password: '123' }, 'al menos 6 caracteres');
+    expectInvalid(UpdateUserSchema, { ...valid, password: '123' }, 'Mínimo 8 caracteres');
   });
 
   it('rechaza userId no UUID', () => {

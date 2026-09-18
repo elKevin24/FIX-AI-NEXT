@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { auth } from '@/auth';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils';
 import { redirect, notFound } from 'next/navigation';
 import EditCustomerForm from './EditCustomerForm';
 
@@ -23,7 +24,7 @@ export default async function EditCustomerPage({ params }: Props) {
     }
 
     const isSuperAdminUser = isSuperAdmin(session.user);
-    const isAdmin = session.user.role === 'ADMIN';
+    const isAdmin = checkIsAdmin(session.user.role);
     const tenantId = session.user.tenantId;
 
     let customer;

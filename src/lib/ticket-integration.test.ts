@@ -473,7 +473,7 @@ describe('Ticket Integration — Full Workshops', () => {
       vi.mocked(auth).mockResolvedValue(viewerSession as any);
       const result = await createTicket({ title: 'Viewer attempt' });
       expect(result.success).toBe(false);
-      expect(result.message).toContain('observadores');
+      expect(result.message).toContain('permiso');
     });
 
     it('TK-02b: VIEWER cannot update status', async () => {
@@ -484,7 +484,7 @@ describe('Ticket Integration — Full Workshops', () => {
       vi.mocked(auth).mockResolvedValue(viewerSession as any);
       const r = await updateTicketStatus(ticketId, 'IN_PROGRESS');
       expect(r.success).toBe(false);
-      expect(r.message).toContain('observadores');
+      expect(r.message).toContain('permiso');
     });
 
     it('TK-02c: VIEWER cannot add notes', async () => {
@@ -495,7 +495,7 @@ describe('Ticket Integration — Full Workshops', () => {
       vi.mocked(auth).mockResolvedValue(viewerSession as any);
       const r = await addTicketNote(ticketId, 'Should fail');
       expect(r.success).toBe(false);
-      expect(r.message).toContain('observadores');
+      expect(r.message).toContain('permiso');
     });
   });
 

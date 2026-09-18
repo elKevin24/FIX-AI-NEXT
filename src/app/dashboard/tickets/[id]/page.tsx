@@ -5,6 +5,7 @@ import { getTicketTimeline } from '@/lib/timeline';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { serializeDecimal } from '@/lib/utils';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -25,7 +26,7 @@ export default async function TicketDetailPage({ params }: Props) {
 
     const { tenantId, id: userId, role } = session.user;
     const isSuperAdminUser = isSuperAdmin(session.user);
-    const isAdmin = role === 'ADMIN';
+    const isAdmin = checkIsAdmin(role);
 
     // 1. Get DB Context
     // Use getTenantPrisma to automatically enforce tenant isolation

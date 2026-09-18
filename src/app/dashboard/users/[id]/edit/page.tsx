@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin, hasPermission } from '@/lib/auth-utils';
 import { redirect, notFound } from 'next/navigation';
 import EditUserForm from './EditUserForm';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
     title: 'Editar Usuario',
@@ -21,7 +23,7 @@ export default async function EditUserPage({ params }: Props) {
         redirect('/login');
     }
 
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+    if (!isAdmin(session.user.role as any) && !hasPermission(session.user.role as UserRole, 'canEditUsers')) {
         redirect('/dashboard');
     }
 

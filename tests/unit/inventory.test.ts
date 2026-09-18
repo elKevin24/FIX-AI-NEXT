@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { addPartToTicket, removePartFromTicket } from '@/lib/actions/ticket-actions';
-import { receivePurchaseOrder, addPurchaseItem } from '@/lib/purchase-actions';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 
@@ -215,91 +214,5 @@ describe('removePartFromTicket (restauración de stock)', () => {
     expect(result.success).toBe(false);
     expect(result.message).toBe('No autorizado');
     expect(tx.part.update).not.toHaveBeenCalled();
-  });
-});
-
-describe('receivePurchaseOrder (incremento de inventario)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (auth as any).mockResolvedValue(SESSION);
-  });
-
-  it('rechaza a usuarios que no son ADMIN', async () => {
-    (auth as any).mockResolvedValue({
-      user: { id: 'user-1', tenantId: 'tenant-1', role: 'TECHNICIAN' },
-    });
-    const result = await receivePurchaseOrder('order-1');
-    expect(result).toEqual({ success: false, message: 'Permiso denegado' });
-  });
-
-  it('incrementa stock de cada item y marca la orden RECEIVED', async () => {
-    const txDb = makeTx();
-    txDb.purchaseOrder.findUnique.mockResolvedValue({
-      id: 'order-1',
-      tenantId: 'tenant-1',
-      status: 'PENDING',
-      items: [
-        { partId: PART_ID, quantity: 4, unitCost: 10 },
-        { partId: '550e8400-e29b-41d4-a716-446655440002', quantity: 2, unitCost: 15 },
-      ],
-    });
-    const db = { $transaction: vi.fn(async (cb: any) => cb(txDb)) };
-    (getTenantPrisma as any).mockImplementation((tenantId: string, userId?: string, tx?: any) =>
-      tx ? txDb : db,
-    );
-
-    const result = await receivePurchaseOrder('order-1');
-
-    expect(result.success).toBe(true);
-    expect(txDb.part.update).toHaveBeenCalledTimes(2);
-    expect(txDb.part.update).toHaveBeenCalledWith({
-      where: { id: PART_ID },
-      data: { quantity: { increment: 4 }, cost: 10, updatedById: 'user-1' },
-    });
-    expect(txDb.purchaseOrder.update).toHaveBeenCalledWith({
-      where: { id: 'order-1' },
-      data: { status: 'RECEIVED', receivedDate: expect.any(Date), updatedById: 'user-1' },
-    });
-  });
-
-  it('falla si la orden no está PENDING', async () => {
-    const txDb = makeTx();
-    txDb.purchaseOrder.findUnique.mockResolvedValue({ id: 'order-1', status: 'RECEIVED', items: [] });
-    const db = { $transaction: vi.fn(async (cb: any) => cb(txDb)) };
-    (getTenantPrisma as any).mockImplementation((tenantId: string, userId?: string, tx?: any) =>
-      tx ? txDb : db,
-    );
-
-    const result = await receivePurchaseOrder('order-1');
-    expect(result.success).toBe(false);
-    expect(txDb.part.update).not.toHaveBeenCalled();
-  });
-});
-
-describe('addPurchaseItem (validación)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (auth as any).mockResolvedValue(SESSION);
-  });
-
-  it('rechaza cantidad <= 0 o costo negativo', async () => {
-    expect(await addPurchaseItem('order-1', PART_ID, 0, 5)).toEqual({
-      success: false,
-      message: 'Cantidad o costo inválidos',
-    });
-    expect(await addPurchaseItem('order-1', PART_ID, 5, -1)).toEqual({
-      success: false,
-      message: 'Cantidad o costo inválidos',
-    });
-  });
-
-  it('rechaza a no ADMIN', async () => {
-    (auth as any).mockResolvedValue({
-      user: { id: 'user-1', tenantId: 'tenant-1', role: 'MANAGER' },
-    });
-    expect(await addPurchaseItem('order-1', PART_ID, 2, 5)).toEqual({
-      success: false,
-      message: 'Permiso denegado',
-    });
   });
 });

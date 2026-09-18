@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { ServiceTemplateForm } from '../ServiceTemplateForm';
 import PageHeader from '@/components/PageHeader';
 import styles from './create.module.css';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Nueva Plantilla de Servicio',
@@ -11,12 +13,12 @@ export const metadata = {
 export default async function CreateServiceTemplatePage() {
   const session = await auth();
 
-  if (session?.user?.role !== 'ADMIN') {
+  if (!session?.user || !hasPermission(session.user.role as UserRole, 'canManageTemplates')) {
     return (
       <div className={styles['errorContainer']}>
         <h2 className={styles['errorTitle']}>Acceso Denegado</h2>
         <p className={styles['errorMessage']}>
-          Solo los administradores pueden crear plantillas de servicio.
+          No tienes permisos para crear plantillas de servicio.
         </p>
       </div>
     );

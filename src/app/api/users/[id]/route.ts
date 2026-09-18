@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-
-// Validation schema for update
-const updateUserSchema = z.object({
-  email: z.string().email('Invalid email address').optional(),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
-  name: z.string().min(1, 'Name is required').optional(),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
-});
+import { UpdateUserSchema } from '@/lib/schemas';
+import { DeleteUserUseCase, UpdateManagedUserUseCase } from '@/use-cases/users';
+import { toClientMessage } from '@/lib/errors';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 // GET /api/users/[id] - Get single user
 export async function GET(
@@ -73,18 +68,12 @@ export async function PATCH(
 
     const { id } = await params;
 
-    // Only ADMIN can update users (or user can update themselves)
-    if (session.user.role !== 'ADMIN' && session.user.id !== id) {
-      return NextResponse.json(
-        { error: 'Forbidden: Only admins can update other users' },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
 
-    // Validate input
-    const validationResult = updateUserSchema.safeParse(body);
+    const validationResult = UpdateUserSchema.safeParse({
+      ...body,
+      userId: id,
+    });
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
@@ -92,75 +81,29 @@ export async function PATCH(
       );
     }
 
-    const { email, password, name, role } = validationResult.data;
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+    const { updatedUser } = await UpdateManagedUserUseCase.execute(
+      validationResult.data,
+      session.user.id,
+      session.user.role as UserRole,
+      session.user.tenantId,
+      db
+    );
 
-    const db = getTenantPrisma(session.user.tenantId);
-
-    // Check if user exists
-    const existingUser = await db.user.findFirst({
-      where: { id },
+    return NextResponse.json({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      role: updatedUser.role,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
     });
-
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if email is already taken by another user
-    if (email && email !== existingUser.email) {
-      const emailTaken = await db.user.findFirst({
-        where: {
-          email,
-          id: { not: id },
-        },
-      });
-
-      if (emailTaken) {
-        return NextResponse.json(
-          { error: 'Email already in use' },
-          { status: 409 }
-        );
-      }
-    }
-
-    // Prepare update data
-    const updateData: any = {};
-    if (email) updateData.email = email;
-    if (name) updateData.name = name;
-    if (role) {
-      // Only ADMIN can change roles
-      if (session.user.role !== 'ADMIN') {
-        return NextResponse.json(
-          { error: 'Forbidden: Only admins can change user roles' },
-          { status: 403 }
-        );
-      }
-      updateData.role = role;
-    }
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 12);
-    }
-
-    // Update user
-    const updatedUser = await db.user.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return NextResponse.json(updatedUser);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: toClientMessage(error, 'Internal Server Error') },
+      { status: error instanceof Error && error.message.includes('no encontrado') ? 404 : 500 }
+    );
   }
 }
 
@@ -181,47 +124,25 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Only ADMIN can delete users
-    if (session.user.role !== 'ADMIN') {
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteUsers')) {
       return NextResponse.json(
-        { error: 'Forbidden: Only admins can delete users' },
+        { error: 'Forbidden: insufficient permissions' },
         { status: 403 }
       );
     }
 
-    // Prevent deleting yourself
-    if (session.user.id === id) {
-      return NextResponse.json(
-        { error: 'Cannot delete your own account' },
-        { status: 400 }
-      );
-    }
-
-    const db = getTenantPrisma(session.user.tenantId);
-
-    // Check if user exists
-    const existingUser = await db.user.findFirst({
-      where: { id },
-    });
-
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Delete user
-    await db.user.delete({
-      where: { id },
-    });
+    const db = getTenantPrisma(session.user.tenantId, session.user.id);
+    await DeleteUserUseCase.execute(id, session.user.tenantId, session.user.id, db);
 
     return NextResponse.json(
       { message: 'User deleted successfully' },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting user:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: toClientMessage(error, 'Internal Server Error') },
+      { status: error instanceof Error && error.message.includes('no encontrado') ? 404 : 500 }
+    );
   }
 }

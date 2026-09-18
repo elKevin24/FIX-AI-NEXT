@@ -56,13 +56,16 @@ export async function createUser(
     }
 
     const { id: creatorId, tenantId, role: creatorRole } = session.user;
+    requirePermission(creatorRole as UserRole, 'canCreateUsers');
+
     const db = getTenantPrisma(tenantId, creatorId);
 
     const rawData = {
-      email: formData.get('email'),
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      role: formData.get('role'),
+      email: formData.get('email') || undefined,
+      firstName: formData.get('firstName') || undefined,
+      lastName: formData.get('lastName') || undefined,
+      name: formData.get('name') || undefined,
+      role: formData.get('role') || undefined,
       password: formData.get('password') || undefined,
     };
 
@@ -131,7 +134,9 @@ export async function updateUser(
       email: formData.get('email') || undefined,
       firstName: formData.get('firstName') || undefined,
       lastName: formData.get('lastName') || undefined,
+      name: formData.get('name') || undefined,
       role: formData.get('role') || undefined,
+      password: formData.get('password') || undefined,
     };
 
     const validatedFields = UpdateUserSchema.safeParse(rawData);
@@ -434,9 +439,7 @@ export async function deleteUser(
     }
 
     const { id: actorId, tenantId, role: actorRole } = session.user;
-    if (actorRole !== 'ADMIN' && (actorRole as string) !== 'SUPER_ADMIN') {
-      return { success: false, message: 'Solo los administradores pueden eliminar usuarios' };
-    }
+    requirePermission(actorRole as UserRole, 'canDeleteUsers');
 
     const userId = formData.get('userId') as string;
     if (!userId) {

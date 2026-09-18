@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import styles from '../page.module.css';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
     title: 'Configuración General',
@@ -53,7 +55,7 @@ export default async function SettingsPage() {
                     </div>
                 </Link>
 
-                {session.user.role === 'ADMIN' && (
+                {hasPermission(session.user.role as UserRole, 'canManageTemplates') && (
                     <Link href="/dashboard/settings/service-templates" className={styles['card']} style={{ textDecoration: 'none' }}>
                         <h3>Plantillas de Servicio</h3>
                         <div style={{ marginTop: '1rem' }}>

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ServiceCategory } from '@prisma/client';
+import { passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
 // TICKET SCHEMAS
@@ -95,7 +96,7 @@ export const CreateUserSchema = z.object({
   name: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+  password: z.union([passwordSchema, z.literal('')]).optional(),
 }).superRefine((data, ctx) => {
   const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
   const hasFirst = typeof data.firstName === 'string' && data.firstName.trim().length > 0;
@@ -130,7 +131,7 @@ export const UpdateUserSchema = z.object({
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }).optional(),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+  password: z.union([passwordSchema, z.literal('')]).optional(),
 }).transform((data) => {
   const fullName = data.name?.trim() || [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined;
   const parts = fullName ? fullName.split(' ') : [];

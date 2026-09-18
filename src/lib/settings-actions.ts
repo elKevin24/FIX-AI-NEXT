@@ -5,10 +5,12 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
 import { UpdateSLASettingsSchema } from '@/lib/schemas';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export async function updateSLASettings(prevState: any, formData: FormData) {
     const session = await auth();
-    if (!session?.user?.tenantId || session.user.role !== 'ADMIN') {
+    if (!session?.user?.tenantId || !hasPermission(session.user.role as UserRole, 'canManageTenantSettings')) {
         return { success: false, message: 'Unauthorized' };
     }
 

@@ -9,6 +9,7 @@ import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { DateRangeSchema } from '@/lib/schemas';
 import { GetReportDataUseCase } from '@/use-cases/reports';
+import { isAdmin } from '@/lib/auth-utils';
 
 export async function getReportData(startDate?: Date, endDate?: Date) {
   const session = await auth();
@@ -16,8 +17,7 @@ export async function getReportData(startDate?: Date, endDate?: Date) {
     throw new Error('No autorizado');
   }
 
-  // RBAC: Solo ADMIN puede ver reportes financieros y de rendimiento
-  if (session.user.role !== 'ADMIN') {
+  if (!isAdmin(session.user.role)) {
     throw new Error('Solo los administradores pueden generar reportes');
   }
 

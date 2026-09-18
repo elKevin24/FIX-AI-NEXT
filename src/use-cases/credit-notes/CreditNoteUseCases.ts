@@ -1,6 +1,7 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
 import { z } from 'zod';
+import { reserveInventoryForTenant, restoreInventoryForTenant } from '@/lib/inventory-atomic';
 import {
     CreditNoteItemSchema,
     CreateCreditNoteSchema,
@@ -194,12 +195,9 @@ export class CreateCreditNoteUseCase {
             },
         });
 
-        // Restore stock for returned items
+        // Restore stock for returned items atomically
         for (const item of itemsWithCalcs) {
-            await db.part.update({
-                where: { id: item.partId },
-                data: { quantity: { increment: item.quantity } },
-            });
+            await restoreInventoryForTenant(db, tenantId, item.partId, item.quantity);
         }
 
         // Update sale status based on total returns
@@ -379,12 +377,9 @@ export class CancelCreditNoteUseCase {
             throw new Error('Solo se pueden cancelar notas de crédito pendientes');
         }
 
-        // Reverse stock changes
+        // Reverse stock changes atomically
         for (const item of creditNote.items) {
-            await db.part.update({
-                where: { id: item.partId },
-                data: { quantity: { decrement: item.quantity } },
-            });
+            await reserveInventoryForTenant(db, creditNote.tenantId, item.partId, item.quantity);
         }
 
         // Update credit note status

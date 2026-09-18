@@ -33,6 +33,8 @@ import { sendEmail } from '@/lib/email-service';
 import { ResetPasswordEmail } from '@/emails/ResetPasswordEmail';
 import { hash } from 'bcryptjs';
 import crypto from 'crypto';
+import { isAdmin } from '@/lib/auth-utils';
+import { validatePassword } from '@/lib/password-utils';
 
 
 export async function requestPasswordReset(formData: FormData) {
@@ -46,7 +48,7 @@ export async function requestPasswordReset(formData: FormData) {
       try {
         const user = await prisma.user.findUnique({ where: { email } });
         
-        if (user && user.role === 'ADMIN') {
+        if (user && isAdmin(user.role)) {
           // Generar token criptográfico
           const rawToken = crypto.randomBytes(32).toString('hex');
           const hashedToken = await hash(rawToken, 10); // Guardamos el Hash en BD
@@ -89,8 +91,12 @@ export async function resetPassword(formData: FormData) {
     const email = formData.get('email')?.toString(); // Necesitamos el correo del query params
     const password = formData.get('password')?.toString();
     
-    if (!rawToken || !email || !password || password.length < 6) {
+    if (!rawToken || !email || !password) {
       return { error: 'Datos inválidos o el enlace está corrupto.' };
+    }
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return { error: passwordValidation.errors[0] || 'La contraseña no cumple los requisitos.' };
     }
 
     // Buscamos los tokens válidos para este correo
@@ -121,7 +127,7 @@ export async function resetPassword(formData: FormData) {
       return { error: 'El enlace de recuperación es inválido o ha expirado.' };
     }
 
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await hash(password, 12);
 
     // Actualizar usuario
     await prisma.user.update({
@@ -140,4 +146,3 @@ export async function resetPassword(formData: FormData) {
     return { error: 'Ocurrió un error al restablecer la contraseña.' };
   }
 }
-

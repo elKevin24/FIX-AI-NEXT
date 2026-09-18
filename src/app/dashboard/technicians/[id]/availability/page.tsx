@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation';
 import AvailabilityList from '@/components/technicians/AvailabilityList';
 import AvailabilityPageClient from './AvailabilityPageClient'; // Client wrapper for the Add Dialog
 import PageHeader from '@/components/PageHeader';
+import { isAdmin } from '@/lib/auth-utils';
 
 export const metadata = {
     title: 'Disponibilidad de Técnico',
@@ -28,7 +29,7 @@ export default async function AvailabilityPage(props: { params: Promise<{ id: st
     if (!targetUser) notFound();
 
     // Security: Only Admin or the User themselves can view/edit
-    const canEdit = session.user.role === 'ADMIN' || session.user.id === targetUserId;
+    const canEdit = isAdmin(session.user.role as any) || session.user.id === targetUserId;
     if (!canEdit) {
         return <div>No tienes permiso para ver esta página.</div>;
     }

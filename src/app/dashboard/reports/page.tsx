@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getReportData } from '@/lib/report-actions';
 import ReportsClient from './ReportsClient';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Reportes',
@@ -20,7 +22,7 @@ export default async function ReportsPage() {
   }
 
   // Verificar permisos
-  if (session.user.role !== 'ADMIN') {
+  if (!hasPermission(session.user.role as UserRole, 'canViewReports')) {
     redirect('/dashboard');
   }
 

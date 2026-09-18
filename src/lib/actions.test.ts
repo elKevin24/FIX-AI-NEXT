@@ -89,16 +89,18 @@ describe('Core Actions CRUD', () => {
     describe('User Actions', () => {
         it('createUser should create a user successfully', async () => {
             mockDb.user.findFirst.mockResolvedValue(null);
+            mockDb.user.create.mockResolvedValue({ id: 'user-new', email: 'new@test.com', role: 'TECHNICIAN' });
             const formData = new FormData();
             formData.append('name', 'New User');
             formData.append('email', 'new@test.com');
-            formData.append('password', '123456');
+            formData.append('password', 'Password123!');
             formData.append('role', 'TECHNICIAN');
 
             const result = await createUser(null, formData);
 
             expect(mockDb.user.create).toHaveBeenCalled();
-            expect(result).toEqual({ success: true, message: 'Usuario creado exitosamente' });
+            expect(result.success).toBe(true);
+            expect(result.message).toBe('Usuario creado exitosamente');
         });
 
         it('createUser should fail if not ADMIN', async () => {
@@ -106,7 +108,7 @@ describe('Core Actions CRUD', () => {
             const formData = new FormData();
             await expect(createUser(null, formData)).resolves.toEqual({ 
                 success: false,
-                message: 'Solo los administradores pueden crear usuarios' 
+                message: 'Tu rol (TECHNICIAN) no tiene permiso para realizar esta acción (canCreateUsers)' 
             });
         });
     });
@@ -301,7 +303,7 @@ describe('Core Actions CRUD', () => {
 
             const result = await createPart(null, formData);
             expect(result.success).toBe(false);
-            expect(result.message).toBe('Los observadores no pueden crear repuestos');
+            expect(result.message).toBe('No tienes permiso para crear repuestos');
         });
 
         it('createUser should return error if user is VIEWER', async () => {
@@ -317,7 +319,7 @@ describe('Core Actions CRUD', () => {
 
             const result = await createUser(null, formData);
             expect(result!.success).toBe(false);
-            expect(result!.message).toBe('Solo los administradores pueden crear usuarios');
+            expect(result!.message).toBe('Tu rol (VIEWER) no tiene permiso para realizar esta acción (canCreateUsers)');
         });
     });
 });

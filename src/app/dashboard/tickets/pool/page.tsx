@@ -1,6 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { TicketPoolView } from "@/components/tickets/TicketPoolView";
+import { hasPermission } from "@/lib/auth-utils";
+import type { UserRole } from "@prisma/client";
 
 export const metadata = {
   title: 'Pool de Tickets',
@@ -18,8 +20,8 @@ export default async function TicketPoolPage() {
     redirect('/login');
   }
 
-  // Only technicians and admins can access the pool
-  if (session.user.role !== 'TECHNICIAN' && session.user.role !== 'ADMIN') {
+  // Only users with ticket taking permissions can access the pool
+  if (!hasPermission(session.user.role as UserRole, 'canTakeTicket')) {
     redirect('/dashboard');
   }
 

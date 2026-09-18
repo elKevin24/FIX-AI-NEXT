@@ -2,6 +2,8 @@
 
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, requireAdmin, type Permission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 /**
  * Represents the authenticated session context for a tenant-scoped server action.
@@ -56,10 +58,25 @@ export async function assertNotViewer(userRole: string, actionDescription: strin
 }
 
 /**
- * Asserts that the user has ADMIN role; throws if they do not.
+ * Asserts that the user has ADMIN-equivalent privileges; throws if they do not.
  */
 export async function assertAdmin(userRole: string): Promise<void> {
-    if (userRole !== 'ADMIN') {
+    try {
+        requireAdmin(userRole as UserRole);
+    } catch {
         throw new Error('Solo los administradores pueden realizar esta acción');
+    }
+}
+
+/**
+ * Asserts that the user has a centralized RBAC permission.
+ */
+export async function assertPermission(
+    userRole: string,
+    permission: Permission,
+    message = 'No tienes permiso para realizar esta acción'
+): Promise<void> {
+    if (!hasPermission(userRole as UserRole, permission)) {
+        throw new Error(message);
     }
 }

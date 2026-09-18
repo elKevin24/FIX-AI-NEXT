@@ -6,6 +6,8 @@ import { CreateCustomerSchema, UpdateCustomerSchema } from '@/lib/schemas';
 import { CreateCustomerUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
 import { toClientMessage } from '@/lib/errors';
 import { ActionState } from '@/lib/types';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 /**
  * Create a new customer (Server Action)
@@ -15,8 +17,8 @@ export async function createCustomer(prevState: ActionState, formData: FormData)
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden crear clientes' };
+    if (!hasPermission(session.user.role as UserRole, 'canCreateCustomers')) {
+        return { success: false, message: 'No tienes permiso para crear clientes' };
     }
 
     const formDataObj = Object.fromEntries(formData);
@@ -44,8 +46,8 @@ export async function updateCustomer(prevState: ActionState, formData: FormData)
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden editar clientes' };
+    if (!hasPermission(session.user.role as UserRole, 'canEditCustomers')) {
+        return { success: false, message: 'No tienes permiso para editar clientes' };
     }
 
     const formDataObj = Object.fromEntries(formData);
@@ -74,8 +76,8 @@ export async function deleteCustomer(prevState: ActionState, formData: FormData)
         return { success: false, message: 'No autorizado' };
     }
 
-    if (session.user.role !== 'ADMIN') {
-        return { success: false, message: 'Solo los administradores pueden eliminar clientes' };
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteCustomers')) {
+        return { success: false, message: 'No tienes permiso para eliminar clientes' };
     }
 
     const customerId = formData.get('customerId') as string;

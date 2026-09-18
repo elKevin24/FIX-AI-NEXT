@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin } from '@/lib/auth-utils';
 import { redirect } from 'next/navigation';
 import { WorkloadDashboard } from '@/components/technicians/WorkloadDashboard';
 
@@ -20,7 +21,7 @@ export default async function WorkloadPage() {
   }
 
   // Only admins or superadmins can access this page
-  if (session.user.role !== 'ADMIN' && !isSuperAdmin(session.user)) {
+  if (!isAdmin(session.user.role as any) && !isSuperAdmin(session.user)) {
     redirect('/dashboard');
   }
 

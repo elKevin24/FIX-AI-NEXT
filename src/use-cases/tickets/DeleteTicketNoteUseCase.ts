@@ -1,5 +1,7 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export interface DeleteTicketNoteParams {
     noteId: string;
@@ -28,7 +30,7 @@ export class DeleteTicketNoteUseCase {
 
         const isAuthor = note.authorId === userId;
         const isSameTenant = note.ticket.tenantId === tenantId;
-        const isAdmin = role === 'ADMIN';
+        const isAdmin = role ? checkIsAdmin(role as UserRole) : false;
 
         if (!isSuperAdmin({ id: userId, email, role }) && !isAuthor && !(isAdmin && isSameTenant)) {
             throw new Error('No autorizado para eliminar esta nota');

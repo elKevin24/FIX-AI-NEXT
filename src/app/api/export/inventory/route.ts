@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
 
 async function* makeInventoryIterator(tenantId: string, userId: string) {
   const db = getTenantPrisma(tenantId, userId);
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+  if (!hasPermission(session.user.role as UserRole, 'canExportData')) {
     return new Response('Forbidden: Insufficient permissions for data export', { status: 403 });
   }
 

@@ -6,7 +6,8 @@
  */
 
 import { auth } from "@/auth";
-import { AuditAction, AuditModule } from "@prisma/client";
+import { isAdmin } from "@/lib/auth-utils";
+import { AuditAction, AuditModule, type UserRole } from "@prisma/client";
 import { headers, cookies } from "next/headers";
 import {
   LogActionUseCase,
@@ -144,9 +145,9 @@ export async function logPageAccess(pathname: string) {
 }
 
 export async function getAuditLogs(
-  tenantId: string, 
-  limit: number = 50,
-  offset: number = 0,
+  tenantId: string,
+  limit = 50,
+  offset = 0,
   filters?: {
     userId?: string;
     action?: AuditAction;
@@ -156,7 +157,8 @@ export async function getAuditLogs(
   }
 ) {
   const session = await auth();
-  if (session?.user?.tenantId !== tenantId && session?.user?.role !== 'ADMIN') {
+  const role = session?.user?.role as UserRole | undefined;
+  if (session?.user?.tenantId !== tenantId && (!role || !isAdmin(role))) {
     throw new Error("Unauthorized");
   }
 
@@ -174,7 +176,8 @@ export async function checkSuspiciousActivity(ipAddress: string, email?: string)
 
 export async function runLogsMaintenance() {
   const session = await auth();
-  if (session?.user?.role !== 'ADMIN') return { success: false, message: 'Unauthorized' };
+  const role = session?.user?.role as UserRole | undefined;
+  if (!role || !isAdmin(role)) return { success: false, message: 'Unauthorized' };
 
   try {
     return await RunLogsMaintenanceUseCase.execute();

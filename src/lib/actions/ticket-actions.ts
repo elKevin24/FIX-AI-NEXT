@@ -15,7 +15,7 @@ import {
 } from '@/lib/schemas';
 import { ActionState } from '@/lib/types';
 import { notifyTicketCreated } from '@/lib/ticket-notifications';
-import { TicketRepository } from '@/lib/repositories/ticket.repository';
+import { TicketRepository } from '@/lib/repositories';
 import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
 import { CreateBatchTicketsUseCase } from '@/use-cases/tickets/CreateBatchTicketsUseCase';
 import { UpdateTicketUseCase } from '@/use-cases/tickets/UpdateTicketUseCase';
@@ -30,6 +30,7 @@ import { RemovePartFromTicketUseCase } from '@/use-cases/tickets/RemovePartFromT
 import { AddServiceToTicketUseCase } from '@/use-cases/tickets/AddServiceToTicketUseCase';
 import { RemoveServiceFromTicketUseCase } from '@/use-cases/tickets/RemoveServiceFromTicketUseCase';
 import { PublicCustomerApprovalUseCase } from '@/use-cases/tickets/PublicCustomerApprovalUseCase';
+import { hasPermission, type UserRole } from '@/lib/auth-utils';
 
 /**
  * Get ticket by ID for public status check.
@@ -93,8 +94,8 @@ export async function createTicket(
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden crear tickets' };
+    if (!hasPermission(session.user.role as UserRole, 'canCreateTickets')) {
+        return { success: false, message: 'No tienes permiso para crear tickets' };
     }
 
     const tenantId = session.user.tenantId;
@@ -163,8 +164,8 @@ export async function createBatchTickets(
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden crear tickets' };
+    if (!hasPermission(session.user.role as UserRole, 'canCreateTickets')) {
+        return { success: false, message: 'No tienes permiso para crear tickets' };
     }
 
     const customerName = formData.get('customerName') as string;
@@ -233,8 +234,8 @@ export async function updateTicket(
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden editar tickets' };
+    if (!hasPermission(session.user.role as UserRole, 'canEditTickets')) {
+        return { success: false, message: 'No tienes permiso para editar tickets' };
     }
 
     const { user } = session;
@@ -290,8 +291,8 @@ export async function updateTicketStatus(
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden cambiar el estado' };
+    if (!hasPermission(session.user.role as UserRole, 'canEditTickets')) {
+        return { success: false, message: 'No tienes permiso para cambiar el estado' };
     }
 
     const parseResult = UpdateTicketStatusSchema.safeParse({
@@ -329,7 +330,7 @@ export async function updateTicketStatus(
 }
 
 /**
- * Delete a ticket (Server Action). Restricted to ADMIN role.
+ * Delete a ticket (Server Action).
  */
 export async function deleteTicket(
     prevState: ActionState | null,
@@ -339,8 +340,8 @@ export async function deleteTicket(
     if (!session?.user?.tenantId) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role !== 'ADMIN') {
-        return { success: false, message: 'Solo los administradores pueden eliminar tickets' };
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteTickets')) {
+        return { success: false, message: 'No tienes permiso para eliminar tickets' };
     }
 
     const parseResult = DeleteTicketSchema.safeParse({
@@ -384,8 +385,8 @@ export async function addTicketNote(
     if (!session?.user?.tenantId || !session?.user?.id) {
         return { success: false, message: 'No autorizado' };
     }
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden agregar notas' };
+    if (!hasPermission(session.user.role as UserRole, 'canAddTicketNotes')) {
+        return { success: false, message: 'No tienes permiso para agregar notas' };
     }
 
     const ticketId = formData.get('ticketId') as string;

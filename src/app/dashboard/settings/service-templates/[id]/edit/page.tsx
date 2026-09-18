@@ -7,6 +7,8 @@ import { TemplatePartsManager } from '../../TemplatePartsManager';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
 import styles from '../../service-templates.module.css';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Editar Plantilla de Servicio',
@@ -25,13 +27,13 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
     redirect('/login');
   }
 
-  if (session.user.role !== 'ADMIN') {
+  if (!hasPermission(session.user.role as UserRole, 'canManageTemplates')) {
     return (
       <div className={styles['container']}>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <h2 className="text-2xl font-bold text-red-800 mb-2">Acceso Denegado</h2>
           <p className="text-red-600 mb-4">
-            Solo los administradores pueden editar plantillas.
+            No tienes permisos para editar plantillas.
           </p>
           <Button
             as={Link}

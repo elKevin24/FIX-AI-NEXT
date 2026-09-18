@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { isSuperAdmin } from '@/lib/authz';
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils';
 import { redirect, notFound } from 'next/navigation';
 import PartEditForm from './PartEditForm';
 
@@ -49,7 +50,7 @@ export default async function EditPartPage({ params }: Props) {
         redirect('/dashboard/parts');
     }
 
-    const isAdmin = session.user.role === 'ADMIN';
+    const isAdmin = checkIsAdmin(session.user.role);
 
     return (
         <PartEditForm

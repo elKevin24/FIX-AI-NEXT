@@ -28,11 +28,13 @@ export class ValidationError extends DomainError {
 }
 
 export class AuthorizationError extends DomainError {
-    readonly code = 'UNAUTHORIZED';
-    readonly statusCode = 401;
+    readonly code: string;
+    readonly statusCode: number;
 
-    constructor(message = 'No autorizado') {
+    constructor(message = 'No autorizado', code = 'FORBIDDEN', statusCode = 403) {
         super(message);
+        this.code = code;
+        this.statusCode = statusCode;
     }
 }
 

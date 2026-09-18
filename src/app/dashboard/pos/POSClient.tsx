@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
 import PageHeader from '@/components/PageHeader';
+import POSCart, { CartItem } from './components/POSCart';
+import POSPaymentModal, { PaymentItem } from './components/POSPaymentModal';
 import styles from './pos.module.css';
 
 // ============================================================================
@@ -29,22 +31,6 @@ interface Customer {
     name: string;
     nit: string | null;
     phone: string | null;
-}
-
-interface CartItem {
-    partId: string;
-    name: string;
-    sku: string | null;
-    quantity: number;
-    unitPrice: number;
-    maxQuantity: number;
-}
-
-interface PaymentItem {
-    id: string;
-    amount: number;
-    paymentMethod: PaymentMethod;
-    transactionRef?: string;
 }
 
 interface POSClientProps {
@@ -382,311 +368,42 @@ export default function POSClient({
                         )}
                     </div>
 
-                    {/* Cart Items */}
-                    <div className={styles['cartItems']}>
-                        {cart.length === 0 ? (
-                            <div className={styles['emptyCart']}>
-                                <p>Carrito vacío</p>
-                                <p className={styles['emptyCartHint']}>
-                                    Haz clic en los productos para agregarlos
-                                </p>
-                            </div>
-                        ) : (
-                            cart.map(item => (
-                                <div key={item.partId} className={styles['cartItem']}>
-                                    <div className={styles['cartItemInfo']}>
-                                        <span className={styles['cartItemName']}>{item.name}</span>
-                                        <span className={styles['cartItemPrice']}>
-                                            {formatCurrency(item.unitPrice)}
-                                        </span>
-                                    </div>
-                                    <div className={styles['cartItemActions']}>
-                                        <button
-                                            className={styles['qtyBtn']}
-                                            onClick={() => updateQuantity(item.partId, item.quantity - 1)}
-                                            aria-label={`Reducir cantidad de ${item.name}`}
-                                        >
-                                            -
-                                        </button>
-                                        <span className={styles['qtyValue']} aria-label={`Cantidad: ${item.quantity}`}>{item.quantity}</span>
-                                        <button
-                                            className={styles['qtyBtn']}
-                                            onClick={() => updateQuantity(item.partId, item.quantity + 1)}
-                                            aria-label={`Aumentar cantidad de ${item.name}`}
-                                        >
-                                            +
-                                        </button>
-                                        <span className={styles['cartItemTotal']}>
-                                            {formatCurrency(item.unitPrice * item.quantity)}
-                                        </span>
-                                        <button
-                                            className={styles['removeBtn']}
-                                            onClick={() => removeFromCart(item.partId)}
-                                            aria-label={`Eliminar ${item.name} del carrito`}
-                                        >
-                                            &times;
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {/* Discount */}
-                    {cart.length > 0 && (
-                        <div className={styles['discountSection']}>
-                            <label className={styles['label']}>Descuento</label>
-                            <div className={styles['discountRow']}>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={discount}
-                                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                                />
-                                <select
-                                    value={discountType}
-                                    onChange={(e) => setDiscountType(e.target.value as 'amount' | 'percent')}
-                                    className={styles['discountSelect']}
-                                    aria-label="Tipo de descuento"
-                                >
-                                    <option value="amount">Q</option>
-                                    <option value="percent">%</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Totals */}
-                    <div className={styles['totals']} role="region" aria-label="Resumen de totales">
-                        <div className={styles['totalRow']}>
-                            <span>Subtotal</span>
-                            <span>{formatCurrency(subtotal)}</span>
-                        </div>
-                        {discountAmount > 0 && (
-                            <div className={styles['totalRow']}>
-                                <span>Descuento</span>
-                                <span>-{formatCurrency(discountAmount)}</span>
-                            </div>
-                        )}
-                        <div className={styles['totalRow']}>
-                            <span>IVA ({taxRate}%)</span>
-                            <span>{formatCurrency(taxAmount)}</span>
-                        </div>
-                        <div className={`${styles['totalRow']} ${styles['grandTotal']}`}>
-                            <span>TOTAL</span>
-                            <span>{formatCurrency(total)}</span>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className={styles['cartActions']}>
-                        <Button
-                            variant="ghost"
-                            onClick={() => {
-                                if (cart.length === 0) return;
-                                if (confirm('¿Limpiar el carrito? Se perderán todos los items.')) {
-                                    clearCart();
-                                }
-                            }}
-                            disabled={cart.length === 0}
-                        >
-                            Limpiar
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={() => setShowPaymentModal(true)}
-                            disabled={cart.length === 0}
-                        >
-                            Cobrar {formatCurrency(total)}
-                        </Button>
-                    </div>
+                    {/* Cart Section */}
+                    <POSCart
+                        cart={cart}
+                        subtotal={subtotal}
+                        discount={discount}
+                        discountType={discountType}
+                        discountAmount={discountAmount}
+                        taxRate={taxRate}
+                        taxAmount={taxAmount}
+                        total={total}
+                        onUpdateQuantity={updateQuantity}
+                        onRemoveFromCart={removeFromCart}
+                        onClearCart={clearCart}
+                        onDiscountChange={setDiscount}
+                        onDiscountTypeChange={setDiscountType}
+                        onOpenPaymentModal={() => setShowPaymentModal(true)}
+                    />
                 </div>
             </div>
 
             {/* Payment Modal */}
-            {showPaymentModal && (
-                <div className={styles['modalOverlay']}>
-                    <div className={styles['modal']}>
-                        <div className={styles['modalHeader']}>
-                            <h2>Procesar Pago</h2>
-                            <button
-                                className={styles['modalClose']}
-                                onClick={() => setShowPaymentModal(false)}
-                                aria-label="Cerrar modal de pago"
-                            >
-                                &times;
-                            </button>
-                        </div>
-
-                        <div className={styles['modalBody']}>
-                            {/* Payment Summary */}
-                            <div className={styles['paymentSummary']}>
-                                <div className={styles['summaryRow']}>
-                                    <span>Total a pagar</span>
-                                    <span className={styles['summaryTotal']}>{formatCurrency(total)}</span>
-                                </div>
-                                <div className={styles['summaryRow']}>
-                                    <span>Pagado</span>
-                                    <span>{formatCurrency(totalPaid)}</span>
-                                </div>
-                                {remaining > 0 && (
-                                    <div className={`${styles['summaryRow']} ${styles['remaining']}`}>
-                                        <span>Pendiente</span>
-                                        <span>{formatCurrency(remaining)}</span>
-                                    </div>
-                                )}
-                                {change > 0 && (
-                                    <div className={`${styles['summaryRow']} ${styles['change']}`}>
-                                        <span>Cambio</span>
-                                        <span>{formatCurrency(change)}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Payment Methods */}
-                            <div className={styles['paymentMethods']}>
-                                <h3>Agregar Pago</h3>
-                                <PaymentForm
-                                    remainingAmount={remaining > 0 ? remaining : 0}
-                                    onAdd={addPayment}
-                                />
-                            </div>
-
-                            {/* Added Payments */}
-                            {payments.length > 0 && (
-                                <div className={styles['paymentsList']}>
-                                    <h3>Pagos Agregados</h3>
-                                    {payments.map(payment => (
-                                        <div key={payment.id} className={styles['paymentItem']}>
-                                            <span className={styles['paymentMethod']}>
-                                                {getPaymentMethodLabel(payment.paymentMethod)}
-                                            </span>
-                                            <span className={styles['paymentAmount']}>
-                                                {formatCurrency(payment.amount)}
-                                            </span>
-                                            <button
-                                                className={styles['removePaymentBtn']}
-                                                onClick={() => removePayment(payment.id)}
-                                                aria-label={`Eliminar pago ${getPaymentMethodLabel(payment.paymentMethod)} de ${formatCurrency(payment.amount)}`}
-                                            >
-                                                &times;
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Notes */}
-                            <div className={styles['notesSection']}>
-                                <label className={styles['label']}>Notas (opcional)</label>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Notas adicionales..."
-                                    className={styles['notesInput']}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles['modalFooter']}>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowPaymentModal(false)}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={processSale}
-                                disabled={isSubmitting || totalPaid < total}
-                                isLoading={isSubmitting}
-                            >
-                                {isSubmitting ? 'Procesando...' : 'Completar Venta'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <POSPaymentModal
+                isOpen={showPaymentModal}
+                total={total}
+                totalPaid={totalPaid}
+                remaining={remaining}
+                change={change}
+                payments={payments}
+                notes={notes}
+                isSubmitting={isSubmitting}
+                onClose={() => setShowPaymentModal(false)}
+                onAddPayment={addPayment}
+                onRemovePayment={removePayment}
+                onNotesChange={setNotes}
+                onProcessSale={processSale}
+            />
         </div>
     );
-}
-
-// ============================================================================
-// PAYMENT FORM COMPONENT
-// ============================================================================
-
-interface PaymentFormProps {
-    remainingAmount: number;
-    onAdd: (method: PaymentMethod, amount: number, ref?: string) => void;
-}
-
-function PaymentForm({ remainingAmount, onAdd }: PaymentFormProps) {
-    const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
-    const [amount, setAmount] = useState(remainingAmount);
-    const [transactionRef, setTransactionRef] = useState('');
-
-    const handleAdd = () => {
-        if (amount <= 0) return;
-        onAdd(method, amount, transactionRef || undefined);
-        setAmount(remainingAmount - amount > 0 ? remainingAmount - amount : 0);
-        setTransactionRef('');
-    };
-
-    const needsRef = method === PaymentMethod.CARD || method === PaymentMethod.TRANSFER;
-
-    return (
-        <div className={styles['paymentForm']}>
-            <div className={styles['paymentFormRow']}>
-                <select
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                    className={styles['methodSelect']}
-                    aria-label="Método de pago"
-                >
-                    <option value={PaymentMethod.CASH}>Efectivo</option>
-                    <option value={PaymentMethod.CARD}>Tarjeta</option>
-                    <option value={PaymentMethod.TRANSFER}>Transferencia</option>
-                    <option value={PaymentMethod.CHECK}>Cheque</option>
-                    <option value={PaymentMethod.OTHER}>Otro</option>
-                </select>
-                <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                    placeholder="Monto"
-                />
-            </div>
-            {needsRef && (
-                <Input
-                    placeholder="Referencia de transacción"
-                    value={transactionRef}
-                    onChange={(e) => setTransactionRef(e.target.value)}
-                />
-            )}
-            <Button
-                variant="secondary"
-                onClick={handleAdd}
-                disabled={amount <= 0}
-            >
-                Agregar Pago
-            </Button>
-        </div>
-    );
-}
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function getPaymentMethodLabel(method: PaymentMethod): string {
-    const labels: Record<PaymentMethod, string> = {
-        CASH: 'Efectivo',
-        CARD: 'Tarjeta',
-        TRANSFER: 'Transferencia',
-        CHECK: 'Cheque',
-        OTHER: 'Otro',
-    };
-    return labels[method];
 }

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
 import * as XLSX from 'xlsx';
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
         return new NextResponse('Unauthorized', { status: 401 });
     }
 
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+  if (!hasPermission(session.user.role as UserRole, 'canExportData')) {
     return new NextResponse('Forbidden: Insufficient permissions for data export', { status: 403 });
   }
 

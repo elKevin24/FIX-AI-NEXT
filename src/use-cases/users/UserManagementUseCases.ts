@@ -31,6 +31,10 @@ export class CreateManagedUserUseCase {
     tenantId: string,
     db: TenantDb
   ) {
+    if ((input.role as string) === 'SUPER_ADMIN') {
+      throw new Error('No está permitido crear usuarios con el rol Super Administrador');
+    }
+
     requireAdminOrManager(creatorRole);
 
     const assignableRoles = getAssignableRoles(creatorRole);
@@ -43,7 +47,7 @@ export class CreateManagedUserUseCase {
     });
 
     if (existingUser) {
-      const error: any = new Error('Ya existe un usuario con ese email en este tenant');
+      const error: any = new Error('El usuario ya existe');
       error.fieldErrors = { email: ['Email ya registrado'] };
       throw error;
     }
@@ -114,6 +118,7 @@ export interface UpdateManagedUserInput {
   lastName?: string;
   name?: string;
   role?: UserRole;
+  password?: string;
 }
 
 export class UpdateManagedUserUseCase {
@@ -124,6 +129,10 @@ export class UpdateManagedUserUseCase {
     tenantId: string,
     db: TenantDb
   ) {
+    if ((input.role as string) === 'SUPER_ADMIN') {
+      throw new Error('No está permitido asignar el rol Super Administrador');
+    }
+
     const targetUser = await db.user.findUnique({
       where: { id: input.userId },
     });
@@ -134,9 +143,19 @@ export class UpdateManagedUserUseCase {
 
     validateTenantAccess(tenantId, targetUser.tenantId);
 
+    // Proteger usuario SUPER_ADMIN
+    if (targetUser.role === 'SUPER_ADMIN') {
+      if (actorId !== input.userId) {
+        throw new Error('No autorizado para modificar al Super Administrador');
+      }
+      if (input.role && (input.role as string) !== 'SUPER_ADMIN') {
+        throw new Error('No se puede revocar el rol del Super Administrador');
+      }
+    }
+
     const isSelf = actorId === input.userId;
 
-    if (!isSelf) {
+    if (!isSelf && targetUser.role !== 'SUPER_ADMIN') {
       requirePermission(actorRole, 'canEditUsers');
 
       if (!canModifyUser(actorRole, targetUser.role as UserRole, isSelf)) {
@@ -164,7 +183,7 @@ export class UpdateManagedUserUseCase {
         where: { email: input.email, tenantId, NOT: { id: input.userId } },
       });
       if (existingUser) {
-        const error: any = new Error('Ya existe un usuario con ese email');
+        const error: any = new Error('Ya existe un usuario con este email');
         error.fieldErrors = { email: ['Email ya registrado'] };
         throw error;
       }
@@ -180,7 +199,17 @@ export class UpdateManagedUserUseCase {
     if (input.firstName || input.lastName || input.name) {
       updateData['name'] = input.name || `${input.firstName || targetUser.firstName || ''} ${input.lastName || targetUser.lastName || ''}`.trim();
     }
-    if (input.role) updateData['role'] = input.role;
+    if (input.role) updateData['role'] = targetUser.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : input.role;
+
+    if (input.password && input.password.length > 0) {
+      const passwordValidation = validatePassword(input.password);
+      if (!passwordValidation.valid) {
+        const error: any = new Error('Contraseña no cumple los requisitos');
+        error.fieldErrors = { password: passwordValidation.errors };
+        throw error;
+      }
+      updateData['password'] = await bcryptjs.hash(input.password, 12);
+    }
 
     const updatedUser = await db.user.update({
       where: { id: input.userId },
@@ -202,6 +231,55 @@ export class UpdateManagedUserUseCase {
     });
 
     return { updatedUser };
+  }
+}
+
+export class DeleteUserUseCase {
+  static async execute(
+    targetUserId: string,
+    tenantId: string,
+    actorId: string,
+    db?: TenantDb
+  ) {
+    if (targetUserId === actorId) {
+      throw new Error('No puedes eliminar tu propio usuario');
+    }
+
+    const tenantDb = db || getTenantPrisma(tenantId, actorId);
+    const targetUser = await tenantDb.user.findUnique({
+      where: { id: targetUserId },
+    });
+
+    if (!targetUser) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    validateTenantAccess(tenantId, targetUser.tenantId);
+
+    if (targetUser.role === 'SUPER_ADMIN') {
+      throw new Error('No es posible eliminar al Super Administrador del sistema');
+    }
+
+    const deleted = await tenantDb.user.delete({
+      where: { id: targetUserId },
+    });
+
+    await tenantDb.auditLog.create({
+      data: {
+        action: 'USER_DEACTIVATED',
+        module: 'USERS',
+        details: JSON.stringify({
+          deletedUserId: targetUserId,
+          email: targetUser.email,
+          deletedBy: actorId,
+          type: 'HARD_DELETE',
+        }),
+        userId: actorId,
+        tenantId,
+      },
+    });
+
+    return deleted;
   }
 }
 

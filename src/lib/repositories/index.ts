@@ -7,7 +7,7 @@ export type { ICashRegisterRepository } from './interfaces/cash-register.reposit
 export type { IAuditLogRepository } from './interfaces/audit-log.repository.interface';
 
 export { PrismaCustomerRepository } from './implementations/prisma-customer.repository';
-export { PrismaTicketRepository } from './implementations/prisma-ticket.repository';
+export { PrismaTicketRepository, PrismaTicketRepository as TicketRepository } from './implementations/prisma-ticket.repository';
 export { PrismaPartRepository } from './implementations/prisma-part.repository';
 export { PrismaUserRepository } from './implementations/prisma-user.repository';
 export { PrismaInvoiceRepository } from './implementations/prisma-invoice.repository';

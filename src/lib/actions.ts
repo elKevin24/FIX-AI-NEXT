@@ -3,8 +3,8 @@
  * Refactored according to Single Responsibility Principle (SRP).
  */
 
-export * from './actions/auth-actions';
-export * from './actions/user-actions';
+export { authenticate, requestPasswordReset } from './actions/auth-actions';
+export * from './user-actions';
 export * from './actions/customer-actions';
 export * from './actions/part-actions';
 export * from './actions/ticket-actions';

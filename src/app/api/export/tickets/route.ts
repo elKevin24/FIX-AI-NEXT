@@ -1,7 +1,7 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
 
 // Iterador asíncrono que genera filas CSV bajo demanda
 async function* makeIterator(tenantId: string, userId: string) {
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+  if (!hasPermission(session.user.role as UserRole, 'canExportData')) {
     return new NextResponse('Forbidden: Insufficient permissions for data export', { status: 403 });
   }
 

@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { z } from 'zod';
-
-// Validation schema
-const createCustomerSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  dpi: z.string().optional(),
-  nit: z.string().optional(),
-});
+import { CreateCustomerSchema } from '@/lib/schemas';
+import { CreateCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
+import { toClientMessage } from '@/lib/errors';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 // GET /api/customers - List all customers in tenant
 export async function GET(request: NextRequest) {
@@ -130,8 +124,14 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validate input
-    const validationResult = createCustomerSchema.safeParse(body);
+    if (!hasPermission(session.user.role as UserRole, 'canCreateCustomers')) {
+      return NextResponse.json(
+        { error: 'Forbidden: insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    const validationResult = CreateCustomerSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
@@ -139,34 +139,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, phone, address, dpi, nit } = validationResult.data;
-
-    const db = getTenantPrisma(session.user.tenantId);
-
-    // Create customer
-    const newCustomer = await db.customer.create({
-      data: {
-        name,
-        email: email || null,
-        phone: phone || null,
-        address: address || null,
-        dpi: dpi || null,
-        nit: nit || null,
-        tenantId: session.user.tenantId,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        createdAt: true,
-      },
-    });
+    const newCustomer = await CreateCustomerUseCase.execute(
+      validationResult.data,
+      session.user.tenantId,
+      session.user.id
+    );
 
     return NextResponse.json(newCustomer, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating customer:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: toClientMessage(error, 'Internal Server Error') }, { status: 500 });
   }
 }

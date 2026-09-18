@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTemplateAnalytics } from '@/lib/service-template-actions';
 import TemplateAnalyticsClient from './TemplateAnalyticsClient';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Analytics de Plantillas',
@@ -19,7 +21,7 @@ export default async function TemplateAnalyticsPage() {
     redirect('/login');
   }
 
-  if (session.user.role !== 'ADMIN') {
+  if (!hasPermission(session.user.role as UserRole, 'canManageTemplates')) {
     redirect('/dashboard');
   }
 

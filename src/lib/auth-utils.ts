@@ -12,8 +12,9 @@
  */
 
 import { UserRole } from '@prisma/client';
+import { AuthorizationError } from '@/lib/errors/domain-errors';
 
-export { UserRole };
+export { UserRole, AuthorizationError };
 
 /**
  * Permisos definidos para cada rol
@@ -32,6 +33,11 @@ export const ROLE_PERMISSIONS = {
 
     // Ticket Viewing
     canViewAllTickets: true,
+
+    // Ticket Management
+    canCreateTickets: true,
+    canEditTickets: true,
+    canAddTicketNotes: true,
 
     // Ticket Actions
     canTakeTicket: true,
@@ -74,6 +80,11 @@ export const ROLE_PERMISSIONS = {
     // Ticket Viewing
     canViewAllTickets: true,
 
+    // Ticket Management
+    canCreateTickets: true,
+    canEditTickets: true,
+    canAddTicketNotes: true,
+
     // Ticket Actions
     canTakeTicket: true,
     canAssignTickets: true,
@@ -114,6 +125,11 @@ export const ROLE_PERMISSIONS = {
 
     // Ticket Viewing
     canViewAllTickets: true,
+
+    // Ticket Management
+    canCreateTickets: true,
+    canEditTickets: true,
+    canAddTicketNotes: true,
 
     // Ticket Actions
     canTakeTicket: true,
@@ -156,6 +172,11 @@ export const ROLE_PERMISSIONS = {
     // Ticket Viewing
     canViewAllTickets: false,
 
+    // Ticket Management
+    canCreateTickets: true,
+    canEditTickets: true,
+    canAddTicketNotes: true,
+
     // Ticket Actions
     canTakeTicket: true,
     canAssignTickets: false,
@@ -197,6 +218,11 @@ export const ROLE_PERMISSIONS = {
     // Ticket Viewing
     canViewAllTickets: true,
 
+    // Ticket Management
+    canCreateTickets: false,
+    canEditTickets: false,
+    canAddTicketNotes: false,
+
     // Ticket Actions
     canTakeTicket: false,
     canAssignTickets: false,
@@ -231,42 +257,43 @@ export type Permission = keyof typeof ROLE_PERMISSIONS.ADMIN;
 /**
  * Verifica si un rol tiene un permiso específico
  */
-export function hasPermission(role: UserRole, permission: Permission): boolean {
-  return ROLE_PERMISSIONS[role]?.[permission] ?? false;
+export function hasPermission(role?: UserRole | string | null, permission?: Permission): boolean {
+  if (!role || !permission) return false;
+  return (ROLE_PERMISSIONS as Record<string, Record<string, boolean>>)[role]?.[permission] ?? false;
 }
 
 /**
  * Verifica si el usuario es super administrador (plataforma)
  */
-export function isSuperAdmin(role: UserRole): boolean {
+export function isSuperAdmin(role?: UserRole | string | null): boolean {
   return role === 'SUPER_ADMIN';
 }
 
 /**
  * Verifica si el usuario es administrador (incluye super administrador)
  */
-export function isAdmin(role: UserRole): boolean {
+export function isAdmin(role?: UserRole | string | null): boolean {
   return role === 'ADMIN' || role === 'SUPER_ADMIN';
 }
 
 /**
  * Verifica si el usuario es manager
  */
-export function isManager(role: UserRole): boolean {
+export function isManager(role?: UserRole | string | null): boolean {
   return role === 'MANAGER';
 }
 
 /**
  * Verifica si el usuario es técnico
  */
-export function isTechnician(role: UserRole): boolean {
+export function isTechnician(role?: UserRole | string | null): boolean {
   return role === 'TECHNICIAN';
 }
 
 /**
  * Verifica si el usuario es visualizador
  */
-export function isViewer(role: UserRole): boolean {
+export function isViewer(role?: UserRole | string | null): boolean {
   return role === 'VIEWER';
 }
 
@@ -313,19 +340,6 @@ export function canModifyUser(
   const actorLevel = getRoleHierarchyLevel(actorRole);
   const targetLevel = getRoleHierarchyLevel(targetRole);
   return actorLevel > targetLevel;
-}
-
-/**
- * Tipos de error de autorización
- */
-export class AuthorizationError extends Error {
-  constructor(
-    message: string,
-    public code: string = 'FORBIDDEN'
-  ) {
-    super(message);
-    this.name = 'AuthorizationError';
-  }
 }
 
 /**

@@ -4,6 +4,8 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { CreatePartSchema, UpdatePartSchema } from '@/lib/schemas';
 import { isSuperAdmin } from '@/lib/authz';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 import { CreatePartUseCase, UpdatePartUseCase, DeletePartUseCase } from '@/use-cases/parts/PartUseCases';
 import { ActionState } from '@/lib/types';
 
@@ -16,8 +18,8 @@ export async function createPart(prevState: ActionState, formData: FormData) {
         return { success: false, message: 'No autorizado' };
     }
 
-    if (session.user.role === 'VIEWER') {
-        return { success: false, message: 'Los observadores no pueden crear repuestos' };
+    if (!hasPermission(session.user.role as UserRole, 'canEditParts')) {
+        return { success: false, message: 'No tienes permiso para crear repuestos' };
     }
 
     const data = {
@@ -33,8 +35,6 @@ export async function createPart(prevState: ActionState, formData: FormData) {
     if (!validatedFields.success) {
         return { success: false, message: validatedFields.error.errors[0]?.message ?? 'Datos inválidos' };
     }
-
-    const superAdmin = isSuperAdmin(session.user);
 
     try {
         await CreatePartUseCase.execute(validatedFields.data, session.user.tenantId, session.user.id);
@@ -91,8 +91,8 @@ export async function deletePart(prevState: ActionState, formData: FormData) {
         return { success: false, message: 'No autorizado' };
     }
 
-    if (session.user.role !== 'ADMIN') {
-        return { success: false, message: 'Solo los administradores pueden eliminar repuestos' };
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteParts')) {
+        return { success: false, message: 'No tienes permiso para eliminar repuestos' };
     }
 
     const partId = formData.get('partId') as string;

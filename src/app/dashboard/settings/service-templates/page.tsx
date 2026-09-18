@@ -6,6 +6,8 @@ import { Button } from '@/components/ui';
 import { ServiceTemplateList } from './ServiceTemplateList';
 import PageHeader from '@/components/PageHeader';
 import styles from './service-templates.module.css';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Plantillas de Servicio',
@@ -23,8 +25,8 @@ export default async function ServiceTemplatesPage() {
     redirect('/login');
   }
 
-  // Solo ADMIN puede acceder a esta página
-  if (session.user.role !== 'ADMIN') {
+  // Verificar permisos
+  if (!hasPermission(session.user.role as UserRole, 'canManageTemplates')) {
     return (
       <div className={styles['container']}>
         <div className={styles['errorCard']}>

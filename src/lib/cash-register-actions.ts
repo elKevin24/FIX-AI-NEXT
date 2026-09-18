@@ -5,9 +5,8 @@
  * Delegating domain transactions, audits and cuts to CashRegister use cases.
  */
 
-import { auth } from '@/auth';
-import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { revalidatePath } from 'next/cache';
+import { requireTenantSession, assertNotViewer } from '@/lib/auth-context';
 import {
   OpenCashRegisterSchema,
   CashTransactionSchema,
@@ -48,12 +47,6 @@ export interface CloseCashRegisterData {
   notes?: string;
 }
 
-function assertNotViewer(role?: string, action: string = 'realizar esta acción') {
-  if (role === 'VIEWER') {
-    throw new Error(`Los observadores no pueden ${action}`);
-  }
-}
-
 // ============================================================================
 // CASH REGISTER MANAGEMENT
 // ============================================================================
@@ -62,20 +55,18 @@ function assertNotViewer(role?: string, action: string = 'realizar esta acción'
  * Abre una caja registradora con un saldo inicial
  */
 export async function openCashRegister(data: CashRegisterData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) throw new Error('No autorizado');
-  assertNotViewer(session.user.role, 'abrir cajas');
+  const { tenantId, userId, userRole, db } = await requireTenantSession();
+  await assertNotViewer(userRole, 'abrir cajas');
 
   const validatedFields = OpenCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
     throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const cashRegister = await OpenCashRegisterActionUseCase.execute(
     validatedFields.data,
-    session.user.tenantId,
-    session.user.id,
+    tenantId,
+    userId,
     db
   );
 
@@ -87,42 +78,42 @@ export async function openCashRegister(data: CashRegisterData) {
  * Obtiene la caja abierta actualmente
  */
 export async function getOpenCashRegister() {
-  const session = await auth();
-  if (!session?.user?.tenantId) return null;
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-  return await GetOpenCashRegisterUseCase.execute(session.user.tenantId, db);
+  try {
+    const { tenantId, db } = await requireTenantSession();
+    return await GetOpenCashRegisterUseCase.execute(tenantId, db);
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Obtiene todas las cajas (historial)
  */
 export async function getCashRegisters(filters?: { from?: Date; to?: Date }) {
-  const session = await auth();
-  if (!session?.user?.tenantId) return [];
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-  return await GetCashRegistersUseCase.execute(filters, session.user.tenantId, db);
+  try {
+    const { tenantId, db } = await requireTenantSession();
+    return await GetCashRegistersUseCase.execute(filters, tenantId, db);
+  } catch {
+    return [];
+  }
 }
 
 /**
  * Registra una transacción de caja
  */
 export async function registerCashTransaction(data: CashTransactionData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) throw new Error('No autorizado');
-  assertNotViewer(session.user.role, 'registrar transacciones');
+  const { tenantId, userId, userRole, db } = await requireTenantSession();
+  await assertNotViewer(userRole, 'registrar transacciones');
 
   const validatedFields = CashTransactionSchema.safeParse(data);
   if (!validatedFields.success) {
     throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const transaction = await RegisterCashTransactionUseCase.execute(
     validatedFields.data,
-    session.user.tenantId,
-    session.user.id,
+    tenantId,
+    userId,
     db
   );
 
@@ -134,20 +125,18 @@ export async function registerCashTransaction(data: CashTransactionData) {
  * Cierra una caja registradora
  */
 export async function closeCashRegister(data: CloseCashRegisterData) {
-  const session = await auth();
-  if (!session?.user?.tenantId) throw new Error('No autorizado');
-  assertNotViewer(session.user.role, 'cerrar cajas');
+  const { tenantId, userId, userRole, db } = await requireTenantSession();
+  await assertNotViewer(userRole, 'cerrar cajas');
 
   const validatedFields = CloseCashRegisterSchema.safeParse(data);
   if (!validatedFields.success) {
     throw new Error(`Datos inválidos: ${validatedFields.error.errors[0]?.message ?? 'Datos inválidos'}`);
   }
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const updated = await CloseCashRegisterActionUseCase.execute(
     validatedFields.data,
-    session.user.tenantId,
-    session.user.id,
+    tenantId,
+    userId,
     db
   );
 
@@ -159,11 +148,12 @@ export async function closeCashRegister(data: CloseCashRegisterData) {
  * Obtiene estadísticas de caja
  */
 export async function getCashRegisterStats(cashRegisterId: string) {
-  const session = await auth();
-  if (!session?.user?.tenantId) return null;
-
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
-  return await GetCashRegisterStatsUseCase.execute(cashRegisterId, session.user.tenantId, db);
+  try {
+    const { tenantId, db } = await requireTenantSession();
+    return await GetCashRegisterStatsUseCase.execute(cashRegisterId, tenantId, db);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -173,16 +163,14 @@ export async function registerInvoicePaymentInCash(
   invoiceId: string,
   amount: number
 ) {
-  const session = await auth();
-  if (!session?.user?.tenantId) throw new Error('No autorizado');
-  assertNotViewer(session.user.role, 'registrar pagos');
+  const { tenantId, userId, userRole, db } = await requireTenantSession();
+  await assertNotViewer(userRole, 'registrar pagos');
 
-  const db = getTenantPrisma(session.user.tenantId, session.user.id);
   const transaction = await RegisterInvoicePaymentInCashUseCase.execute(
     invoiceId,
     amount,
-    session.user.tenantId,
-    session.user.id,
+    tenantId,
+    userId,
     db
   );
 
@@ -198,15 +186,14 @@ export async function generateCashCutAction(
   cutType: CutType,
   physicalCashReported?: number,
 ) {
-  const session = await auth();
-  if (!session?.user?.tenantId) throw new Error('No autorizado');
+  const { tenantId, userId } = await requireTenantSession();
 
   const result = await GenerateCashCutUseCase.execute({
     cashRegisterId,
     cutType,
     physicalCashReported,
-    tenantId: session.user.tenantId,
-    userId: session.user.id,
+    tenantId,
+    userId,
   });
 
   revalidatePath('/dashboard/cash-register');

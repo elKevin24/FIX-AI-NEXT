@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { z } from 'zod';
-
-// Validation schema for update
-const updateCustomerSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-});
+import { UpdateCustomerSchema } from '@/lib/schemas';
+import { DeleteCustomerUseCase, UpdateCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
+import { toClientMessage } from '@/lib/errors';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 // GET /api/customers/[id] - Get single customer
 export async function GET(
@@ -82,10 +78,20 @@ export async function PATCH(
       );
     }
 
+    if (!hasPermission(session.user.role as UserRole, 'canEditCustomers')) {
+      return NextResponse.json(
+        { error: 'Forbidden: insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
     const body = await request.json();
 
-    // Validate input
-    const validationResult = updateCustomerSchema.safeParse(body);
+    const validationResult = UpdateCustomerSchema.safeParse({
+      ...body,
+      customerId: id,
+    });
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
@@ -93,48 +99,19 @@ export async function PATCH(
       );
     }
 
-    const { name, email, phone, address } = validationResult.data;
-
-    const db = getTenantPrisma(session.user.tenantId);
-
-    // Check if customer exists
-    const existingCustomer = await db.customer.findFirst({
-      where: { id: (await params).id },
-    });
-
-    if (!existingCustomer) {
-      return NextResponse.json(
-        { error: 'Customer not found' },
-        { status: 404 }
-      );
-    }
-
-    // Prepare update data
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email || null;
-    if (phone !== undefined) updateData.phone = phone || null;
-    if (address !== undefined) updateData.address = address || null;
-
-    // Update customer
-    const updatedCustomer = await db.customer.update({
-      where: { id: (await params).id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const updatedCustomer = await UpdateCustomerUseCase.execute(
+      validationResult.data,
+      session.user.tenantId,
+      session.user.id
+    );
 
     return NextResponse.json(updatedCustomer);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating customer:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: toClientMessage(error, 'Internal Server Error') },
+      { status: error instanceof Error && error.message.includes('no encontrado') ? 404 : 500 }
+    );
   }
 }
 
@@ -153,54 +130,25 @@ export async function DELETE(
       );
     }
 
-    // Only ADMIN can delete customers
-    if (session.user.role !== 'ADMIN') {
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteCustomers')) {
       return NextResponse.json(
-        { error: 'Forbidden: Only admins can delete customers' },
+        { error: 'Forbidden: insufficient permissions' },
         { status: 403 }
       );
     }
 
-    const db = getTenantPrisma(session.user.tenantId);
-
-    // Check if customer exists
-    const existingCustomer = await db.customer.findFirst({
-      where: { id: (await params).id },
-      include: {
-        _count: {
-          select: {
-            tickets: true,
-          },
-        },
-      },
-    });
-
-    if (!existingCustomer) {
-      return NextResponse.json(
-        { error: 'Customer not found' },
-        { status: 404 }
-      );
-    }
-
-    // Prevent deleting customer with active tickets
-    if (existingCustomer._count.tickets > 0) {
-      return NextResponse.json(
-        { error: `Cannot delete customer with ${existingCustomer._count.tickets} existing tickets` },
-        { status: 400 }
-      );
-    }
-
-    // Delete customer
-    await db.customer.delete({
-      where: { id: (await params).id },
-    });
+    const { id } = await params;
+    await DeleteCustomerUseCase.execute(id, session.user.tenantId, session.user.id);
 
     return NextResponse.json(
       { message: 'Customer deleted successfully' },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting customer:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: toClientMessage(error, 'Internal Server Error') },
+      { status: error instanceof Error && error.message.includes('no encontrado') ? 404 : 500 }
+    );
   }
 }

@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { Card, CardBody } from '@/components/ui';
 import CreateUserForm from './CreateUserForm';
 import PageHeader from '@/components/PageHeader';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
   title: 'Nuevo Usuario',
@@ -16,8 +18,8 @@ export default async function CreateUserPage() {
     redirect('/login');
   }
 
-  // Only ADMIN can create users
-  if (session.user.role !== 'ADMIN') {
+  // Check permissions to create users
+  if (!hasPermission(session.user.role as UserRole, 'canCreateUsers')) {
     redirect('/dashboard/users');
   }
 

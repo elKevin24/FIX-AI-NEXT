@@ -17,7 +17,7 @@ describe('Unified User Schemas', () => {
         name: 'Carlos Mendoza',
         email: 'carlos@example.com',
         role: 'TECHNICIAN',
-        password: 'password123',
+        password: 'Password123!',
       });
 
       expect(result.success).toBe(true);

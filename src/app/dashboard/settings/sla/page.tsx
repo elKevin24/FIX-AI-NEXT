@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import SLASettingsForm from './SLASettingsForm';
 import PageHeader from '@/components/PageHeader';
+import { hasPermission } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 export const metadata = {
     title: 'Configuración SLA',
@@ -16,7 +18,7 @@ export const metadata = {
 
 export default async function SLASettingsPage() {
     const session = await auth();
-    if (!session?.user?.tenantId || session.user.role !== 'ADMIN') {
+    if (!session?.user?.tenantId || !hasPermission(session.user.role as UserRole, 'canManageTenantSettings')) {
         redirect('/dashboard');
     }
 

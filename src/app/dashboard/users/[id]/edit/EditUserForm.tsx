@@ -1,12 +1,13 @@
 'use client';
 
-import { useActionState } from 'react';
-import { updateUser, deleteUser } from '@/lib/actions';
+import { useActionState, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { updateUser, deleteUser } from '@/lib/user-actions';
+import { useToast } from '@/context/ToastContext';
 import styles from '../../../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
-import { useState } from 'react';
 
 import type { UserRole } from '@prisma/client';
 
@@ -28,11 +29,29 @@ interface Props {
 }
 
 export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Props) {
-    const [updateState, updateAction, isUpdating] = useActionState(updateUser, null);
-    const [deleteState, deleteAction, isDeleting] = useActionState(deleteUser, null);
+    const router = useRouter();
+    const { addToast } = useToast();
+    const [updateState, updateAction, isUpdating] = useActionState(updateUser, { success: false, message: '' });
+    const [deleteState, deleteAction, isDeleting] = useActionState(deleteUser, { success: false, message: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const isCurrentUser = user.id === currentUserId;
+
+    useEffect(() => {
+        if (updateState?.success) {
+            addToast('Usuario actualizado exitosamente', 'SUCCESS');
+            router.push('/dashboard/users');
+            router.refresh();
+        }
+    }, [updateState?.success, router, addToast]);
+
+    useEffect(() => {
+        if (deleteState?.success) {
+            addToast('Usuario eliminado exitosamente', 'SUCCESS');
+            router.push('/dashboard/users');
+            router.refresh();
+        }
+    }, [deleteState?.success, router, addToast]);
 
     return (
         <div className={styles['container']}>

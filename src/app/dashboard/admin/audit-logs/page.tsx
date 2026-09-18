@@ -3,6 +3,7 @@ import { getAuditLogs } from "@/lib/audit-actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
+import { isAdmin, isManager } from "@/lib/auth-utils";
 
 export const metadata = {
     title: "Registros de Auditoría",
@@ -15,7 +16,7 @@ export default async function AuditLogsPage(props: {
     const searchParams = await props.searchParams;
     const session = await auth();
 
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER')) {
+    if (!session || (!isAdmin(session.user.role as any) && !isManager(session.user.role as any))) {
         redirect("/dashboard");
     }
 

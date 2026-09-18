@@ -1,64 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createCustomer } from '@/lib/actions';
 import { Input, Textarea, Button, Alert } from '@/components/ui';
 import styles from '@/components/ui/Form.module.css';
 
 export default function CreateCustomerForm() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    dpi: '',
-    nit: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/customers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create customer');
-      }
-
-      router.push('/dashboard/customers');
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const [state, formAction, isPending] = useActionState(createCustomer, null);
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && (
+    <form action={formAction}>
+      {state?.message && (
         <Alert variant="error">
-          {error}
+          {state.message}
         </Alert>
       )}
 
@@ -66,8 +22,6 @@ export default function CreateCustomerForm() {
         label="Customer Name"
         name="name"
         type="text"
-        value={formData.name}
-        onChange={handleChange}
         placeholder="John Doe"
         required
       />
@@ -76,8 +30,6 @@ export default function CreateCustomerForm() {
         label="Email Address"
         name="email"
         type="email"
-        value={formData.email}
-        onChange={handleChange}
         placeholder="john@example.com"
         helper="Optional - for sending notifications"
       />
@@ -86,8 +38,6 @@ export default function CreateCustomerForm() {
         label="Phone Number"
         name="phone"
         type="tel"
-        value={formData.phone}
-        onChange={handleChange}
         placeholder="+1 (555) 123-4567"
         helper="Optional"
       />
@@ -97,8 +47,6 @@ export default function CreateCustomerForm() {
           label="DPI (ID)"
           name="dpi"
           type="text"
-          value={formData.dpi}
-          onChange={handleChange}
           placeholder="1234 56789 0101"
           helper="Optional"
         />
@@ -106,8 +54,6 @@ export default function CreateCustomerForm() {
           label="NIT (Tax ID)"
           name="nit"
           type="text"
-          value={formData.nit}
-          onChange={handleChange}
           placeholder="123456-7"
           helper="Optional"
         />
@@ -116,8 +62,6 @@ export default function CreateCustomerForm() {
       <Textarea
         label="Address"
         name="address"
-        value={formData.address}
-        onChange={handleChange}
         placeholder="123 Main St, City, State 12345"
         helper="Optional"
         rows={3}
@@ -134,8 +78,8 @@ export default function CreateCustomerForm() {
         <Button
           type="submit"
           variant="primary"
-          disabled={isSubmitting}
-          isLoading={isSubmitting}
+          disabled={isPending}
+          isLoading={isPending}
         >
           Create Customer
         </Button>

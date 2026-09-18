@@ -9,6 +9,8 @@ import CustomerSearchFilters from './CustomerSearchFilters';
 
 import PaginationControls from '@/components/ui/PaginationControls';
 import PageHeader from '@/components/PageHeader';
+import { isAdmin } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 interface CustomersPageProps {
   searchParams: Promise<{
@@ -112,7 +114,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   }
 
   const totalPages = Math.ceil(totalItems / pageSize);
-  const isAdmin = session.user.role === 'ADMIN';
+  const isAdminUser = isAdmin(session.user.role as UserRole);
 
   return (
     <div className={styles['container']}>
@@ -128,7 +130,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
       <CustomerSearchFilters />
 
-      <CustomersClient data={customers} isAdmin={isAdmin} />
+      <CustomersClient data={customers} isAdmin={isAdminUser} />
 
       <PaginationControls
         currentPage={currentPage}

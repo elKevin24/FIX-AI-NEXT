@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
+import { CreateTicketSchema } from '@/lib/schemas';
+import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
+import { toClientMessage } from '@/lib/errors';
 
 export async function GET(request: Request) {
     const session = await auth();
@@ -35,53 +39,47 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (!hasPermission(session.user.role as UserRole, 'canCreateTickets')) {
+        return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     try {
         const body = await request.json();
-        const { title, description, customerId, priority } = body;
+        const { customerId, customerName, customerEmail, customerPhone, ...ticketFields } = body;
 
-        // Validate required fields
-        if (!title || !description || !customerId) {
+        const validationResult = CreateTicketSchema.safeParse(ticketFields);
+        if (!validationResult.success) {
             return NextResponse.json(
-                { error: 'Missing required fields: title, description, customerId' },
+                { error: 'Validation failed', details: validationResult.error.errors },
                 { status: 400 }
             );
         }
 
-        const db = getTenantPrisma(session.user.tenantId, session.user.id);
-
-        // CRITICAL: Validate tenant isolation - ensure customer belongs to user's tenant
-        const customer = await db.customer.findFirst({
-            where: {
-                id: customerId,
-                tenantId: session.user.tenantId,
-            },
-        });
-
-        if (!customer) {
+        if (!customerId && !customerName) {
             return NextResponse.json(
-                { error: 'Customer not found or does not belong to your organization' },
-                { status: 404 }
+                { error: 'Customer ID or Customer Name is required' },
+                { status: 400 }
             );
         }
 
-        const ticket = await db.ticket.create({
-            data: {
-                title,
-                description,
+        const ticket = await CreateTicketUseCase.execute({
+            ticketData: validationResult.data,
+            customerInfo: {
                 customerId,
-                priority: priority || 'MEDIUM',
-                tenantId: session.user.tenantId,
-                status: 'OPEN',
-                createdById: session.user.id,
+                customerName,
+                customerEmail,
+                customerPhone,
             },
-            include: {
-                customer: true,
-            },
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
         });
 
-        return NextResponse.json(ticket);
+        return NextResponse.json(ticket, { status: 201 });
     } catch (error) {
         console.error('Failed to create ticket:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json(
+            { error: toClientMessage(error, 'Internal Server Error') },
+            { status: error instanceof Error && error.message.includes('not found') ? 404 : 500 }
+        );
     }
 }

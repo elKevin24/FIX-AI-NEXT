@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, type UserRole } from '@/lib/auth-utils';
 
 /**
  * Get a single ticket by ID with tenant isolation
@@ -118,7 +119,7 @@ export async function PATCH(
 }
 
 /**
- * Delete a ticket (ADMIN only)
+ * Delete a ticket.
  */
 export async function DELETE(
     request: Request,
@@ -126,8 +127,11 @@ export async function DELETE(
 ) {
     const session = await auth();
 
-    if (!session?.user?.tenantId || session.user.role !== 'ADMIN') {
+    if (!session?.user?.tenantId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteTickets')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { id } = await params;
