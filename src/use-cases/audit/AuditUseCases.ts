@@ -156,7 +156,7 @@ export class CheckSuspiciousActivityUseCase {
 
 export class RunLogsMaintenanceUseCase {
   static async execute() {
-    await prisma.$executeRawUnsafe(`SELECT purge_old_audit_data();`);
+    await prisma.$executeRaw`SELECT purge_old_audit_data();`;
     return { success: true, message: 'Maintenance executed successfully' };
   }
 }
