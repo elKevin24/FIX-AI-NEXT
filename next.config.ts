@@ -23,6 +23,7 @@ const cspHeader = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
+  deploymentId: process.env['NEXT_DEPLOYMENT_ID'] || process.env['VERCEL_DEPLOYMENT_ID'] || undefined,
 
   images: {
     formats: ['image/avif', 'image/webp'],
