@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { Prisma } from '@prisma/client';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import ExportButton from '@/components/ui/ExportButton';
@@ -169,7 +170,7 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
                 </div>
                 <div className={styles['statCard']}>
                     <span className={styles['statLabel']}>Valor Inventario (Costo)</span>
-                    <p className={styles['statValue']}>Q{totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}</p>
+                    <p className={styles['statValue']}>{formatCurrency(totalValue)}</p>
                 </div>
             </div>
 

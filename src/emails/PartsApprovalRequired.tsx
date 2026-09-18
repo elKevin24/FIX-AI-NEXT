@@ -1,6 +1,7 @@
 import { Button, Section, Text, Row, Column } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from './components/EmailLayout';
+import { formatCurrency } from '@/lib/utils';
 
 interface PartsApprovalRequiredEmailProps {
   customerName: string;
@@ -14,11 +15,6 @@ interface PartsApprovalRequiredEmailProps {
   ticketLink?: string;
 }
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-  }).format(value);
 
 export const PartsApprovalRequiredEmail = ({
   customerName = 'Cliente',

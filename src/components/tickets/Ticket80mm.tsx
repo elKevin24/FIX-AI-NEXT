@@ -8,6 +8,7 @@
 'use client';
 
 import React, { forwardRef, useEffect, useState } from 'react';
+import { formatCurrency as formatQCurrency } from '@/lib/utils';
 import styles from './Ticket80mm.module.css';
 import {
     Ticket80mmData,
@@ -41,10 +42,8 @@ const formatDate = (date: Date | string): string => {
 /**
  * Formatea montos monetarios
  */
-const formatCurrency = (amount: number | string): string => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return `Q${num.toFixed(2)}`;
-};
+const formatCurrency = (amount: number | string): string =>
+    formatQCurrency(typeof amount === 'string' ? parseFloat(amount) : amount);
 
 /**
  * Obtiene la clase CSS del badge de estado

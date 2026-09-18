@@ -31,9 +31,9 @@ export function serializeDecimal<T>(data: T): any {
 /**
  * Formatea un valor numérico como moneda (ej. Q125.00 o $125.00).
  */
-export function formatCurrency(amount: number | null | undefined, currency: string = 'Q'): string {
+export function formatCurrency(amount: number | null | undefined): string {
   const numericAmount = Number(amount) || 0;
-  return `${currency}${numericAmount.toFixed(2)}`;
+  return `Q${numericAmount.toFixed(2)}`;
 }
 
 /**

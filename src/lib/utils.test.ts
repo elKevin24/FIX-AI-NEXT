@@ -8,8 +8,8 @@ describe('utils formatting helpers', () => {
       expect(formatCurrency(0)).toBe('Q0.00');
     });
 
-    it('formats numbers with custom currency symbol', () => {
-      expect(formatCurrency(99.99, '$')).toBe('$99.99');
+    it('always formats amounts as Guatemalan quetzales', () => {
+      expect(formatCurrency(99.99)).toBe('Q99.99');
     });
 
     it('handles null and undefined safely', () => {

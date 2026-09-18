@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentMethod } from '@prisma/client';
 import { createPOSSale, getPartsForPOS } from '@/lib/pos-actions';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
@@ -50,7 +51,6 @@ interface POSClientProps {
     initialParts: Part[];
     initialCustomers: Customer[];
     taxRate: number;
-    currency: string;
 }
 
 // ============================================================================
@@ -61,7 +61,7 @@ export default function POSClient({
     initialParts,
     initialCustomers,
     taxRate,
-    currency,
+
 }: POSClientProps) {
     const router = useRouter();
 
@@ -115,10 +115,6 @@ export default function POSClient({
     const remaining = total - totalPaid;
     const change = totalPaid > total ? totalPaid - total : 0;
 
-    // Format currency
-    const formatCurrency = (amount: number) => {
-        return `Q${amount.toFixed(2)}`;
-    };
 
     // Add to cart
     const addToCart = (part: Part) => {

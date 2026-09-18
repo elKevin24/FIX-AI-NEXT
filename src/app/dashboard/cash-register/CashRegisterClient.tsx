@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { openCashRegister, closeCashRegister, registerCashTransaction } from '@/lib/cash-register-actions';
+import { formatCurrency } from '@/lib/utils';
 import PageHeader from '@/components/PageHeader';
 import styles from './cash-register.module.css';
 
@@ -23,9 +24,7 @@ export default function CashRegisterClient({ initialOpenRegister }: CashRegister
   const [transDesc, setTransDesc] = useState('');
   const [transType, setTransType] = useState<'INCOME' | 'EXPENSE' | 'WITHDRAWAL'>('INCOME');
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(amount);
-  };
+
 
   const calculateExpected = () => {
     if (!openRegister) return 0;

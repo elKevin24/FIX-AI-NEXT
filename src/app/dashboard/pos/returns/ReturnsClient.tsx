@@ -15,6 +15,7 @@ import {
     getPOSSaleForReturn,
 } from '@/lib/credit-note-actions';
 import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { formatCurrency } from '@/lib/utils';
 import styles from './returns.module.css';
 import PageHeader from '@/components/PageHeader';
 import {
@@ -92,7 +93,6 @@ export function ReturnsClient({ initialCreditNotes, stats }: ReturnsProps) {
     }, [returnItems, selectedSale]);
 
     // Helpers
-    const formatCurrency = (amount: number) => `Q${amount.toFixed(2)}`;
     const formatDate = (date: Date) =>
         new Date(date).toLocaleDateString('es-GT', {
             day: '2-digit',

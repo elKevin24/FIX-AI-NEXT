@@ -35,7 +35,6 @@ export default async function POSPage() {
             initialParts={parts}
             initialCustomers={customers}
             taxRate={serializedSettings?.taxRate ?? 12}
-            currency={serializedSettings?.currency ?? 'GTQ'}
         />
     );
 }

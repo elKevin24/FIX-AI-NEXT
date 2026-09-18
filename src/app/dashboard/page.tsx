@@ -10,6 +10,7 @@ import PageHeader from '@/components/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
+import { formatCurrency } from '@/lib/utils';
 import RecentTicketsTable from '@/components/dashboard/RecentTicketsTable';
 
 // Define types locally since they may not be exported yet
@@ -179,7 +180,7 @@ export default async function DashboardPage() {
     ]);
 
     // Format currency
-    const formatCurrency = (amount: number) => `Q${amount.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 
     const totalIncome = (financialStats?.totalPaid || 0) + (posStats?.totalSales || 0);
     const pendingCollection = financialStats?.totalPending || 0;

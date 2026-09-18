@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { getTemplateAnalytics, TemplateAnalytics } from '@/lib/service-template-actions';
+import { formatCurrency } from '@/lib/utils';
 import {
   XAxis,
   YAxis,
@@ -70,8 +71,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
     });
   };
 
-  const formatCurrency = (val: number) =>
-    `Q${Number(val).toLocaleString('es-GT', { minimumFractionDigits: 2 })}`;
+
 
   const formatDate = (date: Date | string) =>
     new Date(date).toLocaleDateString('es-GT', {

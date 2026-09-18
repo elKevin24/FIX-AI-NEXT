@@ -77,8 +77,8 @@ describe('template-utils', () => {
 
   describe('formatCurrency', () => {
     it('formats numeric amounts as Guatemalan Quetzales', () => {
-      expect(formatCurrency(450)).toBe('Q 450.00');
-      expect(formatCurrency(12.3)).toBe('Q 12.30');
+      expect(formatCurrency(450)).toBe('Q450.00');
+      expect(formatCurrency(12.3)).toBe('Q12.30');
     });
   });
 

@@ -1,4 +1,5 @@
 import { addHours } from 'date-fns';
+export { formatCurrency } from './utils';
 
 // ============================================================================
 // TYPES
@@ -96,14 +97,6 @@ export function calculateTemplateCost(
   };
 }
 
-/**
- * Format currency in Guatemalan Quetzales
- * @param amount - Amount to format
- * @returns Formatted currency string (e.g., "Q 450.00")
- */
-export function formatCurrency(amount: number): string {
-  return `Q ${amount.toFixed(2)}`;
-}
 
 // ============================================================================
 // CATEGORY UTILITIES

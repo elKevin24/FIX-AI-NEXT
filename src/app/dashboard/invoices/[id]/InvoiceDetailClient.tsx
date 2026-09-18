@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PaymentMethod } from '@prisma/client';
 import { registerPayment } from '@/lib/invoice-actions';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import styles from './invoice-detail.module.css';
 
@@ -23,9 +24,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
   const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [reference, setReference] = useState('');
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(amount);
-  };
+
 
   const totalPaid = invoice.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
   const remaining = Number(invoice.total) - totalPaid;

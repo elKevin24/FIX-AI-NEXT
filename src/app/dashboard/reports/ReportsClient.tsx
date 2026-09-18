@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { getReportData } from '@/lib/report-actions';
+import { formatCurrency } from '@/lib/utils';
 import PageHeader from '@/components/PageHeader';
 import styles from './reports.module.css';
 
@@ -44,7 +45,6 @@ export default function ReportsClient({ initialData }: Props) {
     value: s.count
   }));
 
-  const formatCurrency = (val: number) => `Q${Number(val).toLocaleString('es-GT', { minimumFractionDigits: 2 })}`;
 
   return (
     <div className={styles['reportsPage']}>

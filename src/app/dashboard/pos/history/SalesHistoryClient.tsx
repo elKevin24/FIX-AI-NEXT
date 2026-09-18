@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { POSSaleStatus, PaymentMethod } from '@prisma/client';
 import { voidPOSSale, getPOSSales } from '@/lib/pos-actions';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
@@ -74,8 +75,6 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    // Format currency
-    const formatCurrency = (amount: number) => `Q${amount.toFixed(2)}`;
 
     // Format date
     const formatDate = (date: Date) => {

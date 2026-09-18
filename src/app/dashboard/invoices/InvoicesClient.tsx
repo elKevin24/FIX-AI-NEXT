@@ -8,6 +8,7 @@ import { Badge, Button } from '@/components/ui';
 import ExportButton from '@/components/ui/ExportButton';
 import PageHeader from '@/components/PageHeader';
 import styles from './invoices.module.css';
+import { formatCurrency } from '@/lib/utils';
 
 interface Invoice {
   id: string;
@@ -49,9 +50,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
     count: invoices.length
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(amount);
-  };
+
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
