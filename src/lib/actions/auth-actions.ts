@@ -31,16 +31,32 @@ export async function authenticate(
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
 import { ResetPasswordEmail } from '@/emails/ResetPasswordEmail';
-import { hash } from 'bcryptjs';
+import { hash, compare } from 'bcryptjs';
 import crypto from 'crypto';
 import { isAdmin } from '@/lib/auth-utils';
 import { validatePassword } from '@/lib/password-utils';
+import { checkActionRateLimit } from '@/lib/rate-limit';
+import { headers } from 'next/headers';
 
+async function getClientIp(): Promise<string> {
+  try {
+    const headerList = await headers();
+    return headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || headerList.get('x-real-ip') || '127.0.0.1';
+  } catch {
+    return '127.0.0.1';
+  }
+}
 
 export async function requestPasswordReset(formData: FormData) {
   try {
-    const email = formData.get('email')?.toString();
+    const email = formData.get('email')?.toString()?.trim()?.toLowerCase();
     if (!email) return { error: 'El email es requerido' };
+
+    const ip = await getClientIp();
+    const rateLimit = await checkActionRateLimit(`${ip}:${email}`, 'forgot-password', 3, 900);
+    if (!rateLimit.success) {
+      return { error: `Demasiados intentos. Por favor espera ${rateLimit.retryAfter || 900} segundos antes de intentar nuevamente.` };
+    }
 
     // Siempre retornar éxito para prevenir Timing Attacks (enumeración de usuarios)
     // Procesamos la lógica en segundo plano (Fire-and-Forget)
@@ -88,12 +104,19 @@ export async function requestPasswordReset(formData: FormData) {
 export async function resetPassword(formData: FormData) {
   try {
     const rawToken = formData.get('token')?.toString();
-    const email = formData.get('email')?.toString(); // Necesitamos el correo del query params
+    const email = formData.get('email')?.toString()?.trim()?.toLowerCase();
     const password = formData.get('password')?.toString();
     
     if (!rawToken || !email || !password) {
       return { error: 'Datos inválidos o el enlace está corrupto.' };
     }
+
+    const ip = await getClientIp();
+    const rateLimit = await checkActionRateLimit(`${ip}:${email}`, 'reset-password', 5, 900);
+    if (!rateLimit.success) {
+      return { error: `Demasiados intentos fallidos. Por favor espera ${rateLimit.retryAfter || 900} segundos.` };
+    }
+
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       return { error: passwordValidation.errors[0] || 'La contraseña no cumple los requisitos.' };
@@ -112,7 +135,6 @@ export async function resetPassword(formData: FormData) {
     }
 
     // Comparar hashes usando bcrypt
-    const { compare } = require('bcryptjs');
     let validTokenId = null;
     
     for (const rt of resetTokens) {

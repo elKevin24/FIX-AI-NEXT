@@ -7,6 +7,10 @@ import { Prisma } from '@prisma/client';
 export function serializeDecimal<T>(data: T): any {
   if (data === null || data === undefined) return data;
 
+  if (data instanceof Date) {
+    return data;
+  }
+
   if ((data as any) instanceof Prisma.Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
     return (data as unknown as Prisma.Decimal).toNumber();
   }

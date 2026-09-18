@@ -22,6 +22,7 @@ import {
   UpdateUserSchema,
   ResetPasswordSchema,
 } from '@/lib/schemas';
+import { checkActionRateLimit } from '@/lib/rate-limit';
 import type { ActionResponse, ActionState } from '@/lib/types';
 import {
   CreateManagedUserUseCase,
@@ -343,6 +344,14 @@ export async function changePassword(
     }
 
     const { id: userId, tenantId } = session.user;
+
+    const rateLimit = await checkActionRateLimit(userId, 'change-password', 5, 900);
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        message: `Demasiados intentos de cambio de contraseña. Por favor espera ${rateLimit.retryAfter || 900} segundos.`,
+      };
+    }
 
     const rawData = {
       currentPassword: formData.get('currentPassword'),

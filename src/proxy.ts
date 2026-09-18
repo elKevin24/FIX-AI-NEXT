@@ -142,7 +142,11 @@ export async function proxy(request: NextRequest) {
 
   // 4. Protección de Rutas (Dashboard y API interna)
   const isApi = cleanPathname.startsWith('/api');
-  const isPublicApi = cleanPathname.startsWith('/api/auth') || cleanPathname.startsWith('/api/cron');
+  const isPublicApi =
+    cleanPathname.startsWith('/api/auth') ||
+    cleanPathname.startsWith('/api/cron') ||
+    cleanPathname.startsWith('/api/health') ||
+    cleanPathname.startsWith('/api/ready');
   const isDashboard = cleanPathname.startsWith(DASHBOARD_PATH);
 
   // Si la ruta requiere protección
@@ -162,8 +166,7 @@ export async function proxy(request: NextRequest) {
 
     // Si requiere cambio de contraseña
     if (user.passwordMustChange) {
-      const isChangingPassword = cleanPathname === CHANGE_PASSWORD_PATH || 
-                                 cleanPathname === '/api/users/change-password';
+      const isChangingPassword = cleanPathname === CHANGE_PASSWORD_PATH;
       
       if (!isChangingPassword) {
         if (isApi) {
