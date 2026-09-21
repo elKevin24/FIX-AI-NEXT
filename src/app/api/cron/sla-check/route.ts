@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
+import { SLABreachEmail } from '@/emails/SLABreach';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -79,10 +80,22 @@ export async function GET(request: Request) {
 
                     // Email notification
                     if (setting.slaEmailEnabled && ticket.assignedTo.email) {
+                        const baseUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app';
+                        const remainingMs = Math.max(0, due.getTime() - now.getTime());
+                        const remainingHours = Math.round(remainingMs / (1000 * 60 * 60));
+                        const timeRemaining = remainingHours > 0 ? `~${remainingHours} horas` : 'Plazo vencido';
+
                         await sendEmail({
                             to: ticket.assignedTo.email,
                             subject: `[FIX-AI] ${title}`,
                             text: message,
+                            react: SLABreachEmail({
+                                ticketNumber: ticket.ticketNumber || undefined,
+                                title: ticket.title,
+                                status: isCritical ? 'CRITICAL' : 'WARNING',
+                                timeRemaining,
+                                ticketLink: `${baseUrl}/dashboard/tickets/${ticket.id}`,
+                            }),
                         });
                     }
 
