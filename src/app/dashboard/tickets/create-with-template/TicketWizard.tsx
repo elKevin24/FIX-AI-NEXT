@@ -410,8 +410,7 @@ export default function TicketWizard() {
                         }))}
                       onAddPart={(partId, quantity) => {
                         setAddedOptionalPartIds(prev => new Set(prev).add(partId));
-                        // Note: In a real implementation, you'd store this to send with the form
-                        console.log(`Added optional part: ${partId}, qty: ${quantity}`);
+                        // Note: En una implementación real, esto se envía con el formulario
                       }}
                       addedPartIds={addedOptionalPartIds}
                     />
