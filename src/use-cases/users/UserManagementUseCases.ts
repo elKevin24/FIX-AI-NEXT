@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import type { UserRole } from '@prisma/client';
+import type { UserRole, Prisma } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import {
   validateTenantAccess,
@@ -562,8 +562,27 @@ export class GetUsersUseCase {
       search: options?.search,
     });
 
-    const sortField = options?.sortBy || 'createdAt';
-    const sortDirection = options?.sortOrder || 'desc';
+    const sortDirection: 'asc' | 'desc' = options?.sortOrder === 'asc' ? 'asc' : 'desc';
+
+    let orderBy: Prisma.UserOrderByWithRelationInput = { createdAt: sortDirection };
+    switch (options?.sortBy) {
+      case 'name':
+        orderBy = { name: sortDirection };
+        break;
+      case 'email':
+        orderBy = { email: sortDirection };
+        break;
+      case 'role':
+        orderBy = { role: sortDirection };
+        break;
+      case 'lastLoginAt':
+        orderBy = { lastLoginAt: sortDirection };
+        break;
+      case 'createdAt':
+      default:
+        orderBy = { createdAt: sortDirection };
+        break;
+    }
 
     return await db.user.findMany({
       where,
@@ -578,9 +597,7 @@ export class GetUsersUseCase {
         lastLoginAt: true,
         createdAt: true,
       },
-      orderBy: {
-        [sortField]: sortDirection,
-      },
+      orderBy,
     });
   }
 }

@@ -40,6 +40,11 @@ jobs:
               - 'prisma/seed.ts'
               - 'src/generated/**'
               - 'scripts/**'
+              - 'playwright-report/**'
+              - 'test-results/**'
+              - '.lighthouseci/**'
+              - 'coverage/**'
+              - 'tests/**'
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

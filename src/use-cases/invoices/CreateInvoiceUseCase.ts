@@ -1,6 +1,5 @@
 import { Invoice, InvoiceStatus, Prisma } from '@prisma/client';
 import { IInvoiceRepository } from '@/lib/repositories/interfaces/invoice.repository.interface';
-import { PrismaInvoiceRepository } from '@/lib/repositories/implementations/prisma-invoice.repository';
 import { createActionRepositories } from '@/lib/action-factory';
 
 /**
