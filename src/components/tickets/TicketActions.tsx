@@ -204,7 +204,7 @@ const TicketActions: React.FC<TicketActionsProps> = ({
         } catch (error) {
             // El usuario canceló el share dialog, no es un error
             if ((error as Error).name === 'AbortError') {
-                console.log('Usuario canceló compartir');
+                // Silenciar: cancelación esperada
             } else {
                 onError?.(error instanceof Error ? error : new Error('Error desconocido'));
                 console.error('Error al compartir:', error);

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { getTemplateAnalytics, TemplateAnalytics } from '@/lib/service-template-actions';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, formatMonthYear } from '@/lib/utils';
 import {
   XAxis,
   YAxis,
@@ -76,7 +76,7 @@ export default function TemplateAnalyticsClient({ initialData }: Props) {
   const formatMonthLabel = (month: string) => {
     const [year = '2026', m = '1'] = (month || '').split('-');
     const date = new Date(parseInt(year), parseInt(m) - 1);
-    return date.toLocaleDateString('es-GT', { month: 'short', year: '2-digit' });
+    return formatMonthYear(date);
   };
 
   // Prepare chart data

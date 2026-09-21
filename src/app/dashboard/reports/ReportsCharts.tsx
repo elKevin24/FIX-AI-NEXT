@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDayMonth, formatLongDate } from '@/lib/utils';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'];
 
@@ -17,12 +17,12 @@ export function FinanceHistoryChart({ history }: { history: any[] }) {
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis
             dataKey="date"
-            tickFormatter={(date) => new Date(date).toLocaleDateString('es-GT', { month: 'short', day: 'numeric' })}
+            tickFormatter={(date) => formatDayMonth(date)}
         />
         <YAxis />
         <Tooltip
             formatter={(value: any) => formatCurrency(Number(value))}
-            labelFormatter={(date: any) => date ? new Date(date).toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            labelFormatter={(date: any) => date ? formatLongDate(date) : ''}
         />
         <Legend />
         <Line type="monotone" dataKey="invoice" name="Facturación" stroke="var(--color-primary-500)" strokeWidth={2} dot={false} />

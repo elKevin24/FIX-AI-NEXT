@@ -66,6 +66,35 @@ export function formatDateTime(date: Date | string | null | undefined, locale: s
   });
 }
 
+/**
+ * Formatea fecha en formato mes/año corto (ej. sep 26).
+ */
+export function formatMonthYear(date: Date | string | null | undefined, locale: string = 'es-GT'): string {
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
+}
+
+/**
+ * Formatea fecha en formato corto día/mes (ej. 16 sep).
+ */
+export function formatDayMonth(date: Date | string | null | undefined, locale: string = 'es-GT'): string {
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Formatea fecha completa con día de la semana (ej. jueves, 16 de septiembre de 2026).
+ */
+export function formatLongDate(date: Date | string | null | undefined, locale: string = 'es-GT'): string {
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   CASH: 'Efectivo',
   CARD: 'Tarjeta',
