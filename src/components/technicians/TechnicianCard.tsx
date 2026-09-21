@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatDate } from '@/lib/utils';
 import styles from './TechnicianCard.module.css';
 
 interface Technician {
@@ -75,15 +76,6 @@ export function TechnicianCard({ technician, onRefresh }: TechnicianCardProps) {
 
   const formatStatus = (status: string) => {
     return status.replace(/_/g, ' ');
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
   };
 
   return (

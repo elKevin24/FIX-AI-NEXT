@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { POSSaleStatus, PaymentMethod } from '@prisma/client';
 import { voidPOSSale, getPOSSales } from '@/lib/pos-actions';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDateTime as formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
@@ -74,18 +74,6 @@ export default function SalesHistoryClient({ initialSales, stats }: SalesHistory
     const [isVoiding, setIsVoiding] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-
-
-    // Format date
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString('es-GT', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
 
     // Get status badge
     const getStatusBadge = (status: POSSaleStatus) => {
