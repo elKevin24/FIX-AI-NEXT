@@ -14,6 +14,7 @@ export enum TicketStatus {
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
   REJECTED = 'REJECTED',
+  DELETED = 'DELETED',
 }
 
 export type TicketAction =
@@ -25,6 +26,7 @@ export type TicketAction =
   | 'resolve'
   | 'deliver'
   | 'cancel'
+  | 'delete'
   | 'reopen'
   | 'approve'
   | 'reject';
@@ -37,36 +39,45 @@ const VALID_TRANSITIONS: Record<TicketStatus, Partial<Record<TicketAction, Ticke
     take: TicketStatus.IN_PROGRESS,
     assign: TicketStatus.IN_PROGRESS,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.WAITING_APPROVAL]: {
     approve: TicketStatus.IN_PROGRESS,
     reject: TicketStatus.REJECTED,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.IN_PROGRESS]: {
     wait_for_parts: TicketStatus.WAITING_FOR_PARTS,
     resolve: TicketStatus.RESOLVED,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.WAITING_FOR_PARTS]: {
     resume: TicketStatus.IN_PROGRESS,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.RESOLVED]: {
     deliver: TicketStatus.CLOSED,
     reopen: TicketStatus.IN_PROGRESS,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.CLOSED]: {
     reopen: TicketStatus.IN_PROGRESS,
     cancel: TicketStatus.CANCELLED,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.CANCELLED]: {
     reopen: TicketStatus.OPEN,
+    delete: TicketStatus.DELETED,
   },
   [TicketStatus.REJECTED]: {
     reopen: TicketStatus.OPEN,
+    delete: TicketStatus.DELETED,
   },
+  [TicketStatus.DELETED]: {},
 };
 
 /**
@@ -145,6 +156,14 @@ export function describeTransition(
     'CLOSED->reopen': 'Cliente reporta nuevo problema, se reabre',
     'CANCELLED->reopen': 'Ticket cancelado se reactiva',
     'REJECTED->reopen': 'Ticket rechazado se reactiva',
+    'OPEN->delete': 'Ticket eliminado',
+    'WAITING_APPROVAL->delete': 'Ticket eliminado mientras se esperaba aprobación',
+    'IN_PROGRESS->delete': 'Ticket eliminado durante el trabajo',
+    'WAITING_FOR_PARTS->delete': 'Ticket eliminado mientras esperaba repuestos',
+    'RESOLVED->delete': 'Ticket eliminado después de resolver',
+    'CLOSED->delete': 'Ticket eliminado después de cerrar',
+    'CANCELLED->delete': 'Ticket cancelado eliminado',
+    'REJECTED->delete': 'Ticket rechazado eliminado',
   };
 
   const key = `${currentStatus}->${action}`;

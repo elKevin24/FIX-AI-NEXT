@@ -58,6 +58,8 @@ export default function TicketWorkflowActions({ ticket, availableUsers, isAdmin,
             case 'RESOLVED': return 'Resuelto';
             case 'CLOSED': return 'Cerrado';
             case 'CANCELLED': return 'Cancelado';
+            case 'REJECTED': return 'Rechazado';
+            case 'DELETED': return 'Eliminado';
             default: return status;
         }
     };

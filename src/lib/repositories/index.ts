@@ -5,6 +5,8 @@ export type { IUserRepository, UserFilters, UserCreateInput, UserUpdateInput } f
 export type { IInvoiceRepository } from './interfaces/invoice.repository.interface';
 export type { ICashRegisterRepository } from './interfaces/cash-register.repository.interface';
 export type { IAuditLogRepository } from './interfaces/audit-log.repository.interface';
+export type { IServiceTemplateRepository, ServiceTemplateFilters, ServiceTemplateCreateInput, ServiceTemplateUpdateInput } from './interfaces/service-template.repository.interface';
+export type { ITenantSettingsRepository, TenantSettingsUpdateInput } from './interfaces/tenant-settings.repository.interface';
 
 export { PrismaCustomerRepository } from './implementations/prisma-customer.repository';
 export { PrismaTicketRepository, PrismaTicketRepository as TicketRepository } from './implementations/prisma-ticket.repository';
@@ -13,6 +15,8 @@ export { PrismaUserRepository } from './implementations/prisma-user.repository';
 export { PrismaInvoiceRepository } from './implementations/prisma-invoice.repository';
 export { PrismaCashRegisterRepository } from './implementations/prisma-cash-register.repository';
 export { PrismaAuditLogRepository } from './implementations/prisma-audit-log.repository';
+export { PrismaServiceTemplateRepository } from './implementations/prisma-service-template.repository';
+export { PrismaTenantSettingsRepository } from './implementations/prisma-tenant-settings.repository';
 
 export { TicketStatus, TicketPriority } from './interfaces/ticket.repository.interface';
 export { UserRole } from './interfaces/user.repository.interface';

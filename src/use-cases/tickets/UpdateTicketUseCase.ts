@@ -50,12 +50,14 @@ export class UpdateTicketUseCase {
         if (priority !== undefined) updateData.priority = priority;
         if (assignedToId !== undefined) updateData.assignedToId = assignedToId;
         
+        const isTerminal = status === 'CANCELLED' || status === 'DELETED';
+
         if (deviceType !== undefined) updateData.deviceType = deviceType;
         if (deviceModel !== undefined) updateData.deviceModel = deviceModel;
         if (serialNumber !== undefined) updateData.serialNumber = serialNumber;
         if (accessories !== undefined) updateData.accessories = accessories;
         if (checkInNotes !== undefined) updateData.checkInNotes = checkInNotes;
-        if (status === 'CANCELLED' && cancellationReason) updateData.cancellationReason = cancellationReason;
+        if (isTerminal && cancellationReason) updateData.cancellationReason = cancellationReason;
 
         updateData.updatedById = userId;
 
@@ -63,7 +65,7 @@ export class UpdateTicketUseCase {
              // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
              // We must apply the tenant constraint manually.
 
-             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
+             if (isTerminal && existingTicket.status !== 'CANCELLED' && existingTicket.status !== 'DELETED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
                          await tx.partUsage.delete({

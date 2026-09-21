@@ -17,6 +17,10 @@ const STATUS_COLORS: Record<string, string> = {
     'WAITING_FOR_PARTS': '#8b5cf6', // Purple
     'RESOLVED': '#10b981',       // Green
     'CLOSED': '#6b7280',         // Gray
+    'WAITING_APPROVAL': '#f97316',
+    'CANCELLED': '#ef4444',      // Red
+    'REJECTED': '#dc2626',
+    'DELETED': '#374151',        // Dark gray (terminal)
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -25,6 +29,10 @@ const STATUS_LABELS: Record<string, string> = {
     'WAITING_FOR_PARTS': 'Esperando Repuestos',
     'RESOLVED': 'Resuelto',
     'CLOSED': 'Cerrado',
+    'WAITING_APPROVAL': 'Esperando Aprobación',
+    'CANCELLED': 'Cancelado',
+    'REJECTED': 'Rechazado',
+    'DELETED': 'Eliminado',
 };
 
 export default function TicketsByStatusChart({ data }: Props) {

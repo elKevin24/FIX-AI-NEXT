@@ -48,9 +48,16 @@ export class UpdateTicketStatusUseCase {
             }
         }
 
-        if (status === 'CANCELLED') {
+        const isTerminal = status === 'CANCELLED' || status === 'DELETED';
+
+        if (isTerminal) {
             if (!note || note.trim().length < 10) {
-                throw new ValidationError('Debes ingresar un motivo de cancelación de al menos 10 caracteres', 'note');
+                throw new ValidationError(
+                    status === 'DELETED'
+                        ? 'Debes ingresar un motivo de eliminación de al menos 10 caracteres'
+                        : 'Debes ingresar un motivo de cancelación de al menos 10 caracteres',
+                    'note'
+                );
             }
         }
 
@@ -58,7 +65,7 @@ export class UpdateTicketStatusUseCase {
              // We cannot use getTenantPrisma with tx because tx doesn't support $extends.
              // We must apply the tenant constraint manually.
              
-             if (status === 'CANCELLED' && existingTicket.status !== 'CANCELLED') {
+             if (isTerminal && existingTicket.status !== 'CANCELLED' && existingTicket.status !== 'DELETED') {
                  if (existingTicket.partsUsed.length > 0) {
                      for (const usage of existingTicket.partsUsed) {
                          await tx.partUsage.delete({
@@ -69,7 +76,7 @@ export class UpdateTicketStatusUseCase {
              }
 
              const updateData: any = { status, updatedById: userId };
-             if (status === 'CANCELLED' && note) {
+             if (isTerminal && note) {
                  updateData.cancellationReason = note;
              }
 
@@ -80,7 +87,7 @@ export class UpdateTicketStatusUseCase {
 
              await tx.auditLog.create({
                 data: {
-                    action: 'TICKET_STATUS_CHANGED',
+                    action: status === 'DELETED' ? 'TICKET_DELETED' : 'TICKET_STATUS_CHANGED',
                     module: 'TICKETS',
                     details: JSON.stringify({ id: existingTicket.id, oldStatus: existingTicket.status, newStatus: status }),
                     userId,

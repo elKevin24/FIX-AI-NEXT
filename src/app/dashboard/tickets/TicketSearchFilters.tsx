@@ -9,6 +9,7 @@ const statusOptions = [
     { value: '', label: 'Todos los estados' }, { value: 'OPEN', label: 'Abierto' },
     { value: 'IN_PROGRESS', label: 'En progreso' }, { value: 'WAITING_FOR_PARTS', label: 'Esperando repuestos' },
     { value: 'RESOLVED', label: 'Resuelto' }, { value: 'CLOSED', label: 'Cerrado' },
+    { value: 'DELETED', label: 'Eliminado' },
 ];
 const priorityOptions = [
     { value: '', label: 'Todas las prioridades' }, { value: 'LOW', label: 'Baja' },

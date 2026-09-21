@@ -30,6 +30,7 @@ enum TicketStatus {
   CLOSED = 'CLOSED',
   CANCELLED = 'CANCELLED',
   REJECTED = 'REJECTED',
+  DELETED = 'DELETED',
 }
 
 export const metadata = {
@@ -106,7 +107,7 @@ export default async function DashboardPage() {
             where: {
                 // tenantId auto-injected by findMany wrapper
                 priority: { in: [TicketPriority.HIGH, TicketPriority.URGENT] },
-                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED] },
+                status: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED, TicketStatus.DELETED] },
             },
             include: {
                 customer: {

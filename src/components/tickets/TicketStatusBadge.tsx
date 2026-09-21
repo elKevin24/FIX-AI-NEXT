@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/Badge';
 
-export type TicketStatus = 'OPEN' | 'WAITING_APPROVAL' | 'IN_PROGRESS' | 'WAITING_FOR_PARTS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED' | 'REJECTED';
+export type TicketStatus = 'OPEN' | 'WAITING_APPROVAL' | 'IN_PROGRESS' | 'WAITING_FOR_PARTS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED' | 'REJECTED' | 'DELETED';
 
 interface TicketStatusBadgeProps {
   status: string;
@@ -19,11 +19,13 @@ export function TicketStatusBadge({ status, className }: TicketStatusBadgeProps)
       case 'CLOSED': return 'gray'; // Gray
       case 'CANCELLED': return 'error'; // Red
       case 'REJECTED': return 'error'; // Red
+      case 'DELETED': return 'error'; // Red - terminal
       default: return 'gray';
     }
   };
 
   const getLabel = (s: string) => {
+    if (s === 'DELETED') return 'Eliminado';
     return s.replace(/_/g, ' ');
   };
 
