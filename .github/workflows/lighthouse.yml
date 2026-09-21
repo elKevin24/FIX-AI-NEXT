@@ -13,6 +13,13 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+      NEXTAUTH_SECRET: ci-dummy-secret-key-123456789012345678901234567890
+      AUTH_SECRET: ci-dummy-secret-key-123456789012345678901234567890
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SKIP_ENV_VALIDATION: "true"
 
     steps:
       - name: Checkout code
@@ -21,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies

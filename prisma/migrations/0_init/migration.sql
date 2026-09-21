@@ -1172,7 +1172,6 @@ CREATE INDEX IF NOT EXISTS "idx_tickets_serial_trgm" ON "tickets" USING GIN ("se
 
 CREATE INDEX IF NOT EXISTS "idx_parts_name_trgm" ON "parts" USING GIN ("name" gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS "idx_parts_sku_trgm" ON "parts" USING GIN ("sku" gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS "idx_parts_desc_trgm" ON "parts" USING GIN ("description" gin_trgm_ops);
 
 -- ==============================================================================
 -- 2. Helper Functions
