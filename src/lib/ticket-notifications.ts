@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from './notifications';
 import { sendEmail } from './email-service';
 import { TicketCreatedEmail } from '@/emails/TicketCreated';
@@ -196,9 +196,9 @@ export async function notifyTicketCreated(ticket: TicketNotificationData) {
  */
 export async function notifyLowStock(partName: string, currentQuantity: number, tenantId: string) {
     // Buscar administradores del tenant
-    const admins = await prisma.user.findMany({
+    const db = getTenantPrisma(tenantId);
+    const admins = await db.user.findMany({
         where: {
-            tenantId,
             role: 'ADMIN'
         },
         include: {

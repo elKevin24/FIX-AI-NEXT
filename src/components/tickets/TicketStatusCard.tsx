@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { formatDateTime as formatDate } from '@/lib/utils';
 
 interface TicketWithTenant {
     id: string;
@@ -25,12 +26,6 @@ interface TicketWithTenant {
         email: string;
     } | null;
 }
-
-const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-    });
-};
 
 export default function TicketStatusCard({ ticket }: { ticket: TicketWithTenant }) {
     

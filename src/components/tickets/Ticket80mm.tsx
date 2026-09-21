@@ -8,7 +8,7 @@
 'use client';
 
 import React, { forwardRef, useEffect, useState } from 'react';
-import { formatCurrency as formatQCurrency } from '@/lib/utils';
+import { formatCurrency, formatDateTime as formatDate } from '@/lib/utils';
 import styles from './Ticket80mm.module.css';
 import {
     Ticket80mmData,
@@ -24,26 +24,6 @@ interface Ticket80mmProps {
     showQR?: boolean;
     baseUrl?: string; // URL base para el QR code (ej: 'https://tuapp.com')
 }
-
-/**
- * Formatea fechas en formato legible español
- */
-const formatDate = (date: Date | string): string => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('es-GT', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
-
-/**
- * Formatea montos monetarios
- */
-const formatCurrency = (amount: number | string): string =>
-    formatQCurrency(typeof amount === 'string' ? parseFloat(amount) : amount);
 
 /**
  * Obtiene la clase CSS del badge de estado

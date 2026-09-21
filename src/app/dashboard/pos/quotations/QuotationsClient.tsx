@@ -15,7 +15,7 @@ import {
     getQuotationById,
 } from '@/lib/quotation-actions';
 import { QuotationStatus, PaymentMethod } from '@prisma/client';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import styles from './quotations.module.css';
 import PageHeader from '@/components/PageHeader';
 import { Part, CartItem, Payment, QuotationDetail, QuotationsProps } from './types';
@@ -112,13 +112,6 @@ export function QuotationsClient({
     }, [cartItems, globalDiscount, taxRate]);
 
     // Helpers
-    const formatDate = (date: Date) =>
-        new Date(date).toLocaleDateString('es-GT', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-
     const announce = (msg: string) => {
         setLiveMessage('');
         requestAnimationFrame(() => setLiveMessage(msg));
