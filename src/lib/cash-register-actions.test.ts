@@ -13,6 +13,7 @@ describe('Cash Register Actions', () => {
         user: {
             id: 'user-1',
             tenantId: 'tenant-1',
+            role: 'ADMIN',
         },
     };
 

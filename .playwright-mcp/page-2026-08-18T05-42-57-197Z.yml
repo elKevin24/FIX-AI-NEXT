@@ -1,0 +1,381 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - complementary [ref=f2e3]:
+      - heading "FIX-AI" [level=2] [ref=f2e6]
+      - navigation [ref=f2e7]:
+        - generic [ref=f2e8]:
+          - generic [ref=f2e9]: General
+          - link "Inicio" [ref=f2e10] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Tickets" [ref=f2e13] [cursor=pointer]:
+            - /url: /dashboard/tickets
+          - link "Pool de Tickets" [ref=f2e16] [cursor=pointer]:
+            - /url: /dashboard/tickets/pool
+        - generic [ref=f2e19]:
+          - generic [ref=f2e20]: Operaciones
+          - link "Repuestos" [ref=f2e21] [cursor=pointer]:
+            - /url: /dashboard/parts
+          - link "Carga de Trabajo" [ref=f2e24] [cursor=pointer]:
+            - /url: /dashboard/technicians/workload
+          - link "Plantillas" [ref=f2e27] [cursor=pointer]:
+            - /url: /dashboard/settings/service-templates
+          - link "Clientes" [ref=f2e31] [cursor=pointer]:
+            - /url: /dashboard/customers
+        - generic [ref=f2e34]:
+          - generic [ref=f2e35]: Ventas & POS
+          - link "Punto de Venta" [ref=f2e36] [cursor=pointer]:
+            - /url: /dashboard/pos
+          - link "Caja" [ref=f2e39] [cursor=pointer]:
+            - /url: /dashboard/cash-register
+          - link "Facturación" [ref=f2e42] [cursor=pointer]:
+            - /url: /dashboard/invoices
+          - link "Cotizaciones" [ref=f2e45] [cursor=pointer]:
+            - /url: /dashboard/pos/quotations
+          - link "Devoluciones" [ref=f2e48] [cursor=pointer]:
+            - /url: /dashboard/pos/returns
+        - generic [ref=f2e51]:
+          - generic [ref=f2e52]: Administración
+          - link "Reportes" [ref=f2e53] [cursor=pointer]:
+            - /url: /dashboard/reports
+          - link "Usuarios" [ref=f2e57] [cursor=pointer]:
+            - /url: /dashboard/users
+          - link "Configuración" [ref=f2e60] [cursor=pointer]:
+            - /url: /dashboard/settings
+      - generic [ref=f2e64]:
+        - button "Cambiar tema" [ref=f2e67] [cursor=pointer]:
+          - generic [ref=f2e68]: 🌓
+          - generic [ref=f2e69]: Auto (Sistema)
+        - button "Cerrar Sesión" [ref=f2e74] [cursor=pointer]
+    - main [ref=f2e78]:
+      - button "Notificaciones" [ref=f2e81] [cursor=pointer]
+      - generic [ref=f2e85]:
+        - generic:
+          - generic [ref=f2e86]:
+            - heading "Tickets" [level=1] [ref=f2e87]
+            - generic [ref=f2e88]: Gestiona las órdenes de servicio y su estado
+          - generic [ref=f2e89]:
+            - button "📥 Exportar" [ref=f2e91] [cursor=pointer]
+            - link "+ Nuevo Ticket" [ref=f2e92] [cursor=pointer]:
+              - /url: /dashboard/tickets/create
+        - generic [ref=f2e93]: Cargando filtros...
+        - table [ref=f2e96]:
+          - rowgroup [ref=f2e97]:
+            - row [ref=f2e98]:
+              - columnheader "ID" [ref=f2e99] [cursor=pointer]
+              - columnheader "Problema" [ref=f2e101] [cursor=pointer]
+              - columnheader "Cliente" [ref=f2e103] [cursor=pointer]
+              - columnheader "Estado" [ref=f2e105] [cursor=pointer]
+              - columnheader "Prioridad" [ref=f2e107] [cursor=pointer]
+              - columnheader "Técnico" [ref=f2e109] [cursor=pointer]
+              - columnheader "Acciones" [ref=f2e111]
+          - rowgroup [ref=f2e113]:
+            - row [ref=f2e114]:
+              - cell "TK-000018" [ref=f2e115]
+              - cell "Mantenimiento 17/8/2026" [ref=f2e117]:
+                - generic [ref=f2e118]:
+                  - generic "Mantenimiento" [ref=f2e119]
+                  - generic [ref=f2e120]: 17/8/2026
+              - cell [ref=f2e121]:
+                - link "Kevin Cordon" [ref=f2e122] [cursor=pointer]:
+                  - /url: /dashboard/customers/b80eaaed-b103-42d4-94d1-c11fa8a76ff6
+              - cell "OPEN" [ref=f2e123]
+              - cell "MEDIUM" [ref=f2e125]
+              - cell "Sin asignar" [ref=f2e127]
+              - cell [ref=f2e128]:
+                - link "Ver Detalles" [ref=f2e129] [cursor=pointer]:
+                  - /url: /dashboard/tickets/49780629-d1ec-4696-8020-41ed538d8484
+            - row [ref=f2e130]:
+              - cell "TK-000017" [ref=f2e131]
+              - cell "E2E Device Broken Screen 1787014759701 17/8/2026" [ref=f2e133]:
+                - generic [ref=f2e134]:
+                  - generic "E2E Device Broken Screen 1787014759701" [ref=f2e135]
+                  - generic [ref=f2e136]: 17/8/2026
+              - cell [ref=f2e137]:
+                - link "E2E Customer 1787014759701" [ref=f2e138] [cursor=pointer]:
+                  - /url: /dashboard/customers/333ca4d0-4abf-4e98-84ca-8773d9ad4486
+              - cell "IN PROGRESS" [ref=f2e139]
+              - cell "MEDIUM" [ref=f2e141]
+              - cell "Sin asignar" [ref=f2e143]
+              - cell [ref=f2e144]:
+                - link "Ver Detalles" [ref=f2e145] [cursor=pointer]:
+                  - /url: /dashboard/tickets/c89340ab-2196-4317-8c4d-c386afa67cc2
+            - row [ref=f2e146]:
+              - cell "TK-000016" [ref=f2e147]
+              - cell "Pantalla Rota 1787014421815 17/8/2026" [ref=f2e149]:
+                - generic [ref=f2e150]:
+                  - generic "Pantalla Rota 1787014421815" [ref=f2e151]
+                  - generic [ref=f2e152]: 17/8/2026
+              - cell [ref=f2e153]:
+                - link "E2E Lifecycle 1787014421815" [ref=f2e154] [cursor=pointer]:
+                  - /url: /dashboard/customers/2b683deb-05ce-4fac-a1a1-af12f2d80338
+              - cell "WAITING APPROVAL" [ref=f2e155]
+              - cell "MEDIUM" [ref=f2e157]
+              - cell "Sin asignar" [ref=f2e159]
+              - cell [ref=f2e160]:
+                - link "Ver Detalles" [ref=f2e161] [cursor=pointer]:
+                  - /url: /dashboard/tickets/699dff30-4846-4e38-b72f-3a4079dc5095
+            - row [ref=f2e162]:
+              - cell "TK-000015" [ref=f2e163]
+              - cell "Pantalla Rota 1787014206528 17/8/2026" [ref=f2e165]:
+                - generic [ref=f2e166]:
+                  - generic "Pantalla Rota 1787014206528" [ref=f2e167]
+                  - generic [ref=f2e168]: 17/8/2026
+              - cell [ref=f2e169]:
+                - link "E2E Lifecycle 1787014206528" [ref=f2e170] [cursor=pointer]:
+                  - /url: /dashboard/customers/654e0f13-1cb4-48bb-bdcc-aaa4cf03e264
+              - cell "RESOLVED" [ref=f2e171]
+              - cell "MEDIUM" [ref=f2e173]
+              - cell "Sin asignar" [ref=f2e175]
+              - cell [ref=f2e176]:
+                - link "Ver Detalles" [ref=f2e177] [cursor=pointer]:
+                  - /url: /dashboard/tickets/088fbf31-32fc-4917-a701-9b8ec9b75fe1
+            - row [ref=f2e178]:
+              - cell "TK-000014" [ref=f2e179]
+              - cell "E2E Device Broken Screen 1787014171526 17/8/2026" [ref=f2e181]:
+                - generic [ref=f2e182]:
+                  - generic "E2E Device Broken Screen 1787014171526" [ref=f2e183]
+                  - generic [ref=f2e184]: 17/8/2026
+              - cell [ref=f2e185]:
+                - link "E2E Customer 1787014171526" [ref=f2e186] [cursor=pointer]:
+                  - /url: /dashboard/customers/54103db6-4505-4098-b76b-11c6b785d321
+              - cell "IN PROGRESS" [ref=f2e187]
+              - cell "MEDIUM" [ref=f2e189]
+              - cell "Sin asignar" [ref=f2e191]
+              - cell [ref=f2e192]:
+                - link "Ver Detalles" [ref=f2e193] [cursor=pointer]:
+                  - /url: /dashboard/tickets/2e31370d-c91b-41fe-886d-3d1fa8e865fe
+            - row [ref=f2e194]:
+              - cell "TK-000013" [ref=f2e195]
+              - cell "Pantalla Rota 1787014045626 17/8/2026" [ref=f2e197]:
+                - generic [ref=f2e198]:
+                  - generic "Pantalla Rota 1787014045626" [ref=f2e199]
+                  - generic [ref=f2e200]: 17/8/2026
+              - cell [ref=f2e201]:
+                - link "E2E Lifecycle 1787014045626" [ref=f2e202] [cursor=pointer]:
+                  - /url: /dashboard/customers/bdee3f04-fb24-4945-a141-8cca7a114518
+              - cell "WAITING APPROVAL" [ref=f2e203]
+              - cell "MEDIUM" [ref=f2e205]
+              - cell "Sin asignar" [ref=f2e207]
+              - cell [ref=f2e208]:
+                - link "Ver Detalles" [ref=f2e209] [cursor=pointer]:
+                  - /url: /dashboard/tickets/2f615ba3-5dd0-4b6c-9ab0-be1c5624fe03
+            - row [ref=f2e210]:
+              - cell "TK-000012" [ref=f2e211]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e213]:
+                - generic [ref=f2e214]:
+                  - generic "Revisión General Simulación" [ref=f2e215]
+                  - generic [ref=f2e216]: 6/8/2026
+              - cell [ref=f2e217]:
+                - link "Juan Pérez" [ref=f2e218] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "CLOSED" [ref=f2e219]
+              - cell "MEDIUM" [ref=f2e221]
+              - cell "Sin asignar" [ref=f2e223]
+              - cell [ref=f2e224]:
+                - link "Ver Detalles" [ref=f2e225] [cursor=pointer]:
+                  - /url: /dashboard/tickets/f5bfbe55-9abe-4bf3-bd84-2712a6ca679c
+            - row [ref=f2e226]:
+              - cell "TK-000011" [ref=f2e227]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e229]:
+                - generic [ref=f2e230]:
+                  - generic "Revisión General Simulación" [ref=f2e231]
+                  - generic [ref=f2e232]: 6/8/2026
+              - cell [ref=f2e233]:
+                - link "Juan Pérez" [ref=f2e234] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "RESOLVED" [ref=f2e235]
+              - cell "MEDIUM" [ref=f2e237]
+              - cell "Sin asignar" [ref=f2e239]
+              - cell [ref=f2e240]:
+                - link "Ver Detalles" [ref=f2e241] [cursor=pointer]:
+                  - /url: /dashboard/tickets/1281dd6a-077b-439d-be4f-e14a5a8bc760
+            - row [ref=f2e242]:
+              - cell "TK-000010" [ref=f2e243]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e245]:
+                - generic [ref=f2e246]:
+                  - generic "Revisión General Simulación" [ref=f2e247]
+                  - generic [ref=f2e248]: 6/8/2026
+              - cell [ref=f2e249]:
+                - link "Juan Pérez" [ref=f2e250] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e251]
+              - cell "MEDIUM" [ref=f2e253]
+              - cell "Sin asignar" [ref=f2e255]
+              - cell [ref=f2e256]:
+                - link "Ver Detalles" [ref=f2e257] [cursor=pointer]:
+                  - /url: /dashboard/tickets/0febc48a-599c-4a34-ac03-1f2b5c72fc9e
+            - row [ref=f2e258]:
+              - cell "TK-000009" [ref=f2e259]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e261]:
+                - generic [ref=f2e262]:
+                  - generic "Revisión General Simulación" [ref=f2e263]
+                  - generic [ref=f2e264]: 6/8/2026
+              - cell [ref=f2e265]:
+                - link "Juan Pérez" [ref=f2e266] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e267]
+              - cell "MEDIUM" [ref=f2e269]
+              - cell "Sin asignar" [ref=f2e271]
+              - cell [ref=f2e272]:
+                - link "Ver Detalles" [ref=f2e273] [cursor=pointer]:
+                  - /url: /dashboard/tickets/a842d7f4-2bd3-40a7-8261-8cdf5efbf177
+            - row [ref=f2e274]:
+              - cell "TK-000008" [ref=f2e275]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e277]:
+                - generic [ref=f2e278]:
+                  - generic "Revisión General Simulación" [ref=f2e279]
+                  - generic [ref=f2e280]: 6/8/2026
+              - cell [ref=f2e281]:
+                - link "Juan Pérez" [ref=f2e282] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "RESOLVED" [ref=f2e283]
+              - cell "MEDIUM" [ref=f2e285]
+              - cell "Sin asignar" [ref=f2e287]
+              - cell [ref=f2e288]:
+                - link "Ver Detalles" [ref=f2e289] [cursor=pointer]:
+                  - /url: /dashboard/tickets/ac2d63d0-e4bf-4fde-82fc-59f58e9d9251
+            - row [ref=f2e290]:
+              - cell "TK-000007" [ref=f2e291]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e293]:
+                - generic [ref=f2e294]:
+                  - generic "Revisión General Simulación" [ref=f2e295]
+                  - generic [ref=f2e296]: 6/8/2026
+              - cell [ref=f2e297]:
+                - link "Juan Pérez" [ref=f2e298] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "RESOLVED" [ref=f2e299]
+              - cell "MEDIUM" [ref=f2e301]
+              - cell "Sin asignar" [ref=f2e303]
+              - cell [ref=f2e304]:
+                - link "Ver Detalles" [ref=f2e305] [cursor=pointer]:
+                  - /url: /dashboard/tickets/482ca077-8254-498a-baf2-b545948f8341
+            - row [ref=f2e306]:
+              - cell "TK-000006" [ref=f2e307]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e309]:
+                - generic [ref=f2e310]:
+                  - generic "Revisión General Simulación" [ref=f2e311]
+                  - generic [ref=f2e312]: 6/8/2026
+              - cell [ref=f2e313]:
+                - link "Juan Pérez" [ref=f2e314] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e315]
+              - cell "MEDIUM" [ref=f2e317]
+              - cell "Sin asignar" [ref=f2e319]
+              - cell [ref=f2e320]:
+                - link "Ver Detalles" [ref=f2e321] [cursor=pointer]:
+                  - /url: /dashboard/tickets/595be08b-235d-4dab-9852-1ef37f2ff82f
+            - row [ref=f2e322]:
+              - cell "TK-000005" [ref=f2e323]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e325]:
+                - generic [ref=f2e326]:
+                  - generic "Revisión General Simulación" [ref=f2e327]
+                  - generic [ref=f2e328]: 6/8/2026
+              - cell [ref=f2e329]:
+                - link "Juan Pérez" [ref=f2e330] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e331]
+              - cell "MEDIUM" [ref=f2e333]
+              - cell "Sin asignar" [ref=f2e335]
+              - cell [ref=f2e336]:
+                - link "Ver Detalles" [ref=f2e337] [cursor=pointer]:
+                  - /url: /dashboard/tickets/630724a5-3688-4a2d-bf52-f20661804a00
+            - row [ref=f2e338]:
+              - cell "TK-000004" [ref=f2e339]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e341]:
+                - generic [ref=f2e342]:
+                  - generic "Revisión General Simulación" [ref=f2e343]
+                  - generic [ref=f2e344]: 6/8/2026
+              - cell [ref=f2e345]:
+                - link "Juan Pérez" [ref=f2e346] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e347]
+              - cell "MEDIUM" [ref=f2e349]
+              - cell "Sin asignar" [ref=f2e351]
+              - cell [ref=f2e352]:
+                - link "Ver Detalles" [ref=f2e353] [cursor=pointer]:
+                  - /url: /dashboard/tickets/6f07a466-177f-4e92-9790-de32fa232c62
+            - row [ref=f2e354]:
+              - cell "TK-000003" [ref=f2e355]
+              - cell "Revisión General Simulación 6/8/2026" [ref=f2e357]:
+                - generic [ref=f2e358]:
+                  - generic "Revisión General Simulación" [ref=f2e359]
+                  - generic [ref=f2e360]: 6/8/2026
+              - cell [ref=f2e361]:
+                - link "Juan Pérez" [ref=f2e362] [cursor=pointer]:
+                  - /url: /dashboard/customers/e37862b8-a022-4c27-803b-b4adfe85425c
+              - cell "OPEN" [ref=f2e363]
+              - cell "MEDIUM" [ref=f2e365]
+              - cell "Sin asignar" [ref=f2e367]
+              - cell [ref=f2e368]:
+                - link "Ver Detalles" [ref=f2e369] [cursor=pointer]:
+                  - /url: /dashboard/tickets/1872fee3-871b-43f5-8824-fff74e3c14de
+            - row [ref=f2e370]:
+              - cell "TK-000002" [ref=f2e371]
+              - cell "E2E Device Broken Screen 1786064776762 6/8/2026" [ref=f2e373]:
+                - generic [ref=f2e374]:
+                  - generic "E2E Device Broken Screen 1786064776762" [ref=f2e375]
+                  - generic [ref=f2e376]: 6/8/2026
+              - cell [ref=f2e377]:
+                - link "E2E Customer 1786064776762" [ref=f2e378] [cursor=pointer]:
+                  - /url: /dashboard/customers/73991b5d-fcc7-4d77-8d8c-3f625bb3984c
+              - cell "CLOSED" [ref=f2e379]
+              - cell "MEDIUM" [ref=f2e381]
+              - cell "Sin asignar" [ref=f2e383]
+              - cell [ref=f2e384]:
+                - link "Ver Detalles" [ref=f2e385] [cursor=pointer]:
+                  - /url: /dashboard/tickets/ee5b3e99-ce18-485d-bbc4-ea7484b891e4
+            - row [ref=f2e386]:
+              - cell "TK-000001" [ref=f2e387]
+              - cell "Pantalla Rota 1786064768985 6/8/2026" [ref=f2e389]:
+                - generic [ref=f2e390]:
+                  - generic "Pantalla Rota 1786064768985" [ref=f2e391]
+                  - generic [ref=f2e392]: 6/8/2026
+              - cell [ref=f2e393]:
+                - link "E2E Lifecycle 1786064768985" [ref=f2e394] [cursor=pointer]:
+                  - /url: /dashboard/customers/35b41505-277a-4b38-80ce-3564523c4c89
+              - cell "OPEN" [ref=f2e395]
+              - cell "MEDIUM" [ref=f2e397]
+              - cell "Sin asignar" [ref=f2e399]
+              - cell [ref=f2e400]:
+                - link "Ver Detalles" [ref=f2e401] [cursor=pointer]:
+                  - /url: /dashboard/tickets/d4c7ada9-c75e-45c0-bf05-bdd2beb19910
+            - row [ref=f2e402]:
+              - cell "e8636536" [ref=f2e403]:
+                - generic "e8636536-f20e-4fed-90ad-830d353632c1" [ref=f2e404]: e8636536
+              - cell "Pantalla Rota 1786062720600 6/8/2026" [ref=f2e405]:
+                - generic [ref=f2e406]:
+                  - generic "Pantalla Rota 1786062720600" [ref=f2e407]
+                  - generic [ref=f2e408]: 6/8/2026
+              - cell [ref=f2e409]:
+                - link "E2E Lifecycle 1786062720600" [ref=f2e410] [cursor=pointer]:
+                  - /url: /dashboard/customers/34da00de-7c68-4514-9f3d-d41b815d6dc1
+              - cell "CLOSED" [ref=f2e411]
+              - cell "MEDIUM" [ref=f2e413]
+              - cell "Sin asignar" [ref=f2e415]
+              - cell [ref=f2e416]:
+                - link "Ver Detalles" [ref=f2e417] [cursor=pointer]:
+                  - /url: /dashboard/tickets/e8636536-f20e-4fed-90ad-830d353632c1
+            - row [ref=f2e418]:
+              - cell "f074cce9" [ref=f2e419]:
+                - generic "f074cce9-3807-4587-bf6b-92e272f84bb2" [ref=f2e420]: f074cce9
+              - cell "E2E Device Broken Screen 1786062729696 6/8/2026" [ref=f2e421]:
+                - generic [ref=f2e422]:
+                  - generic "E2E Device Broken Screen 1786062729696" [ref=f2e423]
+                  - generic [ref=f2e424]: 6/8/2026
+              - cell [ref=f2e425]:
+                - link "E2E Customer 1786062729696" [ref=f2e426] [cursor=pointer]:
+                  - /url: /dashboard/customers/5e7f88fb-3ef8-4fba-b84c-c2cea693c7fc
+              - cell "IN PROGRESS" [ref=f2e427]
+              - cell "MEDIUM" [ref=f2e429]
+              - cell "Sin asignar" [ref=f2e431]
+              - cell [ref=f2e432]:
+                - link "Ver Detalles" [ref=f2e433] [cursor=pointer]:
+                  - /url: /dashboard/tickets/f074cce9-3807-4587-bf6b-92e272f84bb2
+        - generic [ref=f2e434]:
+          - generic [ref=f2e435]:
+            - text: Mostrando página 1 de 4
+            - generic [ref=f2e436]: (68 resultados)
+          - generic [ref=f2e437]:
+            - button "← Anterior" [disabled]
+            - button "Siguiente →" [ref=f2e438] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=f2e444] [cursor=pointer]

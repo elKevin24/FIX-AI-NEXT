@@ -41,7 +41,7 @@ async function testNotifications() {
         { oldStatus: 'OPEN', newStatus: 'IN_PROGRESS' }
     );
 
-    console.log('✅ Pruebas completadas. Revisa la consola de Resend o tu inbox.');
+    console.log('✅ Pruebas completadas. Revisa tu inbox o logs de correo.');
 }
 
 testNotifications()

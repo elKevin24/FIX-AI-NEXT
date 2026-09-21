@@ -28,6 +28,13 @@
     pointer-events: auto;
 }
 
+.header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
 .pageInfo {
     color: var(--color-text-secondary);
     font-size: 0.875rem;

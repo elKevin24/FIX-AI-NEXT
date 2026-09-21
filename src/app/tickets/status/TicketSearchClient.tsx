@@ -12,26 +12,36 @@ interface DemoTicket {
     deviceType: string | null;
 }
 
-export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?: DemoTicket[] }) {
-    const [ticketId, setTicketId] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [ticket, setTicket] = useState<any | null>(null);
+interface TicketSearchClientProps {
+    demoTickets?: DemoTicket[];
+    initialTicket?: any;
+    initialQuery?: string;
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!ticketId.trim()) return;
+export default function TicketSearchClient({ 
+    demoTickets = [],
+    initialTicket = null,
+    initialQuery = ''
+}: TicketSearchClientProps) {
+    const [ticketId, setTicketId] = useState(initialQuery);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(initialQuery && !initialTicket ? 'ID o código de ticket no encontrado.' : '');
+    const [ticket, setTicket] = useState<any | null>(initialTicket);
+
+    const performSearch = async (query: string) => {
+        const cleanQuery = query.trim();
+        if (!cleanQuery) return;
 
         setLoading(true);
         setError('');
         setTicket(null);
 
         try {
-            const result = await searchTicket(ticketId.trim());
+            const result = await searchTicket(cleanQuery);
             if (result) {
                 setTicket(result);
             } else {
-                setError('ID no encontrado.');
+                setError('ID o código de ticket no encontrado.');
             }
         } catch (err) {
             console.error(err);
@@ -39,6 +49,11 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await performSearch(ticketId);
     };
 
     return (
@@ -188,11 +203,15 @@ export default function TicketSearchClient({ demoTickets = [] }: { demoTickets?:
                             {demoTickets.map((demo) => (
                                 <button
                                     key={demo.id}
-                                    onClick={() => setTicketId(demo.id.slice(0, 8))}
+                                    onClick={() => {
+                                        const id = demo.id.slice(0, 8);
+                                        setTicketId(id);
+                                        performSearch(id);
+                                    }}
                                     className="demo-button"
                                     style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-tertiary)', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
                                 >
-                                    Demo {demo.deviceType || 'Equipo'}
+                                    Demo {demo.deviceType || 'Equipo'} ({demo.title})
                                 </button>
                             ))}
                         </div>

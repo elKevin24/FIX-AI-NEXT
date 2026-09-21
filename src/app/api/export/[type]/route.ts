@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, UserRole } from '@/lib/auth-utils';
 import * as XLSX from 'xlsx';
 
 export async function GET(
@@ -12,6 +13,10 @@ export async function GET(
     if (!session?.user?.tenantId) {
         return new NextResponse('Unauthorized', { status: 401 });
     }
+
+  if (!hasPermission(session.user.role as UserRole, 'canExportData')) {
+    return new NextResponse('Forbidden: Insufficient permissions for data export', { status: 403 });
+  }
 
     const { type } = await params;
     const { searchParams } = new URL(request.url);

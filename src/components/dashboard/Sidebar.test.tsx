@@ -61,8 +61,8 @@ describe('Sidebar Component', () => {
     
     // Initially, class 'open' should NOT be present (assuming default state is closed)
     // Note: We check classList because CSS modules might hash names, but we used global 'open' in CSS module composition?
-    // Wait, in Sidebar.tsx: className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
-    // We need to know what `styles.open` resolves to.
+    // Wait, in Sidebar.tsx: className={`${styles['sidebar']} ${isOpen ? styles['open'] : ''}`}
+    // We need to know what `styles['open']` resolves to.
     // In test environment with CSS modules, standard setup usually returns the key name or an object.
     // Vitest + standard vite-plugin-react usually handles CSS modules by returning unique strings.
     
@@ -80,7 +80,7 @@ describe('Sidebar Component', () => {
     
     // Actually, checking for 'open' string in className might fail if hashed.
     // However, I can check if the overlay becomes visible or present.
-    // <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
+    // <div className={`${styles['overlay']} ${isOpen ? styles['open'] : ''}`}
     
     // Let's verify the logic by firing click and checking if "open" appears in className *if* mocks aren't hashing aggressively,
     // OR just trust the interactions.

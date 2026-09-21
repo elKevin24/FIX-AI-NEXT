@@ -36,12 +36,12 @@ interface TemplateSelectorProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  MAINTENANCE: '🔧 Mantenimiento',
-  REPAIR: '🔨 Reparación',
-  UPGRADE: '⬆️ Actualización',
-  DIAGNOSTIC: '🔍 Diagnóstico',
-  INSTALLATION: '💿 Instalación',
-  CONSULTATION: '💬 Consultoría',
+  MAINTENANCE: 'Mantenimiento',
+  REPAIR: 'Reparación',
+  UPGRADE: 'Actualización',
+  DIAGNOSTIC: 'Diagnóstico',
+  INSTALLATION: 'Instalación',
+  CONSULTATION: 'Consultoría',
 };
 
 export default function TemplateSelector({
@@ -114,9 +114,9 @@ export default function TemplateSelector({
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner} />
+      <div className={styles['container']}>
+        <div className={styles['loading']}>
+          <div className={styles['spinner']} />
           <p>Cargando plantillas...</p>
         </div>
       </div>
@@ -125,8 +125,8 @@ export default function TemplateSelector({
 
   if (error) {
     return (
-      <div className={styles.container}>
-        <div className={styles.error}>
+      <div className={styles['container']}>
+        <div className={styles['error']}>
           <p>⚠️ {error}</p>
         </div>
       </div>
@@ -135,10 +135,10 @@ export default function TemplateSelector({
 
   if (templates.length === 0) {
     return (
-      <div className={styles.container}>
-        <div className={styles.empty}>
+      <div className={styles['container']}>
+        <div className={styles['empty']}>
           <p>📋 No hay plantillas activas disponibles</p>
-          <p className={styles.emptyHint}>
+          <p className={styles['emptyHint']}>
             Las plantillas ayudan a crear tickets más rápido con configuración
             predefinida.
           </p>
@@ -148,71 +148,60 @@ export default function TemplateSelector({
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>
-          ✨ Selecciona una Plantilla (Opcional)
-        </h3>
-        <p className={styles.subtitle}>
-          Las plantillas pre-configuran el ticket con título, descripción y
-          partes recomendadas
-        </p>
-      </div>
+    <div className={styles['container']}>
+      {/* Search Bar & Category Filter in single compact row */}
+      <div className={styles['toolbar']}>
+        <div className={styles['searchContainer']}>
+          <input
+            type="text"
+            placeholder="🔍 Buscar plantilla..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles['searchInput']}
+          />
+        </div>
 
-      {/* Search Bar */}
-      <div className={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="🔍 Buscar plantillas por nombre..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={styles.searchInput}
-        />
-      </div>
-
-      {/* Category Filter */}
-      <div className={styles.categories}>
-        <button
-          type="button"
-          onClick={() => setSelectedCategory(null)}
-          className={`${styles.categoryChip} ${
-            !selectedCategory ? styles.categoryChipActive : ''
-          }`}
-        >
-          Todas ({templates.length})
-        </button>
-        {categories.map((category) => (
+        <div className={styles['categories']}>
           <button
-            key={category}
             type="button"
-            onClick={() => setSelectedCategory(category)}
-            className={`${styles.categoryChip} ${
-              selectedCategory === category ? styles.categoryChipActive : ''
+            onClick={() => setSelectedCategory(null)}
+            className={`${styles['categoryChip']} ${
+              !selectedCategory ? styles['categoryChipActive'] : ''
             }`}
           >
-            {CATEGORY_LABELS[category] || category} (
-            {templates.filter((t) => t.category === category).length})
+            Todas ({templates.length})
           </button>
-        ))}
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+              className={`${styles['categoryChip']} ${
+                selectedCategory === category ? styles['categoryChipActive'] : ''
+              }`}
+            >
+              {CATEGORY_LABELS[category] || category}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Template Grid */}
-      <div className={styles.grid}>
+      {/* Template Grid - Compact */}
+      <div className={styles['grid']}>
         {/* Option: No Template (Manual) */}
         <button
           type="button"
           onClick={() => onSelect(null)}
-          className={`${styles.templateCard} ${
-            !selectedTemplate ? styles.templateCardSelected : ''
+          className={`${styles['templateCard']} ${
+            !selectedTemplate ? styles['templateCardSelected'] : ''
           }`}
         >
-          <div className={styles.templateIcon}>✏️</div>
-          <div className={styles.templateInfo}>
-            <h4 className={styles.templateName}>Sin Plantilla</h4>
-            <p className={styles.templateCategory}>Creación manual</p>
-            <p className={styles.templateDescription}>
-              Completa todos los campos manualmente
-            </p>
+          <div className={styles['templateHeader']}>
+            <span className={styles['templateIcon']}>✏️</span>
+            <div className={styles['templateInfo']}>
+              <span className={styles['templateName']}>Creación Manual</span>
+              <span className={styles['templateCategory']}>Sin plantilla</span>
+            </div>
           </div>
         </button>
 
@@ -222,92 +211,71 @@ export default function TemplateSelector({
             key={template.id}
             type="button"
             onClick={() => onSelect(template)}
-            className={`${styles.templateCard} ${
+            className={`${styles['templateCard']} ${
               selectedTemplate?.id === template.id
-                ? styles.templateCardSelected
+                ? styles['templateCardSelected']
                 : ''
             }`}
             style={
               {
-                '--template-color': template.color || '#3B82F6',
+                '--template-color': template.color || '#3b82f6',
               } as React.CSSProperties
             }
           >
-            <div className={styles.templateIcon}>
-              {template.icon || '🔧'}
-            </div>
-            <div className={styles.templateInfo}>
-              <h4 className={styles.templateName}>{template.name}</h4>
-              <p className={styles.templateCategory}>
-                {CATEGORY_LABELS[template.category] || template.category}
-              </p>
-              <p className={styles.templateDescription}>
-                {template.defaultTitle}
-              </p>
-              {template.defaultParts.length > 0 && (
-                <div className={styles.templateParts}>
-                  <span className={styles.partsCount}>
-                    {template.defaultParts.length} parte(s)
-                  </span>
-                  {template.defaultParts.some((p) => p.required) && (
-                    <span className={styles.requiredBadge}>Requiere stock</span>
-                  )}
-                </div>
-              )}
-              {template.estimatedDuration && (
-                <span className={styles.duration}>
-                  ⏱️ ~{Math.round(template.estimatedDuration / 60)}h
+            <div className={styles['templateHeader']}>
+              <span className={styles['templateIcon']}>{template.icon || '🔧'}</span>
+              <div className={styles['templateInfo']}>
+                <span className={styles['templateName']}>{template.name}</span>
+                <span className={styles['templateCategory']}>
+                  {CATEGORY_LABELS[template.category] || template.category} {template.estimatedDuration ? `• ~${Math.round(template.estimatedDuration / 60)}h` : ''}
                 </span>
-              )}
+              </div>
             </div>
-            {selectedTemplate?.id === template.id && (
-              <div className={styles.checkmark}>✓</div>
-            )}
           </button>
         ))}
       </div>
 
       {/* Selected Template Preview */}
       {selectedTemplate && selectedTemplateData && (
-        <div className={styles.preview}>
-          <h4 className={styles.previewTitle}>
+        <div className={styles['preview']}>
+          <h4 className={styles['previewTitle']}>
             📄 Vista Previa: {selectedTemplate.name}
           </h4>
 
           {selectedTemplateData.hasInsufficientStock && (
-            <div className={styles.warningBanner}>
+            <div className={styles['warningBanner']}>
               ⚠️ Stock insuficiente para algunos repuestos requeridos
             </div>
           )}
 
-          <div className={styles.previewContent}>
-            <div className={styles.previewRow}>
+          <div className={styles['previewContent']}>
+            <div className={styles['previewRow']}>
               <strong>Título:</strong>
               <span>{selectedTemplate.defaultTitle}</span>
             </div>
-            <div className={styles.previewRow}>
+            <div className={styles['previewRow']}>
               <strong>Descripción:</strong>
               <span>{selectedTemplate.defaultDescription}</span>
             </div>
-            <div className={styles.previewRow}>
+            <div className={styles['previewRow']}>
               <strong>Prioridad:</strong>
               <span>{selectedTemplate.defaultPriority}</span>
             </div>
 
             {/* Required Parts with Stock Status */}
             {selectedTemplateData.requiredParts.length > 0 && (
-              <div className={styles.previewRow}>
+              <div className={styles['previewRow']}>
                 <strong>✅ Repuestos Requeridos (se consumirán automáticamente):</strong>
-                <ul className={styles.partsList}>
+                <ul className={styles['partsList']}>
                   {selectedTemplateData.requiredParts.map((dp) => (
-                    <li key={dp.id} className={styles.partItem}>
+                    <li key={dp.id} className={styles['partItem']}>
                       <span>{dp.part.name} × {dp.quantity}</span>
-                      <div className={styles.partBadges}>
+                      <div className={styles['partBadges']}>
                         <span
-                          className={`${styles.stockBadge} ${
-                            dp.stockStatus === 'insufficient' ? styles.stockInsufficient :
-                            dp.stockStatus === 'low' ? styles.stockLow :
-                            styles.stockSufficient
+                          className={`${styles['stockBadge']} ${
+                            dp.stockStatus === 'insufficient' ? styles['stockInsufficient'] :
+                            dp.stockStatus === 'low' ? styles['stockLow'] :
+                            styles['stockSufficient']
                           }`}
                         >
                           {dp.stockStatus === 'insufficient' && '❌ Sin stock'}
@@ -315,7 +283,7 @@ export default function TemplateSelector({
                           {dp.stockStatus === 'sufficient' && '✅ Disponible'}
                           {' '}({dp.part.quantity} disponible)
                         </span>
-                        <span className={styles.priceBadge}>
+                        <span className={styles['priceBadge']}>
                           {formatCurrency(dp.part.price * dp.quantity)}
                         </span>
                       </div>
@@ -327,15 +295,15 @@ export default function TemplateSelector({
 
             {/* Optional Parts */}
             {selectedTemplateData.optionalParts.length > 0 && (
-              <div className={styles.previewRow}>
+              <div className={styles['previewRow']}>
                 <strong>💡 Repuestos Sugeridos (opcionales):</strong>
-                <ul className={styles.partsList}>
+                <ul className={styles['partsList']}>
                   {selectedTemplateData.optionalParts.map((dp) => (
-                    <li key={dp.id} className={styles.partItem}>
+                    <li key={dp.id} className={styles['partItem']}>
                       <span>{dp.part.name} × {dp.quantity}</span>
-                      <div className={styles.partBadges}>
-                        <span className={styles.optionalBadge}>Opcional</span>
-                        <span className={styles.stock}>
+                      <div className={styles['partBadges']}>
+                        <span className={styles['optionalBadge']}>Opcional</span>
+                        <span className={styles['stock']}>
                           Stock: {dp.part.quantity}
                         </span>
                       </div>
@@ -346,25 +314,25 @@ export default function TemplateSelector({
             )}
 
             {/* Cost Breakdown */}
-            <div className={styles.costBreakdown}>
-              <h5 className={styles.costTitle}>💰 Costo Estimado</h5>
-              <div className={styles.costRow}>
+            <div className={styles['costBreakdown']}>
+              <h5 className={styles['costTitle']}>💰 Costo Estimado</h5>
+              <div className={styles['costRow']}>
                 <span>Mano de obra:</span>
                 <span>{formatCurrency(selectedTemplateData.costBreakdown.laborCost)}</span>
               </div>
-              <div className={styles.costRow}>
+              <div className={styles['costRow']}>
                 <span>Repuestos:</span>
                 <span>{formatCurrency(selectedTemplateData.costBreakdown.partsCost)}</span>
               </div>
-              <div className={`${styles.costRow} ${styles.costSubtotal}`}>
+              <div className={`${styles['costRow']} ${styles['costSubtotal']}`}>
                 <span>Subtotal:</span>
                 <span>{formatCurrency(selectedTemplateData.costBreakdown.subtotal)}</span>
               </div>
-              <div className={styles.costRow}>
+              <div className={styles['costRow']}>
                 <span>IVA (12%):</span>
                 <span>{formatCurrency(selectedTemplateData.costBreakdown.tax)}</span>
               </div>
-              <div className={`${styles.costRow} ${styles.costTotal}`}>
+              <div className={`${styles['costRow']} ${styles['costTotal']}`}>
                 <strong>TOTAL:</strong>
                 <strong>{formatCurrency(selectedTemplateData.costBreakdown.total)}</strong>
               </div>

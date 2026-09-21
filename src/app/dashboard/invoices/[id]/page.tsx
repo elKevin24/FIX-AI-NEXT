@@ -2,9 +2,15 @@ import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import { getInvoiceById } from '@/lib/invoice-actions';
 import InvoiceDetailClient from './InvoiceDetailClient';
+import { serializeDecimal } from '@/lib/utils';
 
 export const metadata = {
-  title: 'Detalle de Factura | FIX-AI',
+  title: 'Detalle de Factura',
+  description: 'Consulta los detalles, ítems y estado de pago de una factura específica.',
+  openGraph: {
+    title: 'Detalle de Factura | FIX Workshop',
+    description: 'Consulta los detalles, ítems y estado de pago de una factura específica.',
+  },
 };
 
 interface PageProps {
@@ -25,5 +31,5 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <InvoiceDetailClient invoice={invoice as any} />;
+  return <InvoiceDetailClient invoice={serializeDecimal(invoice)} />;
 }

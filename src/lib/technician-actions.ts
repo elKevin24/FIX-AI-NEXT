@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreateUnavailabilitySchema } from '@/lib/schemas';
+import { isAdmin } from '@/lib/auth-utils';
 import { revalidatePath } from 'next/cache';
 
 export async function createUnavailability(prevState: any, formData: FormData) {
@@ -33,7 +34,7 @@ export async function createUnavailability(prevState: any, formData: FormData) {
   const { userId, startDate, endDate, reason, notes } = validation.data;
   
   // Security check: Only Admins can set for others. Technicians set for themselves.
-  if (userId && userId !== session.user.id && session.user.role !== 'ADMIN') {
+  if (userId && userId !== session.user.id && !isAdmin(session.user.role)) {
       return { success: false, message: 'No tienes permisos para modificar la disponibilidad de otro usuario.' };
   }
 
@@ -110,7 +111,7 @@ export async function deleteUnavailability(prevState: any, formData: FormData) {
 
         if (!record) return { success: false, message: 'Registro no encontrado' };
 
-        if (record.userId !== session.user.id && session.user.role !== 'ADMIN') {
+        if (record.userId !== session.user.id && !isAdmin(session.user.role)) {
              return { success: false, message: 'No autorizado' };
         }
 

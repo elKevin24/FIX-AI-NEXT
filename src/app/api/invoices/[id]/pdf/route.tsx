@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { isSuperAdmin } from '@/lib/authz';
 import { renderToStream } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
 
@@ -16,7 +17,7 @@ export async function GET(
         }
 
         const { id } = await params;
-        const isSuperAdmin = session.user.email === 'adminkev@example.com';
+        const isSuperAdminUser = isSuperAdmin(session.user);
 
         // Buscar la factura con toda la información necesaria
         const invoice = await prisma.invoice.findUnique({
@@ -42,7 +43,7 @@ export async function GET(
         }
 
         // Verificar permisos de tenant (a menos que sea super admin)
-        if (!isSuperAdmin && invoice.tenantId !== session.user.tenantId) {
+        if (!isSuperAdminUser && invoice.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
         }
 

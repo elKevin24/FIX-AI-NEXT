@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ServiceCategory } from '@/generated/prisma';
+import { ServiceCategory } from '@prisma/client';
 import { toggleTemplateActiveStatus, deleteServiceTemplate, duplicateServiceTemplate } from '@/lib/service-template-actions';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import styles from './service-templates.module.css';
 
@@ -33,6 +34,7 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
 
 export function ServiceTemplateList({ templates }: { templates: Template[] }) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [filter, setFilter] = useState<ServiceCategory | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       await toggleTemplateActiveStatus(id, !currentStatus);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al cambiar estado');
+      addToast(error instanceof Error ? error.message : 'Error al cambiar estado', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -65,7 +67,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       await deleteServiceTemplate(id);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al eliminar');
+      addToast(error instanceof Error ? error.message : 'Error al eliminar', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -78,7 +80,7 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       router.refresh();
       router.push(`/dashboard/settings/service-templates/${newTemplate.id}/edit`);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al duplicar');
+      addToast(error instanceof Error ? error.message : 'Error al duplicar', 'ERROR');
     } finally {
       setLoading(null);
     }
@@ -98,20 +100,20 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
   };
 
   return (
-    <div className={styles.container} style={{ padding: 0 }}>
+    <div className={styles['container']} style={{ padding: 0 }}>
       {/* Filtros Minimalistas */}
-      <div className={styles.filterBar}>
+      <div className={styles['filterBar']}>
         <input
           type="text"
           placeholder="Buscar servicio..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className={styles.searchInput}
+          className={styles['searchInput']}
         />
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value as ServiceCategory | 'ALL')}
-          className={styles.selectInput}
+          className={styles['selectInput']}
         >
           <option value="ALL">Categoría</option>
           {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
@@ -123,13 +125,13 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
       </div>
 
       {/* Lista Horizontal Minimalista */}
-      <div className={styles.templateList}>
+      <div className={styles['templateList']}>
         {filteredTemplates.length === 0 ? (
-          <div className={styles.emptyState}>
+          <div className={styles['emptyState']}>
             <p>No hay plantillas de servicio</p>
             <Link
               href="/dashboard/settings/service-templates/create"
-              className={styles.createFirstLink}
+              className={styles['createFirstLink']}
             >
               Crear nueva
             </Link>
@@ -138,42 +140,42 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
           filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className={`${styles.templateCard} ${!template.isActive ? styles.inactive : ''}`}
+              className={`${styles['templateCard']} ${!template.isActive ? styles['inactive'] : ''}`}
             >
-              <div className={styles.cardMain}>
-                <div className={styles.templateIcon} style={{ color: template.color || 'var(--color-primary-500)' }}>
+              <div className={styles['cardMain']}>
+                <div className={styles['templateIcon']} style={{ color: template.color || 'var(--color-primary-500)' }}>
                   {template.icon || '🔧'}
                 </div>
-                <div className={styles.cardInfo}>
-                  <h3 className={styles.templateTitle}>{template.name}</h3>
-                  <div className={styles.badgeGroup}>
-                    <span className={styles.categoryTag}>{CATEGORY_LABELS[template.category]}</span>
+                <div className={styles['cardInfo']}>
+                  <h3 className={styles['templateTitle']}>{template.name}</h3>
+                  <div className={styles['badgeGroup']}>
+                    <span className={styles['categoryTag']}>{CATEGORY_LABELS[template.category]}</span>
                     <span>•</span>
                     <span>{template.defaultPriority}</span>
                   </div>
                 </div>
 
-                <div className={styles.infoGrid}>
-                  <div className={styles.infoItem} title="Duración Estimada">
-                    <span className={styles.infoLabel}>⏱</span>
+                <div className={styles['infoGrid']}>
+                  <div className={styles['infoItem']} title="Duración Estimada">
+                    <span className={styles['infoLabel']}>⏱</span>
                     <span>{formatDuration(template.estimatedDuration)}</span>
                   </div>
-                  <div className={styles.infoItem} title="Costo de Labor">
-                    <span className={styles.infoLabel}>💰</span>
+                  <div className={styles['infoItem']} title="Costo de Labor">
+                    <span className={styles['infoLabel']}>💰</span>
                     <span>{formatCost(template.laborCost)}</span>
                   </div>
-                  <div className={styles.infoItem} title="Tickets Generados">
-                    <span className={styles.infoLabel}>📊</span>
+                  <div className={styles['infoItem']} title="Tickets Generados">
+                    <span className={styles['infoLabel']}>📊</span>
                     <span>{template._count.tickets}</span>
                   </div>
                 </div>
               </div>
 
               {/* Acciones Minimalistas (Iconos) */}
-              <div className={styles.actions}>
+              <div className={styles['actions']}>
                 <Link
                   href={`/dashboard/settings/service-templates/${template.id}/edit`}
-                  className={`${styles.btnIcon} ${styles.btnEdit}`}
+                  className={`${styles['btnIcon']} ${styles['btnEdit']}`}
                   title="Editar"
                 >
                   <EditIcon />
@@ -181,26 +183,29 @@ export function ServiceTemplateList({ templates }: { templates: Template[] }) {
                 <button
                   onClick={() => handleDuplicate(template.id)}
                   disabled={loading === template.id}
-                  className={`${styles.btnIcon}`}
+                  className={`${styles['btnIcon']}`}
                   style={{ color: 'var(--color-text-secondary)' }}
                   title="Duplicar"
+                  aria-label="Duplicar plantilla"
                 >
                   <CopyIcon />
                 </button>
                 <button
                   onClick={() => handleToggleActive(template.id, template.isActive)}
                   disabled={loading === template.id}
-                  className={`${styles.btnIcon}`}
+                  className={`${styles['btnIcon']}`}
                   style={{ color: template.isActive ? 'var(--color-warning-600)' : 'var(--color-success-600)' }}
                   title={template.isActive ? 'Desactivar' : 'Activar'}
+                  aria-label={template.isActive ? 'Desactivar plantilla' : 'Activar plantilla'}
                 >
                   {template.isActive ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
                 <button
                   onClick={() => handleDelete(template.id, template.name)}
                   disabled={loading === template.id || template._count.tickets > 0}
-                  className={`${styles.btnIcon} ${styles.btnDelete}`}
+                  className={`${styles['btnIcon']} ${styles['btnDelete']}`}
                   title={template._count.tickets > 0 ? 'Tiene tickets asociados' : 'Eliminar'}
+                  aria-label={template._count.tickets > 0 ? 'Tiene tickets asociados' : 'Eliminar plantilla'}
                 >
                   <TrashIcon />
                 </button>

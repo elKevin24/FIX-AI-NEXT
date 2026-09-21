@@ -8,6 +8,9 @@ import CustomersClient from './CustomersClient';
 import CustomerSearchFilters from './CustomerSearchFilters';
 
 import PaginationControls from '@/components/ui/PaginationControls';
+import PageHeader from '@/components/PageHeader';
+import { isAdmin } from '@/lib/auth-utils';
+import type { UserRole } from '@prisma/client';
 
 interface CustomersPageProps {
   searchParams: Promise<{
@@ -15,6 +18,15 @@ interface CustomersPageProps {
     page?: string;
   }>;
 }
+
+export const metadata = {
+  title: 'Clientes',
+  description: 'Gestiona la base de datos de clientes, historial de reparaciones y datos de contacto.',
+  openGraph: {
+    title: 'Clientes | FIX Workshop',
+    description: 'Gestiona la base de datos de clientes, historial de reparaciones y datos de contacto.',
+  },
+};
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
   const session = await auth();
@@ -102,23 +114,23 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   }
 
   const totalPages = Math.ceil(totalItems / pageSize);
-  const isAdmin = session.user.role === 'ADMIN';
+  const isAdminUser = isAdmin(session.user.role as UserRole);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>Clientes</h1>
-          <p>Gestiona la base de datos de clientes y su historial</p>
-        </div>
-        <Button as={Link} href="/dashboard/customers/create" variant="primary">
-          + Nuevo Cliente
-        </Button>
-      </div>
+    <div className={styles['container']}>
+      <PageHeader
+        title="Clientes"
+        subtitle="Gestiona la base de datos de clientes y su historial"
+        actions={
+          <Button as={Link} href="/dashboard/customers/create" variant="primary">
+            + Nuevo Cliente
+          </Button>
+        }
+      />
 
       <CustomerSearchFilters />
 
-      <CustomersClient data={customers} isAdmin={isAdmin} />
+      <CustomersClient data={customers} isAdmin={isAdminUser} />
 
       <PaginationControls
         currentPage={currentPage}

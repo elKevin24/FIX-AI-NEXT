@@ -213,7 +213,7 @@ Estas tareas se realizan en paralelo a todo el desarrollo para garantizar un pro
    - ✅ Actualización de variables de entorno
 
 7. **Notificaciones por Email**
-   - Configurar servicio de email (Resend/SendGrid)
+   - Configurar servicio de email (SMTP/Nodemailer)
    - Notificaciones al cambiar estado de ticket
    - Templates de email profesionales
    - Opción de enviar PDFs por email

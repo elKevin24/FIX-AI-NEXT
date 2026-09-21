@@ -17,16 +17,16 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={styles.container}>
+    <main className={styles['container']}>
       {/* Elementos decorativos */}
-      <div className={styles.decorativeBlobs}>
-        <div className={`${styles.blob} ${styles.blob1}`} />
-        <div className={`${styles.blob} ${styles.blob2}`} />
-        <div className={`${styles.blob} ${styles.blob3}`} />
+      <div className={styles['decorativeBlobs']}>
+        <div className={`${styles['blob']} ${styles['blob1']}`} />
+        <div className={`${styles['blob']} ${styles['blob2']}`} />
+        <div className={`${styles['blob']} ${styles['blob3']}`} />
       </div>
 
       {/* Contenedor principal */}
-      <div className={styles.cardWrapper}>
+      <div className={styles['cardWrapper']}>
         {/* Back to Home Link */}
         <div style={{ marginBottom: 'var(--spacing-4)', textAlign: 'center' }}>
           <Link
@@ -47,14 +47,15 @@ export default function LoginPage() {
           </Link>
         </div>
         {/* Card */}
-        <div className={styles.card}>
+        <div className={styles['card']}>
           {/* Header */}
-          <div className={`${styles.header} ${styles.animatedItem}`}>
-            <div className={styles.iconWrapper}>
+          <div className={`${styles['header']} ${styles['animatedItem']}`}>
+            <div className={styles['iconWrapper']}>
               <svg
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -64,18 +65,18 @@ export default function LoginPage() {
                 />
               </svg>
             </div>
-            <h1 className={styles.title}>FIX Workshop</h1>
-            <p className={styles.subtitle}>Bienvenido a tu sistema de gestión</p>
+            <h1 className={styles['title']}>FIX Workshop</h1>
+            <p className={styles['subtitle']}>Bienvenido a tu sistema de gestión</p>
           </div>
 
           {/* Formulario */}
-          <form action={formAction} className={`${styles.form} ${styles.animatedItem}`}>
+          <form action={formAction} className={`${styles['form']} ${styles['animatedItem']}`}>
             {/* Email Field */}
-            <div className={styles.inputGroup}>
-              <label htmlFor="email" className={styles.label}>
+            <div className={styles['inputGroup']}>
+              <label htmlFor="email" className={styles['label']}>
                 Correo electrónico
               </label>
-              <div className={styles.inputContainer}>
+              <div className={styles['inputContainer']}>
                 <input
                   id="email"
                   type="email"
@@ -84,13 +85,14 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@example.com"
                   required
-                  className={styles.input}
+                  className={styles['input']}
                 />
                 <svg
-                  className={styles.inputIcon}
+                  className={styles['inputIcon']}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -103,16 +105,16 @@ export default function LoginPage() {
             </div>
 
             {/* Password Field */}
-            <div className={styles.inputGroup}>
-              <div className={styles.flexBetween}>
-                <label htmlFor="password" className={styles.label}>
+            <div className={styles['inputGroup']}>
+              <div className={styles['labelRow']}>
+                <label htmlFor="password" className={styles['label']}>
                   Contraseña
                 </label>
-                <Link href="#" className={styles.forgotPassword}>
+                <Link href="/forgot-password" className={styles['forgotPassword']}>
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-              <div className={styles.inputContainer}>
+              <div className={styles['inputContainer']}>
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -122,12 +124,12 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className={styles.input}
+                  className={styles['input']}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={styles.passwordToggle}
+                  className={styles['passwordToggle']}
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? (
@@ -161,15 +163,15 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className={styles.errorMessage} role="alert">
-                <svg fill="currentColor" viewBox="0 0 20 20">
+              <div className={styles['errorMessage']} role="alert">
+                <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                     clipRule="evenodd"
                   />
                 </svg>
-                <p>{typeof errorMessage === 'object' ? errorMessage.message : errorMessage}</p>
+                <p>{typeof errorMessage === 'string' ? errorMessage : String(errorMessage)}</p>
               </div>
             )}
 
@@ -177,15 +179,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isPending}
-              className={styles.submitButton}
+              className={styles['submitButton']}
             >
               {isPending ? (
                 <>
                   <svg
-                    className={styles.spinner}
+                    className={styles['spinner']}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -199,7 +202,7 @@ export default function LoginPage() {
               ) : (
                 <>
                   <span>Iniciar sesión</span>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -212,38 +215,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className={`${styles.divider} ${styles.animatedItem}`}>
-            <div className={styles.dividerLine} />
-            <div className={styles.dividerText}>O continúa con</div>
-          </div>
 
-          {/* Demo Credentials */}
-          <div className={`${styles.demoCredentials} ${styles.animatedItem}`}>
-            <p className={styles.demoTitle}>Credenciales de demostración:</p>
-            <div className={styles.demoGrid}>
-              <div className={styles.demoCard}>
-                <p className={styles.demoUser}>Admin</p>
-                <p className={`${styles.demoEmail} ${styles.demoEmailAdmin}`}>admin@example.com</p>
-                <p className={styles.demoPassword}>password123</p>
-              </div>
-              <div className={styles.demoCard}>
-                <p className={styles.demoUser}>Técnico</p>
-                <p className={`${styles.demoEmail} ${styles.demoEmailTech}`}>tech@example.com</p>
-                <p className={styles.demoPassword}>password123</p>
-              </div>
-            </div>
-          </div>
 
           {/* Footer */}
-          <p className={`${styles.footer} ${styles.animatedItem}`}>
+          <p className={`${styles['footer']} ${styles['animatedItem']}`}>
             ¿Problemas para acceder?{' '}
-            <Link href="#" className={styles.footerLink}>
+            <Link href="#" className={styles['footerLink']}>
               Contacta soporte
             </Link>
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

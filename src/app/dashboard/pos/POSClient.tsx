@@ -2,11 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { PaymentMethod } from '@/generated/prisma';
+import { PaymentMethod } from '@prisma/client';
 import { createPOSSale, getPartsForPOS } from '@/lib/pos-actions';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import PageHeader from '@/components/PageHeader';
+import POSCart, { CartItem } from './components/POSCart';
+import POSPaymentModal, { PaymentItem } from './components/POSPaymentModal';
 import styles from './pos.module.css';
 
 // ============================================================================
@@ -29,27 +33,10 @@ interface Customer {
     phone: string | null;
 }
 
-interface CartItem {
-    partId: string;
-    name: string;
-    sku: string | null;
-    quantity: number;
-    unitPrice: number;
-    maxQuantity: number;
-}
-
-interface PaymentItem {
-    id: string;
-    amount: number;
-    paymentMethod: PaymentMethod;
-    transactionRef?: string;
-}
-
 interface POSClientProps {
     initialParts: Part[];
     initialCustomers: Customer[];
     taxRate: number;
-    currency: string;
 }
 
 // ============================================================================
@@ -60,7 +47,7 @@ export default function POSClient({
     initialParts,
     initialCustomers,
     taxRate,
-    currency,
+
 }: POSClientProps) {
     const router = useRouter();
 
@@ -114,10 +101,6 @@ export default function POSClient({
     const remaining = total - totalPaid;
     const change = totalPaid > total ? totalPaid - total : 0;
 
-    // Format currency
-    const formatCurrency = (amount: number) => {
-        return `Q${amount.toFixed(2)}`;
-    };
 
     // Add to cart
     const addToCart = (part: Part) => {
@@ -259,27 +242,50 @@ export default function POSClient({
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles['container']}>
             {/* Header */}
-            <header className={styles.header}>
-                <h1>Punto de Venta</h1>
-                <div className={styles.headerActions}>
+            <PageHeader
+                title="Punto de Venta"
+                subtitle="Registra ventas directas a clientes"
+                actions={
                     <Button
                         variant="outline"
                         onClick={() => router.push('/dashboard/pos/history')}
                     >
                         Historial
                     </Button>
+                }
+            />
+
+            {/* Stats Bar */}
+            <div className={styles['statsBar']}>
+                <div className={styles['statsBarItem']}>
+                    Productos: <span className={styles['statsBarValue']}>{parts.length}</span>
                 </div>
-            </header>
+                {cart.length > 0 && (
+                    <>
+                        <div className={styles['statsBarItem']}>
+                            En carrito: <span className={styles['statsBarValue']}>{cart.length}</span>
+                        </div>
+                        <div className={styles['statsBarItem']}>
+                            Total: <span className={styles['statsBarValue']}>{formatCurrency(total)}</span>
+                        </div>
+                    </>
+                )}
+            </div>
 
-            {error && <Alert variant="error" className={styles.alert}>{error}</Alert>}
-            {success && <Alert variant="success" className={styles.alert}>{success}</Alert>}
+            {error && <Alert variant="error" className={styles['alert']}>{error}</Alert>}
+            {success && <Alert variant="success" className={styles['alert']}>{success}</Alert>}
 
-            <div className={styles.posLayout}>
+            <div className={styles['posLayout']}>
                 {/* Products Grid */}
-                <div className={styles.productsSection}>
-                    <div className={styles.searchBar}>
+                <div className={styles['productsSection']}>
+                    <div className={styles['sectionTitle']}>
+                        <h2>Productos</h2>
+                        <span>{filteredParts.length} disponible{filteredParts.length !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    <div className={styles['searchBar']}>
                         <Input
                             placeholder="Buscar producto por nombre o SKU..."
                             value={searchProduct}
@@ -287,27 +293,28 @@ export default function POSClient({
                         />
                     </div>
 
-                    <div className={styles.productsGrid}>
+                    <div className={styles['productsGrid']}>
                         {filteredParts.length === 0 ? (
-                            <div className={styles.emptyProducts}>
+                            <div className={styles['emptyProducts']}>
                                 <p>No se encontraron productos</p>
                             </div>
                         ) : (
                             filteredParts.map(part => (
                                 <button
                                     key={part.id}
-                                    className={styles.productCard}
+                                    className={styles['productCard']}
                                     onClick={() => addToCart(part)}
                                     disabled={part.quantity <= 0}
+                                    aria-label={`${part.name}, ${formatCurrency(part.price)}, Stock: ${part.quantity}`}
                                 >
-                                    <div className={styles.productName}>{part.name}</div>
+                                    <div className={styles['productName']}>{part.name}</div>
                                     {part.sku && (
-                                        <div className={styles.productSku}>{part.sku}</div>
+                                        <div className={styles['productSku']}>{part.sku}</div>
                                     )}
-                                    <div className={styles.productPrice}>
+                                    <div className={styles['productPrice']}>
                                         {formatCurrency(part.price)}
                                     </div>
-                                    <div className={styles.productStock}>
+                                    <div className={`${styles['productStock']} ${part.quantity <= 5 ? styles['low'] : ''}`}>
                                         Stock: {part.quantity}
                                     </div>
                                 </button>
@@ -317,337 +324,86 @@ export default function POSClient({
                 </div>
 
                 {/* Cart Section */}
-                <div className={styles.cartSection}>
-                    {/* Customer Selector */}
-                    <div className={styles.customerSection}>
-                        <label className={styles.label}>Cliente</label>
+                <div className={styles['cartSection']}>
+                    <div className={styles['sectionTitle']}>
+                        <h2>Carrito</h2>
+                        {cart.length > 0 && <span>{cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}</span>}
+                    </div>
+                    <div className={styles['customerSection']}>
+                        <label className={styles['label']}>Cliente</label>
                         <Input
                             placeholder="Buscar cliente..."
                             value={searchCustomer}
                             onChange={(e) => setSearchCustomer(e.target.value)}
                         />
                         {searchCustomer && filteredCustomers.length > 0 && (
-                            <div className={styles.customerDropdown}>
+                            <div className={styles['customerDropdown']}>
                                 {filteredCustomers.map(customer => (
                                     <button
                                         key={customer.id}
-                                        className={styles.customerOption}
+                                        className={styles['customerOption']}
                                         onClick={() => selectCustomer(customer)}
                                     >
                                         <span>{customer.name}</span>
-                                        {customer.nit && <span className={styles.customerNit}>{customer.nit}</span>}
+                                        {customer.nit && <span className={styles['customerNit']}>{customer.nit}</span>}
                                     </button>
                                 ))}
                             </div>
                         )}
                         {selectedCustomer && (
-                            <div className={styles.selectedCustomer}>
+                            <div className={styles['selectedCustomer']}>
                                 <span>{customerName}</span>
                                 <span>NIT: {customerNIT}</span>
-                                <button onClick={() => {
-                                    setSelectedCustomer(null);
-                                    setCustomerName('Consumidor Final');
-                                    setCustomerNIT('C/F');
-                                }}>
+                                <button
+                                    onClick={() => {
+                                        setSelectedCustomer(null);
+                                        setCustomerName('Consumidor Final');
+                                        setCustomerNIT('C/F');
+                                    }}
+                                    aria-label={`Eliminar cliente ${customerName}`}
+                                >
                                     &times;
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    {/* Cart Items */}
-                    <div className={styles.cartItems}>
-                        {cart.length === 0 ? (
-                            <div className={styles.emptyCart}>
-                                <p>Carrito vacío</p>
-                                <p className={styles.emptyCartHint}>
-                                    Haz clic en los productos para agregarlos
-                                </p>
-                            </div>
-                        ) : (
-                            cart.map(item => (
-                                <div key={item.partId} className={styles.cartItem}>
-                                    <div className={styles.cartItemInfo}>
-                                        <span className={styles.cartItemName}>{item.name}</span>
-                                        <span className={styles.cartItemPrice}>
-                                            {formatCurrency(item.unitPrice)}
-                                        </span>
-                                    </div>
-                                    <div className={styles.cartItemActions}>
-                                        <button
-                                            className={styles.qtyBtn}
-                                            onClick={() => updateQuantity(item.partId, item.quantity - 1)}
-                                        >
-                                            -
-                                        </button>
-                                        <span className={styles.qtyValue}>{item.quantity}</span>
-                                        <button
-                                            className={styles.qtyBtn}
-                                            onClick={() => updateQuantity(item.partId, item.quantity + 1)}
-                                        >
-                                            +
-                                        </button>
-                                        <span className={styles.cartItemTotal}>
-                                            {formatCurrency(item.unitPrice * item.quantity)}
-                                        </span>
-                                        <button
-                                            className={styles.removeBtn}
-                                            onClick={() => removeFromCart(item.partId)}
-                                        >
-                                            &times;
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {/* Discount */}
-                    {cart.length > 0 && (
-                        <div className={styles.discountSection}>
-                            <label className={styles.label}>Descuento</label>
-                            <div className={styles.discountRow}>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={discount}
-                                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                                />
-                                <select
-                                    value={discountType}
-                                    onChange={(e) => setDiscountType(e.target.value as 'amount' | 'percent')}
-                                    className={styles.discountSelect}
-                                >
-                                    <option value="amount">Q</option>
-                                    <option value="percent">%</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Totals */}
-                    <div className={styles.totals}>
-                        <div className={styles.totalRow}>
-                            <span>Subtotal</span>
-                            <span>{formatCurrency(subtotal)}</span>
-                        </div>
-                        {discountAmount > 0 && (
-                            <div className={styles.totalRow}>
-                                <span>Descuento</span>
-                                <span>-{formatCurrency(discountAmount)}</span>
-                            </div>
-                        )}
-                        <div className={styles.totalRow}>
-                            <span>IVA ({taxRate}%)</span>
-                            <span>{formatCurrency(taxAmount)}</span>
-                        </div>
-                        <div className={`${styles.totalRow} ${styles.grandTotal}`}>
-                            <span>TOTAL</span>
-                            <span>{formatCurrency(total)}</span>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className={styles.cartActions}>
-                        <Button
-                            variant="outline"
-                            onClick={clearCart}
-                            disabled={cart.length === 0}
-                        >
-                            Limpiar
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={() => setShowPaymentModal(true)}
-                            disabled={cart.length === 0}
-                        >
-                            Cobrar {formatCurrency(total)}
-                        </Button>
-                    </div>
+                    {/* Cart Section */}
+                    <POSCart
+                        cart={cart}
+                        subtotal={subtotal}
+                        discount={discount}
+                        discountType={discountType}
+                        discountAmount={discountAmount}
+                        taxRate={taxRate}
+                        taxAmount={taxAmount}
+                        total={total}
+                        onUpdateQuantity={updateQuantity}
+                        onRemoveFromCart={removeFromCart}
+                        onClearCart={clearCart}
+                        onDiscountChange={setDiscount}
+                        onDiscountTypeChange={setDiscountType}
+                        onOpenPaymentModal={() => setShowPaymentModal(true)}
+                    />
                 </div>
             </div>
 
             {/* Payment Modal */}
-            {showPaymentModal && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <div className={styles.modalHeader}>
-                            <h2>Procesar Pago</h2>
-                            <button
-                                className={styles.modalClose}
-                                onClick={() => setShowPaymentModal(false)}
-                            >
-                                &times;
-                            </button>
-                        </div>
-
-                        <div className={styles.modalBody}>
-                            {/* Payment Summary */}
-                            <div className={styles.paymentSummary}>
-                                <div className={styles.summaryRow}>
-                                    <span>Total a pagar</span>
-                                    <span className={styles.summaryTotal}>{formatCurrency(total)}</span>
-                                </div>
-                                <div className={styles.summaryRow}>
-                                    <span>Pagado</span>
-                                    <span>{formatCurrency(totalPaid)}</span>
-                                </div>
-                                {remaining > 0 && (
-                                    <div className={`${styles.summaryRow} ${styles.remaining}`}>
-                                        <span>Pendiente</span>
-                                        <span>{formatCurrency(remaining)}</span>
-                                    </div>
-                                )}
-                                {change > 0 && (
-                                    <div className={`${styles.summaryRow} ${styles.change}`}>
-                                        <span>Cambio</span>
-                                        <span>{formatCurrency(change)}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Payment Methods */}
-                            <div className={styles.paymentMethods}>
-                                <h3>Agregar Pago</h3>
-                                <PaymentForm
-                                    remainingAmount={remaining > 0 ? remaining : 0}
-                                    onAdd={addPayment}
-                                />
-                            </div>
-
-                            {/* Added Payments */}
-                            {payments.length > 0 && (
-                                <div className={styles.paymentsList}>
-                                    <h3>Pagos Agregados</h3>
-                                    {payments.map(payment => (
-                                        <div key={payment.id} className={styles.paymentItem}>
-                                            <span className={styles.paymentMethod}>
-                                                {getPaymentMethodLabel(payment.paymentMethod)}
-                                            </span>
-                                            <span className={styles.paymentAmount}>
-                                                {formatCurrency(payment.amount)}
-                                            </span>
-                                            <button
-                                                className={styles.removePaymentBtn}
-                                                onClick={() => removePayment(payment.id)}
-                                            >
-                                                &times;
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Notes */}
-                            <div className={styles.notesSection}>
-                                <label className={styles.label}>Notas (opcional)</label>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Notas adicionales..."
-                                    className={styles.notesInput}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles.modalFooter}>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowPaymentModal(false)}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={processSale}
-                                disabled={isSubmitting || totalPaid < total}
-                                isLoading={isSubmitting}
-                            >
-                                {isSubmitting ? 'Procesando...' : 'Completar Venta'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <POSPaymentModal
+                isOpen={showPaymentModal}
+                total={total}
+                totalPaid={totalPaid}
+                remaining={remaining}
+                change={change}
+                payments={payments}
+                notes={notes}
+                isSubmitting={isSubmitting}
+                onClose={() => setShowPaymentModal(false)}
+                onAddPayment={addPayment}
+                onRemovePayment={removePayment}
+                onNotesChange={setNotes}
+                onProcessSale={processSale}
+            />
         </div>
     );
-}
-
-// ============================================================================
-// PAYMENT FORM COMPONENT
-// ============================================================================
-
-interface PaymentFormProps {
-    remainingAmount: number;
-    onAdd: (method: PaymentMethod, amount: number, ref?: string) => void;
-}
-
-function PaymentForm({ remainingAmount, onAdd }: PaymentFormProps) {
-    const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
-    const [amount, setAmount] = useState(remainingAmount);
-    const [transactionRef, setTransactionRef] = useState('');
-
-    const handleAdd = () => {
-        if (amount <= 0) return;
-        onAdd(method, amount, transactionRef || undefined);
-        setAmount(remainingAmount - amount > 0 ? remainingAmount - amount : 0);
-        setTransactionRef('');
-    };
-
-    const needsRef = method === PaymentMethod.CARD || method === PaymentMethod.TRANSFER;
-
-    return (
-        <div className={styles.paymentForm}>
-            <div className={styles.paymentFormRow}>
-                <select
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                    className={styles.methodSelect}
-                >
-                    <option value={PaymentMethod.CASH}>Efectivo</option>
-                    <option value={PaymentMethod.CARD}>Tarjeta</option>
-                    <option value={PaymentMethod.TRANSFER}>Transferencia</option>
-                    <option value={PaymentMethod.CHECK}>Cheque</option>
-                    <option value={PaymentMethod.OTHER}>Otro</option>
-                </select>
-                <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                    placeholder="Monto"
-                />
-            </div>
-            {needsRef && (
-                <Input
-                    placeholder="Referencia de transacción"
-                    value={transactionRef}
-                    onChange={(e) => setTransactionRef(e.target.value)}
-                />
-            )}
-            <Button
-                variant="secondary"
-                onClick={handleAdd}
-                disabled={amount <= 0}
-            >
-                Agregar Pago
-            </Button>
-        </div>
-    );
-}
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function getPaymentMethodLabel(method: PaymentMethod): string {
-    const labels: Record<PaymentMethod, string> = {
-        CASH: 'Efectivo',
-        CARD: 'Tarjeta',
-        TRANSFER: 'Transferencia',
-        CHECK: 'Cheque',
-        OTHER: 'Otro',
-    };
-    return labels[method];
 }

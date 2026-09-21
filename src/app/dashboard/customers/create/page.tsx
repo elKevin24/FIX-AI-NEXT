@@ -1,7 +1,17 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui';
+import { Card, CardBody } from '@/components/ui';
 import CreateCustomerForm from './CreateCustomerForm';
+import PageHeader from '@/components/PageHeader';
+
+export const metadata = {
+  title: 'Nuevo Cliente',
+  description: 'Registra un cliente nuevo con sus datos de contacto y equipo.',
+  openGraph: {
+    title: 'Nuevo Cliente | FIX Workshop',
+    description: 'Registra un cliente nuevo con sus datos de contacto y equipo.',
+  },
+};
 
 export default async function CreateCustomerPage() {
   const session = await auth();
@@ -11,14 +21,12 @@ export default async function CreateCustomerPage() {
   }
 
   return (
-    <div style={{ padding: 'var(--spacing-6)', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <PageHeader
+        title="Nuevo Cliente"
+        subtitle="Crea un nuevo registro de cliente"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Add New Customer</CardTitle>
-          <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
-            Create a new customer record
-          </p>
-        </CardHeader>
         <CardBody>
           <CreateCustomerForm />
         </CardBody>

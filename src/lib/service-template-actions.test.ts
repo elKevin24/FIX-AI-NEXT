@@ -180,6 +180,8 @@ describe('service-template-actions', () => {
 
       mockDb.serviceTemplate.findUnique.mockResolvedValue(template);
       mockDb.customer.findUnique.mockResolvedValue({ id: customerId, tenantId: 'tenant-1' });
+      mockTx.ticket.create.mockResolvedValue({ id: 'tick-1', ticketNumber: 'T-100' });
+      // Part stock is below the required quantity — trigger the stock error
       mockTx.part.findUnique.mockResolvedValue({ id: 'part-1', quantity: 1, tenantId: 'tenant-1' });
 
       const formData = new FormData();

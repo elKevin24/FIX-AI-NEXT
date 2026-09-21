@@ -17,7 +17,7 @@ interface EmailLayoutProps {
   children: React.ReactNode;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fix-ai-next.vercel.app';
+const baseUrl = process.env['NEXT_PUBLIC_APP_URL'] || 'https://fix-ai-next.vercel.app';
 
 export const EmailLayout = ({
   previewText,

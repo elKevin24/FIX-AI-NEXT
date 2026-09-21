@@ -1,0 +1,368 @@
+import { PaymentMethod, POSSaleStatus, Prisma } from '@prisma/client';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { z } from 'zod';
+import { CreatePOSSaleSchema } from '@/lib/schemas';
+import {
+  POSCartItem,
+  POSPaymentItem,
+  POSSaleFilters,
+  SaleLineItem,
+  SaleTotals,
+  decimalToNumber,
+  normalizeSaleDecimals,
+} from './types';
+
+type TenantDb = ReturnType<typeof getTenantPrisma>;
+type ValidatedPOSSaleData = z.infer<typeof CreatePOSSaleSchema>;
+
+export async function buildValidatedSaleTotals(
+  db: TenantDb,
+  cartItems: POSCartItem[],
+  discount: number,
+  taxRate: number,
+): Promise<SaleTotals> {
+  const partIds = cartItems.map((item) => item.partId);
+  const parts = await db.part.findMany({
+    where: { id: { in: partIds } },
+  });
+
+  if (parts.length !== partIds.length) {
+    throw new Error('Uno o más productos no fueron encontrados');
+  }
+
+  const saleItems: SaleLineItem[] = [];
+  let subtotal = 0;
+
+  for (const cartItem of cartItems) {
+    const part = parts.find((p: (typeof parts)[number]) => p.id === cartItem.partId);
+    if (!part) {
+      throw new Error(`Producto ${cartItem.partId} no encontrado`);
+    }
+    if (part.quantity < cartItem.quantity) {
+      throw new Error(`Stock insuficiente para "${part.name}". Disponible: ${part.quantity}`);
+    }
+
+    const unitPrice = decimalToNumber(part.price);
+    const lineTotal = unitPrice * cartItem.quantity;
+    subtotal += lineTotal;
+
+    saleItems.push({ partId: part.id, partName: part.name, quantity: cartItem.quantity, unitPrice, total: lineTotal });
+  }
+
+  const discountAmount = discount;
+  const taxableAmount = subtotal - discountAmount;
+  const taxAmount = (taxableAmount * taxRate) / 100;
+  const total = taxableAmount + taxAmount;
+
+  return { saleItems, subtotal, discountAmount, taxableAmount, taxAmount, total };
+}
+
+export function assertPaymentsCoverTotal(totalPayments: number, saleTotal: number): number {
+  if (totalPayments < saleTotal) {
+    throw new Error(
+      `El total de pagos (Q${totalPayments.toFixed(2)}) es menor al total (Q${saleTotal.toFixed(2)})`,
+    );
+  }
+  return totalPayments - saleTotal;
+}
+
+export async function requireOpenCashRegister(
+  db: TenantDb,
+  tenantId: string,
+  hasCashPayment: boolean,
+) {
+  if (!hasCashPayment) return null;
+
+  const register = await db.cashRegister.findFirst({
+    where: { tenantId, isOpen: true },
+  });
+
+  if (!register) {
+    throw new Error('No hay una caja abierta. Abra una caja para recibir pagos en efectivo.');
+  }
+
+  return register;
+}
+
+export class CreatePOSSaleUseCase {
+  static async execute(
+    data: ValidatedPOSSaleData,
+    taxRate: number,
+    tenantId: string,
+    userId: string,
+    db: TenantDb
+  ) {
+    const saleTotals = await buildValidatedSaleTotals(db, data.items, data.discountAmount ?? 0, taxRate);
+
+    const totalPayments = data.payments.reduce((sum, payment) => sum + payment.amount, 0);
+    const changeGiven = assertPaymentsCoverTotal(totalPayments, saleTotals.total);
+
+    const hasCashPayment = data.payments.some((p) => p.paymentMethod === PaymentMethod.CASH);
+    const openCashRegister = await requireOpenCashRegister(db, tenantId, hasCashPayment);
+
+    const sale = await db.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const newSale = await tx.pOSSale.create({
+          data: {
+            saleNumber: '', // Assigned by DB trigger trg_assign_sale_number
+            customerId: data.customerId || null,
+            customerName: data.customerName || 'Consumidor Final',
+            subtotal: new Prisma.Decimal(saleTotals.subtotal),
+            taxRate: new Prisma.Decimal(taxRate),
+            taxAmount: new Prisma.Decimal(saleTotals.taxAmount),
+            discountAmount: new Prisma.Decimal(saleTotals.discountAmount),
+            total: new Prisma.Decimal(saleTotals.total),
+            amountPaid: new Prisma.Decimal(totalPayments),
+            changeGiven: new Prisma.Decimal(changeGiven),
+            status: POSSaleStatus.COMPLETED,
+            notes: data.notes,
+            tenantId,
+            cashRegisterId: openCashRegister?.id ?? null,
+            createdById: userId,
+          },
+        });
+
+        for (const item of saleTotals.saleItems) {
+          await tx.pOSSaleItem.create({
+            data: {
+              saleId: newSale.id,
+              partId: item.partId,
+              quantity: item.quantity,
+              unitPrice: new Prisma.Decimal(item.unitPrice),
+            },
+          });
+        }
+
+        for (const payment of data.payments) {
+          await tx.pOSSalePayment.create({
+            data: {
+              saleId: newSale.id,
+              amount: new Prisma.Decimal(payment.amount),
+              method: payment.paymentMethod,
+              reference: payment.transactionRef,
+            },
+          });
+
+          if (payment.paymentMethod === PaymentMethod.CASH && openCashRegister) {
+            await tx.cashTransaction.create({
+              data: {
+                type: 'INCOME',
+                amount: new Prisma.Decimal(payment.amount),
+                description: `Venta POS ${newSale.saleNumber}`,
+                reference: newSale.id,
+                cashRegisterId: openCashRegister.id,
+                tenantId,
+                createdById: userId,
+              },
+            });
+          }
+        }
+
+        return newSale;
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+
+    return sale;
+  }
+}
+
+export class VoidPOSSaleUseCase {
+  static async execute(
+    saleId: string,
+    reason: string,
+    tenantId: string,
+    userId: string,
+    db: TenantDb
+  ) {
+    if (!reason?.trim()) {
+      throw new Error('Debe proporcionar una razón para anular la venta');
+    }
+
+    const sale = await db.pOSSale.findFirst({
+      where: { id: saleId, tenantId },
+      include: { items: true, payments: true, creditNotes: true },
+    });
+
+    if (!sale) throw new Error('Venta no encontrada');
+    if (sale.status !== POSSaleStatus.COMPLETED) throw new Error('Solo se pueden anular ventas completadas');
+    if (sale.creditNotes.length > 0) {
+      throw new Error('Esta venta tiene notas de crédito asociadas. Use el proceso de devolución.');
+    }
+
+    const cashPayments = sale.payments.filter(
+      (p: (typeof sale.payments)[number]) => p.method === PaymentMethod.CASH,
+    );
+    const openCashRegister = await requireOpenCashRegister(db, tenantId, cashPayments.length > 0);
+
+    await db.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        await tx.pOSSale.update({
+          where: { id: saleId },
+          data: {
+            status: POSSaleStatus.VOIDED,
+            notes: sale.notes ? `${sale.notes}\n\nANULADA: ${reason}` : `ANULADA: ${reason}`,
+          },
+        });
+
+        if (openCashRegister) {
+          const totalCashRefund = cashPayments.reduce(
+            (sum: number, payment: (typeof cashPayments)[number]) => sum + decimalToNumber(payment.amount),
+            0,
+          );
+
+          if (totalCashRefund > 0) {
+            await tx.cashTransaction.create({
+              data: {
+                type: 'EXPENSE',
+                amount: new Prisma.Decimal(totalCashRefund),
+                description: `Anulación venta ${sale.saleNumber}: ${reason}`,
+                reference: saleId,
+                cashRegisterId: openCashRegister.id,
+                tenantId,
+                createdById: userId,
+              },
+            });
+          }
+        }
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+
+    return { success: true };
+  }
+}
+
+export class GetPOSSalesUseCase {
+  static async execute(filters: POSSaleFilters | undefined, tenantId: string, db: TenantDb) {
+    const where: Record<string, unknown> = { tenantId };
+
+    if (filters?.status) where['status'] = filters.status;
+    if (filters?.customerId) where['customerId'] = filters.customerId;
+
+    if (filters?.from || filters?.to) {
+      const dateRange: Record<string, unknown> = {};
+      if (filters.from) dateRange['gte'] = filters.from;
+      if (filters.to) dateRange['lte'] = filters.to;
+      where['createdAt'] = dateRange;
+    }
+
+    if (filters?.search) {
+      where['OR'] = [
+        { saleNumber: { contains: filters.search, mode: 'insensitive' } },
+        { customerName: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    const sales = await db.pOSSale.findMany({
+      where,
+      include: {
+        customer: { select: { id: true, name: true, nit: true } },
+        items: { select: { id: true, quantity: true, unitPrice: true, part: { select: { name: true } } } },
+        payments: { select: { method: true, amount: true } },
+        createdBy: { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return sales.map((sale: (typeof sales)[number]) => ({
+      ...normalizeSaleDecimals(sale),
+      customerNIT: sale.customer?.nit ?? null,
+      items: sale.items.map((item: (typeof sale.items)[number]) => ({
+        id: item.id,
+        partName: item.part.name,
+        quantity: item.quantity,
+        unitPrice: decimalToNumber(item.unitPrice),
+        total: decimalToNumber(item.unitPrice) * item.quantity,
+      })),
+      payments: sale.payments.map((payment: (typeof sale.payments)[number]) => ({
+        paymentMethod: payment.method,
+        amount: decimalToNumber(payment.amount),
+      })),
+    }));
+  }
+}
+
+export class GetPartsForPOSUseCase {
+  static async execute(search: string | undefined, db: TenantDb) {
+    const where: Record<string, unknown> = { quantity: { gt: 0 } };
+
+    if (search?.trim()) {
+      where['OR'] = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const parts = await db.part.findMany({
+      where,
+      select: { id: true, name: true, sku: true, quantity: true, price: true, category: true },
+      orderBy: { name: 'asc' },
+    });
+
+    return parts.map((part: (typeof parts)[number]) => ({ ...part, price: decimalToNumber(part.price) }));
+  }
+}
+
+export class GetCustomersForPOSUseCase {
+  static async execute(search: string | undefined, tenantId: string, db: TenantDb) {
+    const where: Record<string, unknown> = { tenantId };
+
+    if (search?.trim()) {
+      where['OR'] = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { nit: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    return db.customer.findMany({
+      where,
+      select: { id: true, name: true, nit: true, phone: true },
+      orderBy: { name: 'asc' },
+      take: 20,
+    });
+  }
+}
+
+export class GetPOSSalesStatsUseCase {
+  static async execute(from: Date | undefined, to: Date | undefined, tenantId: string, db: TenantDb) {
+    const where: Record<string, unknown> = { tenantId, status: POSSaleStatus.COMPLETED };
+
+    if (from || to) {
+      const dateRange: Record<string, unknown> = {};
+      if (from) dateRange['gte'] = from;
+      if (to) dateRange['lte'] = to;
+      where['createdAt'] = dateRange;
+    }
+
+    const [stats, payments] = await Promise.all([
+      db.pOSSale.aggregate({
+        _sum: { total: true, taxAmount: true, discountAmount: true },
+        _count: { id: true },
+        where,
+      }),
+      db.pOSSalePayment.findMany({
+        where: { sale: where },
+        select: { method: true, amount: true },
+      }),
+    ]);
+
+    const byPaymentMethod = payments.reduce(
+      (acc: Record<string, number>, payment: (typeof payments)[number]) => {
+        if (!payment.method) return acc;
+        acc[payment.method] = (acc[payment.method] ?? 0) + decimalToNumber(payment.amount);
+        return acc;
+      },
+      {},
+    );
+
+    return {
+      salesCount: stats._count.id,
+      totalSales: decimalToNumber(stats._sum.total),
+      totalTax: decimalToNumber(stats._sum.taxAmount),
+      totalDiscount: decimalToNumber(stats._sum.discountAmount),
+      byPaymentMethod,
+    };
+  }
+}

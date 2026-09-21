@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
+import { hasPermission, type UserRole } from '@/lib/auth-utils';
 
 /**
  * Get a single ticket by ID with tenant isolation
@@ -63,7 +64,7 @@ export async function GET(
         return NextResponse.json(ticket);
     } catch (error) {
         console.error('Failed to fetch ticket:', error);
-        return NextResponse.json({ error: 'Failed to fetch ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -113,12 +114,12 @@ export async function PATCH(
         return NextResponse.json(ticket);
     } catch (error) {
         console.error('Failed to update ticket:', error);
-        return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
 /**
- * Delete a ticket (ADMIN only)
+ * Delete a ticket.
  */
 export async function DELETE(
     request: Request,
@@ -126,8 +127,11 @@ export async function DELETE(
 ) {
     const session = await auth();
 
-    if (!session?.user?.tenantId || session.user.role !== 'ADMIN') {
+    if (!session?.user?.tenantId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!hasPermission(session.user.role as UserRole, 'canDeleteTickets')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { id } = await params;
@@ -151,6 +155,6 @@ export async function DELETE(
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Failed to delete ticket:', error);
-        return NextResponse.json({ error: 'Failed to delete ticket' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

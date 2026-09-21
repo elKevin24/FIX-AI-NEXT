@@ -18,11 +18,13 @@ interface TicketStatusChangedEmailProps {
 const translate = (status: string) => {
     const map: Record<string, string> = {
         'OPEN': 'Abierto',
+        'WAITING_APPROVAL': 'Esperando Aprobación',
         'IN_PROGRESS': 'En Progreso',
         'WAITING_FOR_PARTS': 'Esperando Repuestos',
         'RESOLVED': 'Resuelto',
         'CLOSED': 'Cerrado',
-        'CANCELLED': 'Cancelado'
+        'CANCELLED': 'Cancelado',
+        'REJECTED': 'Rechazado'
     };
     return map[status] || status;
 };
@@ -30,10 +32,12 @@ const translate = (status: string) => {
 const getStatusColor = (status: string) => {
     switch(status) {
         case 'IN_PROGRESS': return '#3B82F6'; // Blue
+        case 'WAITING_APPROVAL': return '#8B5CF6'; // Purple
         case 'WAITING_FOR_PARTS': return '#F59E0B'; // Orange
         case 'RESOLVED': return '#10B981'; // Green
         case 'CLOSED': return '#6B7280'; // Gray
         case 'CANCELLED': return '#EF4444'; // Red
+        case 'REJECTED': return '#B91C1C'; // Dark Red
         default: return '#6366F1'; // Indigo
     }
 };

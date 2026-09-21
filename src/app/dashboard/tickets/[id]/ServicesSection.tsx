@@ -3,6 +3,7 @@
 import { useActionState, useState, useEffect } from 'react';
 import { addServiceToTicket, removeServiceFromTicket } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 import styles from '../tickets.module.css';
 
 interface Service {
@@ -52,31 +53,32 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
     }, [removeState, router]);
 
     return (
-        <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
-                <button
+        <div className={styles['section']}>
+            <div className={styles['sectionHeader']}>
+                <h3 className={styles['sectionTitle']}>Servicios y Mano de Obra ({servicesUsed.length})</h3>
+                <Button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? styles.cancelBtn : styles.createBtn}
+                    variant={showAddForm ? 'ghost' : 'primary'}
+                    size="sm"
                 >
                     {showAddForm ? 'Cancelar' : '+ Agregar Servicio'}
-                </button>
+                </Button>
             </div>
 
             {/* Add Service Form */}
             {showAddForm && (
-                <form action={addAction} className={styles.inlineForm}>
+                <form action={addAction} className={styles['inlineForm']}>
                     <input type="hidden" name="ticketId" value={ticketId} />
 
-                    <div className={styles.gridForm} style={{ gridTemplateColumns: '1fr auto' }}>
-                        <div className={styles.formGroup}>
-                            <label className={styles.label}>Servicio / Labor</label>
+                    <div className={styles['gridForm']} style={{ gridTemplateColumns: '1fr auto' }}>
+                        <div className={styles['formGroup']}>
+                            <label className={styles['label']}>Servicio / Labor</label>
                             <select
                                 name="serviceId"
                                 value={selectedServiceId}
                                 onChange={(e) => setSelectedServiceId(e.target.value)}
                                 required
-                                className={styles.select}
+                                className={styles['select']}
                             >
                                 <option value="">Seleccionar servicio...</option>
                                 {availableServices.map(service => (
@@ -87,17 +89,19 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                             </select>
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
+                            variant="primary"
+                            size="sm"
+                            isLoading={isAdding}
                             disabled={isAdding || !selectedServiceId}
-                            className={styles.createBtn}
                         >
-                            {isAdding ? 'Agregando...' : 'Agregar'}
-                        </button>
+                            Agregar
+                        </Button>
                     </div>
 
                     {addState?.message && !addState.success && (
-                        <p className={styles.errorMessage}>
+                        <p className={styles['errorMessage']}>
                             {addState.message}
                         </p>
                     )}
@@ -106,26 +110,27 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
 
             {/* Services List */}
             {servicesUsed.length === 0 ? (
-                <div className={styles.emptyState}>
+                <div className={styles['emptyState']}>
                     No hay cargos de mano de obra registrados.
                 </div>
             ) : (
                 <>
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
+                    <div className={styles['tableWrapper']}>
+                        <table className={styles['table']}>
+                          <caption className="sr-only">Servicios del ticket</caption>
                             <thead>
-                                <tr className={styles.tableHeaderRow}>
-                                    <th>Descripción del Servicio</th>
-                                    <th>Fecha Registro</th>
-                                    <th style={{ textAlign: 'right' }}>Costo Labor</th>
-                                    <th style={{ textAlign: 'center' }}>Acción</th>
+                                <tr className={styles['tableHeaderRow']}>
+                                    <th scope="col">Descripción del Servicio</th>
+                                    <th scope="col">Fecha Registro</th>
+                                    <th scope="col" style={{ textAlign: 'right' }}>Costo Labor</th>
+                                    <th scope="col" style={{ textAlign: 'center' }}>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {servicesUsed.map((usage) => (
-                                    <tr key={usage.id} className={styles.tableRow}>
+                                    <tr key={usage.id} className={styles['tableRow']}>
                                         <td><strong>{usage.name}</strong></td>
-                                        <td className={styles.textMuted}>{new Date(usage.createdAt).toLocaleDateString()}</td>
+                                        <td className={styles['textMuted']}>{new Date(usage.createdAt).toLocaleDateString()}</td>
                                         <td style={{ textAlign: 'right' }}><strong>Q{Number(usage.laborCost).toFixed(2)}</strong></td>
                                         <td style={{ textAlign: 'center' }}>
                                             <form action={removeAction}>
@@ -133,10 +138,18 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                                                 <button
                                                     type="submit"
                                                     disabled={isRemoving}
-                                                    className={styles.textDanger}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8125rem' }}
+                                                    className={styles['textDanger']}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'underline',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600
+                                                    }}
+                                                    aria-label={`Eliminar servicio ${usage.name}`}
                                                 >
-                                                    Eliminar
+                                                    {isRemoving ? 'Eliminando...' : 'Eliminar'}
                                                 </button>
                                             </form>
                                         </td>
@@ -147,17 +160,17 @@ export default function ServicesSection({ ticketId, servicesUsed, availableServi
                     </div>
 
                     {/* Total Labor */}
-                    <div className={styles.summaryCard}>
-                        <div className={styles.summaryItem} style={{ gridColumn: 'span 2' }}>
-                            <span className={styles.summaryLabel}>Total Mano de Obra</span>
-                            <span className={`${styles.summaryValue} ${styles.textInfo}`}>Q{totalLaborCost.toFixed(2)}</span>
+                    <div className={styles['summaryCard']}>
+                        <div className={styles['summaryItem']} style={{ gridColumn: 'span 2' }}>
+                            <span className={styles['summaryLabel']}>Total Mano de Obra</span>
+                            <span className={`${styles['summaryValue']} ${styles['textInfo']}`}>Q{totalLaborCost.toFixed(2)}</span>
                         </div>
                     </div>
                 </>
             )}
 
             {removeState?.message && !removeState.success && (
-                <p className={styles.errorMessage}>
+                <p className={styles['errorMessage']}>
                     {removeState.message}
                 </p>
             )}

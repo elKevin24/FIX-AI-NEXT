@@ -21,3 +21,10 @@ export { Alert } from './Alert';
 export type { AlertProps } from './Alert';
 
 export { default as SearchInputGroup } from './SearchInputGroup';
+export { Modal } from './Modal';
+export { DataTable } from './DataTable';
+export { default as PaginationControls } from './PaginationControls';
+export { default as BrandLogo } from './BrandLogo';
+export { default as ExportButton } from './ExportButton';
+export { default as CsvExportButton } from './CsvExportButton';
+export { default as ThemeSwitcher } from './ThemeSwitcher';

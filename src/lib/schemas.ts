@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { ServiceCategory } from '@/generated/prisma';
+import { ServiceCategory } from '@prisma/client';
+import { passwordSchema } from '@/lib/password-utils';
 
 // ============================================================================
 // TICKET SCHEMAS
@@ -60,27 +61,96 @@ export const UpdateTicketSchema = z.object({
   cancellationReason: z.string().max(500, 'El motivo de cancelación es demasiado largo.').optional().nullable(),
 });
 
+export const UpdateTicketStatusSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'RESOLVED', 'CLOSED', 'CANCELLED'], {
+    errorMap: () => ({ message: 'Estado de ticket inválido.' })
+  }),
+  note: z.string().optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.status === 'CANCELLED') {
+    if (!data.note || data.note.trim().length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['note'],
+        message: 'Debes ingresar un motivo de cancelación de al menos 10 caracteres.',
+      });
+    }
+  }
+});
+
+export const DeleteTicketSchema = z.object({
+  ticketId: z.string().min(1, 'ID de ticket requerido'),
+  reason: z.string().min(10, 'El motivo de eliminación debe tener al menos 10 caracteres.'),
+});
+
 // ============================================================================
 // USER SCHEMAS
 // ============================================================================
 
 export const CreateUserSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Formato de email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
   }),
+  name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  password: z.union([passwordSchema, z.literal('')]).optional(),
+}).superRefine((data, ctx) => {
+  const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+  const hasFirst = typeof data.firstName === 'string' && data.firstName.trim().length > 0;
+  if (!hasName && !hasFirst) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'El nombre es requerido',
+      path: data.firstName !== undefined ? ['firstName'] : ['name'],
+    });
+  }
+}).transform((data) => {
+  const fullName = (data.name?.trim() || [data.firstName, data.lastName].filter(Boolean).join(' ').trim()) || '';
+  const parts = fullName.split(' ');
+  const firstName = data.firstName?.trim() || parts[0] || '';
+  const lastName = data.lastName?.trim() || parts.slice(1).join(' ') || '';
+  return {
+    email: data.email,
+    role: data.role,
+    name: fullName,
+    firstName,
+    lastName,
+    password: data.password || '',
+  };
 });
 
 export const UpdateUserSchema = z.object({
   userId: z.string().uuid('ID de usuario inválido'),
-  name: z.string().min(1, 'El nombre es requerido'),
-  email: z.string().email('Formato de email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+  email: z.string().email('Formato de email inválido').optional(),
+  name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER'], {
     errorMap: () => ({ message: 'Rol inválido' })
-  }),
+  }).optional(),
+  password: z.union([passwordSchema, z.literal('')]).optional(),
+}).transform((data) => {
+  const fullName = data.name?.trim() || [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined;
+  const parts = fullName ? fullName.split(' ') : [];
+  const firstName = data.firstName?.trim() || parts[0] || undefined;
+  const lastName = data.lastName?.trim() || parts.slice(1).join(' ') || undefined;
+  return {
+    ...data,
+    name: fullName,
+    firstName,
+    lastName,
+  };
+});
+
+export const UserActionCreateSchema = CreateUserSchema;
+export const UserActionUpdateSchema = UpdateUserSchema;
+
+export const ResetPasswordSchema = z.object({
+  userId: z.string().uuid('ID de usuario inválido'),
+  newPassword: z.string().optional(),
 });
 
 // ============================================================================
@@ -254,4 +324,107 @@ export const RegisterPaymentSchema = z.object({
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER', 'OTHER'], { errorMap: () => ({ message: 'Método de pago inválido' }) }),
   transactionRef: z.string().max(100).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
+});
+
+export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
+export type UpdateTicketInput = z.infer<typeof UpdateTicketSchema>;
+export type CreateCustomerInput = z.infer<typeof CreateCustomerSchema>;
+export type UpdateCustomerInput = z.infer<typeof UpdateCustomerSchema>;
+export type CreatePartInput = z.infer<typeof CreatePartSchema>;
+export type UpdatePartInput = z.infer<typeof UpdatePartSchema>;
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface UpdateUserInput {
+  userId: string;
+  name?: string;
+  email?: string;
+  role?: 'ADMIN' | 'MANAGER' | 'TECHNICIAN' | 'VIEWER';
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+}
+// ============================================================================
+// REPORTS SCHEMAS
+// ============================================================================
+
+export const DateRangeSchema = z.object({
+  startDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+  endDate: z.string().transform((str) => new Date(str)).optional().nullable(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: "La fecha de fin debe ser posterior a la fecha de inicio",
+  path: ["endDate"],
+});
+
+// ============================================================================
+// NOTIFICATIONS SCHEMAS
+// ============================================================================
+
+export const NotificationFilterSchema = z.object({
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(20),
+});
+
+export const NotificationIdSchema = z.object({
+  id: z.string().uuid('ID de notificación inválido'),
+});
+
+// ============================================================================
+// SLA SCHEMAS
+// ============================================================================
+
+export const SLACheckSchema = z.object({
+  tenantId: z.string().uuid('ID de tenant inválido').optional(), // Opcional para correr el SLA limitadamente
+});
+
+export const UpdateSLASettingsSchema = z.object({
+  slaWarningPercent: z.number().min(1, 'Debe ser al menos 1%').max(99, 'No puede superar el 99%'),
+  slaCriticalPercent: z.number().min(1, 'Debe ser al menos 1%').max(100, 'No puede superar el 100%'),
+  slaEmailEnabled: z.boolean(),
+  slaInAppEnabled: z.boolean(),
+}).refine(data => data.slaWarningPercent < data.slaCriticalPercent, {
+  message: 'El porcentaje de advertencia debe ser menor al porcentaje crítico',
+  path: ['slaWarningPercent'],
+});
+
+// ============================================================================
+// QUOTATION EXPORT SCHEMAS
+// ============================================================================
+
+export const QuotationExportSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)').optional(),
+  status: z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELLED']).optional(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return data.endDate >= data.startDate;
+  }
+  return true;
+}, {
+  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
+  path: ['endDate'],
+});
+
+export const UpdateTenantSettingsSchema = z.object({
+  businessName: z.string().min(1, 'El nombre del negocio es requerido').nullable().optional(),
+  businessNIT: z.string().nullable().optional(),
+  businessAddress: z.string().nullable().optional(),
+  businessPhone: z.string().nullable().optional(),
+  businessEmail: z.string().email('Formato de email inválido').nullable().optional().or(z.literal('')),
+  taxRate: z.number().min(0, 'La tasa no puede ser negativa').max(100, 'La tasa no puede exceder 100%').optional(),
+  taxName: z.string().optional(),
+  currency: z.string().optional(),
+  defaultPaymentTerms: z.string().nullable().optional(),
+  invoiceFooter: z.string().nullable().optional(),
 });

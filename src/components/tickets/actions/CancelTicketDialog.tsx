@@ -16,6 +16,8 @@ interface CancelTicketDialogProps {
 
 export function CancelTicketDialog({ ticketId, isOpen, onClose, onSuccess }: CancelTicketDialogProps) {
   const [state, action, isPending] = useActionState(updateTicketStatus, null);
+  const [reason, setReason] = React.useState('');
+  const isValidLength = reason.trim().length >= 10;
 
   useEffect(() => {
     if (state?.success) {
@@ -40,38 +42,45 @@ export function CancelTicketDialog({ ticketId, isOpen, onClose, onSuccess }: Can
             type="submit" 
             form="cancel-ticket-form" 
             isLoading={isPending}
+            disabled={!isValidLength || isPending}
           >
             Confirmar Cancelación
           </Button>
         </>
       }
     >
-      <form id="cancel-ticket-form" action={action} className={styles.form}>
+      <form id="cancel-ticket-form" action={action} className={styles['form']}>
         <input type="hidden" name="ticketId" value={ticketId} />
         <input type="hidden" name="status" value="CANCELLED" />
         
-        <div className={styles.warningBox}>
-          <p className={styles.warningText}>
+        <div className={styles['warningBox']}>
+          <p className={styles['warningText']}>
             ⚠️ Advertencia: Al cancelar este ticket, cualquier repuesto asignado y no utilizado será devuelto automáticamente al inventario.
           </p>
         </div>
 
-        <div className={styles.fieldGroup}>
-          <label htmlFor="cancel-reason" className={styles.label}>
-            Motivo de la cancelación *
+        <div className={styles['fieldGroup']}>
+          <label htmlFor="cancel-reason" className={styles['label']}>
+            Motivo de la cancelación * (mínimo 10 caracteres)
           </label>
           <textarea
             id="cancel-reason"
             name="note"
-            className={styles.textarea}
+            className={styles['textarea']}
             placeholder="Ej: Cliente rechazó el presupuesto / Equipo irreparable..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            minLength={10}
             required
             autoFocus
           />
+          <small style={{ color: isValidLength ? '#059669' : '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
+            {reason.trim().length} / 10 caracteres mínimos
+          </small>
         </div>
 
         {state?.message && !state.success && (
-          <div className={styles.errorBox}>
+          <div className={styles['errorBox']}>
             {state.message}
           </div>
         )}
