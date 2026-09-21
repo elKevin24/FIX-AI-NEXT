@@ -46,7 +46,6 @@ export async function GET(request: NextRequest) {
           ORDER BY "createdAt" DESC
           LIMIT 20;
         `;
-        console.log('[API Search] Raw query results:', { search, count: Array.isArray(customers) ? customers.length : 0 }); // DEBUG: Log results safely
       } else {
         // Fallback to standard Prisma for list without search (preserves relations easily)
         customers = await db.customer.findMany({
