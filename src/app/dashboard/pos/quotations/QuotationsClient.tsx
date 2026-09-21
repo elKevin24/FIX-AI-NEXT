@@ -18,7 +18,7 @@ import { QuotationStatus, PaymentMethod } from '@prisma/client';
 import { formatCurrency } from '@/lib/utils';
 import styles from './quotations.module.css';
 import PageHeader from '@/components/PageHeader';
-import { Part, Customer, CartItem, Payment, QuotationDetail, QuotationsProps } from './types';
+import { Part, CartItem, Payment, QuotationDetail, QuotationsProps } from './types';
 import { QuotationCreateModal } from './components/QuotationCreateModal';
 import { QuotationDetailModal } from './components/QuotationDetailModal';
 import { QuotationConvertModal } from './components/QuotationConvertModal';

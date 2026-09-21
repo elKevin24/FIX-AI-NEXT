@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { ITicketRepository, TicketFilters, TicketCreateInput, TicketUpdateInput, TicketWithRelations } from '../interfaces/ticket.repository.interface';
-import { TicketStatus, TicketPriority } from '@prisma/client';
+import { TicketStatus } from '@prisma/client';
 
 export class PrismaTicketRepository implements ITicketRepository {
     constructor(

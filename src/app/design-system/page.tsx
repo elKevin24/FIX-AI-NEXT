@@ -4,8 +4,6 @@ import { useState, Suspense } from 'react';
 import { 
   Button, 
   Card, 
-  CardHeader, 
-  CardTitle, 
   CardBody, 
   Badge, 
   Input, 
@@ -47,7 +45,7 @@ export default function DesignSystemPage() {
 function DesignSystemContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage] = useState(1);
 
   const statusOptions: SelectOption[] = [
     { value: 'open', label: 'Abierto' },

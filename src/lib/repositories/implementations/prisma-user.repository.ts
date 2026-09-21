@@ -1,7 +1,6 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { buildUserWhereClause } from '@/lib/user-filters';
 import { IUserRepository, UserFilters, UserCreateInput, UserUpdateInput } from '../interfaces/user.repository.interface';
-import { UserRole } from '@prisma/client';
 
 export class PrismaUserRepository implements IUserRepository {
     constructor(
