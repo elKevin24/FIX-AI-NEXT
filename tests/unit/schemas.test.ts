@@ -129,7 +129,11 @@ describe('UpdateTicketSchema', () => {
   });
 
   it('rechaza estado inválido', () => {
-    expectInvalid(UpdateTicketSchema, { ...valid, status: 'DELETED' }, 'Estado de ticket inválido');
+    expectInvalid(UpdateTicketSchema, { ...valid, status: 'NOT_A_STATUS' }, 'Estado de ticket inválido');
+  });
+
+  it('acepta DELETED como estado terminal válido', () => {
+    expectValid(UpdateTicketSchema, { ...valid, status: 'DELETED' });
   });
 
   it('rechaza ticketId no UUID', () => {

@@ -40,6 +40,7 @@ const STATUS_LABELS: Record<string, string> = {
     CLOSED: 'Cerrado',
     CANCELLED: 'Cancelado',
     REJECTED: 'Rechazado',
+    DELETED: 'Eliminado',
 };
 
 // --- Notification Functions ---

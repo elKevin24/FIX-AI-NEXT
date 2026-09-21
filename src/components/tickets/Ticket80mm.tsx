@@ -37,6 +37,7 @@ const getStatusBadgeClass = (status: string): string => {
         RESUELTO: styles['statusResolved'],
         CERRADO: styles['statusClosed'],
         CANCELADO: styles['statusCancelled'],
+        ELIMINADO: styles['statusCancelled'],
         // Legacy English values (compat)
         OPEN: styles['statusOpen'],
         IN_PROGRESS: styles['statusInProgress'],
@@ -44,6 +45,7 @@ const getStatusBadgeClass = (status: string): string => {
         RESOLVED: styles['statusResolved'],
         CLOSED: styles['statusClosed'],
         CANCELLED: styles['statusCancelled'],
+        DELETED: styles['statusCancelled'],
     };
     return `${styles['statusBadge'] ?? ''} ${statusMap[status] || styles['statusOpen'] || ''}`;
 };

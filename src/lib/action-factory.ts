@@ -6,6 +6,8 @@ import {
     IInvoiceRepository,
     ICashRegisterRepository,
     IAuditLogRepository,
+    IServiceTemplateRepository,
+    ITenantSettingsRepository,
     PrismaCustomerRepository,
     PrismaPartRepository,
     PrismaUserRepository,
@@ -13,6 +15,8 @@ import {
     PrismaInvoiceRepository,
     PrismaCashRegisterRepository,
     PrismaAuditLogRepository,
+    PrismaServiceTemplateRepository,
+    PrismaTenantSettingsRepository,
 } from './repositories';
 
 export interface ActionRepositories {
@@ -23,6 +27,8 @@ export interface ActionRepositories {
     invoiceRepo: IInvoiceRepository;
     cashRegisterRepo: ICashRegisterRepository;
     auditLogRepo: IAuditLogRepository;
+    serviceTemplateRepo: IServiceTemplateRepository;
+    tenantSettingsRepo: ITenantSettingsRepository;
 }
 
 /**
@@ -39,5 +45,7 @@ export function createActionRepositories(tenantId: string, userId?: string): Act
         invoiceRepo: new PrismaInvoiceRepository(tenantId, safeUserId),
         cashRegisterRepo: new PrismaCashRegisterRepository(tenantId, safeUserId),
         auditLogRepo: new PrismaAuditLogRepository(tenantId),
+        serviceTemplateRepo: new PrismaServiceTemplateRepository(tenantId, safeUserId),
+        tenantSettingsRepo: new PrismaTenantSettingsRepository(tenantId, safeUserId),
     };
 }

@@ -27,6 +27,13 @@ describe('Ticket State Machine', () => {
       [TicketStatus.WAITING_APPROVAL, 'reject', TicketStatus.REJECTED],
       [TicketStatus.WAITING_APPROVAL, 'cancel', TicketStatus.CANCELLED],
       [TicketStatus.REJECTED, 'reopen', TicketStatus.OPEN],
+      [TicketStatus.OPEN, 'delete', TicketStatus.DELETED],
+      [TicketStatus.IN_PROGRESS, 'delete', TicketStatus.DELETED],
+      [TicketStatus.WAITING_FOR_PARTS, 'delete', TicketStatus.DELETED],
+      [TicketStatus.RESOLVED, 'delete', TicketStatus.DELETED],
+      [TicketStatus.CLOSED, 'delete', TicketStatus.DELETED],
+      [TicketStatus.CANCELLED, 'delete', TicketStatus.DELETED],
+      [TicketStatus.REJECTED, 'delete', TicketStatus.DELETED],
     ];
     it.each(valid)('%s → %s → %s', (from, action, to) => {
       expect(isValidTransition(from, action as any)).toBe(true);
@@ -62,6 +69,9 @@ describe('Ticket State Machine', () => {
       [TicketStatus.REJECTED, 'deliver'],
       [TicketStatus.REJECTED, 'resolve'],
       [TicketStatus.REJECTED, 'take'],
+      [TicketStatus.DELETED, 'reopen'],
+      [TicketStatus.DELETED, 'cancel'],
+      [TicketStatus.DELETED, 'delete'],
     ];
     it.each(invalid)('%s → %s is rejected', (from, action) => {
       expect(isValidTransition(from, action as any)).toBe(false);
@@ -70,29 +80,32 @@ describe('Ticket State Machine', () => {
   });
 
   describe('getValidActions', () => {
-    it('OPEN allows take, assign, cancel', () => {
-      expect(getValidActions(TicketStatus.OPEN).sort()).toEqual(['assign', 'cancel', 'take']);
+    it('OPEN allows take, assign, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.OPEN).sort()).toEqual(['assign', 'cancel', 'delete', 'take']);
     });
-    it('IN_PROGRESS allows wait_for_parts, resolve, cancel', () => {
-      expect(getValidActions(TicketStatus.IN_PROGRESS).sort()).toEqual(['cancel', 'resolve', 'wait_for_parts']);
+    it('IN_PROGRESS allows wait_for_parts, resolve, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.IN_PROGRESS).sort()).toEqual(['cancel', 'delete', 'resolve', 'wait_for_parts']);
     });
-    it('WAITING_FOR_PARTS allows resume, cancel', () => {
-      expect(getValidActions(TicketStatus.WAITING_FOR_PARTS).sort()).toEqual(['cancel', 'resume']);
+    it('WAITING_FOR_PARTS allows resume, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.WAITING_FOR_PARTS).sort()).toEqual(['cancel', 'delete', 'resume']);
     });
-    it('RESOLVED allows deliver, reopen, cancel', () => {
-      expect(getValidActions(TicketStatus.RESOLVED).sort()).toEqual(['cancel', 'deliver', 'reopen']);
+    it('RESOLVED allows deliver, reopen, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.RESOLVED).sort()).toEqual(['cancel', 'delete', 'deliver', 'reopen']);
     });
-    it('CLOSED allows reopen, cancel', () => {
-      expect(getValidActions(TicketStatus.CLOSED).sort()).toEqual(['cancel', 'reopen']);
+    it('CLOSED allows reopen, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.CLOSED).sort()).toEqual(['cancel', 'delete', 'reopen']);
     });
-    it('CANCELLED only allows reopen', () => {
-      expect(getValidActions(TicketStatus.CANCELLED)).toEqual(['reopen']);
+    it('CANCELLED only allows reopen, delete', () => {
+      expect(getValidActions(TicketStatus.CANCELLED).sort()).toEqual(['delete', 'reopen']);
     });
-    it('WAITING_APPROVAL allows approve, reject, cancel', () => {
-      expect(getValidActions(TicketStatus.WAITING_APPROVAL).sort()).toEqual(['approve', 'cancel', 'reject']);
+    it('WAITING_APPROVAL allows approve, reject, cancel, delete', () => {
+      expect(getValidActions(TicketStatus.WAITING_APPROVAL).sort()).toEqual(['approve', 'cancel', 'delete', 'reject']);
     });
-    it('REJECTED only allows reopen', () => {
-      expect(getValidActions(TicketStatus.REJECTED)).toEqual(['reopen']);
+    it('REJECTED only allows reopen, delete', () => {
+      expect(getValidActions(TicketStatus.REJECTED).sort()).toEqual(['delete', 'reopen']);
+    });
+    it('DELETED is terminal (no actions)', () => {
+      expect(getValidActions(TicketStatus.DELETED)).toEqual([]);
     });
   });
 
@@ -125,6 +138,14 @@ describe('Ticket State Machine', () => {
         expect(isValidTransition(status, 'cancel')).toBe(true);
       }
       expect(isValidTransition(TicketStatus.CANCELLED, 'cancel')).toBe(false);
+    });
+
+    it('delete at any point is valid and terminal', () => {
+      for (const status of [TicketStatus.OPEN, TicketStatus.WAITING_APPROVAL, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_FOR_PARTS, TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED, TicketStatus.REJECTED]) {
+        expect(isValidTransition(status, 'delete')).toBe(true);
+        expect(getNextStatus(status, 'delete')).toBe(TicketStatus.DELETED);
+      }
+      expect(getValidActions(TicketStatus.DELETED)).toEqual([]);
     });
 
     it('reopen from CANCELLED goes to OPEN', () => {

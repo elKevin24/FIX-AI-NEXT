@@ -36,7 +36,7 @@ export async function GET(request: Request) {
             const overdueTickets = await prisma.ticket.findMany({
                 where: {
                     tenantId: setting.tenantId,
-                    status: { notIn: ['CLOSED', 'CANCELLED', 'RESOLVED'] },
+                    status: { notIn: ['CLOSED', 'CANCELLED', 'RESOLVED', 'DELETED', 'REJECTED'] },
                     dueDate: { not: null },
                     assignedToId: { not: null },
                 },

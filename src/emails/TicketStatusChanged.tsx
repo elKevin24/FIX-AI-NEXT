@@ -24,7 +24,8 @@ const translate = (status: string) => {
         'RESOLVED': 'Resuelto',
         'CLOSED': 'Cerrado',
         'CANCELLED': 'Cancelado',
-        'REJECTED': 'Rechazado'
+        'REJECTED': 'Rechazado',
+        'DELETED': 'Eliminado'
     };
     return map[status] || status;
 };
@@ -38,6 +39,7 @@ const getStatusColor = (status: string) => {
         case 'CLOSED': return '#6B7280'; // Gray
         case 'CANCELLED': return '#EF4444'; // Red
         case 'REJECTED': return '#B91C1C'; // Dark Red
+        case 'DELETED': return '#374151'; // Dark Gray - terminal
         default: return '#6366F1'; // Indigo
     }
 };

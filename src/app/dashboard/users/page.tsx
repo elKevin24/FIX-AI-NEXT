@@ -62,7 +62,7 @@ export default async function UsersPage() {
                 select: {
                     assignedTickets: {
                         where: {
-                            status: { notIn: ['RESOLVED', 'CLOSED', 'CANCELLED'] }
+                            status: { notIn: ['RESOLVED', 'CLOSED', 'CANCELLED', 'REJECTED', 'DELETED'] }
                         }
                     }
                 }

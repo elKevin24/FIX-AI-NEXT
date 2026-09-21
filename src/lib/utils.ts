@@ -82,6 +82,8 @@ export const TICKET_STATUS_LABELS: Record<string, string> = {
   RESOLVED: 'Resuelto',
   CLOSED: 'Cerrado',
   CANCELLED: 'Cancelado',
+  REJECTED: 'Rechazado',
+  DELETED: 'Eliminado',
 };
 
 export const TICKET_PRIORITY_LABELS: Record<string, string> = {
