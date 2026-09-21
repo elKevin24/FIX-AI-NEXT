@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email-service';
 import { SLABreachEmail } from '@/emails/SLABreach';
+import { formatDate } from '@/lib/utils';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -76,7 +77,7 @@ export async function GET(request: Request) {
                     if (existingNotification) continue;
 
                     const title = `SLA ${isCritical ? 'CRÍTICO' : 'Advertencia'}: ${ticket.ticketNumber || ticket.title}`;
-                    const message = `El ticket (ID: ${ticket.ticketNumber}) ha consumido el ${consumptionPercentage.toFixed(0)}% del tiempo asignado. Vence: ${due.toLocaleDateString('es-GT')}`;
+                    const message = `El ticket (ID: ${ticket.ticketNumber}) ha consumido el ${consumptionPercentage.toFixed(0)}% del tiempo asignado. Vence: ${formatDate(due)}`;
 
                     // Email notification
                     if (setting.slaEmailEnabled && ticket.assignedTo.email) {

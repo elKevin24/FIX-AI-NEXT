@@ -372,25 +372,49 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                         <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Documentos y Formatos</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <Button
+                                as={Link}
+                                href={`/dashboard/tickets/${ticket.id}/print-half-letter`}
+                                variant="primary"
+                                size="sm"
+                                fullWidth
+                                leftIcon={<span aria-hidden="true">🖨️</span>}
+                            >
+                                Imprimir Media Carta
+                            </Button>
+
+                            <Button
                                 as="a"
-                                href={`/api/tickets/${ticket.id}/pdf/work-order`}
+                                href={`/api/tickets/${ticket.id}/pdf/half-letter`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 variant="secondary"
                                 size="sm"
                                 fullWidth
+                                leftIcon={<span aria-hidden="true">📥</span>}
+                            >
+                                Descargar Media Carta (PDF)
+                            </Button>
+
+                            <Button
+                                as="a"
+                                href={`/api/tickets/${ticket.id}/pdf/work-order`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                variant="ghost"
+                                size="sm"
+                                fullWidth
                                 leftIcon={<span aria-hidden="true">📄</span>}
                             >
-                                Orden de Ingreso (PDF)
+                                Orden de Ingreso (Carta Completa)
                             </Button>
 
                             <Button
                                 as={Link}
                                 href={`/dashboard/tickets/${ticket.id}/ticket80mm`}
-                                variant="secondary"
+                                variant="ghost"
                                 size="sm"
                                 fullWidth
-                                leftIcon={<span aria-hidden="true">🖨️</span>}
+                                leftIcon={<span aria-hidden="true">🧾</span>}
                             >
                                 Ticket Térmico 80mm
                             </Button>

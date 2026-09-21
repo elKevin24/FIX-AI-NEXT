@@ -111,9 +111,14 @@ export default async function Ticket80mmPage({ params }: Props) {
                 title="Ticket 80mm - Orden de Servicio"
                 subtitle="Formato optimizado para impresión térmica y compartir"
                 actions={
-                    <Button as={Link} href={`/dashboard/tickets/${id}`} variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
-                        Volver al Ticket
-                    </Button>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <Button as={Link} href={`/dashboard/tickets/${id}`} variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
+                            Volver al Ticket
+                        </Button>
+                        <Button as={Link} href={`/dashboard/tickets/${id}/print-half-letter`} variant="primary" size="sm" leftIcon={<span aria-hidden="true">🖨️</span>}>
+                            Formato Media Carta
+                        </Button>
+                    </div>
                 }
             />
 
