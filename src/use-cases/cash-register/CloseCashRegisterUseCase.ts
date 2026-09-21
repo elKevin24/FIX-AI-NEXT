@@ -1,4 +1,4 @@
-import { CashRegister, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { ICashRegisterRepository } from '@/lib/repositories/interfaces/cash-register.repository.interface';
 import { createActionRepositories } from '@/lib/action-factory';
 

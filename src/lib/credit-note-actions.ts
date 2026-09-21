@@ -11,7 +11,6 @@ import { CreditNoteStatus } from '@prisma/client';
 import { requireTenantSession } from '@/lib/auth-context';
 import { getTenantSettingsForDocuments } from './tenant-settings-actions';
 import {
-    CreditNoteItemSchema,
     CreateCreditNoteSchema,
     ProcessRefundSchema,
     CreditNoteListItem,

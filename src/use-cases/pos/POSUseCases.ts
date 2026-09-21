@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { CreatePOSSaleSchema } from '@/lib/schemas';
 import {
   POSCartItem,
-  POSPaymentItem,
   POSSaleFilters,
   SaleLineItem,
   SaleTotals,

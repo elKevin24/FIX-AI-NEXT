@@ -564,7 +564,7 @@ export class GetUsersUseCase {
 
     const sortDirection: 'asc' | 'desc' = options?.sortOrder === 'asc' ? 'asc' : 'desc';
 
-    let orderBy: Prisma.UserOrderByWithRelationInput = { createdAt: sortDirection };
+    let orderBy: Prisma.UserOrderByWithRelationInput;
     switch (options?.sortBy) {
       case 'name':
         orderBy = { name: sortDirection };

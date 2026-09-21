@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CreateCustomerUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
+import { CreateCustomerUseCase, DeleteCustomerUseCase } from '@/use-cases/customers/CustomerUseCases';
 import { ICustomerRepository } from '@/lib/repositories';
 
 describe('CustomerUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {

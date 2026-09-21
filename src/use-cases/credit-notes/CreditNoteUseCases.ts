@@ -1,5 +1,5 @@
 import { getTenantPrisma } from '@/lib/tenant-prisma';
-import { CreditNoteStatus, PaymentMethod } from '@prisma/client';
+import { CreditNoteStatus } from '@prisma/client';
 import { z } from 'zod';
 import { reserveInventoryForTenant, restoreInventoryForTenant } from '@/lib/inventory-atomic';
 import {

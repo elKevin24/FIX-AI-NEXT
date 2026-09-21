@@ -3,7 +3,7 @@ import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from '@/lib/notifications';
 import { notifyTicketStatusChange } from '@/lib/ticket-notifications';
 import type { Prisma, TicketStatus } from '@prisma/client';
-import { NotFoundError, ValidationError, BusinessRuleError } from '@/lib/errors';
+import { NotFoundError, ValidationError } from '@/lib/errors';
 import { canTransitionTo } from '@/lib/ticket-state-machine';
 
 export interface UpdateTicketStatusParams {

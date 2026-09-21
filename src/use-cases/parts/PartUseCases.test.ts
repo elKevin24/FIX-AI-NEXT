@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CreatePartUseCase, UpdatePartUseCase, DeletePartUseCase } from '@/use-cases/parts/PartUseCases';
+import { CreatePartUseCase, DeletePartUseCase } from '@/use-cases/parts/PartUseCases';
 import { IPartRepository } from '@/lib/repositories';
 
 describe('PartUseCases with Mock Repository (SOLID DIP & Unit Testing)', () => {

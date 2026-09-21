@@ -3,7 +3,6 @@ import { TicketStatus, UserRole } from '@prisma/client';
 import {
   requireTicketActionPermission,
   TicketAction,
-  AuthorizationError,
 } from '@/lib/auth-utils';
 import {
   isValidTransition,
