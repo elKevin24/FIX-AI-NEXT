@@ -209,7 +209,7 @@ export default function TicketSearchClient({
                                         performSearch(id);
                                     }}
                                     className="demo-button"
-                                    style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-tertiary)', padding: '0.375rem 0.75rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                    style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-tertiary)', minHeight: '44px', padding: '0.375rem 1rem', borderRadius: '1.25rem', fontSize: '0.75rem', cursor: 'pointer', touchAction: 'manipulation', transition: 'all 0.2s ease' }}
                                 >
                                     Demo {demo.deviceType || 'Equipo'} ({demo.title})
                                 </button>
@@ -281,43 +281,17 @@ export default function TicketSearchClient({
                     transform: scale(0.95);
                 }
 
-                /* Desactivar TODOS los outlines, box-shadows y efectos de focus */
-                *,
-                *::before,
-                *::after {
-                    outline: none !important;
-                    -webkit-tap-highlight-color: transparent !important;
-                }
-
-                *:focus,
-                *:focus-visible,
-                *:active,
-                *:hover {
-                    outline: none !important;
-                    box-shadow: none !important;
-                    -webkit-box-shadow: none !important;
-                    -moz-box-shadow: none !important;
-                }
-
-                button:focus,
-                button:focus-visible,
-                button:active,
-                button:hover {
-                    outline: none !important;
-                    box-shadow: none !important;
-                }
-
-                input:focus,
-                input:focus-visible,
-                input:active {
-                    outline: none !important;
-                    box-shadow: none !important;
-                }
-
-                div:focus,
-                div:focus-visible {
-                    outline: none !important;
-                    box-shadow: none !important;
+                /* El bloque que seguía aquí anulaba con !important el
+                   :focus-visible de globals.css y el tap-highlight en *,
+                   :focus, :focus-visible, :active y :hover de todo el
+                   documento (WCAG 2.4.7). Se eliminó para que el anillo de
+                   foco global vuelva a aplicarse, y se compensa aquí con
+                   sombra en los controles de la página. */
+                .search-button:focus-visible,
+                .demo-button:focus-visible,
+                .search-input:focus-visible {
+                    outline: 2px solid var(--color-primary-600);
+                    outline-offset: 2px;
                 }
             `}</style>
             </div>

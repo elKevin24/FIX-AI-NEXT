@@ -37,8 +37,8 @@ Rama objetivo: `feature/mobile-first` desde `develop` (HEAD y develop son idént
 | Gate | Estado | Detalle |
 |---|---|---|
 | `npx tsc --noEmit` | ✅ verde | exit 0, 0 errores |
-| `npx eslint .` | ⚠️ **2 errores preexistentes** | `src/components/pdf/WorkOrderHalfLetterPDF.tsx:499` → 2× `react/no-unescaped-entities` por `(5.5" x 8.5")` sin escapar. **Está en HEAD**, no en el WIP sin commitear. |
-| `npx vitest run` | ⚠️ 556 pass, 3 files fallan | Los 3 fallos son specs de **Playwright** en `e2e/` (untracked) que vitest intenta cargar: `test.describe() from an async test.describe() block`. No es código del repo, es config: vitest no excluye `e2e/`. |
+| `npx eslint .` | ⚠️ **4 errores preexistentes en `develop`** | 2× `react/no-unescaped-entities` en `PrintHalfLetterClient.tsx:368` y 2× en `WorkOrderHalfLetterPDF.tsx:499`, ambos por `(5.5" x 8.5")` sin escapar. |
+| `npx vitest run` | ✅ verde | exit 0 · 60 files · **556 pass, 4 skipped**. Verificado 2 veces seguidas (determinista). Ver nota D2c. |
 | `npx next build` | ❌ bloqueado | `EACCES` por `.next` root-owned |
 
 **Consecuencia para la verificación:** `npm run check:all` **no puede quedar verde** mientras persistan los 2 errores de lint de `WorkOrderHalfLetterPDF.tsx:499` — son de `develop`, ajenos a mobile-first. Criterio de no-regresión aplicado: *ningún error nuevo*; los 2 de lint y los 3 files de `e2e/` son la línea base conocida.
@@ -112,9 +112,12 @@ Rama objetivo: `feature/mobile-first` desde `develop` (HEAD y develop son idént
 
 **D2 · Permisos** — ejecutar el `chown` de §0. Sin esto no se puede ni editar ni compilar.
 
-**D2b · Errores de lint preexistentes** — `WorkOrderHalfLetterPDF.tsx:499` (2× `react/no-unescaped-entities`). Fix de un carácter (`&quot;`). ¿Los arreglo en un commit aparte, los dejo, o los incluyo en la Fase 1? Enquanto tanto son la línea base de no-regresión.
+**D2b · Errores de lint preexistentes — NO tocar, y por qué.**
+`develop` limpio tiene **4** errores: 2 en `PrintHalfLetterClient.tsx:368` y 2 en `WorkOrderHalfLetterPDF.tsx:499`, ambos por `(5.5" x 8.5")` sin escapar. El **WIP del usuario ya arregla los 2 primeros** (`(5.5&quot; x 8.5&quot;)` en `stash@{0}`), así que arreglarlos aquí produciría un conflicto al aplicar su stash. Se dejan intactos y son la línea base de no-regresión: el criterio es *cero errores nuevos*, no `check:all` en verde.
 
-**D2c · `vitest` arrastra los specs de Playwright** — `vitest.config.ts` no excluye `e2e/`, así que 3 specs de Playwright se ejecutan como tests unitarios y fallan. Ruido que oculta fallos reales. ¿Lo excluyo?
+> Corrección de una medición anterior: el primer baseline dio 2 errores porque se midió con el WIP aplicado en el working tree, que ya neutralizaba 2 de los 4. El número real de `develop` es 4.
+
+**D2c · `vitest` y `e2e/` — RESUELTO, era falsa alarma.** La primera medición dio 3 files fallando con `test.describe() from an async test.describe() block` sobre specs de Playwright. `vitest.config.ts:7` **ya excluye** `['tests/e2e/**', 'e2e/**', 'node_modules/**']`, y `npm test` da exit 0 con 556 pass de forma determinista (2 corridas). La causa fue transitoria: los specs de `e2e/` se estaban escribiendo en ese momento (mtime 20:05-20:11) y vitest los descubrió a medio escribir. Sin acción pendiente.
 
 **D3 · Rama** — `feature/mobile-first` (requiere §0). Alternativa si no se corrigen permisos: `fix/mobile-first` (verificado que sí funciona).
 
@@ -132,16 +135,26 @@ Cada fase termina con commit propio. Gate de verificación: `npm run check:all`
 
 **Criterio:** `check:all` verde y rama creada.
 
-### Fase 1 · P0 — Funcionalidad rota en táctil
+### Fase 1 · P0 — Funcionalidad rota en táctil ✅
 Ficheros: `ExportButton.{tsx,module.css}`, `AttachmentsSection.module.css`, `TicketSearchClient.tsx`, `audit-logs/page.tsx`, `Modal.module.css`.
 
-- [ ] **MF-101 (C1)** `ExportButton`: estado `isOpen` + `onClick` + `aria-expanded`; abrir también con teclado (Enter/Escape). Mantener `:hover` como refuerzo, nunca como único mecanismo. Un botón que no funciona en móvil no es un problema de estilo, es una feature rota.
-- [ ] **MF-102 (C2)** `AttachmentsSection.deleteBtn`: 44×44px mínimo, `opacity:1` por defecto en táctil vía `@media (hover:none)`, y `:focus-within` para teclado. Botón destructivo hoy invisible en móvil.
-- [ ] **MF-103 (C3)** `TicketSearchClient`: eliminar el `<style jsx global>` que anula focus/tap-highlight. Si el motivo fue eliminar un anillo duplicate, usar `:focus-visible` correctamente en vez de `* { outline:none !important }`.
-- [ ] **MF-104 (C4)** `audit-logs`: `overflow:'hidden'` → `overflowX:'auto'`, y mover el `nowrap` a la celda de fecha únicamente.
-- [ ] **MF-105 (C7)** `Modal`: `width:100vw`→`width:100%` con `inset:0`, `100vh`→`100dvh`, `max-height` a `dvh`, y `padding-bottom: env(safe-area-inset-bottom)` en el footer.
+- [x] **MF-101 (C1)** `ExportButton`: estado `isOpen` + `onClick` + `aria-expanded`/`aria-haspopup`; cierra con Escape (devolviendo el foco al disparador), con click fuera y al elegir formato. El `:hover` se eliminó: era la causa del bug y habría entrando en conflicto con el toggle por click. Items a 44px con `touch-action: manipulation`.
+- [x] **MF-102 (C2)** `AttachmentsSection.deleteBtn`: 24×24 → 44×44, `opacity:1` bajo `@media (hover:none)`, y `:focus-within` para teclado.
+- [x] **MF-103 (C3)** `TicketSearchClient`: eliminado el `<style jsx global>` con `outline:none !important` sobre `*`, `:focus`, `:focus-visible`, `:active` y `:hover`. El anillo de `globals.css:626` vuelve a aplicarse. De paso, `.demo-button` de 28px → 44px.
+- [x] **MF-104 (C4)** `audit-logs`: `overflow-x` al hijo (conserva el radio del padre), `min-width: 40rem` en la tabla y padding lateral 1.5rem → 1rem. El `nowrap` ya estaba solo en la celda de fecha.
+- [x] **MF-105 (C7)** `Modal`: `width:100vw/height:100vh` → `inset:0`; `max-height` con fallback `90vh` → `90dvh`; footer con `padding-bottom: env(safe-area-inset-bottom)`.
+- [x] **Test de regresión** `ExportButton.test.tsx`, 6 casos. **Verificado que los 6 fallan contra la implementación anterior** (`expected null to be 'true'`), así que es un test real y no tautológico. Sin `@testing-library/jest-dom` en el proyecto, por eso usa aserciones nativas.
 
-**Criterio:** cada uno verificado por `grep` de la ausencia del patrón roto + `check:all` verde + prueba manual en DevTools a 375px.
+**Criterio:** `grep` de ausencia de cada patrón roto + gate completo en verde.
+
+**Gate medido de la Fase 1:**
+
+| Gate | Baseline develop | Tras Fase 1 |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `eslint .` | 4 errores preexistentes | **4 errores, 0 en los archivos tocados** |
+| `npm test` | 556 pass, 4 skipped | **562 pass, 4 skipped** (+6) |
+| `next build` | exit 0, 0 warnings | **exit 0, 0 warnings** |
 
 ### Fase 2 · P0 — Estructura y layout
 Ficheros: `dashboard.module.css`, `layout.tsx` (root y de grupo), `globals.css`.

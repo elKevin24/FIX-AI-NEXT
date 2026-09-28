@@ -80,18 +80,32 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  /* 44x44: mínimo táctil. Antes 24x24 con opacity:0 solo por :hover,
+     lo que hacía el borrado inaccesible e invisible en móvil. */
+  width: 44px;
+  height: 44px;
+  font-size: 1.25rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  touch-action: manipulation;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.card:hover .deleteBtn {
+.card:hover .deleteBtn,
+.card:focus-within .deleteBtn,
+.deleteBtn:focus-visible {
   opacity: 1;
+}
+
+/* Sin hover no hay forma de revelar el botón: siempre visible. */
+@media (hover: none) {
+  .deleteBtn {
+    opacity: 1;
+  }
 }
 
 .uploadZone {

@@ -17,7 +17,9 @@
     overflow: hidden;
 }
 
-.wrapper:hover .dropdown {
+/* El estado es la única fuente de verdad: el :hover anterior dejaba el menú
+   inalcanzable en cualquier dispositivo táctil. */
+.wrapper[data-open] .dropdown {
     display: block;
 }
 
@@ -25,15 +27,18 @@
     display: block;
     width: 100%;
     text-align: left;
+    min-height: 44px;
     padding: 0.5rem 0.875rem;
     background: none;
     border: none;
     color: var(--color-text-primary);
     font-size: 0.8125rem;
     cursor: pointer;
+    touch-action: manipulation;
     transition: background 0.1s;
 }
 
-.dropdownItem:hover {
+.dropdownItem:hover,
+.dropdownItem:focus-visible {
     background: var(--color-bg-secondary);
 }

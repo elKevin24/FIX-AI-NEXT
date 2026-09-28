@@ -40,27 +40,31 @@ export default async function AuditLogsPage(props: {
             />
 
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                {/* overflow:hidden recortaba la tabla sin possibility de scroll:
+                    4 columnas x 1.5rem de padding lateral = 192px, inalcanzable
+                    a 375px. El overflow-x pasa al hijo para conservar el radio. */}
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: '40rem', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                   <caption className="sr-only">Registro de auditoría del sistema</caption>
                     <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                         <tr>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Fecha</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Usuario</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Acción</th>
-                            <th scope="col" style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Detalles</th>
+                            <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Fecha</th>
+                            <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Usuario</th>
+                            <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Acción</th>
+                            <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Detalles</th>
                         </tr>
                     </thead>
                     <tbody>
                         {logs.map((log: any) => (
                             <tr key={log.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                                <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
                                     {new Date(log.createdAt).toLocaleString()}
                                 </td>
-                                <td style={{ padding: '1rem 1.5rem' }}>
+                                <td style={{ padding: '0.75rem 1rem' }}>
                                     <div style={{ fontWeight: 500 }}>{log.user?.name || 'Sistema'}</div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{log.user?.email}</div>
                                 </td>
-                                <td style={{ padding: '1rem 1.5rem' }}>
+                                <td style={{ padding: '0.75rem 1rem' }}>
                                     <span style={{ 
                                         padding: '0.25rem 0.5rem', 
                                         borderRadius: '9999px', 
@@ -72,13 +76,14 @@ export default async function AuditLogsPage(props: {
                                         {log.action}
                                     </span>
                                 </td>
-                                <td style={{ padding: '1rem 1.5rem', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <td style={{ padding: '0.75rem 1rem', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {log.details || '-'}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
