@@ -68,11 +68,19 @@ export async function POST(
         return NextResponse.json({ error: 'Invalid file content (Magic number mismatch)' }, { status: 400 });
     }
 
-    // Upload to Vercel Blob
-    const blob = await put(`tickets/${session.user.tenantId}/${ticketId}/${file.name}`, file, {
-      access: 'public',
-      token: process.env['BLOB_READ_WRITE_TOKEN'],
-    });
+    // Upload to Vercel Blob or local fallback
+    let blobUrl = '';
+    if (process.env['BLOB_READ_WRITE_TOKEN']) {
+      const blob = await put(`tickets/${session.user.tenantId}/${ticketId}/${file.name}`, file, {
+        access: 'public',
+        token: process.env['BLOB_READ_WRITE_TOKEN'],
+      });
+      blobUrl = blob.url;
+    } else {
+      // In-memory data URL mock when Vercel Blob is not configured
+      const base64 = Buffer.from(buffer).toString('base64');
+      blobUrl = `data:${file.type};base64,${base64}`;
+    }
 
     // Save to DB
     const tenantDb = getTenantPrisma(session.user.tenantId, session.user.id);
@@ -83,7 +91,7 @@ export async function POST(
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
-        url: blob.url,
+        url: blobUrl,
         uploadedById: session.user.id,
       },
       include: {
@@ -138,7 +146,7 @@ export async function DELETE(
         }
 
         // Delete from Blob
-        if (attachment.url) {
+        if (attachment.url && !attachment.url.startsWith('data:') && process.env['BLOB_READ_WRITE_TOKEN']) {
             try {
                 await del(attachment.url, {
                     token: process.env['BLOB_READ_WRITE_TOKEN']
