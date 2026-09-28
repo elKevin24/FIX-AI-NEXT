@@ -103,3 +103,24 @@
 .md { max-width: 550px; }
 .lg { max-width: 800px; }
 .xl { max-width: 1100px; }
+
+/* ========================================
+   TOUCH: TARGET SIZE
+   ======================================== */
+
+/* La "x" de cierre son 1.5rem de texto (24px) con 0.25rem de padding: 32x32px,
+   por debajo de los 44px. Es además el target más crítico de la app en
+   términos de frecuencia: se usa en cada modal y cada drawer. */
+@media (hover: none) {
+  .closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    /* El padding original se conserva y el margen negativo compensa, para que
+       el botón crezca hacia fuera sin desplazar el título de la cabecera. */
+    padding: var(--spacing-2);
+    margin: calc(-1 * var(--spacing-2));
+  }
+}

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { UserRole, TicketStatus } from '@prisma/client';
@@ -13,7 +13,7 @@ import { UserRole, TicketStatus } from '@prisma/client';
  *       200:
  *         description: Workload overview retrieved successfully
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.tenantId) {

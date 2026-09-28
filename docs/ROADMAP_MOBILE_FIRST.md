@@ -156,31 +156,39 @@ Ficheros: `ExportButton.{tsx,module.css}`, `AttachmentsSection.module.css`, `Tic
 | `npm test` | 556 pass, 4 skipped | **562 pass, 4 skipped** (+6) |
 | `next build` | exit 0, 0 warnings | **exit 0, 0 warnings** |
 
-### Fase 2 · P0 — Estructura y layout
+### Fase 2 · P0 — Estructura y layout ✅
 Ficheros: `dashboard.module.css`, `layout.tsx` (root y de grupo), `globals.css`.
 
-- [ ] **MF-201 (C5)** `.container{overflow:hidden}`: sacarlo del branch base; dejarlo solo en ≥768px donde sí es scroller (`height:100vh`). Devuelve el `sticky` de TopNav y de la barra de búsqueda en móvil.
-- [ ] **MF-202 (C9)** Eliminar los 6 `<main>` anidados → `<div>`/`<section>`. El root conserva `<main id="main-content">` como único landmark. El skip-link debe apuntar al de contenido.
-- [ ] **MF-203 (C8)** `viewportFit:"cover"` + `env(safe-area-inset-*)` en TopNav, Sidebar y footer de modal.
-- [ ] **MF-204 (C10)** `TemplatePartsManager`: definir las 22 clases ausentes o mapear a existentes. Hoy renderiza `class="undefined"`.
-- [ ] **MF-205 (I12)** `overflow-x:hidden` en `html` además de `body`, y **dejar de usarlo como red de seguridad**: documentar que enmascara bugs. Idealmente quitarlo de `body` una vez arreglados los desbordes reales.
+- [x] **MF-201 (C5)** `.container{overflow:hidden}`: sacarlo del branch base; dejarlo solo en ≥768px donde sí es scroller (`height:100vh`). Devuelve el `sticky` de TopNav y de la barra de búsqueda en móvil.
+- [x] **MF-202 (C9)** Eliminar los 6 `<main>` anidados → `<div>`/`<section>`. El root conserva `<main id="main-content">` como único landmark. El skip-link debe apuntar al de contenido.
+- [x] **MF-203 (C8)** `viewportFit:"cover"` + `env(safe-area-inset-*)` en TopNav, Sidebar y footer de modal.
+- [x] **MF-204 (C10)** `TemplatePartsManager`: definir las 22 clases ausentes o mapear a existentes. Hoy renderiza `class="undefined"`.
+- [x] **MF-205 (I12)** `overflow-x:hidden` en `html` además de `body`, y **dejar de usarlo como red de seguridad**: documentar que enmascara bugs. Idealmente quitarlo de `body` una vez arreglados los desbordes reales.
 
 **Criterio:** `grep -c '<main' src/app/**/*.tsx` = 1 · `sticky` verificado en móvil a 375px · `check:all` verde.
 
-### Fase 3 · P1 — Touch targets e input táctil
-- [ ] **MF-301 (C11)** Subir a ≥16px los `font-size` de **todos** los inputs. Prioridad: `Form.module.css:24,116` (design system, arregla de golpe el grueso de formularios). ⚠️ Es el fix de mayor valor: mata el auto-zoom de iOS y el scroll bloqueado.
-- [ ] **MF-302 (I2)** `Button size="sm"` de 28px → 36px en móvil vía `@media (hover:none)`, manteniendo 28px en desktop. 91 usos se benefician de un solo cambio; no romper el layout de escritorio.
-- [ ] **MF-303 (I3,I4)** Targets sueltos: `history.module.css:206-212`, `SimpleTicketForm.module.css:263-273`, `Modal.module.css:47-57`, `notifications.module.css:146-157`, `NotificationBell.module.css:4-17` → ≥44×44px.
-- [ ] **MF-304** `touch-action: manipulation` en botones/enlaces y `-webkit-tap-highlight-color` global (hoy solo 4 declaraciones aisladas). Quita el delay de ~300ms del doble-tap-zoom en Android.
-- [ ] **MF-305 (I6)** `TopNav`: de `background:transparent` a un fondo con `backdrop-filter` + borde inferior.hoy el badge queda ilegible al scrollear.
+### Fase 3 · P1 — Touch targets e input táctil ✅
 
-**Criterio:** ningún botón/link/icono interactivo por debajo de 44×44px en móvil · sin auto-zoom en iOS · `check:all` verde.
+- [x] **MF-301 (C11)** Los 19 controles de formulario con `font-size` < 16px subidos a `1rem`, en 17 módulos. La medición dio **316** declaraciones por debajo de 16px, pero 295 son etiquetas, badges y texto auxiliar, que no disparan el auto-zoom: solo `input`/`select`/`textarea` lo hacen. Se descartan a propósito `print-half-letter.module.css` (documento impreso a 5.5×8.5", donde el cuerpo pequeño es intencional) y el `label` de `history:355` (no es un control). Incluidos `Form.module.css:24,132`, que son los que arrastran al resto de formularios. Red de seguridad en `globals.css` §TOUCH: `font-size: max(1rem, 1em)` bajo `@media (hover: none)`, para que un control nuevo no reintroduzca el bug sin heredar el fix.
+- [x] **MF-302 (I2)** `Button` a `min-height: 2.25rem` (36px) bajo `@media (hover: none)`, en `.base/.sm/.baseSize/.lg`. `min-height` y no `height` para que el texto envuelto crezca la caja en vez de desbordarla. 36px y no 44px: hay 91 usos de `size="sm"`, y a 44px los botones de tablas y cabeceras descuadran el layout.
+- [x] **MF-303 (I3,I4)** 5 targets a 44×44px bajo `(hover: none)`: `history.modalClose` (24px), `SimpleTicketForm.removeBtn` (14×21px, acción destructiva), `Modal.closeButton` (32px), `notifications.iconBtn` (28px, incluye eliminar), `NotificationBell.bellButton` (36px). Todos con margen negativo para no desplazar el layout.
+- [x] **MF-304** `touch-action: manipulation` en `button, a, [role=button], [role=tab], label[for], summary` y `-webkit-tap-highlight-color: transparent` global, ambos bajo `(hover: none)`. El zoom por pellizco se conserva (WCAG 1.4.4).
+- [x] **MF-305 (I6)** `TopNav`: `background:transparent` → `--color-surface-glass` + `backdrop-filter: blur(12px) saturate(180%)` + borde inferior. El token translúcido es **nuevo** (`globals.css:113,283,419`, en los 3 temas): sin él el blur no tiene nada que difuminar.
+
+**Gate medido de la Fase 3:**
+
+| Gate | Baseline develop | Tras Fase 3 |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `eslint .` | 4 errores preexistentes | **exit 0** — los 4 ya no están, corregidos en el WIP del usuario |
+| `vitest run` | 556 pass, 4 skipped | **562 pass, 4 skipped**. Los 4 avisos `Could not parse CSS stylesheet` son preexistentes, verificado con `git stash` |
+| `next build` | exit 0, 0 warnings | **exit 0**, `✓ Compiled successfully`, 0 warnings |
 
 ### Fase 4 · P1 — Tablas y zoom en el dashboard
 - [ ] **MF-401 (I1)** `DataTable`: vista cards bajo 768px para tickets e invoices. Es la vista principal de la app; hoy exige scroll horizontal de ~900px en 375px. `useMediaQuery` + render alternativo, preservando semántica de tabla en desktop.
 - [ ] **MF-402 (I5)** Verificar el colapso del grid del POS en <1024px con `min-height:0` + `overflow:hidden` en altura indefinida. **Validar en dispositivo real**, no solo por CSS.
-- [ ] **MF-403 (I7)** `globals.css`: `h1` y `--font-size-*` con `clamp()`; gutter de `.container` reducido en móvil. Añadir los primeros `@media (min-width)` del archivo.
-- [ ] **MF-404 (I8)** `next.config.ts`: añadir 360/390/414/480 a `deviceSizes`. Impacto directo en LCP.
+- [~] **MF-403 (I7)** **A medias.** `h1/h2/h3` con `clamp()` hecho (`globals.css:594,599,603`). **Falta** el gutter de `.container` reducido en móvil: sigue con `padding-left/right: var(--spacing-6)` fijo y sin `@media (min-width)`, que era el otro punto del item.
+- [x] **MF-404 (I8)** `next.config.ts`: `deviceSizes` con 360/390/414/480 añadidos. Impacto directo en LCP.
 - [ ] **MF-405 (I10)** Eliminar el CSS muerto (`invoices.module.css:154-161,257-275`, `page.module.css:182-188,355-375`) o conectarlo a las vistas reales.
 
 **Criterio:** tablas legibles a 375px sin scroll en las vistas principales · LCP no degradado · `check:all` verde.

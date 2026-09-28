@@ -93,7 +93,7 @@
   border-radius: 0.5rem;
   background: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   outline: none;

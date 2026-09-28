@@ -5,7 +5,7 @@ import { logAction } from '@/lib/audit-actions';
 import { TechnicianStatus } from '@prisma/client';
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

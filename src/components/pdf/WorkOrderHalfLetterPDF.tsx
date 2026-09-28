@@ -496,7 +496,7 @@ export const WorkOrderHalfLetterPDF: React.FC<HalfLetterWorkOrderData> = ({ tick
                 {/* Footer */}
                 <View style={styles['footerContainer']}>
                     <Text style={styles['footerText']}>
-                        Documento generado por FIX-AI • Formato Media Carta (5.5" x 8.5")
+                        {'Documento generado por FIX-AI • Formato Media Carta (5.5" x 8.5")'}
                     </Text>
                 </View>
             </Page>

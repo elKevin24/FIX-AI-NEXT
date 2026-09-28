@@ -7,7 +7,7 @@ import { toClientMessage } from '@/lib/errors';
 import type { UserRole } from '@prisma/client';
 
 // GET /api/users - List all users in tenant
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
 

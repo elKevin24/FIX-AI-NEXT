@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { hasPermission, UserRole } from '@/lib/auth-utils';
@@ -58,7 +57,7 @@ function iteratorToStream(iterator: any) {
   });
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await auth();
   if (!session?.user?.tenantId) {
     return new Response('Unauthorized', { status: 401 });

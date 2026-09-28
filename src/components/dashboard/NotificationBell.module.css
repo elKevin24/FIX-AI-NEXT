@@ -279,3 +279,19 @@
     outline: 2px solid var(--color-primary-500);
     outline-offset: -2px;
 }
+
+/* ========================================
+   TOUCH: TARGET SIZE
+   ======================================== */
+
+/* La campana mide 0.5rem de padding alrededor de un icono de 20px, o sea
+   36x36px. Está en el TopNav de todo el dashboard, así que es el botón más
+   accesible de la app y 36px es corto para un dedo. El badge .unreadBadge se
+   posiciona con offsets absolutos desde la esquina, así que crece con el
+   botón sin descolocarse. */
+@media (hover: none) {
+    .bellButton {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}

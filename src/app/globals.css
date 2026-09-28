@@ -107,6 +107,10 @@
   --color-surface: hsl(0, 0%, 100%);
   --color-surface-hover: var(--color-gray-50);
   --color-surface-active: var(--color-gray-100);
+  /* Versión translúcida de --color-surface, para barras pegadas al borde con
+     backdrop-filter. Sin un token con alfa, el blur no tiene nada que
+     difuminar y el fondo acaba siendo opaco o invisible. */
+  --color-surface-glass: hsl(0, 0%, 100% / 0.72);
 
   /* Text Colors - High Contrast */
   --color-text-primary: var(--color-gray-900);
@@ -276,6 +280,7 @@
   --color-surface: hsl(210, 20%, 15%);
   --color-surface-hover: hsl(210, 20%, 18%);
   --color-surface-active: hsl(210, 20%, 22%);
+  --color-surface-glass: hsl(210, 20%, 15% / 0.72);
 
   /* Text - Light colors with high contrast */
   --color-text-primary: hsl(210, 20%, 98%);
@@ -411,6 +416,7 @@
   --color-surface: hsl(220, 13%, 18%);
   --color-surface-hover: hsl(220, 13%, 21%);
   --color-surface-active: hsl(220, 13%, 24%);
+  --color-surface-glass: hsl(220, 13%, 18% / 0.72);
 
   /* Text - High contrast for readability */
   --color-text-primary: hsl(213, 12%, 92%);
@@ -585,16 +591,16 @@ h6 {
 }
 
 h1 {
-  font-size: var(--font-size-4xl);
+  font-size: clamp(1.5rem, 4vw + 0.75rem, var(--font-size-4xl));
   font-weight: var(--font-weight-extrabold);
 }
 
 h2 {
-  font-size: var(--font-size-3xl);
+  font-size: clamp(1.25rem, 3vw + 0.5rem, var(--font-size-3xl));
 }
 
 h3 {
-  font-size: var(--font-size-2xl);
+  font-size: clamp(1.125rem, 2vw + 0.5rem, var(--font-size-2xl));
 }
 
 h4 {
@@ -635,6 +641,48 @@ a:hover {
 }
 
 /* ========================================
+   TOUCH: FORM CONTROLS
+   ======================================== */
+
+/* iOS hace auto-zoom al enfocar cualquier control con font-size < 16px, y el
+   zoom no se deshace con un segundo gesto: la página queda ampliada y el
+   scroll bloqueado hasta que el usuario lo deshace a mano. 16px es el umbral
+   exacto (WCAG 1.4.4 lo permite; por debajo rompe la navegación táctil).
+
+   Se aplica solo con (hover: none) para no cambiar la densidad tipográfica en
+   escritorio, donde el auto-zoom no existe y 13-15px son legibles. Los módulos
+   CSS con font-size propio ya suben a 1rem (MF-301); esto cubre los controles
+   que se añadan en el futuro sin heredar ese fix. */
+@media (hover: none) {
+  input,
+  select,
+  textarea {
+    /* max() en vez de un valor fijo: respeta el tamaño propio del control si
+       algún módulo declara más de 16px, y solo sube el floor. */
+    font-size: max(1rem, 1em);
+  }
+
+  /* El double-tap-to-zoom añade ~300ms de retardo al primer tap y además
+     produce un flash de selección de texto. manipulation elimina ambos sin
+     tocar el zoom por pellizco, que sí es una vía de accesibilidad (WCAG
+     1.4.4) y se conserva. */
+  button,
+  a,
+  [role="button"],
+  [role="tab"],
+  label[for],
+  summary {
+    touch-action: manipulation;
+  }
+
+  /* Sin esto iOS pinta un rectángulo gris sobre cada elemento táctil, que
+     sobre fondos oscuros queda ilegible. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ========================================
    LAYOUT UTILITIES
    ======================================== */
 
@@ -643,8 +691,15 @@ a:hover {
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--spacing-6);
-  padding-right: var(--spacing-6);
+  padding-left: var(--spacing-4);
+  padding-right: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: var(--spacing-6);
+    padding-right: var(--spacing-6);
+  }
 }
 
 .container-sm {

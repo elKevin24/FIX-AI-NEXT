@@ -103,7 +103,6 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();

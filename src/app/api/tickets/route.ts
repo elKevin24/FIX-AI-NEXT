@@ -6,7 +6,7 @@ import { CreateTicketSchema } from '@/lib/schemas';
 import { CreateTicketUseCase } from '@/use-cases/tickets/CreateTicketUseCase';
 import { toClientMessage } from '@/lib/errors';
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await auth();
 
     if (!session?.user?.tenantId) {

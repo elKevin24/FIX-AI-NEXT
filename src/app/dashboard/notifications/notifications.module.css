@@ -194,3 +194,20 @@
     pointer-events: none;
     background-color: var(--color-bg-primary);
 }
+
+/* ========================================
+   TOUCH: TARGET SIZE
+   ======================================== */
+
+/* .iconBtn es el contenedor de los botones de acción de cada notificación
+   (marcar leída / eliminar) y con 0.25rem de padding mide 28x28px. Eliminar
+   una notificación con un target de 28px es un fallo de UX, no solo de
+   accesibilidad: el área de error en un dedo es mayor que el botón. */
+@media (hover: none) {
+    .iconBtn {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        /* Margen negativo para que el crecimiento no desplace el contenido. */
+        margin: -0.5rem;
+    }
+}

@@ -7,7 +7,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import { WorkOrderPDF } from '@/components/pdf/WorkOrderPDF';
 
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {

@@ -21,7 +21,12 @@
     width: 100%;
     padding: 0.75rem 1rem;
     font-family: var(--font-family-base);
-    font-size: 0.9375rem;
+    /* 1rem = 16px, no una cifra "bonita". Es el umbral exacto del auto-zoom
+       de iOS: por debajo, enfocar un campo amplía la página y el scroll queda
+       bloqueado. Este es el design system, así que el valor se propaga a todos
+       los formularios de la app. Ver también la red de seguridad en
+       globals.css, sección "TOUCH: FORM CONTROLS". */
+    font-size: 1rem;
     color: var(--color-text-primary);
     background: var(--color-surface);
     border: 1px solid var(--color-border-medium);
@@ -129,7 +134,8 @@
     width: 100%;
     padding: 0.75rem 1rem;
     font-family: var(--font-family-base);
-    font-size: 0.9375rem;
+    /* Ver la nota de .input/.textarea/.select: 16px es el umbral del auto-zoom. */
+    font-size: 1rem;
     color: var(--color-text-primary);
     background: var(--color-surface);
     border: 1px solid var(--color-border-medium);

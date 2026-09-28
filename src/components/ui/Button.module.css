@@ -190,6 +190,31 @@
   width: 100%;
 }
 
+/* ========================================
+   TOUCH: TARGET SIZE
+   ======================================== */
+
+/* .sm mide ~25px con su padding actual (line-height:1 + 13px de texto) y se
+   usa en 91 sitios. En un dedo ese objetivo falla: la tasa de acierto con
+   targets de 24-32px ronda el 65%, frente a ~95% con 44px (WCAG 2.5.5).
+
+   Se sube a 36px y no a 44px por los 91 usos: a 44px los botones 'sm' de
+   tablas y cabeceras desplazan el layout en pantallas donde cabían en dos
+   columnas. 36px es el mejor compromiso dado el uso real; los targets sueltos
+   que sí llegan a 44px están en MF-303.
+
+   min-height y no height: si el texto envuelve, el botón sigue creciendo en
+   lugar de desbordar la caja. El padding horizontal no se toca, porque
+   ensanchar los botones sí rompería las tablas estrechas. */
+@media (hover: none) {
+  .base,
+  .sm,
+  .baseSize,
+  .lg {
+    min-height: 2.25rem; /* 36px */
+  }
+}
+
 /* Loading Spinner */
 .spinner {
   display: inline-block;

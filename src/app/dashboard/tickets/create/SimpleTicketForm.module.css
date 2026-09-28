@@ -310,6 +310,21 @@
     background-color: var(--color-error-50);
 }
 
+/* .removeBtn quita un dispositivo del ticket, una acción destructiva, y con
+   0.125rem de padding mide ~14x21px: prácticamente inclicable con el dedo y,
+   peor, fácil de apretar por error al rellenar el resto del formulario. */
+@media (hover: none) {
+    .removeBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        /* Compensa el crecimiento para no descuadrar la fila del header. */
+        margin: -0.5rem;
+    }
+}
+
 .gridRow {
     display: grid;
     grid-template-columns: 1fr;

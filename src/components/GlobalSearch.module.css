@@ -32,7 +32,7 @@
 .searchInput {
     width: 100%;
     padding: 1rem 3.5rem 1rem 3.5rem;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--color-text-primary);
     background: var(--color-surface);
     backdrop-filter: blur(20px) saturate(180%);

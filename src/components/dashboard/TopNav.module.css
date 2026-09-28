@@ -11,9 +11,27 @@
     height: calc(3rem + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) 0 0.25rem;
     margin-bottom: 0; /* Cero margen inferior */
-    background: transparent; /* Ojo: si es sticky y transparente, el contenido pasará por debajo al scrollear. */
+    /* Fondo translúcido con desenfoque. Antes era `transparent`, lo que hace
+       que una barra sticky sea invisible: el contenido pasa por debajo al
+       hacer scroll y la campana de notificaciones queda ilegible encima de
+       él. El desenfoque deja leer que hay algo por debajo sin que compita con
+       el icono, y el borde inferior marca dónde termina la barra. */
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid var(--color-border-light);
     z-index: 50;
+    /* Solo el contenido de la derecha (la campana) recibe eventos: el resto
+       de la barra es espacio vacío y no debe interceptar toques del contenido
+       que hay detrás. */
     pointer-events: none;
+}
+
+.rightSection {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .rightSection {

@@ -68,7 +68,7 @@
   border: 1px solid var(--color-border-medium);
   background: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .input:focus {

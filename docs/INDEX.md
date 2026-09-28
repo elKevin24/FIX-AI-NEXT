@@ -33,11 +33,12 @@ Bienvenido a la documentación del sistema Multi-Tenant Workshop Management.
   - Trabajo pendiente consolidado y priorizado
 
 ### Roadmaps Activos
-- **[SECURITY_ROADMAP.md](SECURITY_ROADMAP.md)** - Hardening de seguridad (P0–P3) — ~82%
-- **[TICKET_WORKFLOW_ROADMAP.md](TICKET_WORKFLOW_ROADMAP.md)** - UI del workflow de tickets — ~50%
-- **[TRIGGERS_MIDDLEWARE_ROADMAP.md](TRIGGERS_MIDDLEWARE_ROADMAP.md)** - Integridad de datos BD — ~50%
-- **[ROADMAP_FRONTEND_AUDIT.md](ROADMAP_FRONTEND_AUDIT.md)** - SEO/A11y/Performance — ~35%
-- **[THEME_IMPROVEMENTS_ROADMAP.md](THEME_IMPROVEMENTS_ROADMAP.md)** - Sistema de temas — ~80%
+- **[ROADMAP_MOBILE_FIRST.md](ROADMAP_MOBILE_FIRST.md)** - Accesibilidad móvil, touch targets, landmarks e inputs — ~80%
+- **[SECURITY_ROADMAP.md](SECURITY_ROADMAP.md)** - Hardening de seguridad (P0–P3) — 100%
+- **[TICKET_WORKFLOW_ROADMAP.md](TICKET_WORKFLOW_ROADMAP.md)** - UI del workflow de tickets — ~95%
+- **[TRIGGERS_MIDDLEWARE_ROADMAP.md](TRIGGERS_MIDDLEWARE_ROADMAP.md)** - Integridad de datos BD — ~95%
+- **[ROADMAP_FRONTEND_AUDIT.md](ROADMAP_FRONTEND_AUDIT.md)** - SEO/A11y/Performance — ~90%
+- **[THEME_IMPROVEMENTS_ROADMAP.md](THEME_IMPROVEMENTS_ROADMAP.md)** - Sistema de temas — ~90%
 
 ---
 
@@ -71,14 +72,20 @@ Bienvenido a la documentación del sistema Multi-Tenant Workshop Management.
 
 ---
 
-## 📖 Guías
+## 📖 Guías y Formatos
+
+### Formato de Impresión Térmica y Media Carta
+- **[TICKET80MM_USAGE_GUIDE.md](TICKET80MM_USAGE_GUIDE.md)** - Guía de uso de impresión de tickets térmicos 80mm
+- **[TICKET80MM_TECHNICAL_SUMMARY.md](TICKET80MM_TECHNICAL_SUMMARY.md)** - Resumen técnico y arquitectura de impresión 80mm
 
 ### Deployment
 - **[NEON_SETUP.md](guides/NEON_SETUP.md)** - Configuración de PostgreSQL en Neon
 - **[VERCEL_SETUP.md](guides/VERCEL_SETUP.md)** - Deploy en Vercel
 
-### Desarrollo
+### Desarrollo y Fixes
 - **[AUDIT_IMPLEMENTATION.md](guides/AUDIT_IMPLEMENTATION.md)** - Sistema de auditoría
+- **[CRITICAL_FIXES_SUMMARY.md](CRITICAL_FIXES_SUMMARY.md)** - Resumen de correcciones críticas
+- **[PR_SUMMARY_TENANT_CONCURRENCY.md](PR_SUMMARY_TENANT_CONCURRENCY.md)** - Resumen de concurrencia y aislamiento multi-tenant
 
 ---
 

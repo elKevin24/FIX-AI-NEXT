@@ -9,7 +9,7 @@ import type { UserRole } from '@prisma/client';
 
 // GET /api/users/[id] - Get single user
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -109,7 +109,7 @@ export async function PATCH(
 
 // DELETE /api/users/[id] - Delete user
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
