@@ -147,7 +147,7 @@ export default function SimpleTicketForm() {
                 />
 
                 {error && (
-                    <div style={{ marginBottom: '1.5rem' }}>
+                    <div className={styles['errorWrapper']}>
                         <Alert variant="error">{error}</Alert>
                     </div>
                 )}
@@ -159,7 +159,7 @@ export default function SimpleTicketForm() {
                         <div className={styles['cardHeader']}>
                             <h2 className={styles['cardTitle']}>Tipo de Servicio</h2>
                             {selectedTemplate && (
-                                <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--color-primary-600)', fontWeight: 600 }}>
+                                <span className={styles['selectedTemplateBadge']}>
                                     {selectedTemplate.icon || '📋'} {selectedTemplate.name}
                                 </span>
                             )}
@@ -180,7 +180,7 @@ export default function SimpleTicketForm() {
                         </div>
 
                         <div className={styles['customerGrid']}>
-                            <div style={{ gridColumn: '1 / -1' }}>
+                            <div className={styles['fullWidthCol']}>
                                 <CustomerSearch
                                     onSelect={(c) => setCustomer({
                                         id: 'id' in c ? c.id : undefined,
@@ -236,10 +236,10 @@ export default function SimpleTicketForm() {
                                         <p className={styles['customerName']}>{customer.name}</p>
                                         {(customer.email || customer.phone || customer.nit) && (
                                             <div className={styles['customerDetail']}>
-                                                {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
-                                                {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
-                                                {customer.dpi && <span style={{ display: 'block' }}>DPI: {customer.dpi}</span>}
-                                                {customer.nit && <span style={{ display: 'block' }}>NIT: {customer.nit}</span>}
+                                                {customer.email && <span className={styles['customerMetaText']}>{customer.email}</span>}
+                                                {customer.phone && <span className={styles['customerMetaText']}>{customer.phone}</span>}
+                                                {customer.dpi && <span className={styles['customerMetaText']}>DPI: {customer.dpi}</span>}
+                                                {customer.nit && <span className={styles['customerMetaText']}>NIT: {customer.nit}</span>}
                                             </div>
                                         )}
                                     </div>
@@ -250,7 +250,7 @@ export default function SimpleTicketForm() {
 
                     {/* --- Devices Section Header --- */}
                     <div className={styles['devicesHeader']}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                        <div className={styles['devicesHeaderGroup']}>
                             <h2 className={styles['cardTitle']}>Dispositivos</h2>
                             <span className={styles['deviceCount']}>
                                 {devices.length}
@@ -261,15 +261,15 @@ export default function SimpleTicketForm() {
                             variant="secondary"
                             size="sm"
                             onClick={addDevice}
-                            style={{ borderRadius: '999px' }}
+                            className="rounded-full"
                         >
                             + Agregar otro Dispositivo
                         </Button>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className={styles['devicesList']}>
                         {devices.map((device, index) => (
-                            <div key={index} className={`${styles['glassCard']} ${styles['deviceCard']}`} style={{ animationDelay: `${index * 100}ms`, marginBottom: 0 }}>
+                            <div key={index} className={`${styles['glassCard']} ${styles['deviceCard']}`} style={{ animationDelay: `${index * 100}ms` }}>
                                 <div className={styles['deviceHeader']}>
                                     <div className={styles['deviceNumber']}>
                                         #{index + 1}
@@ -286,7 +286,7 @@ export default function SimpleTicketForm() {
                                     )}
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                <div className={styles['deviceFields']}>
                                     <div className={styles['gridRow']}>
                                         <Input
                                             label="Problema Principal *"

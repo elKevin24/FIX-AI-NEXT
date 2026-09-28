@@ -8,7 +8,11 @@
     min-height: 100vh;
     background: var(--color-bg-primary);
     position: relative;
-    overflow: hidden;
+    /* Sin overflow:hidden en el branch base: convertía al contenedor en
+       scrollport sin rango de scroll, y todo position:sticky interno
+       (TopNav, .searchBar de PageHeader) se anclaba a una caja que no se
+       mueve, con lo que no se quedaba fijo en móvil. En >=768px sí hace
+       falta, porque allí .mainContent es el scroller real. */
     flex-direction: column;
 }
 

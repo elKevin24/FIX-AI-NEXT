@@ -4,7 +4,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import TopNav from '@/components/dashboard/TopNav';
 import { ToastProvider } from '@/context/ToastContext';
 import ToastContainer from '@/components/ui/ToastContainer';
-// We don't import Sidebar.module.css here, the component handles it.
+import sidebarStyles from '@/components/dashboard/Sidebar.module.css';
 
 export default async function DashboardLayout({
     children,
@@ -21,25 +21,7 @@ export default async function DashboardLayout({
             }}
             style={{ width: '100%' }}
         >
-            <button 
-                style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'var(--color-surface)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    borderRadius: '0.75rem',
-                    cursor: 'pointer',
-                    color: '#dc2626',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    boxSizing: 'border-box'
-                }}
-            >
+            <button className={sidebarStyles['logoutBtn']} type="submit">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                     <polyline points="16 17 21 12 16 7"></polyline>
@@ -54,10 +36,10 @@ export default async function DashboardLayout({
         <ToastProvider>
             <div className={styles['container']}>
                 <Sidebar logoutButton={logoutButton} userRole={session?.user?.role} />
-                <main className={styles['mainContent']}>
+                <div className={styles['mainContent']}>
                     <TopNav />
                     {children}
-                </main>
+                </div>
                 <ToastContainer />
             </div>
         </ToastProvider>

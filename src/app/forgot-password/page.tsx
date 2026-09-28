@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
   }, undefined);
 
   return (
-    <main className={styles['container']}>
+    <div className={styles['container']}>
       {/* Decorative Blobs */}
       <div className={styles['decorativeBlobs']}>
         <div className={styles['blob']} />
@@ -99,6 +99,6 @@ export default function ForgotPasswordPage() {
           </form>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

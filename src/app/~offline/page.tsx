@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
     return (
-        <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-950 px-4">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-950 px-4">
             <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-sm text-center">
                 <div
                     aria-hidden="true"
@@ -37,6 +37,6 @@ export default function OfflinePage() {
                     Reintentar
                 </button>
             </div>
-        </main>
+        </div>
     );
 }

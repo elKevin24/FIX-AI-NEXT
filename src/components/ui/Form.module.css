@@ -88,14 +88,30 @@
     line-height: 1.4;
 }
 
-.errorMessage {
+.requiredAsterisk {
+    color: var(--color-error-600);
+    font-weight: 700;
+}
+
+.fieldError {
+    display: block;
+    margin-top: var(--spacing-1);
+    font-size: var(--font-size-xs);
     color: var(--color-error-700);
     font-weight: 600;
 }
 
+.helperText {
+    display: block;
+    margin-top: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    line-height: 1.4;
+}
+
 /* Legacy class names for compatibility */
 .formGroup {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--spacing-3);
 }
 
 .formLabel {

@@ -6,12 +6,14 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 0.25rem 0; /* Padding ultra compacto */
+    /* box-sizing:border-box global, así que el alto incluye el padding:
+       3rem útiles + el safe-area, para no quedar bajo el notch en iOS. */
+    height: calc(3rem + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 0 0.25rem;
     margin-bottom: 0; /* Cero margen inferior */
     background: transparent; /* Ojo: si es sticky y transparente, el contenido pasará por debajo al scrollear. */
     z-index: 50;
     pointer-events: none;
-    height: 3rem; /* Altura fija pequeña para reservar espacio exacto */
 }
 
 .rightSection {

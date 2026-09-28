@@ -1,57 +1,57 @@
 /**
- * Estilos para la página de Ticket 80mm
+ * Estilos para la página de Ticket 80mm - Design Tokens & Dark/Light Theme Aware
  */
 
 .container {
     min-height: auto;
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    padding: 24px;
+    background: var(--color-bg-primary);
+    padding: var(--spacing-6);
 }
 
 .header {
     max-width: 800px;
-    margin: 0 auto 32px;
+    margin: 0 auto var(--spacing-6);
     text-align: center;
 }
 
 .backButton {
     display: inline-block;
-    padding: 8px 16px;
-    background: #ffffff;
-    border: 2px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     text-decoration: none;
-    transition: all 0.2s ease;
-    margin-bottom: 16px;
+    transition: all var(--transition-fast);
+    margin-bottom: var(--spacing-4);
 }
 
 .backButton:hover {
-    background: #f9fafb;
-    border-color: #3b82f6;
-    color: #1e40af;
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary-500);
+    color: var(--color-primary-600);
     transform: translateX(-4px);
 }
 
 .title {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
-    margin: 0 0 8px 0;
+    margin: 0 0 var(--spacing-2) 0;
     letter-spacing: -0.02em;
 }
 
 .subtitle {
-    font-size: 14px;
-    color: #6b7280;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
     margin: 0;
 }
 
 .content {
     max-width: 800px;
-    margin: 0 auto 32px;
+    margin: 0 auto var(--spacing-6);
     display: flex;
     justify-content: center;
 }
@@ -59,17 +59,18 @@
 .instructions {
     max-width: 600px;
     margin: 0 auto;
-    background: #ffffff;
-    border: 2px solid #d1d5db;
-    border-radius: 12px;
-    padding: 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    padding: var(--spacing-6);
 }
 
 .instructions h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 16px 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-4) 0;
 }
 
 .instructions ul {
@@ -79,11 +80,11 @@
 }
 
 .instructions li {
-    padding: 12px 0;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 14px;
-    color: #374151;
-    line-height: 1.6;
+    padding: var(--spacing-3) 0;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-normal);
 }
 
 .instructions li:last-child {
@@ -91,8 +92,8 @@
 }
 
 .instructions strong {
-    color: #1f2937;
-    font-weight: 600;
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
 }
 
 /* Print - Ocultar todo excepto el ticket */
@@ -116,27 +117,27 @@
 /* Responsive */
 @media screen and (max-width: 768px) {
     .container {
-        padding: 16px;
+        padding: var(--spacing-4);
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: var(--font-size-xl);
     }
 
     .subtitle {
-        font-size: 13px;
+        font-size: var(--font-size-xs);
     }
 
     .instructions {
-        padding: 16px;
+        padding: var(--spacing-4);
     }
 
     .instructions h2 {
-        font-size: 16px;
+        font-size: var(--font-size-base);
     }
 
     .instructions li {
-        font-size: 13px;
-        padding: 10px 0;
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-2) 0;
     }
 }

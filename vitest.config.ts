@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
-    exclude: ['tests/e2e/**', 'node_modules/**'],
+    exclude: ['tests/e2e/**', 'e2e/**', 'node_modules/**'],
     alias: {
       '@': path.resolve(__dirname, './src'),
       'server-only': path.resolve(__dirname, 'src/test-utils/server-only-stub.ts'),

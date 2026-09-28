@@ -92,6 +92,10 @@ export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
+    // Necesario junto a env(safe-area-inset-*) en la PWA: sin esto iOS
+    // dibuja la app bajo el notch y bajo el home indicator, y el manifest
+    // la declara como display:standalone.
+    viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -204,20 +204,20 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                                 </Button>
                             </div>
 
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Descripción</span>
+                            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+                                <span className={styles['detailLabel']}>Descripción</span>
                                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{ticket.description}</p>
                             </div>
 
                             <div className={styles['gridTwoColumns']}>
                                 <div>
-                                    <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Prioridad</span>
+                                    <span className={styles['detailLabel']}>Prioridad</span>
                                     <span className={`${styles['status']} ${ticket.priority === 'High' ? styles['waiting_for_parts'] : ticket.priority === 'Medium' ? styles['in_progress'] : styles['closed']}`}>
                                         {ticket.priority || 'Sin definir'}
                                     </span>
                                 </div>
                                 <div>
-                                    <span className={styles['label']} style={{ color: 'var(--color-text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Asignado a</span>
+                                    <span className={styles['detailLabel']}>Asignado a</span>
                                     <p><strong>{ticket.assignedTo?.name || ticket.assignedTo?.email || 'Sin asignar'}</strong></p>
                                 </div>
                             </div>
@@ -330,32 +330,32 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 </div>
 
                 {/* Right Column - Customer Info & Timeline */}
-                <div className="lg:col-span-1 flex flex-col gap-6">
+                <div className="lg:col-span-1 flex flex-col gap-4">
                     {/* Customer Info */}
-                    <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
-                        <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Cliente</h3>
-                        <p style={{ fontWeight: '600', marginBottom: '0.25rem', color: 'var(--color-text-primary)' }}>{ticket.customer.name}</p>
+                    <div className={styles['section']} style={{ marginTop: 0 }}>
+                        <h3 className={styles['detailLabel']}>Cliente</h3>
+                        <p style={{ fontWeight: 600, margin: '0 0 var(--spacing-1) 0', color: 'var(--color-text-primary)' }}>{ticket.customer.name}</p>
                         {ticket.customer.email && (
-                            <p className={styles['textMuted']} style={{ fontSize: '0.875rem', margin: '0.125rem 0' }}>{ticket.customer.email}</p>
+                            <p className={styles['textMuted']} style={{ fontSize: 'var(--font-size-xs)', margin: '0.125rem 0' }}>{ticket.customer.email}</p>
                         )}
                         {ticket.customer.phone && (
-                            <p className={styles['textMuted']} style={{ fontSize: '0.875rem', margin: '0.125rem 0' }}>{ticket.customer.phone}</p>
+                            <p className={styles['textMuted']} style={{ fontSize: 'var(--font-size-xs)', margin: '0.125rem 0' }}>{ticket.customer.phone}</p>
                         )}
                         <Button
                             as={Link}
                             href={`/dashboard/customers/${ticket.customer.id}/edit`}
                             variant="secondary"
                             size="sm"
-                            style={{ marginTop: '0.75rem' }}
+                            style={{ marginTop: 'var(--spacing-3)' }}
                         >
                             Ver cliente
                         </Button>
                     </div>
 
                     {/* Dates */}
-                    <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
-                        <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Fechas</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
+                    <div className={styles['section']} style={{ marginTop: 0 }}>
+                        <h3 className={styles['detailLabel']}>Fechas</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)', fontSize: 'var(--font-size-sm)' }}>
                             <div>
                                 <span className={styles['textMuted']}>Creado:</span>{' '}
                                 <strong style={{ color: 'var(--color-text-primary)' }}>{new Date(ticket.createdAt).toLocaleString('es-ES')}</strong>

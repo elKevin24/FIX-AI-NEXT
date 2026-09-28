@@ -168,20 +168,33 @@
 .customerGrid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-    /* Reduced gap */
+    gap: var(--spacing-2);
+}
+
+.fullWidthCol {
+    grid-column: 1 / -1;
+}
+
+.errorWrapper {
+    margin-bottom: var(--spacing-4);
+}
+
+.selectedTemplateBadge {
+    margin-left: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-primary-600);
+    font-weight: 600;
 }
 
 .customerSelected {
     grid-column: 1 / -1;
-    padding: 0.625rem;
-    /* Reduced padding */
+    padding: var(--spacing-3);
     background: linear-gradient(135deg, var(--color-success-50), var(--color-success-100));
     border: 1px solid var(--color-success-500);
-    border-radius: 0.5rem;
+    border-radius: var(--radius-base);
     display: flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: var(--spacing-3);
     animation: fadeIn 0.3s ease;
 }
 
@@ -189,26 +202,33 @@
     width: 2rem;
     height: 2rem;
     background: linear-gradient(135deg, var(--color-success-600), var(--color-success-700));
-    color: white;
-    border-radius: 50%;
+    color: var(--color-on-success, #ffffff);
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     flex-shrink: 0;
 }
 
 .customerName {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     margin: 0 0 0.125rem 0;
     color: var(--color-success-800);
 }
 
 .customerDetail {
-    font-size: 0.75rem;
-    color: var(--color-success-700);
+    font-size: var(--font-size-xs);
+    color: var(--color-success-800);
+    line-height: 1.4;
+}
+
+.customerMetaText {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-success-800);
     line-height: 1.4;
 }
 
@@ -218,25 +238,39 @@
     justify-content: space-between;
     align-items: center;
     padding: 0;
-    margin-top: 0.25rem;
-    /* Added margin */
+    margin-top: var(--spacing-1);
     margin-bottom: 0;
+}
+
+.devicesHeaderGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
 }
 
 .deviceCount {
     background: var(--color-gray-200);
-    /* Simplified background */
     padding: 0.125rem 0.5rem;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     font-size: 0.7rem;
     font-weight: 600;
-    /* Bolder */
     color: var(--color-text-secondary);
 }
 
+.devicesList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.deviceFields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
 .deviceCard {
-    margin-bottom: 0.5rem;
-    /* Reduced margin */
+    margin-bottom: var(--spacing-2);
     animation: slideUp 0.4s ease-out backwards;
 }
 
@@ -244,8 +278,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    /* More space */
+    margin-bottom: var(--spacing-3);
     padding-bottom: 0;
     border-bottom: none;
     /* Simplified: no border */

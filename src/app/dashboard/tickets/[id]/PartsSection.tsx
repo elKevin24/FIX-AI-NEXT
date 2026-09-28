@@ -105,23 +105,17 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
 
             {/* Pending Approval Banner */}
             {hasPendingParts && (
-                <div style={{
-                    backgroundColor: 'var(--color-warning-50, #fffbeb)',
-                    border: '1px solid var(--color-warning-300, #fcd34d)',
-                    borderRadius: '8px',
-                    padding: '1rem 1.25rem',
-                    marginBottom: '1rem',
-                }}>
-                    <p style={{ fontWeight: 700, margin: '0 0 0.25rem', fontSize: '0.9rem', color: 'var(--color-warning-800)' }}>
+                <div className={styles['pendingBanner']}>
+                    <p className={styles['pendingTitle']}>
                         ⏳ Repuestos pendientes de aprobación del cliente
                     </p>
-                    <p style={{ margin: '0 0 0.75rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+                    <p className={styles['pendingText']}>
                         El cliente debe autorizar estos repuestos antes de descontar inventario y facturar.
                     </p>
 
                     {canApprove ? (
                         <>
-                            <div className={styles['actions']} style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <div className={styles['actions']}>
                                 <form action={approveAction}>
                                     <input type="hidden" name="ticketId" value={ticketId} />
                                     <Button
@@ -144,7 +138,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                             </div>
 
                             {showRejectForm && (
-                                <form action={rejectAction} style={{ marginTop: '0.75rem' }}>
+                                <form action={rejectAction} className={styles['inlineForm']} style={{ marginTop: '0.75rem' }}>
                                     <input type="hidden" name="ticketId" value={ticketId} />
                                     <div className={styles['formGroup']}>
                                         <label className={styles['label']}>Motivo del rechazo</label>
@@ -172,7 +166,7 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                             )}
                         </>
                     ) : (
-                        <p style={{ margin: 0, fontSize: '0.8125rem', fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
+                        <p className={styles['textMuted']} style={{ margin: 0, fontSize: '0.8125rem', fontStyle: 'italic' }}>
                             Solo un administrador puede registrar la aprobación del cliente.
                         </p>
                     )}
@@ -285,9 +279,9 @@ export default function PartsSection({ ticketId, partsUsed, availableParts, tick
                                             <td style={{ textAlign: 'right' }}><strong>Q{subtotal.toFixed(2)}</strong></td>
                                             <td style={{ textAlign: 'center' }}>
                                                 {usage.approved ? (
-                                                    <span className={styles['textSuccess']} style={{ fontSize: '0.75rem', fontWeight: 600 }}>✓ Aprobado</span>
+                                                    <span className={styles['approvedBadge']}>✓ Aprobado</span>
                                                 ) : (
-                                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-warning-600, #b45309)' }}>⏳ Pendiente</span>
+                                                    <span className={styles['pendingBadge']}>⏳ Pendiente</span>
                                                 )}
                                             </td>
                                             <td style={{ textAlign: 'center' }}>

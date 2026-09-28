@@ -17,7 +17,13 @@
 
     display: flex;
     flex-direction: column;
-    padding: 0.5rem 1rem;
+    /* Safe-area: en iOS con la PWA en standalone el notch-notch superior y el
+       indicador de inicio inferior se comerían el logo y el logout. En
+       horizontal el notch pasa a estar en un lateral. */
+    padding: calc(0.5rem + env(safe-area-inset-top, 0px))
+             calc(1rem + env(safe-area-inset-right, 0px))
+             calc(0.5rem + env(safe-area-inset-bottom, 0px))
+             calc(1rem + env(safe-area-inset-left, 0px));
     /* Aligned with toggle button (top: 0.5rem, left: 1rem) */
     transform: translateX(-100%);
     /* Hidden by default */

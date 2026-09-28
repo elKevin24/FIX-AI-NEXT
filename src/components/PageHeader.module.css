@@ -79,6 +79,13 @@
 }
 
 /* ========== RESPONSIVE ========== */
+@media (max-width: 767px) {
+    .header {
+        padding-left: 3.5rem;
+        margin-top: 0;
+    }
+}
+
 @media (min-width: 768px) {
     .header {
         flex-direction: row;

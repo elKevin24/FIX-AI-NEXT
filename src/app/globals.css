@@ -549,6 +549,11 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Necesario también en html, no solo en body: en iOS Safari un
+     overflow-x:hidden solo en body se comporta de forma inconsistente.
+     Es una red de seguridad, no una solución: el drawer off-canvas del
+     Sidebar se posiciona en translateX(-100%), fuera del viewport. */
+  overflow-x: hidden;
 }
 
 body {
