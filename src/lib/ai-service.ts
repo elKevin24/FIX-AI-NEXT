@@ -1,9 +1,9 @@
 import 'server-only';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 interface GenerateTextParams {
   prompt: string;
-  modelName?: "gemini-pro" | "gemini-1.5-flash" | "gemini-1.5-pro";
+  modelName?: string;
   temperature?: number;
 }
 
@@ -13,7 +13,7 @@ interface GenerateTextParams {
  */
 export async function generateAIResponse({ 
   prompt, 
-  modelName = "gemini-1.5-flash",
+  modelName = "gemini-2.5-flash", 
   temperature = 0.7 
 }: GenerateTextParams): Promise<string | null> {
   const apiKey = process.env['GEMINI_API_KEY'] || process.env['GOOGLE_AI_API_KEY'];
@@ -23,17 +23,16 @@ export async function generateAIResponse({
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
       model: modelName,
-      generationConfig: {
+      contents: prompt,
+      config: {
         temperature,
-      } 
+      },
     });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    return response.text ?? null;
   } catch (error) {
     console.error("❌ [AI Service] Error generating content:", error);
     throw error;
