@@ -56,8 +56,8 @@ describe('Sidebar Component', () => {
   it('toggles sidebar on mobile button click', () => {
     render(<Sidebar logoutButton={logoutButton} />);
 
-    // Find the toggle button (it has aria-label="Toggle Menu")
-    const toggleBtn = screen.getByLabelText('Toggle Menu');
+    // Find the toggle button (it has aria-label="Abrir menú" or "Toggle Menu")
+    const toggleBtn = screen.getByLabelText(/abrir menú|toggle menu/i);
     
     // Initially, class 'open' should NOT be present (assuming default state is closed)
     // Note: We check classList because CSS modules might hash names, but we used global 'open' in CSS module composition?
