@@ -16,11 +16,12 @@ const cspHeader = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'self'",
+  "frame-ancestors *",
   ...(isProduction ? ["upgrade-insecure-requests"] : []),
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   compress: true,
   deploymentId: process.env['NEXT_DEPLOYMENT_ID'] || process.env['VERCEL_DEPLOYMENT_ID'] || undefined,

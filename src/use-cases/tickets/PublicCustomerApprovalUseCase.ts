@@ -110,7 +110,7 @@ export class PublicCustomerApprovalUseCase {
                 }
 
                 // Cambiar estado del ticket a IN_PROGRESS si estaba esperando aprobacion
-                await tx.ticket.update({
+                const updatedTicket = await tx.ticket.update({
                     where: { id: publicTicket.id },
                     data: {
                         status: "IN_PROGRESS",

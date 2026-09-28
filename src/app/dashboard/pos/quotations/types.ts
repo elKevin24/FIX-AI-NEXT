@@ -1,5 +1,5 @@
 import { QuotationListItem, getQuotationById } from '@/lib/quotation-actions';
-import { PaymentMethod } from '@prisma/client';
+import { QuotationStatus, PaymentMethod } from '@prisma/client';
 
 export type Part = {
     id: string;

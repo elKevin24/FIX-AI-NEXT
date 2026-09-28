@@ -365,7 +365,7 @@ export default function PrintHalfLetterClient({ ticket }: Props) {
 
           <div className={styles['footer']}>
             <p className={styles['footerText']}>
-              Documento generado por FIX-AI • Formato Media Carta (5.5&quot; x 8.5&quot;)
+              {'Documento generado por FIX-AI • Formato Media Carta (5.5" x 8.5")'}
             </p>
           </div>
         </div>

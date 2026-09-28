@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { sendEmail } from '@/lib/email-service';
 
 const originalEnv = { ...process.env };
 

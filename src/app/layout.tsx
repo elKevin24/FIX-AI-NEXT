@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ThemeInit from "@/components/ThemeInit";
 import { SerwistProvider } from "@serwist/turbopack/react";
+
+const SpeedInsights = () => null;
+const Analytics = () => null;
 
 const inter = Inter({
     subsets: ["latin"],
