@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import type { UserRole } from '@prisma/client';
+import type { UserRole, Prisma } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import {
   validateTenantAccess,
