@@ -22,37 +22,81 @@
 .badgePrimary {
   background: var(--color-primary-100);
   color: var(--color-primary-800);
-  border-color: var(--color-primary-200);
+  border-color: var(--color-primary-300);
 }
 
 .badgeSuccess {
   background: var(--color-success-100);
   color: var(--color-success-800);
-  border-color: var(--color-success-200);
+  border-color: var(--color-success-300);
 }
 
 .badgeWarning {
   background: var(--color-warning-100);
-  color: var(--color-warning-800);
-  border-color: var(--color-warning-200);
+  color: var(--color-warning-900);
+  border-color: var(--color-warning-300);
+  font-weight: 800;
 }
 
 .badgeError {
   background: var(--color-error-100);
   color: var(--color-error-800);
-  border-color: var(--color-error-200);
+  border-color: var(--color-error-300);
 }
 
 .badgeInfo {
   background: var(--color-info-100);
   color: var(--color-info-800);
-  border-color: var(--color-info-200);
+  border-color: var(--color-info-300);
 }
 
 .badgeGray {
   background: var(--color-gray-100);
-  color: var(--color-gray-700);
-  border-color: var(--color-gray-200);
+  color: var(--color-gray-800);
+  border-color: var(--color-gray-300);
+}
+
+/* Dark mode explicit high-contrast rules */
+:global([data-theme="dark"]) .badgePrimary,
+:global(.dark) .badgePrimary {
+  background: hsl(220, 70%, 18%);
+  color: hsl(220, 95%, 85%);
+  border-color: hsl(220, 70%, 35%);
+}
+
+:global([data-theme="dark"]) .badgeSuccess,
+:global(.dark) .badgeSuccess {
+  background: hsl(145, 70%, 16%);
+  color: hsl(145, 80%, 82%);
+  border-color: hsl(145, 60%, 32%);
+}
+
+:global([data-theme="dark"]) .badgeWarning,
+:global(.dark) .badgeWarning {
+  background: hsl(35, 80%, 18%);
+  color: hsl(40, 95%, 85%);
+  border-color: hsl(35, 75%, 38%);
+}
+
+:global([data-theme="dark"]) .badgeError,
+:global(.dark) .badgeError {
+  background: hsl(355, 75%, 18%);
+  color: hsl(355, 95%, 85%);
+  border-color: hsl(355, 70%, 38%);
+}
+
+:global([data-theme="dark"]) .badgeInfo,
+:global(.dark) .badgeInfo {
+  background: hsl(205, 80%, 18%);
+  color: hsl(205, 95%, 85%);
+  border-color: hsl(205, 70%, 38%);
+}
+
+:global([data-theme="dark"]) .badgeGray,
+:global(.dark) .badgeGray {
+  background: hsl(210, 20%, 20%);
+  color: hsl(210, 20%, 90%);
+  border-color: hsl(210, 15%, 35%);
 }
 
 /* Badge Sizes */

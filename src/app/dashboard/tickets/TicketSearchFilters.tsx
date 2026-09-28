@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { Input, Select, Button, SearchInputGroup } from '@/components/ui';
 import styles from './searchFilters.module.css';
 
@@ -77,8 +78,9 @@ export default function TicketSearchFilters() {
                     </div>
                     <div className={styles['gridContainer']}>
                         <div className={styles['searchItem']}>
-                            <label className={styles['searchLabel']}>Término de búsqueda</label>
+                            <label htmlFor="ticket-search-input" className={styles['searchLabel']}>Término de búsqueda</label>
                             <SearchInputGroup
+                                id="ticket-search-input"
                                 value={search}
                                 onChange={setSearch}
                                 onSearch={updateFilters}
@@ -113,7 +115,10 @@ export default function TicketSearchFilters() {
                 {/* Filtros Secundarios Agrupados Cognitivamente (Miller Blocks 2 & 3) */}
                 <details className={styles['advancedFilters']} open={Boolean(dateFrom || dateTo || assignedTo || deviceType)}>
                     <summary>
-                        <span>⚙️ Filtros Avanzados (Dispositivo, Asignación y Fechas)</span>
+                        <span>
+                            <SlidersHorizontal size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-2px' }} aria-hidden="true" />
+                            Filtros Avanzados (Dispositivo, Asignación y Fechas)
+                        </span>
                         <span>{Boolean(dateFrom || dateTo || assignedTo || deviceType) ? 'Filtros activos' : 'Desplegar opciones'}</span>
                     </summary>
                     

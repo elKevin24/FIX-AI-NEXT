@@ -21,7 +21,11 @@
   overflow: hidden;
 }
 
-[data-theme="dark"] .card {
+[data-theme="dark"] .card,
+:global([data-theme="dark"]) .card,
+:global(.dark) .card {
+  border: 1px solid var(--color-border-medium);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
   @supports not (backdrop-filter: blur(20px)) {
       background: rgba(30, 30, 35, 0.95);
   }

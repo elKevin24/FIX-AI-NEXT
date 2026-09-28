@@ -24,20 +24,20 @@ interface Customer {
 }
 
 const DEVICE_TYPE_OPTIONS = [
-  { value: 'PC', label: '🖥️ PC / Torre' },
-  { value: 'Laptop', label: '💻 Laptop' },
-  { value: 'Smartphone', label: '📱 Celular' },
-  { value: 'Console', label: '🎮 Consola' },
-  { value: 'Tablet', label: '📱 Tablet' },
-  { value: 'Printer', label: '🖨️ Impresora' },
-  { value: 'Other', label: '🔧 Otro' },
+  { value: 'PC', label: 'PC / Computadora de Torre' },
+  { value: 'Laptop', label: 'Laptop / Portátil' },
+  { value: 'Smartphone', label: 'Teléfono Móvil' },
+  { value: 'Console', label: 'Consola de Videojuegos' },
+  { value: 'Tablet', label: 'Tablet' },
+  { value: 'Printer', label: 'Impresora / Multifuncional' },
+  { value: 'Other', label: 'Otro Dispositivo' },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 'LOW', label: '🟢 Baja' },
-  { value: 'MEDIUM', label: '🟡 Media' },
-  { value: 'HIGH', label: '🟠 Alta' },
-  { value: 'URGENT', label: '🔴 Urgente' },
+  { value: 'LOW', label: 'Baja' },
+  { value: 'MEDIUM', label: 'Media' },
+  { value: 'HIGH', label: 'Alta' },
+  { value: 'URGENT', label: 'Urgente' },
 ];
 
 export default function TicketWizard() {

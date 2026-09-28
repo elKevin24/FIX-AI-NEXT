@@ -10,6 +10,16 @@ import PageHeader from '@/components/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { getFinancialStats } from "@/lib/invoice-actions";
 import { getPOSSalesStats } from "@/lib/pos-actions";
+import { 
+  BarChart3, 
+  Clock, 
+  CheckCircle2, 
+  Users, 
+  CircleDollarSign, 
+  FileText, 
+  ShoppingCart, 
+  Wrench 
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import RecentTicketsTable from '@/components/dashboard/RecentTicketsTable';
 
@@ -243,33 +253,25 @@ export default async function DashboardPage() {
                     title="Tickets Activos"
                     value={activeTickets}
                     label="Abiertos + En Progreso"
-                    icon="📊"
-                    iconBgColor="#dbeafe"
-                    iconColor="#1e40af"
+                    icon={<BarChart3 size={20} />}
                 />
                 <StatCard 
                     title="Esperando Repuestos"
                     value={pendingParts}
                     label="Inventario pendiente"
-                    icon="⏳"
-                    iconBgColor="#fef3c7"
-                    iconColor="#92400e"
+                    icon={<Clock size={20} />}
                 />
                 <StatCard 
                     title="Completados Hoy"
                     value={completedToday}
                     label="Tickets resueltos"
-                    icon="✓"
-                    iconBgColor="#d1fae5"
-                    iconColor="#065f46"
+                    icon={<CheckCircle2 size={20} />}
                 />
                 <StatCard 
                     title="Total Clientes"
                     value={totalCustomers}
                     label="En base de datos"
-                    icon="👥"
-                    iconBgColor="#e0e7ff"
-                    iconColor="#3730a3"
+                    icon={<Users size={20} />}
                 />
             </div>
 
@@ -279,33 +281,25 @@ export default async function DashboardPage() {
                     title="Ingresos Totales"
                     value={formatCurrency(totalIncome)}
                     label="Facturación + POS"
-                    icon="💰"
-                    iconBgColor="#dcfce7"
-                    iconColor="#166534"
+                    icon={<CircleDollarSign size={20} />}
                 />
                 <StatCard 
                     title="Cuentas por Cobrar"
                     value={formatCurrency(pendingCollection)}
                     label="Facturas pendientes"
-                    icon="📋"
-                    iconBgColor="#fef2f2"
-                    iconColor="#991b1b"
+                    icon={<FileText size={20} />}
                 />
                 <StatCard 
                     title="Ventas POS"
                     value={posStats?.salesCount || 0}
                     label="Ventas directas"
-                    icon="🛒"
-                    iconBgColor="#f0f9ff"
-                    iconColor="#075985"
+                    icon={<ShoppingCart size={20} />}
                 />
                 <StatCard 
                     title="Mano de Obra"
                     value={formatCurrency(financialStats?.totalLaborIncome || 0)}
                     label="Ingresos por servicio"
-                    icon="🔧"
-                    iconBgColor="#faf5ff"
-                    iconColor="#6b21a8"
+                    icon={<Wrench size={20} />}
                 />
             </div>
 

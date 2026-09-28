@@ -18,6 +18,12 @@
     box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
+:global([data-theme="dark"]) .searchGroup:focus-within,
+:global(.dark) .searchGroup:focus-within {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
 .searchGroup.error {
     border-color: var(--color-error-600);
 }

@@ -48,6 +48,18 @@ describe('LoginPage', () => {
     expect(password.type).toBe('password');
   });
 
+  it('preserves password value when toggling visibility', () => {
+    render(<LoginPage />);
+    const password = screen.getByLabelText('Contraseña', { selector: 'input' }) as HTMLInputElement;
+    fireEvent.change(password, { target: { value: 'Secret123!' } });
+    expect(password.value).toBe('Secret123!');
+
+    const toggleBtn = screen.getByLabelText(/mostrar contraseña/i);
+    fireEvent.click(toggleBtn);
+    expect(password.type).toBe('text');
+    expect(password.value).toBe('Secret123!');
+  });
+
   it('submit button shows loading text when disabled', () => {
     render(<LoginPage />);
     const button = screen.getByRole('button', { name: /iniciar sesión/i }) as HTMLButtonElement;

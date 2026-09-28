@@ -2,6 +2,8 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import styles from './PaginationControls.module.css';
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -29,37 +31,33 @@ export default function PaginationControls({
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: '1.5rem',
-      paddingTop: '1rem',
-      borderTop: '1px solid var(--color-border-light)'
-    }}>
-      <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-        Mostrando página <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{currentPage}</span> de <span style={{ fontWeight: 600 }}>{totalPages}</span>
-        <span style={{ marginLeft: '0.5rem', color: 'var(--color-text-tertiary)' }}>({totalItems} resultados)</span>
+    <nav className={styles['container']} aria-label="Paginación de resultados">
+      <div className={styles['info']}>
+        Mostrando página <span className={styles['bold']}>{currentPage}</span> de <span className={styles['bold']}>{totalPages}</span>
+        <span className={styles['total']}>({totalItems} resultados)</span>
       </div>
       
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div className={styles['actions']}>
         <Button
           variant="secondary"
           size="sm"
           disabled={!hasPrevPage}
           onClick={() => handlePageChange(currentPage - 1)}
+          leftIcon={<ChevronLeft size={16} />}
         >
-          ← Anterior
+          Anterior
         </Button>
         <Button
           variant="secondary"
           size="sm"
           disabled={!hasNextPage}
           onClick={() => handlePageChange(currentPage + 1)}
+          rightIcon={<ChevronRight size={16} />}
         >
-          Siguiente →
+          Siguiente
         </Button>
       </div>
-    </div>
+    </nav>
   );
 }
+

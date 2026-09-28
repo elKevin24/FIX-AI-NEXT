@@ -1,3 +1,4 @@
+import { ShieldCheck } from 'lucide-react';
 import styles from './PageHeader.module.css';
 import GlobalSearch from './GlobalSearch';
 
@@ -29,7 +30,10 @@ export default function PageHeader({
                 </div>
             )}
             {superAdmin && (
-                <span className={styles['superAdminBadge']}>👑 Super Admin</span>
+                <span className={styles['superAdminBadge']}>
+                    <ShieldCheck size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-2px' }} aria-hidden="true" />
+                    Super Admin
+                </span>
             )}
         </header>
     );

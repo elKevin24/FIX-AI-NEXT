@@ -78,11 +78,17 @@
   background: var(--color-surface);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: none;
+  border: 1px solid var(--color-border-light);
   border-radius: 1.5rem;
   padding: 2.5rem 2rem;
   box-shadow: var(--shadow-xl);
   position: relative;
+}
+
+:global([data-theme="dark"]) .card,
+:global(.dark) .card {
+  border: 1px solid var(--color-border-medium);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
 .card::before {
@@ -213,28 +219,51 @@
   padding-right: 3rem;
   font-size: 0.9375rem;
   color: var(--color-text-primary);
-  background: var(--color-surface-hover);
-  border: none;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-medium);
   border-radius: 0.75rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
+}
+
+.input::-ms-reveal,
+.input::-ms-clear {
+  display: none;
 }
 
 .input:hover {
   background: var(--color-surface);
-  transform: translateY(-1px);
+  border-color: var(--color-border-strong);
 }
 
 .input::placeholder {
   color: var(--color-text-tertiary);
   font-weight: 400;
+  opacity: 0.85;
 }
 
 .input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary-600), 0 0 30px rgba(59, 130, 246, 0.15);
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
   background: var(--color-surface);
-  transform: translateY(-2px);
+}
+
+:global([data-theme="dark"]) .input,
+:global(.dark) .input {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-medium);
+}
+
+:global([data-theme="dark"]) .input:hover,
+:global(.dark) .input:hover {
+  border-color: var(--color-border-strong);
+}
+
+:global([data-theme="dark"]) .input:focus,
+:global(.dark) .input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 .inputIcon {
@@ -246,30 +275,50 @@
   height: 1.25rem;
   color: var(--color-text-tertiary);
   pointer-events: none;
+  z-index: 5;
 }
 
 .passwordToggle {
   position: absolute;
-  right: 1rem;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: transparent;
   border: none;
+  border-radius: 0.5rem;
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
+  width: 2.25rem;
+  height: 2.25rem;
   display: flex;
   align-items: center;
-  transition: color 0.2s;
+  justify-content: center;
+  z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color 0.2s, background-color 0.2s;
 }
 
 .passwordToggle:hover {
   color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global([data-theme="dark"]) .passwordToggle:hover,
+:global(.dark) .passwordToggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.passwordToggle:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 1px;
 }
 
 .passwordToggle svg {
   width: 1.25rem;
   height: 1.25rem;
+  pointer-events: none;
 }
 
 /* Error Message */
@@ -339,6 +388,11 @@
   background: var(--color-primary-700);
   transform: translateY(-3px) scale(1.02);
   box-shadow: var(--shadow-xl);
+}
+
+.submitButton:focus-visible {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
 }
 
 .submitButton:active:not(:disabled) {
