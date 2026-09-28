@@ -90,13 +90,32 @@ Este archivo sirve como contexto principal para entender la arquitectura, conven
 ### Base de Datos
 *   Si modificas `schema.prisma`:
     1.  `npx prisma generate`
-    2.  `npm run db:migrate` (local) o `npm run neon:migrate` (prod).
+    2.  `npx prisma validate`
+    3.  `npm run db:migrate` (local) o `npm run neon:migrate` (prod).
+
+### Protocolo Obligatorio Pre-Push y Blindaje CI/CD (GitHub Actions)
+Para garantizar que **ningún workflow de GitHub Actions falle jamás**, se debe cumplir este protocolo estricto antes de realizar cualquier push:
+1.  **Lockfile Obligatorio:** `package-lock.json` **NUNCA** debe ser eliminado ni omitido de Git.
+2.  **Versiones de Actions:** Usar siempre versiones oficiales estables:
+    *   `actions/checkout@v4`
+    *   `actions/setup-node@v4` (especificando `node-version: '22'` y `cache: 'npm'`)
+    *   `actions/cache@v4`
+    *   `actions/github-script@v7`
+3.  **Auditoría Local Pre-Push Obligatoria (Gating):**
+    *   `npm run check:types` (0 errores de TypeScript con `noUncheckedIndexedAccess`).
+    *   `npm run lint` (0 errores y 0 warnings de ESLint).
+    *   `npm test` (Suite completa de Vitest en verde).
+    *   `npx prisma validate` (Esquema de BD íntegro).
+    *   `npm run build` (Compilación limpia de Next.js sin errores de SSR o CSS).
 
 ## 5. Comandos Útiles
 *   `npm run dev`: Servidor de desarrollo.
 *   `npm run build`: Verificar compilación (TypeScript/Next.js).
 *   `npm run lint`: Linter.
+*   `npm run check:types`: Verificación de tipos TypeScript.
+*   `npm test`: Suite de pruebas unitarias/integración (Vitest).
+*   `npx prisma validate`: Validación del esquema Prisma.
 *   `npx prisma studio`: Explorador de BD.
 
 ---
-**Nota para el Agente:** Al implementar nuevas funciones, prioriza la seguridad: usa siempre `getTenantPrisma` y crea el esquema Zod correspondiente en `src/lib/schemas.ts` antes de escribir la lógica.
+**Nota para el Agente:** Al implementar nuevas funciones, prioriza la seguridad: usa siempre `getTenantPrisma`, crea el esquema Zod correspondiente en `src/lib/schemas.ts` antes de escribir la lógica, y ejecuta la suite de validación pre-push antes de cualquier commit o push.
