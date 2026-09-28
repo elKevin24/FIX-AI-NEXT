@@ -9,6 +9,7 @@ import {
     getSortedRowModel,
     SortingState,
 } from '@tanstack/react-table';
+import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import styles from './DataTable.module.css';
 
 interface DataTableProps<TData, TValue> {
@@ -84,20 +85,32 @@ export function DataTable<TData, TValue>({
                             <tr key={headerGroup.id} className={styles['headerRow']}>
                                 {headerGroup.headers.map((header) => {
                                     const meta = header.column.columnDef.meta as any;
+                                    const isSorted = header.column.getIsSorted();
+                                    const canSort = header.column.getCanSort();
+                                    const ariaSortValue = isSorted === 'asc' ? 'ascending' : isSorted === 'desc' ? 'descending' : canSort ? 'none' : undefined;
+
                                     return (
                                         <th scope="col" 
                                             key={header.id} 
                                             className={`${styles['headerCell']} ${meta?.className || ''}`}
-                                            onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                                            style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                            onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                                            style={{ cursor: canSort ? 'pointer' : 'default' }}
+                                            aria-sort={ariaSortValue}
                                         >
                                             <div className={styles['headerContent']}>
                                                 {flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
                                                 )}
-                                                {header.column.getIsSorted() === 'asc' && ' 🔼'}
-                                                {header.column.getIsSorted() === 'desc' && ' 🔽'}
+                                                {isSorted === 'asc' && (
+                                                    <ArrowUp size={14} className={styles['sortIcon'] || ''} aria-hidden="true" />
+                                                )}
+                                                {isSorted === 'desc' && (
+                                                    <ArrowDown size={14} className={styles['sortIcon'] || ''} aria-hidden="true" />
+                                                )}
+                                                {!isSorted && canSort && (
+                                                    <ArrowUpDown size={12} className={styles['sortPlaceholderIcon'] || ''} aria-hidden="true" />
+                                                )}
                                             </div>
                                         </th>
                                     );

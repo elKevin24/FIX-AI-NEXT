@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardBody } from '@/components/ui/Card';
+import styles from './StatCard.module.css';
 
 interface StatCardProps {
   title: string;
@@ -8,6 +9,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   iconBgColor?: string;
   iconColor?: string;
+  className?: string;
 }
 
 export function StatCard({ 
@@ -15,39 +17,32 @@ export function StatCard({
   value, 
   label, 
   icon, 
-  iconBgColor = 'var(--color-primary-100)', 
-  iconColor = 'var(--color-primary-700)' 
+  iconBgColor, 
+  iconColor,
+  className = ''
 }: StatCardProps) {
+  const customIconStyle = (iconBgColor || iconColor) ? {
+    backgroundColor: iconBgColor,
+    color: iconColor,
+  } : undefined;
+
   return (
-    <Card className="hover:translate-y-[-2px] transition-transform duration-300">
-      <CardBody className="flex items-center gap-3 md:gap-4 p-3 md:p-5">
+    <Card className={`${styles['statCard']} ${className}`}>
+      <CardBody className={styles['body']}>
         <div 
-          className="hidden md:flex w-12 h-12 rounded-xl items-center justify-center text-2xl flex-shrink-0"
-          style={{ backgroundColor: iconBgColor, color: iconColor }}
+          className={styles['iconWrapper']}
+          style={customIconStyle}
+          aria-hidden="true"
         >
           {icon}
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 
-            className="text-[0.65rem] md:text-xs font-bold uppercase tracking-wider mb-0.5 md:mb-1 truncate"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            {title}
-          </h3>
-          <p 
-            className="text-xl md:text-3xl font-extrabold leading-none truncate"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
-            {value}
-          </p>
-          <p 
-            className="text-[0.65rem] md:text-xs mt-0.5 md:mt-1 truncate"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            {label}
-          </p>
+        <div className={styles['content']}>
+          <h3 className={styles['title']}>{title}</h3>
+          <p className={styles['value']}>{value}</p>
+          <p className={styles['label']}>{label}</p>
         </div>
       </CardBody>
     </Card>
   );
 }
+

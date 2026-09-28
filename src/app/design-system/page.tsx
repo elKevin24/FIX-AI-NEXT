@@ -93,8 +93,8 @@ function DesignSystemContent() {
       
       {/* Header */}
       <PageHeader
-        title="🎨 Sistema de Diseño (Design System)"
-        subtitle="Tokens, componentes estándar y patrones visuales Liquid Glass para FIX-AI NEXT."
+        title="Sistema de Diseño"
+        subtitle="Tokens, componentes estándar y patrones visuales para FIX Workshop."
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <ThemeSwitcher />

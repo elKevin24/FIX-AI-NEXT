@@ -108,6 +108,12 @@
   position: relative;
 }
 
+:global([data-theme="dark"]) .card,
+:global(.dark) .card {
+  border: 1px solid var(--color-border-medium);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
 .card::before {
   content: '';
   position: absolute;
@@ -252,6 +258,11 @@
   font-weight: 500;
 }
 
+.input::-ms-reveal,
+.input::-ms-clear {
+  display: none;
+}
+
 .input:hover {
   background: var(--color-surface);
   border-color: var(--color-gray-400);
@@ -270,6 +281,23 @@
   background: var(--color-surface);
 }
 
+:global([data-theme="dark"]) .input,
+:global(.dark) .input {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-medium);
+}
+
+:global([data-theme="dark"]) .input:hover,
+:global(.dark) .input:hover {
+  border-color: var(--color-border-strong);
+}
+
+:global([data-theme="dark"]) .input:focus,
+:global(.dark) .input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
 .inputIcon {
   position: absolute;
   right: 1rem;
@@ -279,28 +307,39 @@
   height: 1.25rem;
   color: var(--color-text-secondary);
   pointer-events: none;
+  z-index: 5;
 }
 
 .passwordToggle {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: transparent;
   border: none;
+  border-radius: 0.5rem;
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0.375rem;
+  padding: 0;
+  width: 2.25rem;
+  height: 2.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.375rem;
+  z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
   transition: color 0.2s, background-color 0.2s;
 }
 
 .passwordToggle:hover {
   color: var(--color-text-primary);
-  background-color: var(--color-surface-hover);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global([data-theme="dark"]) .passwordToggle:hover,
+:global(.dark) .passwordToggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .passwordToggle:focus-visible {
@@ -311,6 +350,7 @@
 .passwordToggle svg {
   width: 1.35rem;
   height: 1.35rem;
+  pointer-events: none;
 }
 
 /* Error Message */
@@ -380,6 +420,11 @@
   background: var(--color-primary-700);
   transform: translateY(-3px) scale(1.02);
   box-shadow: var(--shadow-xl);
+}
+
+.submitButton:focus-visible {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
 }
 
 .submitButton:active:not(:disabled) {

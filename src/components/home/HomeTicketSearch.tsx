@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SearchIcon, ArrowRightIcon } from '@/components/home/Icons';
+import { Search, ArrowRight } from 'lucide-react';
 import styles from '@/app/page.module.css';
 
 export default function HomeTicketSearch() {
@@ -21,7 +21,7 @@ export default function HomeTicketSearch() {
   return (
     <div className={styles['quickSearchBox']}>
       <div className={styles['quickSearchLabel']}>
-        <SearchIcon size={16} />
+        <Search size={16} aria-hidden="true" />
         <span>Rastreo rápido de reparación para clientes:</span>
       </div>
       <form onSubmit={handleSearch} className={styles['searchForm']}>
@@ -31,10 +31,11 @@ export default function HomeTicketSearch() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ingresa tu código de ticket o teléfono (ej. TK-101)..."
           className={styles['searchInput']}
+          aria-label="Código de ticket o número de teléfono"
         />
         <button type="submit" className={styles['searchBtn']}>
           <span>Consultar Estado</span>
-          <ArrowRightIcon size={16} />
+          <ArrowRight size={16} aria-hidden="true" />
         </button>
       </form>
     </div>

@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   compress: true,
+  allowedDevOrigins: ['ais-dev-nusyp7vpvrnglaby44lxd2-843698245353.us-east1.run.app', '*.run.app'],
   deploymentId: process.env['NEXT_DEPLOYMENT_ID'] || process.env['VERCEL_DEPLOYMENT_ID'] || undefined,
 
   images: {

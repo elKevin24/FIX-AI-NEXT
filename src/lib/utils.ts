@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 /**
  * Convierte objetos Prisma.Decimal de Prisma a números simples de JavaScript.
  * Útil para pasar datos de Server Components a Client Components.
@@ -11,8 +9,9 @@ export function serializeDecimal<T>(data: T): any {
     return data;
   }
 
-  if ((data as any) instanceof Prisma.Decimal || (data && typeof data === 'object' && 'd' in data && 'e' in data && 's' in data)) {
-    return (data as unknown as Prisma.Decimal).toNumber();
+  // Duck-type Prisma.Decimal / Decimal.js instances without pulling @prisma/client into the client bundle
+  if (data && typeof data === 'object' && ('d' in data && 'e' in data && 's' in data || typeof (data as any).toNumber === 'function')) {
+    return typeof (data as any).toNumber === 'function' ? (data as any).toNumber() : Number(data);
   }
 
   if (Array.isArray(data)) {

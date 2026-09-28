@@ -39,10 +39,7 @@ export default function Home() {
             <div className={styles['logoIcon']}>
               <WrenchIcon size={22} />
             </div>
-            <div>
-              <span className={styles['logoTitle']}>FIX Workshop</span>
-              <span className={styles['logoSubtitle']}>Gestión Integral de Talleres</span>
-            </div>
+            <span className={styles['logoTitle']}>FIX Workshop</span>
           </Link>
 
           <nav className={styles['navMenu']}>

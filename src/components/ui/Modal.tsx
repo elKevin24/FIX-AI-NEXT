@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -131,7 +132,7 @@ export function Modal({
             className={styles['closeButton']}
             aria-label="Cerrar modal"
           >
-            &times;
+            <X size={20} />
           </button>
         </div>
 

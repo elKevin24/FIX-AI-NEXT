@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ThemeInit from "@/components/ThemeInit";
-import { SerwistProvider } from "@serwist/turbopack/react";
+import { PWAProvider } from "@/components/PWAProvider";
 
 const SpeedInsights = () => null;
 const Analytics = () => null;
@@ -145,11 +145,11 @@ export default function RootLayout({
                 />
                 <ThemeInit />
                 <ThemeProvider>
-                    <SerwistProvider swUrl="/serwist/sw.js">
+                    <PWAProvider>
                         <main id="main-content" tabIndex={-1}>
                             {children}
                         </main>
-                    </SerwistProvider>
+                    </PWAProvider>
                 </ThemeProvider>
                 <SpeedInsights />
                 <Analytics />
