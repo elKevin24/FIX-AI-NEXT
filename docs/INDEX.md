@@ -8,7 +8,7 @@ Bienvenido a la documentación del sistema Multi-Tenant Workshop Management.
 
 - **[README.md](../README.md)** - Introducción al proyecto y guía de instalación
 - **[GEMINI.md](../GEMINI.md)** - Contexto del proyecto para asistentes AI
-- **[CHANGELOG.md](../CHANGELOG.md)** - Historial de cambios
+- **[CHANGELOG.md](CHANGELOG.md)** - Historial de cambios
 
 ---
 

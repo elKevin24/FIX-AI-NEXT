@@ -185,11 +185,26 @@ Ficheros: `dashboard.module.css`, `layout.tsx` (root y de grupo), `globals.css`.
 | `next build` | exit 0, 0 warnings | **exit 0**, `✓ Compiled successfully`, 0 warnings |
 
 ### Fase 4 · P1 — Tablas y zoom en el dashboard ✅
-- [x] **MF-401 (I1)** `DataTable`: vista cards bajo 768px para tickets e invoices vía CSS puro con `data-label` y `mobileTitleColumn`, manteniendo semántica `<table>` sin hydration mismatches ni scroll horizontal forzado.
-- [x] **MF-402 (I5)** Corregido el colapso del grid del POS en <1024px con `grid-template-rows: auto` y altura máxima para scroll natural en `pos.module.css`.
+- [x] **MF-401 (I1)** `DataTable`: vista cards bajo 768px para las 8 tablas de la app (tickets, invoices, customers, users, parts, sales history, recent tickets, design-system demo) vía CSS puro con `data-label` y `mobileTitleColumn`, manteniendo semántica `<table>` sin hydration mismatches ni scroll horizontal forzado.
+  Tres decisiones que no son obvias:
+  - El `thead` se oculta con las propiedades de `.sr-only`, **no con `display:none`**. Con `display:none` desaparece del árbol de accesibilidad y la tabla se queda sin encabezados: un lector de pantalla anuncia celdas sueltas sin columna a la que atribuirlas.
+  - Cada `<td>` recibe `data-label` con el header **declarado por el consumidor**, no el id interno de la columna. Sin eso, tickets mostraría "customer.name: ACME" en vez de "Cliente: ACME".
+  - `max-height:70vh` y `overflow-x:auto` se desactivan en móvil: con la tabla en cards quedaban dos scrolls anidados (el interno y el de la ventana), que en táctil es una forma segura de perder el scroll.
+  `mobileTitleColumn` por defecto es la primera columna que no sea de acciones, que en las 8 tablas coincide con la columna identificativa salvo en tickets y recent-tickets, donde la primera es el ID; ahí se fija a `title` a mano.
+  **Test de regresión `DataTable.test.tsx`, 11 casos. Verificado que 6 de los 11 fallan contra la implementación anterior**, así que comprueba markup nuevo y no tautología.
+- [~] **MF-402 (I5)** Corregido el colapso del grid del POS en <1024px con `grid-template-rows: auto` y altura máxima para scroll natural en `pos.module.css`. **Pendiente de validar en dispositivo real**: el item pedía expresamente comprobarlo en hardware, no solo por CSS, y `pos.module.css` no se ha podido abrir en un móvil.
 - [x] **MF-403 (I7)** `globals.css`: `h1/h2/h3` con `clamp()` y gutter de `.container` adaptativo (16px base, 24px en `>=768px`).
 - [x] **MF-404 (I8)** `next.config.ts`: `deviceSizes` con 360/390/414/480 añadidos.
 - [x] **MF-405 (I10)** Eliminado el CSS muerto en `invoices.module.css` y `page.module.css`.
+
+**Gate medido de la Fase 4:**
+
+| Gate | Resultado |
+|---|---|
+| `tsc --noEmit` | **exit 0** |
+| `eslint .` | **exit 0** |
+| `vitest run` | **573 pass, 4 skipped** (62 files) — +11 sobre los 562 de la Fase 3 |
+| `next build` | **exit 0**, 0 warnings |
 
 **Criterio:** tablas legibles a 375px sin scroll en las vistas principales · LCP no degradado · `check:all` verde.
 
