@@ -113,10 +113,124 @@
     100% { opacity: 0.6; }
 }
 
-/* ========== RESPONSIVE ========== */
+/* ========== RESPONSIVE: VISTA CARDS ========== */
+
+/* Bajo 768px la tabla pasa a lista de tarjetas: cada fila es un <tr> que se
+   comporta como bloque, y cada celda se convierte en una línea "etiqueta:
+   valor" usando data-label, que DataTable.tsx inyecta desde el header
+   declarado por el consumidor.
+
+   Es CSS puro a propósito, sin useMediaQuery ni render alternativo: el DOM es
+   uno solo, no hay riesgo de hydration mismatch por ancho de ventana, y la
+   semántica de <table> se mantiene en todo momento (solo cambia el display). */
 
 @media (max-width: 768px) {
-    .cell, .headerCell {
-        padding: 0.75rem 1rem;
+    /* El contenedor deja de ser scroller en ambos ejes. Con max-height:70vh la
+       página tendría dos scrolls anidados (el interno de la tabla y el de la
+       ventana), que en táctil es una forma segura de perder el scroll. En
+       móvil scrollea la página, que es lo esperado. */
+    .tableContainer {
+        max-height: none;
+        overflow-x: visible;
+    }
+
+    /* Oculto, no display:none. Un thead con display:none desaparece del árbol
+       de accesibilidad y la tabla se queda sin encabezados: un lector de
+       pantalla announces celdas sueltas sin saber a qué columna pertenecen.
+       Con las propiedades de .sr-only el thead sigue estando, se sigue leyendo
+       como cabecera al navegar la tabla, y no ocupa espacio. */
+    .headerRow {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    .row {
+        display: block;
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .row:last-child {
+        border-bottom: none;
+    }
+
+    /* white-space:nowrap es lo que provocaba el ancho extra: con 7-8 columnas
+       la tabla llegaba a ~900px dentro de un contenedor de 375px. */
+    .cell {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.3125rem 0;
+        border-bottom: none;
+        white-space: normal;
+        text-align: left;
+    }
+
+    /* La etiqueta viene del header de la columna, así que el texto que el
+       usuario lee junto al valor es el mismo que ve en escritorio. */
+    .cell::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-text-tertiary);
+    }
+
+    /* La columna título encabeza la tarjeta: a ancho completo y sin etiqueta,
+       porque su propio contenido ya es un título legible. */
+    .titleCell {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .titleCell::before {
+        content: none;
+    }
+
+    /* Las acciones se separan del bloque de datos para que el botón no se
+       confunda con un valor más, y ocupan el ancho completo: son el target
+       táctil principal de la tarjeta. */
+    .actionCell {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--color-border-light);
+    }
+
+    .actionCell::before {
+        content: none;
+    }
+
+    /* El botón de la columna de acciones viene con clases utilitarias de
+       Tailwind que el proyecto no tiene instaladas, así que el tamaño se
+       resuelve aquí para que sea un target táctil real. */
+    .actionCell > a,
+    .actionCell > button,
+    .actionCell > span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.75rem;
+        width: 100%;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border-strong);
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        font-weight: 600;
+    }
+
+    .emptyCell {
+        display: block;
+        padding: 3rem 1rem;
     }
 }

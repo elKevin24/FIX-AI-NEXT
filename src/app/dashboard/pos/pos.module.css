@@ -125,7 +125,19 @@
 @media (max-width: 1024px) {
   .posLayout {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: auto;
+    overflow: visible;
+  }
+
+  .productsSection,
+  .cartSection {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .productsGrid {
+    max-height: 50vh;
+    overflow-y: auto;
   }
 }
 

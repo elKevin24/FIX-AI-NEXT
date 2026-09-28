@@ -120,6 +120,9 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         <DataTable 
             columns={columns} 
             data={data} 
+            /* La primera columna es el ID, que como título de tarjeta no dice
+               nada. En móvil la tarjeta encabeza con el problema. */
+            mobileTitleColumn="title"
         />
     );
 }

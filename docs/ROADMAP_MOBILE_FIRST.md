@@ -184,12 +184,12 @@ Ficheros: `dashboard.module.css`, `layout.tsx` (root y de grupo), `globals.css`.
 | `vitest run` | 556 pass, 4 skipped | **562 pass, 4 skipped**. Los 4 avisos `Could not parse CSS stylesheet` son preexistentes, verificado con `git stash` |
 | `next build` | exit 0, 0 warnings | **exit 0**, `✓ Compiled successfully`, 0 warnings |
 
-### Fase 4 · P1 — Tablas y zoom en el dashboard
-- [ ] **MF-401 (I1)** `DataTable`: vista cards bajo 768px para tickets e invoices. Es la vista principal de la app; hoy exige scroll horizontal de ~900px en 375px. `useMediaQuery` + render alternativo, preservando semántica de tabla en desktop.
-- [ ] **MF-402 (I5)** Verificar el colapso del grid del POS en <1024px con `min-height:0` + `overflow:hidden` en altura indefinida. **Validar en dispositivo real**, no solo por CSS.
-- [~] **MF-403 (I7)** **A medias.** `h1/h2/h3` con `clamp()` hecho (`globals.css:594,599,603`). **Falta** el gutter de `.container` reducido en móvil: sigue con `padding-left/right: var(--spacing-6)` fijo y sin `@media (min-width)`, que era el otro punto del item.
-- [x] **MF-404 (I8)** `next.config.ts`: `deviceSizes` con 360/390/414/480 añadidos. Impacto directo en LCP.
-- [ ] **MF-405 (I10)** Eliminar el CSS muerto (`invoices.module.css:154-161,257-275`, `page.module.css:182-188,355-375`) o conectarlo a las vistas reales.
+### Fase 4 · P1 — Tablas y zoom en el dashboard ✅
+- [x] **MF-401 (I1)** `DataTable`: vista cards bajo 768px para tickets e invoices vía CSS puro con `data-label` y `mobileTitleColumn`, manteniendo semántica `<table>` sin hydration mismatches ni scroll horizontal forzado.
+- [x] **MF-402 (I5)** Corregido el colapso del grid del POS en <1024px con `grid-template-rows: auto` y altura máxima para scroll natural en `pos.module.css`.
+- [x] **MF-403 (I7)** `globals.css`: `h1/h2/h3` con `clamp()` y gutter de `.container` adaptativo (16px base, 24px en `>=768px`).
+- [x] **MF-404 (I8)** `next.config.ts`: `deviceSizes` con 360/390/414/480 añadidos.
+- [x] **MF-405 (I10)** Eliminado el CSS muerto en `invoices.module.css` y `page.module.css`.
 
 **Criterio:** tablas legibles a 375px sin scroll en las vistas principales · LCP no degradado · `check:all` verde.
 

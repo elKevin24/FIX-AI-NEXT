@@ -18,7 +18,7 @@
 | 5 | Frontend SEO/A11y/Performance | [`docs/ROADMAP_FRONTEND_AUDIT.md`](./ROADMAP_FRONTEND_AUDIT.md) | SEO, accesibilidad WCAG AA, performance | 🟢 Cumplimiento alto (Meta, JSON-LD, H1 únicos, focus trap Modal, lazy charts) | ~90% |
 | 6 | Ticket Workflow UI | [`docs/TICKET_WORKFLOW_ROADMAP.md`](./TICKET_WORKFLOW_ROADMAP.md) | UI del workflow de tickets | 🟢 UI & Backend sincronizados (Diálogos, Workflow, Timeline) | ~95% |
 | 7 | Mejoras del Sistema de Temas | [`docs/THEME_IMPROVEMENTS_ROADMAP.md`](./THEME_IMPROVEMENTS_ROADMAP.md) | Accesibilidad/UX de temas | 🟢 Sprints 1–2 completados + prefers-contrast | ~90% |
-| 8 | Mobile-First & Responsive UX | [`docs/ROADMAP_MOBILE_FIRST.md`](./ROADMAP_MOBILE_FIRST.md) | Accesibilidad táctil, inputs >=16px, landmarks | 🟢 Fases 1, 2, 3 completas + Fase 4 en progreso | ~80% |
+| 8 | Mobile-First & Responsive UX | [`docs/ROADMAP_MOBILE_FIRST.md`](./ROADMAP_MOBILE_FIRST.md) | Accesibilidad táctil, inputs >=16px, landmarks | 🟢 Fases 1 a 4 completas (Fase 5 en backlog) | ~95% |
 | 9 | Análisis de Alineación | [`docs/ROADMAP_ALIGNMENT_ANALYSIS.md`](./ROADMAP_ALIGNMENT_ANALYSIS.md) | Análisis (no ejecutable) | 📄 Documento histórico | N/A |
 
 ---

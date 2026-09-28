@@ -17,6 +17,14 @@ interface DataTableProps<TData, TValue> {
     onRowClick?: (row: TData) => void;
     isLoading?: boolean;
     caption?: string;
+    /**
+     * Columna que encabeza la tarjeta en la vista móvil. Por defecto es la
+     * primera que no sea de acciones, que en todas las tablas de la app
+     * coincide con la columna identificativa (nombre, nº de factura, título).
+     * En tickets hay que fijarla a 'title' a mano: la primera columna es el
+     * ID, que como título de tarjeta no dice nada.
+     */
+    mobileTitleColumn?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -25,6 +33,7 @@ export function DataTable<TData, TValue>({
     onRowClick,
     isLoading = false,
     caption,
+    mobileTitleColumn,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -39,6 +48,31 @@ export function DataTable<TData, TValue>({
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
+
+    // El id que TanStack asigna a una columna es su `id` explícito o, si no
+    // existe, su accessorKey. Resolvemos el título con la misma regla para que
+    // el accessorKey que pasan los consumidores coincida con column.id.
+    const titleColumnId =
+        mobileTitleColumn ??
+        (() => {
+            const first = columns.find(
+                (c) => (c.id ?? (c as { accessorKey?: string }).accessorKey) !== 'actions'
+            );
+            return first ? (first.id ?? (first as { accessorKey?: string }).accessorKey) : undefined;
+        })();
+
+    /**
+     * Etiqueta que la celda muestra a la izquierda en móvil. Sale del header
+     * declarado por el consumidor, de modo que "Cliente: ACME" en la tarjeta es
+     * literalmente el mismo texto que la columna "Cliente" del escritorio. Si
+     * el header es una función (no un string) cae al id de la columna.
+     */
+    const labelFor = (column: { columnDef: { header?: unknown }; id: string }): string => {
+        const { header } = column.columnDef;
+        if (typeof header === 'string') return header;
+        if (typeof header === 'number') return String(header);
+        return column.id;
+    };
 
     return (
         <div className={styles['wrapper']}>
@@ -87,8 +121,19 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => {
                                         const meta = cell.column.columnDef.meta as any;
+                                        const isTitle = cell.column.id === titleColumnId;
+                                        const isActions = cell.column.id === 'actions';
                                         return (
-                                            <td key={cell.id} className={`${styles['cell']} ${meta?.className || ''}`}>
+                                            <td
+                                                key={cell.id}
+                                                data-label={labelFor(cell.column)}
+                                                className={[
+                                                    styles['cell'],
+                                                    isTitle ? styles['titleCell'] : '',
+                                                    isActions ? styles['actionCell'] : '',
+                                                    meta?.className || '',
+                                                ].filter(Boolean).join(' ')}
+                                            >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
                                         );

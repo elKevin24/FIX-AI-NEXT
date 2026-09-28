@@ -75,6 +75,8 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
         <DataTable 
             columns={columns} 
             data={data} 
+            /* Igual que en TicketsClient: la primera columna es el ID. */
+            mobileTitleColumn="title"
         />
     );
 }
