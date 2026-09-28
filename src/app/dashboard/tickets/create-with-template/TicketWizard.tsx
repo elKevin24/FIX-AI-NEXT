@@ -154,7 +154,7 @@ export default function TicketWizard() {
     <div className={styles['container']}>
       <div className={styles['wizard']}>
         <PageHeader
-          title="✨ Nuevo Ticket - Asistente"
+          title="Nuevo Ticket - Asistente Guiado"
           subtitle="Crea tickets rápidamente con plantillas predefinidas o manualmente"
           actions={
             <Button as={Link} href="/dashboard/tickets" variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
@@ -169,12 +169,12 @@ export default function TicketWizard() {
             <div className={styles['stepNumber']}>1</div>
             <span>Plantilla</span>
           </div>
-          <div className={styles['stepLine']} />
+          <div className={`${styles['stepLine']} ${step >= 2 ? styles['stepLineActive'] : ''}`} />
           <div className={`${styles['step']} ${step >= 2 ? styles['stepActive'] : ''}`}>
             <div className={styles['stepNumber']}>2</div>
             <span>Cliente</span>
           </div>
-          <div className={styles['stepLine']} />
+          <div className={`${styles['stepLine']} ${step >= 3 ? styles['stepLineActive'] : ''}`} />
           <div className={`${styles['step']} ${step >= 3 ? styles['stepActive'] : ''}`}>
             <div className={styles['stepNumber']}>3</div>
             <span>Detalles</span>
@@ -205,10 +205,10 @@ export default function TicketWizard() {
               <Button
                 onClick={() => setStep(2)}
                 variant="primary"
-                size="lg"
+                size="base"
                 disabled={false}
               >
-                Continuar →
+                Continuar
               </Button>
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function TicketWizard() {
         {step === 2 && (
           <div className={styles['stepContent']}>
             <div className={styles['card']}>
-              <h2 className={styles['cardTitle']}>👤 Información del Cliente</h2>
+              <h2 className={styles['cardTitle']}>Información del Cliente</h2>
 
               <CustomerSearch
                 onSelect={(c) =>
@@ -233,6 +233,24 @@ export default function TicketWizard() {
                 }
                 selectedCustomer={customer}
               />
+
+              {customer && customer.id && (
+                <div className={styles['customerSelected']}>
+                  <div className={styles['checkIcon']}>
+                    <span>✓</span>
+                  </div>
+                  <div>
+                    <p className={styles['customerName']}>{customer.name}</p>
+                    {(customer.email || customer.phone || customer.nit) && (
+                      <div className={styles['customerDetail']}>
+                        {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
+                        {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
+                        {customer.nit && <span style={{ display: 'block' }}>NIT: {customer.nit}</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {customer && !customer.id && (
                 <div className={styles['newCustomerFields']}>
@@ -282,16 +300,21 @@ export default function TicketWizard() {
             </div>
 
             <div className={styles['actions']}>
-              <Button onClick={() => setStep(1)} variant="secondary" size="lg">
-                ← Atrás
+              <Button
+                onClick={() => setStep(1)}
+                variant="secondary"
+                size="base"
+                leftIcon={<span aria-hidden="true">←</span>}
+              >
+                Atrás
               </Button>
               <Button
                 onClick={() => setStep(3)}
                 variant="primary"
-                size="lg"
+                size="base"
                 disabled={!customer}
               >
-                Continuar →
+                Continuar
               </Button>
             </div>
           </div>
@@ -301,7 +324,7 @@ export default function TicketWizard() {
         {step === 3 && (
           <div className={styles['stepContent']}>
             <div className={styles['card']}>
-              <h2 className={styles['cardTitle']}>🔧 Detalles del Ticket</h2>
+              <h2 className={styles['cardTitle']}>Detalles del Ticket</h2>
 
               <div className={styles['grid2']}>
                 <Select
@@ -375,7 +398,7 @@ export default function TicketWizard() {
                   {selectedTemplate.defaultParts.filter(dp => dp.required).length > 0 && (
                     <div className={styles['requiredPartsInfo']}>
                       <h3 className={styles['requiredPartsTitle']}>
-                        ✅ Repuestos Requeridos (se consumirán automáticamente)
+                        Repuestos Requeridos (Consumo Automático)
                       </h3>
                       <ul className={styles['partsList']}>
                         {selectedTemplate.defaultParts
@@ -420,16 +443,22 @@ export default function TicketWizard() {
             </div>
 
             <div className={styles['actions']}>
-              <Button onClick={() => setStep(2)} variant="secondary" size="lg">
-                ← Atrás
+              <Button
+                onClick={() => setStep(2)}
+                variant="secondary"
+                size="base"
+                leftIcon={<span aria-hidden="true">←</span>}
+              >
+                Atrás
               </Button>
               <Button
                 onClick={handleSubmit}
                 variant="primary"
-                size="lg"
+                size="base"
+                isLoading={loading}
                 disabled={loading || !title || !description}
               >
-                {loading ? 'Creando...' : '✅ Crear Ticket'}
+                Crear Ticket
               </Button>
             </div>
           </div>

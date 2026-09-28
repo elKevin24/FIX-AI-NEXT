@@ -129,12 +129,6 @@ export default function SimpleTicketForm() {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['backgroundEffects']}>
-                <div className={`${styles['blob']} ${styles['blobBlue']}`} />
-                <div className={`${styles['blob']} ${styles['blobPurple']}`} />
-                <div className={`${styles['blob']} ${styles['blobEmerald']}`} />
-            </div>
-
             <div className={styles['content']}>
                 <PageHeader
                     title="Nuevo Ticket"
