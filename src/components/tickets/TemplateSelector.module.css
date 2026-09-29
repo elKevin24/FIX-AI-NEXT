@@ -30,7 +30,9 @@
   outline: none;
   background: var(--color-surface);
   color: var(--color-text-primary);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .searchInput:focus {
@@ -57,10 +59,12 @@
   transition: all var(--transition-fast);
 }
 
-.categoryChip:hover {
-  border-color: var(--color-primary-500);
-  color: var(--color-primary-600);
-  background: var(--color-surface-hover);
+@media (hover: hover) {
+  .categoryChip:hover {
+    border-color: var(--color-primary-500);
+    color: var(--color-primary-600);
+    background: var(--color-surface-hover);
+  }
 }
 
 .categoryChipActive {
@@ -91,10 +95,12 @@
   transition: all var(--transition-fast);
 }
 
-.templateCard:hover {
-  border-color: var(--color-primary-500);
-  background: var(--color-surface-hover);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .templateCard:hover {
+    border-color: var(--color-primary-500);
+    background: var(--color-surface-hover);
+    transform: translateY(-1px);
+  }
 }
 
 .templateCardSelected {

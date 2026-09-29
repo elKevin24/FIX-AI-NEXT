@@ -1,6 +1,10 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-50) 0%,
+    var(--color-secondary-50) 100%
+  );
   padding: var(--spacing-4);
   display: flex;
   align-items: center;
@@ -70,10 +74,12 @@
   transition: all var(--transition-base);
 }
 
-.button:hover {
-  background: var(--color-primary-700);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .button:hover {
+    background: var(--color-primary-700);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 @media (max-width: 768px) {
@@ -85,4 +91,3 @@
     font-size: var(--font-size-2xl);
   }
 }
-

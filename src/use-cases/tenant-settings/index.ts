@@ -1,3 +1,4 @@
+import 'server-only';
 export {
   GetTenantSettingsUseCase,
   UpdateTenantSettingsUseCase,

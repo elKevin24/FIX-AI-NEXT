@@ -8,7 +8,6 @@
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --headless --disable-gpu",
-        "preset": "desktop",
         "onlyCategories": [
           "performance",
           "accessibility",

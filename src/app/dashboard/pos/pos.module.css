@@ -146,9 +146,11 @@
   transition: border-color var(--transition-base);
 }
 
-.productsSection:hover,
-.cartSection:hover {
-  border-color: var(--color-border-medium);
+@media (hover: hover) {
+  .productsSection:hover,
+  .cartSection:hover {
+    border-color: var(--color-border-medium);
+  }
 }
 
 /* ========== PRODUCTS SECTION ========== */
@@ -187,10 +189,12 @@
   text-align: left;
 }
 
-.productCard:hover:not(:disabled) {
-  border-color: var(--color-primary-400);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .productCard:hover:not(:disabled) {
+    border-color: var(--color-primary-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .productCard:focus-visible {
@@ -281,8 +285,10 @@
   transition: background var(--transition-fast);
 }
 
-.customerOption:hover {
-  background: var(--color-bg-secondary);
+@media (hover: hover) {
+  .customerOption:hover {
+    background: var(--color-bg-secondary);
+  }
 }
 
 .customerOption:focus-visible {
@@ -332,8 +338,10 @@
   transition: color var(--transition-fast);
 }
 
-.selectedCustomer button:hover {
-  color: var(--color-error-600);
+@media (hover: hover) {
+  .selectedCustomer button:hover {
+    color: var(--color-error-600);
+  }
 }
 
 .selectedCustomer button:focus-visible {
@@ -372,12 +380,17 @@
   border-radius: var(--radius-base);
   margin-bottom: var(--spacing-2);
   animation: cartItemSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.cartItem:hover {
-  border-color: var(--color-border);
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  .cartItem:hover {
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  }
 }
 
 @keyframes cartItemSlideIn {
@@ -432,10 +445,12 @@
   transition: all var(--transition-fast);
 }
 
-.qtyBtn:hover {
-  background: var(--color-primary-600);
-  color: white;
-  border-color: var(--color-primary-600);
+@media (hover: hover) {
+  .qtyBtn:hover {
+    background: var(--color-primary-600);
+    color: white;
+    border-color: var(--color-primary-600);
+  }
 }
 
 .qtyBtn:active:not(:disabled) {
@@ -483,9 +498,11 @@
   transition: all var(--transition-fast);
 }
 
-.removeBtn:hover {
-  opacity: 1;
-  background: rgba(220, 38, 38, 0.08);
+@media (hover: hover) {
+  .removeBtn:hover {
+    opacity: 1;
+    background: rgba(220, 38, 38, 0.08);
+  }
 }
 
 .removeBtn:focus-visible {
@@ -634,9 +651,11 @@
   transition: all var(--transition-fast);
 }
 
-.modalClose:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
+@media (hover: hover) {
+  .modalClose:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+  }
 }
 
 .modalClose:focus-visible {
@@ -775,8 +794,10 @@
   transition: all var(--transition-fast);
 }
 
-.removePaymentBtn:hover {
-  background: rgba(220, 38, 38, 0.08);
+@media (hover: hover) {
+  .removePaymentBtn:hover {
+    background: rgba(220, 38, 38, 0.08);
+  }
 }
 
 .removePaymentBtn:focus-visible {

@@ -1,3 +1,4 @@
+import 'server-only';
 import { ValidationError } from '@/lib/errors';
 import { ICustomerRepository, PrismaCustomerRepository } from '@/lib/repositories';
 

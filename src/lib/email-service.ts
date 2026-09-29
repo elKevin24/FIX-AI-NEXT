@@ -51,11 +51,22 @@ async function sendViaSmtp({ to, subject, text, html, react }: SendEmailParams) 
   return { success: true, messageId: info.messageId };
 }
 
-function logEmail({ to, subject, text, html }: SendEmailParams) {
-  console.log('⚠️ [Email Service] No SMTP provider configured (set SMTP_*). Email not sent, but logged to console.');
-  console.log(`[Email Log] To: ${to} | Subject: "${subject}"`);
-  if (text) console.log(`[Email Body] ${text}`);
-  if (html) console.log(`[HTML Content Provided: ${html.length} chars]`);
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return '***';
+  const visible = local.slice(0, 2);
+  return `${visible}***@${domain}`;
+}
+
+function logEmail({ to, subject, html, text }: SendEmailParams) {
+  const isDev = process.env.NODE_ENV !== 'production';
+  const maskedTo = maskEmail(to);
+
+  if (isDev) {
+    console.info(`[Email Service (Dev Log)] To: ${maskedTo} | Subject: "${subject}" | Length: ${(text || html || '').length} chars`);
+  } else {
+    console.warn(`[Email Service (Production)] No SMTP configured. Queued email to ${maskedTo} with subject "${subject}" was not sent.`);
+  }
 }
 
 /**

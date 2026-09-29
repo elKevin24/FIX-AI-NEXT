@@ -92,16 +92,18 @@
 }
 
 .card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      var(--color-primary-500) 50%,
-      transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-primary-500) 50%,
+    transparent 100%
+  );
   opacity: 0.5;
 }
 
@@ -115,7 +117,11 @@
   width: 4rem;
   height: 4rem;
   margin: 0 auto 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-600),
+    var(--color-primary-700)
+  );
   border-radius: 1.25rem;
   display: flex;
   align-items: center;
@@ -126,7 +132,6 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0px);
@@ -144,7 +149,6 @@
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     transform: scale(1);
@@ -205,8 +209,10 @@
   transition: color 0.2s;
 }
 
-.forgotPassword:hover {
-  color: var(--color-primary-700);
+@media (hover: hover) {
+  .forgotPassword:hover {
+    color: var(--color-primary-700);
+  }
 }
 
 .inputContainer {
@@ -231,9 +237,11 @@
   display: none;
 }
 
-.input:hover {
-  background: var(--color-surface);
-  border-color: var(--color-border-strong);
+@media (hover: hover) {
+  .input:hover {
+    background: var(--color-surface);
+    border-color: var(--color-border-strong);
+  }
 }
 
 .input::placeholder {
@@ -255,9 +263,11 @@
   border-color: var(--color-border-medium);
 }
 
-:global([data-theme="dark"]) .input:hover,
-:global(.dark) .input:hover {
-  border-color: var(--color-border-strong);
+@media (hover: hover) {
+  :global([data-theme="dark"]) .input:hover,
+  :global(.dark) .input:hover {
+    border-color: var(--color-border-strong);
+  }
 }
 
 :global([data-theme="dark"]) .input:focus,
@@ -297,17 +307,23 @@
   z-index: 10;
   user-select: none;
   -webkit-user-select: none;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 }
 
-.passwordToggle:hover {
-  color: var(--color-text-primary);
-  background: rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  .passwordToggle:hover {
+    color: var(--color-text-primary);
+    background: rgba(0, 0, 0, 0.05);
+  }
 }
 
-:global([data-theme="dark"]) .passwordToggle:hover,
-:global(.dark) .passwordToggle:hover {
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+  :global([data-theme="dark"]) .passwordToggle:hover,
+  :global(.dark) .passwordToggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .passwordToggle:focus-visible {
@@ -367,7 +383,7 @@
 }
 
 .submitButton::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -376,18 +392,24 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
-.submitButton:hover::before {
-  width: 300px;
-  height: 300px;
+@media (hover: hover) {
+  .submitButton:hover::before {
+    width: 300px;
+    height: 300px;
+  }
 }
 
-.submitButton:hover:not(:disabled) {
-  background: var(--color-primary-700);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--shadow-xl);
+@media (hover: hover) {
+  .submitButton:hover:not(:disabled) {
+    background: var(--color-primary-700);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--shadow-xl);
+  }
 }
 
 .submitButton:focus-visible {
@@ -449,9 +471,11 @@
   transition: all 0.3s ease;
 }
 
-.demoCredentials:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .demoCredentials:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .demoTitle {
@@ -478,10 +502,12 @@
   cursor: pointer;
 }
 
-.demoCard:hover {
-  background: var(--color-primary-50);
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .demoCard:hover {
+    background: var(--color-primary-50);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .demoCard:active {
@@ -534,8 +560,10 @@
   transition: color 0.2s;
 }
 
-.footerLink:hover {
-  color: var(--color-primary-700);
+@media (hover: hover) {
+  .footerLink:hover {
+    color: var(--color-primary-700);
+  }
 }
 
 /* Animations */

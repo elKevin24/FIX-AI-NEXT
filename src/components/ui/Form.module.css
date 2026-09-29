@@ -3,171 +3,173 @@
    ======================================== */
 
 .group {
-    margin-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    letter-spacing: 0.01em;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
 }
 
 .input,
 .textarea,
 .select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-family: var(--font-family-base);
-    font-size: 0.9375rem;
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 0.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-xs);
-    font-weight: 500;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-family-base);
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-xs);
+  font-weight: 500;
 }
 
 .input::placeholder,
 .textarea::placeholder {
-    color: var(--color-text-tertiary);
-    font-weight: 400;
-    opacity: 0.8;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  opacity: 0.8;
 }
 
-.input:hover,
-.textarea:hover,
-.select:hover {
+@media (hover: hover) {
+  .input:hover,
+  .textarea:hover,
+  .select:hover {
     border-color: var(--color-border-strong);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
+  }
 }
 
 .input:focus,
 .textarea:focus,
 .select:focus {
-    outline: none;
-    border-color: var(--color-primary-600);
-    box-shadow: 0 0 0 3px var(--color-primary-100);
-    background: var(--color-surface);
-    transform: translateY(-1px);
+  outline: none;
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+  background: var(--color-surface);
+  transform: translateY(-1px);
 }
 
 .input:disabled,
 .textarea:disabled,
 .select:disabled {
-    background-color: var(--color-surface-hover);
-    cursor: not-allowed;
-    border-color: var(--color-border-light);
-    color: var(--color-text-tertiary);
-    opacity: 0.7;
+  background-color: var(--color-surface-hover);
+  cursor: not-allowed;
+  border-color: var(--color-border-light);
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
 }
 
 .errorInput {
-    border-color: var(--color-error-600) !important;
+  border-color: var(--color-error-600) !important;
 }
 
 .errorInput:focus {
-    box-shadow: 0 0 0 3px var(--color-error-100);
+  box-shadow: 0 0 0 3px var(--color-error-100);
 }
 
 .textarea {
-    min-height: 120px;
-    resize: vertical;
-    line-height: 1.6;
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.6;
 }
 
 .helper {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
-    line-height: 1.4;
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
 }
 
 .errorMessage {
-    color: var(--color-error-700);
-    font-weight: 600;
+  color: var(--color-error-700);
+  font-weight: 600;
 }
 
 /* Legacy class names for compatibility */
 .formGroup {
-    margin-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .formLabel {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    letter-spacing: 0.01em;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
 }
 
 .formInput,
 .formTextarea,
 .formSelect {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-family: var(--font-family-base);
-    font-size: 0.9375rem;
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-    font-weight: 500;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-family-base);
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .formInput::placeholder,
 .formTextarea::placeholder {
-    color: var(--color-text-tertiary);
-    opacity: 0.8;
+  color: var(--color-text-tertiary);
+  opacity: 0.8;
 }
 
 .formInput:focus,
 .formTextarea:focus,
 .formSelect:focus {
-    outline: none;
-    border-color: var(--color-primary-600);
-    box-shadow: 0 0 0 3px var(--color-primary-100);
+  outline: none;
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
 .formHelper {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
 }
 
 .formError {
-    color: var(--color-error-700);
-    font-weight: 600;
+  color: var(--color-error-700);
+  font-weight: 600;
 }
 
 /* Form Row */
 .formRow {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
 @media (min-width: 768px) {
-    .formRow {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .formRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-    .formRowThree {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  .formRowThree {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }

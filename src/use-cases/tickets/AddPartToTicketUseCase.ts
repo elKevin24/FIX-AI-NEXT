@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { isSuperAdmin } from '@/lib/authz';
 import { notifyPartsApprovalRequired } from '@/lib/ticket-notifications';

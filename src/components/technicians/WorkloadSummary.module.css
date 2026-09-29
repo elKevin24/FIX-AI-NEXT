@@ -29,10 +29,12 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.statCard:hover {
-  border-color: var(--color-border-medium);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .statCard:hover {
+    border-color: var(--color-border-medium);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
 }
 
 .statIcon {
@@ -152,18 +154,34 @@
 }
 
 .utilizationLow {
-  background: linear-gradient(90deg, var(--color-success-500), var(--color-success-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-success-500),
+    var(--color-success-600)
+  );
 }
 
-.utilizationLow .progressText { color: var(--color-on-progress-low); }
-.utilizationMedium .progressText { color: var(--color-on-progress-medium); }
+.utilizationLow .progressText {
+  color: var(--color-on-progress-low);
+}
+.utilizationMedium .progressText {
+  color: var(--color-on-progress-medium);
+}
 
 .utilizationMedium {
-  background: linear-gradient(90deg, var(--color-warning-400), var(--color-warning-500));
+  background: linear-gradient(
+    90deg,
+    var(--color-warning-400),
+    var(--color-warning-500)
+  );
 }
 
 .utilizationHigh {
-  background: linear-gradient(90deg, var(--color-error-500), var(--color-error-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-error-500),
+    var(--color-error-600)
+  );
 }
 
 .alertSection {
@@ -217,9 +235,11 @@
   white-space: nowrap;
 }
 
-.alertButton:hover {
-  background: var(--color-primary-700);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .alertButton:hover {
+    background: var(--color-primary-700);
+    transform: translateY(-1px);
+  }
 }
 
 .alertButton:focus-visible {

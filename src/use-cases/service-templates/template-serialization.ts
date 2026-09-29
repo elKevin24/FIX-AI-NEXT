@@ -1,3 +1,4 @@
+import 'server-only';
 import { TicketPriority } from '@prisma/client';
 
 /**

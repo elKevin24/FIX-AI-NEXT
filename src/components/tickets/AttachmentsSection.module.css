@@ -33,9 +33,11 @@
   transition: all 0.2s;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .preview {
@@ -90,8 +92,10 @@
   transition: opacity 0.2s;
 }
 
-.card:hover .deleteBtn {
-  opacity: 1;
+@media (hover: hover) {
+  .card:hover .deleteBtn {
+    opacity: 1;
+  }
 }
 
 .uploadZone {
@@ -104,8 +108,10 @@
   transition: border-color 0.2s;
 }
 
-.uploadZone:hover {
-  border-color: var(--primary-color);
+@media (hover: hover) {
+  .uploadZone:hover {
+    border-color: var(--primary-color);
+  }
 }
 
 .uploadText {

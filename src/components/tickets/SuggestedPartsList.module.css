@@ -50,9 +50,11 @@
   transition: all var(--transition-fast);
 }
 
-.partCard:hover {
-  border-color: var(--color-border-medium);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .partCard:hover {
+    border-color: var(--color-border-medium);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .partCardAdded {
@@ -158,10 +160,12 @@
   white-space: nowrap;
 }
 
-.addButton:hover:not(:disabled) {
-  background: var(--color-primary-700);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .addButton:hover:not(:disabled) {
+    background: var(--color-primary-700);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .addButton:disabled {

@@ -1,3 +1,4 @@
+import 'server-only';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantPrisma } from '@/lib/tenant-prisma';

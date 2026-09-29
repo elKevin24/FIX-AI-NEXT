@@ -1,3 +1,4 @@
+import 'server-only';
 import type { TenantPrismaClient } from './types';
 import { serializeTemplate } from './template-serialization';
 

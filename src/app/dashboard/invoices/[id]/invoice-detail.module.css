@@ -4,383 +4,427 @@
    ======================================== */
 
 .container {
-    padding: 0; /* Eliminado padding redundante */
-    max-width: 1400px; /* Estandarizado */
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    width: 100%;
+  padding: 0; /* Eliminado padding redundante */
+  max-width: 1400px; /* Estandarizado */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========== NAVIGATION & ACTIONS ========== */
 .backButtonContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: -1.5rem; /* Zero Waste Alignment */
-    position: relative;
-    z-index: 10;
-    pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -1.5rem; /* Zero Waste Alignment */
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .backButtonContainer > * {
-    pointer-events: auto;
+  pointer-events: auto;
 }
 
 .backButton {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 600;
-    transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s;
 }
 
-.backButton:hover {
+@media (hover: hover) {
+  .backButton:hover {
     color: var(--color-primary-600);
+  }
 }
 
 .btnPrint {
-    background-color: var(--color-secondary-600);
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: var(--radius-base);
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 700;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
+  background-color: var(--color-secondary-600);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
 }
 
-.btnPrint:hover {
+@media (hover: hover) {
+  .btnPrint:hover {
     background-color: var(--color-secondary-700);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+  }
 }
 
 /* ========== INVOICE PAPER (Glass Card) ========== */
 .invoicePaper {
-    background: var(--color-surface);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--color-border-light);
-    border-radius: 1.5rem;
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    position: relative;
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-border-light);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
 }
 
 .invoiceHeader {
-    padding: 3rem;
-    border-bottom: 1px solid var(--color-border-light);
-    display: flex;
-    justify-content: space-between;
-    background: linear-gradient(to bottom right, rgba(255,255,255,0.05), transparent);
+  padding: 3rem;
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
 }
 
 .brand h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--color-primary-600);
-    letter-spacing: -0.04em;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary-600);
+  letter-spacing: -0.04em;
 }
 
 .brand p {
-    font-size: 0.875rem;
-    color: var(--color-text-tertiary);
-    font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
 }
 
 .invoiceTitle {
-    text-align: right;
+  text-align: right;
 }
 
 .invoiceTitle h1 {
-    font-size: 2.25rem;
-    font-weight: 800;
-    color: var(--color-gray-800);
-    letter-spacing: -0.04em;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-gray-800);
+  letter-spacing: -0.04em;
 }
 
 .invoiceTitle p {
-    font-size: 1.125rem;
-    color: var(--color-text-secondary);
-    font-family: var(--font-family-mono);
-    font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-weight: 600;
 }
 
 .infoGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 2rem 3rem;
-    gap: 2rem;
-    background: var(--color-bg-secondary);
-    border-bottom: 1px solid var(--color-border-light);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2rem 3rem;
+  gap: 2rem;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .infoBlock h3 {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.1em;
-    font-weight: 800;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.1em;
+  font-weight: 800;
 }
 
 .infoBlock p {
-    font-size: 0.9375rem;
-    color: var(--color-text-primary);
-    line-height: 1.6;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  line-height: 1.6;
 }
 
 .itemsSection {
-    padding: 2rem 3rem;
+  padding: 2rem 3rem;
 }
 
 .itemTable {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .itemTable th {
-    padding: 1rem 0;
-    text-align: left;
-    border-bottom: 2px solid var(--color-border-medium);
-    color: var(--color-text-tertiary);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+  padding: 1rem 0;
+  text-align: left;
+  border-bottom: 2px solid var(--color-border-medium);
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
 .itemTable td {
-    padding: 1.25rem 0;
-    border-bottom: 1px solid var(--color-border-light);
-    color: var(--color-text-secondary);
-    font-size: 0.9375rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
 }
 
 .summarySection {
-    padding: 2.5rem 3rem;
-    display: flex;
-    justify-content: flex-end;
-    background: linear-gradient(to top, var(--color-bg-secondary), transparent);
+  padding: 2.5rem 3rem;
+  display: flex;
+  justify-content: flex-end;
+  background: linear-gradient(to top, var(--color-bg-secondary), transparent);
 }
 
 .summaryTable {
-    min-width: 320px;
+  min-width: 320px;
 }
 
 .summaryRow {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.625rem 0;
-    font-size: 0.9375rem;
-    color: var(--color-text-secondary);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.625rem 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
 }
 
 .summaryRow.total {
-    border-top: 2px solid var(--color-border-medium);
-    margin-top: 1rem;
-    padding-top: 1rem;
-    font-weight: 800;
-    font-size: 1.5rem;
-    color: var(--color-primary-700);
+  border-top: 2px solid var(--color-border-medium);
+  margin-top: 1rem;
+  padding-top: 1rem;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--color-primary-700);
 }
 
 .footer {
-    padding: 2rem 3rem;
-    background: var(--color-bg-secondary);
-    border-top: 1px solid var(--color-border-light);
+  padding: 2rem 3rem;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .footer h3 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-    margin-bottom: 0.5rem;
-    font-weight: 800;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 0.5rem;
+  font-weight: 800;
 }
 
 .footer p {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
 /* ========== PAYMENTS SECTION ========== */
 .paymentSection {
-    margin-top: 3rem;
+  margin-top: 3rem;
 }
 
 .paymentHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .paymentHeader h2 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--color-gray-800);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-gray-800);
 }
 
 .paymentList {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .paymentItem {
-    background: var(--color-surface);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--color-border-light);
-    padding: 1.25rem;
-    border-radius: var(--radius-base);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: var(--shadow-sm);
+  background: var(--color-surface);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border-light);
+  padding: 1.25rem;
+  border-radius: var(--radius-base);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .paymentInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.paymentDate { font-size: 0.75rem; color: var(--color-text-tertiary); }
-.paymentMethod { font-size: 0.875rem; font-weight: 700; color: var(--color-text-primary); }
+.paymentDate {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+.paymentMethod {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
 
 .paymentAmount {
-    font-family: var(--font-family-mono);
-    font-weight: 800;
-    color: var(--color-success-600);
-    font-size: 1.125rem;
+  font-family: var(--font-family-mono);
+  font-weight: 800;
+  color: var(--color-success-600);
+  font-size: 1.125rem;
 }
 
 /* ========== MODAL & FORMS ========== */
 .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: var(--z-modal);
-    padding: 1rem;
-    animation: fadeIn 0.3s ease-out;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: 1rem;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modalContent {
-    background: var(--color-surface);
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: var(--shadow-xl);
-    border: 1px solid rgba(255,255,255,0.1);
+  background: var(--color-surface);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .formGroup {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .formGroup label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
 }
 
-.input, .select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-base);
-    border: 1px solid var(--color-border-medium);
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-size: 1rem;
-    transition: all 0.2s;
+.input,
+.select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
-.input:focus, .select:focus {
-    outline: none;
-    border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 3px var(--color-primary-100);
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
 .buttonGroup {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-base);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    flex: 1;
-    font-size: 0.875rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  flex: 1;
+  font-size: 0.875rem;
 }
 
-.btnPrimary { 
-    background: var(--color-primary-600); 
-    color: white; 
-    box-shadow: var(--shadow-sm);
+.btnPrimary {
+  background: var(--color-primary-600);
+  color: white;
+  box-shadow: var(--shadow-sm);
 }
 
-.btnPrimary:hover {
+@media (hover: hover) {
+  .btnPrimary:hover {
     background: var(--color-primary-700);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+  }
 }
 
-.btnSecondary { 
-    background: var(--color-bg-secondary); 
-    color: var(--color-text-secondary); 
-    border: 1px solid var(--color-border-medium);
+.btnSecondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-medium);
 }
 
-.btnSecondary:hover {
+@media (hover: hover) {
+  .btnSecondary:hover {
     background: var(--color-gray-200);
+  }
 }
 
 .paidBadge {
-    display: inline-flex;
-    background: var(--color-success-100);
-    color: var(--color-success-700);
-    padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
-    font-weight: 800;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+  display: inline-flex;
+  background: var(--color-success-100);
+  color: var(--color-success-700);
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 @media (max-width: 640px) {
-    .invoiceHeader { padding: 2rem; flex-direction: column; text-align: left; }
-    .invoiceTitle { text-align: left; margin-top: 1.5rem; }
-    .infoGrid { grid-template-columns: 1fr; padding: 2rem; gap: 1.5rem; }
-    .itemsSection, .summarySection, .footer { padding: 2rem; }
-    .summaryTable { min-width: 100%; }
+  .invoiceHeader {
+    padding: 2rem;
+    flex-direction: column;
+    text-align: left;
+  }
+  .invoiceTitle {
+    text-align: left;
+    margin-top: 1.5rem;
+  }
+  .infoGrid {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+  .itemsSection,
+  .summarySection,
+  .footer {
+    padding: 2rem;
+  }
+  .summaryTable {
+    min-width: 100%;
+  }
 }

@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { IPartRepository, PartFilters, PartCreateInput, PartUpdateInput } from '../interfaces/part.repository.interface';
 

@@ -1,3 +1,4 @@
+import 'server-only';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { checkExpiringQuotations, alertExpiringQuotations } from '@/lib/quotation-cron';

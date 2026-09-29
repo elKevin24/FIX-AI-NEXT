@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { ICustomerRepository, CustomerCreateInput, CustomerUpdateInput } from '../interfaces/customer.repository.interface';
 

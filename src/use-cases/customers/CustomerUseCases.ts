@@ -1,3 +1,4 @@
+import 'server-only';
 import { CreateCustomerInput, UpdateCustomerInput } from '@/lib/schemas';
 import { ICustomerRepository, PrismaCustomerRepository } from '@/lib/repositories';
 import { NotFoundError, BusinessRuleError } from '@/lib/errors';

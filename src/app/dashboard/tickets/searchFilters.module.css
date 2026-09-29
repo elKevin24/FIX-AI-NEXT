@@ -22,8 +22,10 @@
   gap: var(--spacing-4);
 }
 
-.filtersCard:hover {
-  border-color: var(--color-border-medium);
+@media (hover: hover) {
+  .filtersCard:hover {
+    border-color: var(--color-border-medium);
+  }
 }
 
 .filterSection {

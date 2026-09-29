@@ -4,62 +4,74 @@
    ======================================== */
 
 .container {
-    display: flex;
-    min-height: 100vh;
-    background: var(--color-bg-primary);
-    position: relative;
-    overflow: hidden;
-    flex-direction: column;
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  position: relative;
+  overflow: hidden;
+  flex-direction: column;
 }
 
 /* Cloudy Background Effects */
 .container::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background:
-        radial-gradient(circle at 20% 30%, var(--color-primary-100) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, var(--color-secondary-100) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, var(--color-success-50) 0%, transparent 70%);
-    filter: blur(100px);
-    opacity: 0.3;
-    pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      var(--color-primary-100) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      var(--color-secondary-100) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--color-success-50) 0%,
+      transparent 70%
+    );
+  filter: blur(100px);
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 /* Main Content Area - Liquid Glass */
 .mainContent {
-    flex: 1;
-    padding: 0 1rem 1rem 1rem; /* Eliminado padding superior */
-    position: relative;
-    z-index: 1;
-    overflow-y: auto;
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  flex: 1;
+  padding: 0 1rem 1rem 1rem; /* Eliminado padding superior */
+  position: relative;
+  z-index: 1;
+  overflow-y: auto;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Desktop Styles */
 @media (min-width: 768px) {
-    .container {
-        flex-direction: row;
-        height: 100vh;
-        overflow: hidden;
-    }
+  .container {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    .mainContent {
-        padding: 0 2rem 2rem 2rem; /* Eliminado padding superior */
-        height: 100vh;
-        overflow-y: auto;
-    }
+  .mainContent {
+    padding: 0 2rem 2rem 2rem; /* Eliminado padding superior */
+    height: 100vh;
+    overflow-y: auto;
+  }
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

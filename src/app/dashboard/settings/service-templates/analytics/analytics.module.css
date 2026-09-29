@@ -38,8 +38,10 @@
   margin-bottom: 0.5rem;
 }
 
-.backLink:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .backLink:hover {
+    text-decoration: underline;
+  }
 }
 
 .header h1 {
@@ -108,8 +110,10 @@
   transition: background 0.2s;
 }
 
-.updateButton:hover:not(:disabled) {
-  background: var(--color-primary-700);
+@media (hover: hover) {
+  .updateButton:hover:not(:disabled) {
+    background: var(--color-primary-700);
+  }
 }
 
 .updateButton:disabled {
@@ -238,8 +242,10 @@
   border-bottom: none;
 }
 
-.table tr:hover td {
-  background-color: var(--color-bg-secondary);
+@media (hover: hover) {
+  .table tr:hover td {
+    background-color: var(--color-bg-secondary);
+  }
 }
 
 .emptyRow {
@@ -297,8 +303,10 @@
   color: inherit;
 }
 
-.ticketLink:hover {
-  color: var(--color-primary-600);
+@media (hover: hover) {
+  .ticketLink:hover {
+    color: var(--color-primary-600);
+  }
 }
 
 .ticketTitle {

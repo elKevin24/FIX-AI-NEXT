@@ -1,3 +1,4 @@
+import 'server-only';
 import { UpdateTicketStatusUseCase } from './UpdateTicketStatusUseCase';
 
 export interface DeleteTicketParams {

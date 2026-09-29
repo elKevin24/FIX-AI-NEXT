@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { createNotification } from './notifications';
 import { sendEmail } from './email-service';

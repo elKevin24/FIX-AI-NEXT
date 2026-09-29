@@ -56,10 +56,12 @@
   box-shadow: var(--shadow-xs);
 }
 
-.refreshButton:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-primary-500);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .refreshButton:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary-500);
+    transform: translateY(-1px);
+  }
 }
 
 .controls {
@@ -99,9 +101,11 @@
   outline: none;
 }
 
-.select:hover,
-.select:focus {
-  border-color: var(--color-primary-500);
+@media (hover: hover) {
+  .select:hover,
+  .select:focus {
+    border-color: var(--color-primary-500);
+  }
 }
 
 .techniciansGrid {
@@ -140,7 +144,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error {
@@ -223,9 +229,11 @@
   transition: all 0.2s;
 }
 
-.retryButton:hover {
-  background: var(--color-primary-dark);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .retryButton:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+  }
 }
 
 .select:focus-visible {
@@ -234,7 +242,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spinner { animation: none; }
+  .spinner {
+    animation: none;
+  }
 }
 
 .emptyState {

@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreateTicketInput } from '@/lib/schemas';
 import { CustomerResolver, CustomerInfo, ResolvedCustomer } from './CustomerResolver';

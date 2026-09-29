@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { NotFoundError, AuthorizationError, BusinessRuleError } from '@/lib/errors';
 

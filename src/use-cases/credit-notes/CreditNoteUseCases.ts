@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { CreditNoteStatus } from '@prisma/client';
 import { z } from 'zod';

@@ -1,3 +1,4 @@
+import 'server-only';
 import bcryptjs from 'bcryptjs';
 import type { UserRole, Prisma } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';

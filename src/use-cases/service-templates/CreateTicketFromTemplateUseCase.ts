@@ -1,3 +1,4 @@
+import 'server-only';
 import { Prisma } from '@prisma/client';
 import type { TenantPrismaClient, TemplateWithParts } from './types';
 import { convertPriorityToEnum } from './template-serialization';

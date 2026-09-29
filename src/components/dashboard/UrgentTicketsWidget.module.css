@@ -3,144 +3,148 @@
    ======================================== */
 
 .container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .ticketList {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .emptyState {
-    padding: 3rem 2rem;
-    text-align: center;
-    color: var(--color-text-secondary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    background: var(--color-surface);
-    border-radius: 1rem;
-    border: 1px solid var(--color-border-light);
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: var(--color-surface);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border-light);
 }
 
 .emptyIcon {
-    font-size: 3rem;
-    opacity: 0.3;
+  font-size: 3rem;
+  opacity: 0.3;
 }
 
 .emptyText {
-    font-weight: 600;
-    margin: 0;
+  font-weight: 600;
+  margin: 0;
 }
 
 .emptySubtext {
-    font-size: 0.875rem;
-    color: var(--color-text-tertiary);
-    margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  margin: 0;
 }
 
 .ticketCard {
-    padding: 1rem;
-    background: var(--color-surface);
-    /* backdrop-filter: blur(12px); Removed inside cards usually, kept if context allows */
-    border: 1px solid var(--color-border-light);
-    border-radius: 0.875rem;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    text-decoration: none;
+  padding: 1rem;
+  background: var(--color-surface);
+  /* backdrop-filter: blur(12px); Removed inside cards usually, kept if context allows */
+  border: 1px solid var(--color-border-light);
+  border-radius: 0.875rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-decoration: none;
 }
 
-.ticketCard:hover {
+@media (hover: hover) {
+  .ticketCard:hover {
     background: var(--color-surface-hover);
     border-color: var(--color-border-medium);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
+  }
 }
 
 .ticketHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
 .ticketInfo {
-    flex: 1;
+  flex: 1;
 }
 
 .ticketTitle {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0 0 0.25rem 0;
-    line-height: 1.4;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
 }
 
 .ticketCustomer {
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
-    margin: 0;
-    font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  font-weight: 500;
 }
 
 /* Priority Badges - Using System Variables */
 .priorityBadge {
-    padding: 0.25rem 0.625rem;
-    border-radius: 9999px;
-    font-size: 0.625rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: white; /* WCAG Check: Ensure background colors are dark enough */
-    flex-shrink: 0;
-    line-height: 1;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white; /* WCAG Check: Ensure background colors are dark enough */
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .priorityUrgent {
-    background-color: var(--color-error-600);
-    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+  background-color: var(--color-error-600);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
 }
 
 .priorityHigh {
-    background-color: var(--color-warning-600); /* Ensure this is readable or switch to black text if yellow */
-    /* If warning-600 is amber/orange, white text is okay-ish. If yellow, need black. 
+  background-color: var(
+    --color-warning-600
+  ); /* Ensure this is readable or switch to black text if yellow */
+  /* If warning-600 is amber/orange, white text is okay-ish. If yellow, need black. 
        Globals says warning-600 is hsl(30, 95%, 35%) which is a dark orange/brown. White text passes AA. */
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
 .priorityMedium {
-    background-color: var(--color-primary-600);
+  background-color: var(--color-primary-600);
 }
 
 .priorityLow {
-    background-color: var(--color-gray-500);
+  background-color: var(--color-gray-500);
 }
 
 .ticketFooter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--color-border-light);
-    font-size: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-light);
+  font-size: 0.75rem;
 }
 
 .ticketStatus {
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    background: var(--color-bg-secondary);
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
 }
 
 .ticketAge {
-    color: var(--color-text-tertiary);
-    font-weight: 500;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
 }

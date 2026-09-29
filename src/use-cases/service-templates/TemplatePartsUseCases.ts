@@ -1,3 +1,4 @@
+import 'server-only';
 import type { TenantPrismaClient } from './types';
 
 export class GetAvailablePartsUseCase {

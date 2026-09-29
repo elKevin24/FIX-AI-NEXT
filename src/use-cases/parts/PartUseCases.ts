@@ -1,3 +1,4 @@
+import 'server-only';
 import { CreatePartInput, UpdatePartInput } from '@/lib/schemas';
 import { notifyLowStock } from '@/lib/ticket-notifications';
 import { IPartRepository, PrismaPartRepository } from '@/lib/repositories';

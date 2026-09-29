@@ -1,3 +1,4 @@
+import 'server-only';
 export { CustomerResolver, type CustomerInfo, type ResolvedCustomer } from './CustomerResolver';
 export { TicketCreator, type TicketCreationData, type CreatedTicket, type ResolvedCustomer as TicketResolvedCustomer, type AssignedTo } from './TicketCreator';
 export { PartUsageHandler, type PartItem, type LowStockAlert } from './PartUsageHandler';

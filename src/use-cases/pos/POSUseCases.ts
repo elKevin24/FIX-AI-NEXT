@@ -1,3 +1,4 @@
+import 'server-only';
 import { PaymentMethod, POSSaleStatus, Prisma } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { z } from 'zod';

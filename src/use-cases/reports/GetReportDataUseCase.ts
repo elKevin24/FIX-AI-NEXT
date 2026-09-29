@@ -1,3 +1,4 @@
+import 'server-only';
 import { InvoiceStatus, POSSaleStatus } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 

@@ -1,3 +1,4 @@
+import 'server-only';
 import { notifyLowStock, notifyTicketCreated } from '@/lib/ticket-notifications';
 
 export interface TicketNotificationData {

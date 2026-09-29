@@ -1,3 +1,4 @@
+import 'server-only';
 import { InvoiceStatus, PaymentMethod, Prisma } from '@prisma/client';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { registerInvoicePaymentInCash } from '@/lib/cash-register-actions';

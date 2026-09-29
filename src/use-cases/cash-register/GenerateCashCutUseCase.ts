@@ -1,3 +1,4 @@
+import 'server-only';
 import { Prisma } from "@prisma/client";
 import { getTenantPrisma } from "@/lib/tenant-prisma";
 

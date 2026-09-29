@@ -4,13 +4,15 @@
   padding: 1rem;
   margin-bottom: 0.75rem;
   border-radius: 0.75rem;
-  
+
   /* Light Mode: 98% opacity for readability */
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.15),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--color-border-medium, rgba(0, 0, 0, 0.1));
   width: calc(100vw - 2rem);
   max-width: 400px;
@@ -82,9 +84,11 @@
   border-radius: 4px;
 }
 
-.closeBtn:hover {
-  opacity: 1;
-  color: var(--color-text-primary);
+@media (hover: hover) {
+  .closeBtn:hover {
+    opacity: 1;
+    color: var(--color-text-primary);
+  }
 }
 
 .closeBtn:focus-visible {

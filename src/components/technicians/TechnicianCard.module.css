@@ -17,10 +17,12 @@
   gap: 1rem;
 }
 
-.card:hover {
-  border-color: var(--color-border-medium);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--color-border-medium);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
 }
 
 .header {
@@ -42,7 +44,11 @@
   width: 42px;
   height: 42px;
   border-radius: 9999px;
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-600),
+    var(--color-primary-800)
+  );
   color: var(--color-on-primary);
   display: flex;
   align-items: center;
@@ -180,15 +186,27 @@
 }
 
 .utilizationLow {
-  background: linear-gradient(90deg, var(--color-success-500), var(--color-success-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-success-500),
+    var(--color-success-600)
+  );
 }
 
 .utilizationMedium {
-  background: linear-gradient(90deg, var(--color-warning-400), var(--color-warning-500));
+  background: linear-gradient(
+    90deg,
+    var(--color-warning-400),
+    var(--color-warning-500)
+  );
 }
 
 .utilizationHigh {
-  background: linear-gradient(90deg, var(--color-error-500), var(--color-error-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-error-500),
+    var(--color-error-600)
+  );
 }
 
 .workloadFooter {
@@ -319,10 +337,18 @@
   border-radius: 50%;
 }
 
-.dotUrgent { background: var(--color-error-500); }
-.dotHigh { background: var(--color-warning-500); }
-.dotMedium { background: var(--color-primary-500); }
-.dotLow { background: var(--color-gray-400); }
+.dotUrgent {
+  background: var(--color-error-500);
+}
+.dotHigh {
+  background: var(--color-warning-500);
+}
+.dotMedium {
+  background: var(--color-primary-500);
+}
+.dotLow {
+  background: var(--color-gray-400);
+}
 
 .ticketsSection {
   margin-top: 0.25rem;
@@ -345,10 +371,12 @@
   transition: all 0.2s;
 }
 
-.toggleTicketsButton:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
+@media (hover: hover) {
+  .toggleTicketsButton:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-strong);
+  }
 }
 
 .ticketsList {
@@ -370,10 +398,12 @@
   transition: all 0.2s;
 }
 
-.ticketItem:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-primary-300);
-  transform: translateX(2px);
+@media (hover: hover) {
+  .ticketItem:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary-300);
+    transform: translateX(2px);
+  }
 }
 
 .ticketId {
@@ -423,7 +453,9 @@
   color: var(--color-text-tertiary);
 }
 
-.actions { margin-top: 0.25rem; }
+.actions {
+  margin-top: 0.25rem;
+}
 
 .actionButton {
   width: 100%;
@@ -439,7 +471,12 @@
   cursor: pointer;
 }
 
-.actionButton:hover { background: var(--color-surface-hover); color: var(--color-text-primary); }
+@media (hover: hover) {
+  .actionButton:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+  }
+}
 
 .actionButton:focus-visible,
 .ticketItem:focus-visible {
@@ -447,10 +484,25 @@
   outline-offset: 3px;
 }
 
-.priorityAlert { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; font-weight: 700; }
-.priorityUrgent { color: var(--color-error-700); }
-.priorityHigh { color: var(--color-warning-700); }
-.ticketHeader { display: flex; justify-content: space-between; gap: 0.5rem; width: 100%; }
+.priorityAlert {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.priorityUrgent {
+  color: var(--color-error-700);
+}
+.priorityHigh {
+  color: var(--color-warning-700);
+}
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
 
 @media (max-width: 480px) {
   .card {

@@ -1,3 +1,4 @@
+import 'server-only';
 // Use Cases - Clean Architecture Layer
 // 
 // This directory contains application-level business logic organized by domain.

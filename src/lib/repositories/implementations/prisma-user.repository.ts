@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { buildUserWhereClause } from '@/lib/user-filters';
 import { IUserRepository, UserFilters, UserCreateInput, UserUpdateInput } from '../interfaces/user.repository.interface';

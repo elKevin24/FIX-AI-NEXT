@@ -1,3 +1,4 @@
+import 'server-only';
 import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { IInvoiceRepository } from '../interfaces/invoice.repository.interface';
 

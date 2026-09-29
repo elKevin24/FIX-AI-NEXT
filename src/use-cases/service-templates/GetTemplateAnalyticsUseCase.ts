@@ -1,3 +1,4 @@
+import 'server-only';
 import { ServiceCategory } from '@prisma/client';
 import type { TenantPrismaClient, TemplateAnalytics } from './types';
 
