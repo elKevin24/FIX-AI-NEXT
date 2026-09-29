@@ -159,7 +159,7 @@ export default function AttachmentsSection({ ticketId, initialAttachments }: Pro
             </div>
 
             {initialAttachments.length === 0 && (
-                 <div className="text-center py-8 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                 <div className={styles['emptyState']}>
                     No attachments yet. <br/>Upload images or documents related to this ticket.
                  </div>
             )}

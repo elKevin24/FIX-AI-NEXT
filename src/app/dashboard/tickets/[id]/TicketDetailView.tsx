@@ -196,9 +196,9 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
             />
 
             {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className={styles['detailLayout']}>
                 {/* Left Column - Ticket Details */}
-                <div className={`${styles['section']} lg:col-span-2`}>
+                <div className={`${styles['section']} ${styles['detailMain']}`} style={{ marginTop: 0 }}>
                     {!isEditing ? (
                         <>
                             <div className={styles['sectionHeader']}>
@@ -338,7 +338,7 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                 </div>
 
                 {/* Right Column - Customer Info & Timeline */}
-                <div className="lg:col-span-1 flex flex-col gap-6">
+                <div className={styles['detailSidebar']}>
                     {/* Customer Info */}
                     <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>
                         <h3 className={styles['label']} style={{ marginBottom: '0.75rem' }}>Cliente</h3>

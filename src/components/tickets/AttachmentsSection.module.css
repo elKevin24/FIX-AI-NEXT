@@ -127,3 +127,13 @@
   align-items: center;
   justify-content: center;
 }
+
+.emptyState {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  border: 2px dashed var(--color-border-light);
+  border-radius: var(--radius-lg);
+  line-height: 1.5;
+}

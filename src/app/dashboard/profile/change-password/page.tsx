@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import ChangePasswordForm from './ChangePasswordForm';
 import PageHeader from '@/components/PageHeader';
+import { Card, CardBody, Alert } from '@/components/ui';
 
 export const metadata = {
   title: 'Cambiar Contraseña',
@@ -25,16 +26,18 @@ export default async function ChangePasswordPage() {
                 subtitle={!isForced ? 'Actualiza tu contraseña de acceso.' : undefined}
             />
             {isForced && (
-                <div className="mt-3 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800">
+                <div className="mb-4">
+                    <Alert variant="warning">
                         Tu contraseña es temporal. Debes cambiarla para continuar usando el sistema.
-                    </p>
+                    </Alert>
                 </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-                <ChangePasswordForm isForced={isForced} />
-            </div>
+            <Card>
+                <CardBody>
+                    <ChangePasswordForm isForced={isForced} />
+                </CardBody>
+            </Card>
         </div>
     );
 }
