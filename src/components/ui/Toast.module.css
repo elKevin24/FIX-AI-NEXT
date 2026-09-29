@@ -5,20 +5,23 @@
   margin-bottom: 0.75rem;
   border-radius: 0.75rem;
   
-  /* Light Mode: 95% opacity for readability */
-  background: rgba(255, 255, 255, 0.95);
+  /* Light Mode: 98% opacity for readability */
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  min-width: 320px;
-  max-width: 420px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-medium, rgba(0, 0, 0, 0.1));
+  width: calc(100vw - 2rem);
+  max-width: 400px;
+  min-width: 280px;
+  box-sizing: border-box;
   animation: slideIn 0.3s ease-out forwards;
   position: relative;
   overflow: hidden;
   pointer-events: auto;
   transition: all 0.3s ease;
+  z-index: 99999;
 }
 
 .toast.exiting {

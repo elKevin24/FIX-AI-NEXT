@@ -12,10 +12,11 @@ export default function ToastContainer() {
         position: 'fixed',
         bottom: '24px',
         right: '24px',
-        zIndex: 9999,
+        zIndex: 99999,
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
+        maxWidth: 'calc(100vw - 32px)',
         pointerEvents: 'none', // Allow clicks to pass through container area
       }}
     >
