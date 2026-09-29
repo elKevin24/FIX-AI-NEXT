@@ -15,6 +15,8 @@ import ServicesSection from './ServicesSection';
 import AttachmentsSection from '@/components/tickets/AttachmentsSection';
 import { TimelineEvent } from '@/lib/timeline';
 import TicketWorkflowActions from '@/components/tickets/TicketWorkflowActions';
+import { buildWhatsAppUrl } from '@/lib/whatsapp-utils';
+import { MessageSquare } from 'lucide-react';
 
 interface Part {
     id: string;
@@ -65,10 +67,16 @@ interface TicketNote {
 
 interface Ticket {
     id: string;
+    ticketNumber?: string | null;
     title: string;
     description: string;
     status: string;
     priority: string | null;
+    deviceType?: string | null;
+    deviceModel?: string | null;
+    serialNumber?: string | null;
+    accessories?: string | null;
+    checkInNotes?: string | null;
     createdAt: Date;
     updatedAt: Date;
     customer: {
@@ -366,6 +374,47 @@ export default function TicketDetailView({ ticket, availableUsers, availablePart
                             </div>
                         </div>
                     </div>
+
+                    {/* WhatsApp Customer Notification */}
+                    {ticket.customer.phone && (
+                        <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0, backgroundColor: 'rgba(34, 197, 94, 0.05)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+                            <h3 className={styles['label']} style={{ marginBottom: '0.75rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <MessageSquare size={16} aria-hidden="true" />
+                                Notificación al Cliente
+                            </h3>
+                            <Button
+                                as="a"
+                                href={buildWhatsAppUrl({
+                                    id: ticket.id,
+                                    ticketNumber: ticket.ticketNumber,
+                                    title: ticket.title,
+                                    status: ticket.status,
+                                    deviceModel: ticket.deviceModel,
+                                    deviceType: ticket.deviceType,
+                                    totalAmount: (
+                                        (ticket.partsUsed?.reduce((acc: number, p: any) => acc + (Number(p.part.price) * p.quantity), 0) || 0) +
+                                        (ticket.services?.reduce((acc: number, s: any) => acc + Number(s.laborCost), 0) || 0)
+                                    ).toFixed(2),
+                                    customer: ticket.customer,
+                                    tenant: ticket.tenant,
+                                }) || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                variant="primary"
+                                size="sm"
+                                fullWidth
+                                leftIcon={<MessageSquare size={15} aria-hidden="true" />}
+                                style={{
+                                    backgroundColor: '#22c55e',
+                                    borderColor: '#16a34a',
+                                    color: '#ffffff',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                Enviar WhatsApp ({ticket.customer.phone})
+                            </Button>
+                        </div>
+                    )}
 
                     {/* PDF Documents */}
                     <div className={styles['section']} style={{ padding: '1.25rem', marginTop: 0 }}>

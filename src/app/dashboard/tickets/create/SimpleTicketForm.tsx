@@ -51,6 +51,17 @@ const DEVICE_TYPE_OPTIONS = [
     { value: 'Other', label: 'Otro Dispositivo' },
 ];
 
+const CHECKLIST_TAGS = [
+    '⚡ Enciende OK',
+    '❌ No enciende',
+    '📱 Pantalla intacta',
+    '💥 Rayones/Golpes',
+    '🔌 Con cargador',
+    '🔋 Batería OK',
+    '🔒 Con clave/patrón',
+    '💧 Mojado/Humedad',
+];
+
 export default function SimpleTicketForm() {
     const router = useRouter();
     const [customer, setCustomer] = useState<Customer | null>(null);
@@ -377,6 +388,27 @@ export default function SimpleTicketForm() {
                                                     onChange={(e) => updateDevice(index, 'checkInNotes', e.target.value)}
                                                     placeholder="Rayones en tapa trasera, botón flojo..."
                                                 />
+                                                <div className={styles['quickTagsContainer']}>
+                                                    {CHECKLIST_TAGS.map((tag) => {
+                                                        const isSelected = (device.checkInNotes || '').includes(tag);
+                                                        return (
+                                                            <button
+                                                                key={tag}
+                                                                type="button"
+                                                                className={`${styles['quickTag']} ${isSelected ? styles['quickTagActive'] : ''}`}
+                                                                onClick={() => {
+                                                                    const current = (device.checkInNotes || '').split(', ').map(s => s.trim()).filter(Boolean);
+                                                                    const next = current.includes(tag)
+                                                                        ? current.filter(t => t !== tag)
+                                                                        : [...current, tag];
+                                                                    updateDevice(index, 'checkInNotes', next.join(', '));
+                                                                }}
+                                                            >
+                                                                {tag}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
