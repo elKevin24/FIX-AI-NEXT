@@ -32,9 +32,9 @@ export default async function UsersPage() {
     if (!canManage) {
         return (
             <div className={styles['container']}>
-                <div className="text-center py-12">
-                    <h2 className="text-xl font-semibold text-gray-800">Acceso denegado</h2>
-                    <p className="text-gray-600 mt-2">No tienes permisos para gestionar usuarios.</p>
+                <div className={styles['accessDenied']}>
+                    <h2 className={styles['accessDeniedTitle']}>Acceso denegado</h2>
+                    <p className={styles['accessDeniedMessage']}>No tienes permisos para gestionar usuarios.</p>
                 </div>
             </div>
         );

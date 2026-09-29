@@ -51,7 +51,7 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={styles['formRow']}>
         <Input
           label="Nombre"
           name="firstName"
@@ -81,19 +81,17 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         error={state.errors?.['email']?.[0]}
       />
 
-      <div className="my-4">
-        <label className="flex items-center gap-2 cursor-pointer">
+      <div className={styles['checkboxGroup']}>
+        <label className={styles['checkboxLabel']}>
           <input
             type="checkbox"
             checked={generatePassword}
             onChange={(e) => setGeneratePassword(e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className={styles['checkboxInput']}
           />
-          <span className="text-sm text-gray-700">
-            Generar contraseña temporal automáticamente
-          </span>
+          <span>Generar contraseña temporal automáticamente</span>
         </label>
-        <p className="text-xs text-gray-500 mt-1 ml-6">
+        <p className={styles['checkboxHelper']}>
           El usuario deberá cambiar la contraseña en su primer inicio de sesión
         </p>
       </div>
@@ -109,9 +107,9 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
             placeholder="Mínimo 8 caracteres"
             error={state.errors?.['password']?.[0]}
           />
-          <div className="mt-2 text-xs text-gray-500 space-y-1">
-            <p className="font-medium">Requisitos de contraseña:</p>
-            <ul className="list-disc list-inside space-y-0.5">
+          <div className={styles['infoCard']}>
+            <p className={styles['infoCardTitle']}>Requisitos de contraseña:</p>
+            <ul className={styles['requirementsList']}>
               <li>Mínimo {PASSWORD_POLICY.minLength} caracteres</li>
               <li>Al menos una mayúscula</li>
               <li>Al menos una minúscula</li>
@@ -130,9 +128,9 @@ export default function CreateUserForm({ currentUserRole = 'ADMIN' }: CreateUser
         helper="Define los permisos del usuario"
       />
 
-      <div className="mt-2 mb-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-        <p className="font-medium mb-2">Descripción de roles:</p>
-        <ul className="space-y-1">
+      <div className={styles['infoCard']}>
+        <p className={styles['infoCardTitle']}>Descripción de roles:</p>
+        <ul className={styles['requirementsList']}>
           {getSelectableRoles().map((role) => (
             <li key={role}>
               <strong>{ROLE_LABELS[role]}:</strong> {ROLE_DESCRIPTIONS[role]}

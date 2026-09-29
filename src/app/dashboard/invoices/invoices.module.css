@@ -308,3 +308,37 @@
     display: none; /* Hide date and ticket info on small mobile */
   }
 }
+
+/* ========== TABLE CELL STYLES ========== */
+.invoiceNumberCell {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.customerCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.customerName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.customerNIT {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.ticketCell {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.noTicketText {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+}

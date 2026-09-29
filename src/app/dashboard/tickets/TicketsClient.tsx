@@ -6,6 +6,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 import Link from 'next/link';
+import styles from './tickets.module.css';
 
 interface TicketData {
     id: string;
@@ -38,9 +39,8 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'id',
             header: 'ID',
-            meta: { className: 'w-[100px] min-w-[100px]' },
             cell: ({ row }) => (
-                <span className="font-mono text-xs text-gray-500 truncate block w-full max-w-[100px]" title={row.original.ticketNumber || row.original.id}>
+                <span className={styles['ticketIdCell']} title={row.original.ticketNumber || row.original.id}>
                     {row.original.ticketNumber || row.original.id.slice(0, 8)}
                 </span>
             ),
@@ -48,11 +48,10 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'title',
             header: 'Problema',
-            meta: { className: 'min-w-[200px] w-full max-w-[400px] whitespace-normal' },
             cell: ({ row }) => (
-                <div className="flex flex-col">
-                    <span className="font-bold text-gray-800 line-clamp-2" title={row.original.title}>{row.original.title}</span>
-                    <span className="text-xs text-gray-500 mt-1">
+                <div className={styles['ticketTitleCell']}>
+                    <span className={styles['ticketTitleText']} title={row.original.title}>{row.original.title}</span>
+                    <span className={styles['ticketDateText']}>
                         {new Date(row.original.createdAt).toLocaleDateString('es-ES')}
                     </span>
                 </div>
@@ -61,9 +60,8 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'customer.name',
             header: 'Cliente',
-            meta: { className: 'min-w-[150px] max-w-[200px] whitespace-normal' },
             cell: ({ row }) => (
-                <Link href={`/dashboard/customers/${row.original.customer.id}`} className="text-primary-600 hover:underline font-medium line-clamp-1" title={row.original.customer.name}>
+                <Link href={`/dashboard/customers/${row.original.customer.id}`} className={styles['ticketCustomerLink']} title={row.original.customer.name}>
                     {row.original.customer.name}
                 </Link>
             ),
@@ -76,7 +74,6 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'status',
             header: 'Estado',
-            meta: { className: 'w-[120px]' },
             cell: ({ row }) => <TicketStatusBadge status={row.original.status as any} />,
         },
         {
@@ -85,8 +82,8 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
             cell: ({ row }) => {
                 const priority = row.original.priority;
                 let color = 'gray';
-                if (priority === 'HIGH') color = 'orange';
-                if (priority === 'URGENT') color = 'red';
+                if (priority === 'HIGH') color = 'warning';
+                if (priority === 'URGENT') color = 'error';
                 return (
                     <Badge variant={color as any}>
                         {priority}
@@ -97,29 +94,24 @@ export default function TicketsClient({ data, isSuperAdmin = false }: TicketsCli
         {
             accessorKey: 'assignedTo.name',
             header: 'Técnico',
-            cell: ({ row }) => row.original.assignedTo?.name || row.original.assignedTo?.email || <span className="text-gray-400 italic">Sin asignar</span>,
+            cell: ({ row }) => row.original.assignedTo?.name || row.original.assignedTo?.email || <span className={styles['unassignedText']}>Sin asignar</span>,
         },
         {
             id: 'actions',
             header: 'Acciones',
-            meta: { className: 'w-[120px] text-right pr-4' },
             cell: ({ row }) => (
-                <Button 
-                    as={Link}
-                    href={`/dashboard/tickets/${row.original.id}`} 
-                    variant="secondary"
-                    size="sm"
-                >
-                    Ver Detalles
-                </Button>
+                <div className="flex gap-2 items-center">
+                    <Link href={`/dashboard/tickets/${row.original.id}`}>
+                        <Button variant="ghost" size="sm">Detalle</Button>
+                    </Link>
+                </div>
             ),
         },
     ];
 
     return (
-        <DataTable 
-            columns={columns} 
-            data={data} 
-        />
+        <div>
+            <DataTable columns={columns} data={data} />
+        </div>
     );
 }

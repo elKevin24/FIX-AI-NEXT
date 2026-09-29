@@ -6,6 +6,7 @@ import { ServiceTemplateForm } from '../../ServiceTemplateForm';
 import { TemplatePartsManager } from '../../TemplatePartsManager';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
+import { Card, CardBody, Alert } from '@/components/ui';
 import styles from '../../service-templates.module.css';
 import { hasPermission } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
@@ -30,19 +31,21 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
   if (!hasPermission(session.user.role as UserRole, 'canManageTemplates')) {
     return (
       <div className={styles['container']}>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold text-red-800 mb-2">Acceso Denegado</h2>
-          <p className="text-red-600 mb-4">
-            No tienes permisos para editar plantillas.
-          </p>
-          <Button
-            as={Link}
-            href="/dashboard"
-            variant="primary"
-          >
-            Volver al Dashboard
-          </Button>
-        </div>
+        <Alert variant="error">
+          <div style={{ textAlign: 'center', padding: '1rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Acceso Denegado</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              No tienes permisos para editar plantillas.
+            </p>
+            <Button
+              as={Link}
+              href="/dashboard"
+              variant="primary"
+            >
+              Volver al Dashboard
+            </Button>
+          </div>
+        </Alert>
       </div>
     );
   }
@@ -50,7 +53,7 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
   const template = await getServiceTemplate(id);
 
   return (
-    <div className={`${styles['container']} max-w-5xl`}>
+    <div className={styles['container']} style={{ maxWidth: '64rem' }}>
       <PageHeader
         title="Editar Plantilla de Servicio"
         subtitle={`Configuración de la plantilla: ${template.name}`}
@@ -67,7 +70,7 @@ export default async function EditServiceTemplatePage({ params }: { params: Prom
         }
       />
 
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Template Form */}
         <div className={`${styles['glassCard']} ${styles['slideUp']}`}>
           {template._count.tickets > 0 && (

@@ -255,3 +255,102 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========== TABLE CLIENT VIEW ========== */
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  margin-bottom: var(--spacing-4);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.filterCount {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.filterCheckbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.tableUserCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.tableAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.tableAvatarActive {
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.tableAvatarInactive {
+  background: var(--color-gray-200);
+  color: var(--color-gray-500);
+}
+
+.tableUserInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableUserName {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.tableUserNameInactive {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+
+.tableUserEmail {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono);
+}
+
+/* Access Denied State */
+.accessDenied {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.accessDeniedTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.accessDeniedMessage {
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+}
+

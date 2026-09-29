@@ -8,6 +8,7 @@ import Link from 'next/link';
 import DeleteUserButton from './DeleteUserButton';
 import { ROLE_LABELS, ROLE_COLORS, hasPermission, canModifyUser } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
+import styles from './users.module.css';
 
 interface UserData {
     id: string;
@@ -69,27 +70,23 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
                 const initials = getInitials(user);
 
                 return (
-                    <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                            user.isActive
-                                ? 'bg-primary-100 text-primary-700'
-                                : 'bg-gray-200 text-gray-500'
-                        }`}>
+                    <div className={styles['tableUserCell']}>
+                        <div className={`${styles['tableAvatar']} ${user.isActive ? styles['tableAvatarActive'] : styles['tableAvatarInactive']}`}>
                             {initials}
                         </div>
-                        <div className="flex flex-col">
+                        <div className={styles['tableUserInfo']}>
                             <div className="flex items-center gap-2">
-                                <span className={`font-bold ${user.isActive ? 'text-gray-800' : 'text-gray-400'}`}>
+                                <span className={user.isActive ? styles['tableUserName'] : styles['tableUserNameInactive']}>
                                     {displayName}
                                 </span>
                                 {!user.isActive && (
-                                    <Badge variant="gray" className="text-xs">Inactivo</Badge>
+                                    <Badge variant="gray" size="sm">Inactivo</Badge>
                                 )}
                                 {user.passwordMustChange && user.isActive && (
-                                    <Badge variant="warning" className="text-xs">Cambiar clave</Badge>
+                                    <Badge variant="warning" size="sm">Cambiar clave</Badge>
                                 )}
                             </div>
-                            <span className="text-xs text-gray-500 font-mono">{user.email}</span>
+                            <span className={styles['tableUserEmail']}>{user.email}</span>
                         </div>
                     </div>
                 );
@@ -129,7 +126,7 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
             cell: ({ row }) => {
                 const count = row.original._count?.assignedTickets || 0;
                 return (
-                    <span className={`font-medium ${count > 0 ? 'text-blue-600' : 'text-gray-400'}`}>
+                    <span className={`font-medium ${count > 0 ? 'text-primary' : 'text-muted'}`}>
                         {count}
                     </span>
                 );
@@ -141,7 +138,7 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
             cell: ({ row }) => {
                 const lastLogin = row.original.lastLoginAt;
                 if (!lastLogin) {
-                    return <span className="text-gray-400 text-sm">Nunca</span>;
+                    return <span className="text-muted text-sm">Nunca</span>;
                 }
                 const date = new Date(lastLogin);
                 const now = new Date();
@@ -158,7 +155,7 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
                     timeAgo = date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
                 }
 
-                return <span className="text-sm text-gray-600">{timeAgo}</span>;
+                return <span className="text-sm text-secondary">{timeAgo}</span>;
             },
         },
         {
@@ -194,20 +191,20 @@ export default function UsersClient({ data, currentUserId, currentUserRole }: Us
     return (
         <div className="space-y-4">
             {/* Filters */}
-            <div className="flex items-center justify-between bg-white p-4 rounded-lg border">
-                <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">
+            <div className={styles['filterBar']}>
+                <div className={styles['filterGroup']}>
+                    <span className={styles['filterCount']}>
                         {filteredData.length} usuario{filteredData.length !== 1 ? 's' : ''}
                     </span>
                     {inactiveCount > 0 && (
-                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <label className={styles['filterCheckbox']}>
                             <input
                                 type="checkbox"
                                 checked={showInactive}
                                 onChange={(e) => setShowInactive(e.target.checked)}
-                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                className={styles['checkboxInput']}
                             />
-                            <span className="text-gray-600">
+                            <span>
                                 Mostrar inactivos ({inactiveCount})
                             </span>
                         </label>

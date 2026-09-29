@@ -2,7 +2,8 @@
 
 import { useActionState } from 'react';
 import { updateSLASettings } from '@/lib/settings-actions';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, Alert } from '@/components/ui';
+import styles from '@/components/ui/Form.module.css';
 
 interface Settings {
     slaWarningPercent: number;
@@ -15,7 +16,13 @@ export default function SLASettingsForm({ initialSettings }: { initialSettings: 
     const [state, action, isPending] = useActionState(updateSLASettings, null);
 
     return (
-        <form action={action} className="space-y-6">
+        <form action={action} className="space-y-4">
+            {state?.message && (
+                <Alert variant={state.success ? 'success' : 'error'}>
+                    {state.message}
+                </Alert>
+            )}
+
             <Input 
                 label="Warning Threshold (%)"
                 type="number" 
@@ -36,44 +43,45 @@ export default function SLASettingsForm({ initialSettings }: { initialSettings: 
                 helper="Vital alert when time used exceeds this %"
             />
 
-            <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <input 
-                        type="checkbox" 
-                        name="slaEmailEnabled" 
-                        id="slaEmailEnabled"
-                        defaultChecked={initialSettings.slaEmailEnabled}
-                        className="h-4 w-4 text-blue-600 rounded"
-                    />
-                    <label htmlFor="slaEmailEnabled" className="text-sm font-medium text-gray-700">Enable Email Notifications</label>
+            <div className="space-y-2">
+                <div className={styles['checkboxGroup']} style={{ margin: '0.5rem 0' }}>
+                    <label className={styles['checkboxLabel']}>
+                        <input 
+                            type="checkbox" 
+                            name="slaEmailEnabled" 
+                            id="slaEmailEnabled"
+                            defaultChecked={initialSettings.slaEmailEnabled}
+                            className={styles['checkboxInput']}
+                        />
+                        <span>Enable Email Notifications</span>
+                    </label>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <input 
-                        type="checkbox" 
-                        name="slaInAppEnabled" 
-                        id="slaInAppEnabled"
-                        defaultChecked={initialSettings.slaInAppEnabled}
-                        className="h-4 w-4 text-blue-600 rounded"
-                    />
-                    <label htmlFor="slaInAppEnabled" className="text-sm font-medium text-gray-700">Enable In-App Notifications</label>
+                <div className={styles['checkboxGroup']} style={{ margin: '0.5rem 0' }}>
+                    <label className={styles['checkboxLabel']}>
+                        <input 
+                            type="checkbox" 
+                            name="slaInAppEnabled" 
+                            id="slaInAppEnabled"
+                            defaultChecked={initialSettings.slaInAppEnabled}
+                            className={styles['checkboxInput']}
+                        />
+                        <span>Enable In-App Notifications</span>
+                    </label>
                 </div>
             </div>
 
-            {state?.message && (
-                <div className={`p-3 rounded text-sm ${state.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {state.message}
-                </div>
-            )}
-
-            <Button 
-                type="submit" 
-                variant="primary"
-                size="sm"
-                isLoading={isPending}
-            >
-                Guardar Configuración SLA
-            </Button>
+            <div style={{ marginTop: '1.5rem' }}>
+                <Button 
+                    type="submit" 
+                    variant="primary"
+                    size="sm"
+                    isLoading={isPending}
+                    disabled={isPending}
+                >
+                    Guardar Configuración SLA
+                </Button>
+            </div>
         </form>
     );
 }

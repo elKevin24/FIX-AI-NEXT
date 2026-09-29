@@ -5,6 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/DataTable';
 import { TicketStatusBadge } from '@/components/tickets/TicketStatusBadge';
 import Link from 'next/link';
+import styles from '@/app/dashboard/tickets/tickets.module.css';
 
 interface RecentTicket {
     id: string;
@@ -35,7 +36,7 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
             accessorKey: 'id',
             header: 'ID',
             cell: ({ row }) => (
-                <Link href={`/dashboard/tickets/${row.original.id}`} className="font-mono text-primary-600 hover:underline">
+                <Link href={`/dashboard/tickets/${row.original.id}`} className={styles['ticketCustomerLink']} style={{ fontFamily: 'var(--font-family-mono)' }}>
                     {row.original.ticketNumber || row.original.id.slice(0, 8)}
                 </Link>
             ),
@@ -43,7 +44,7 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
         {
             accessorKey: 'title',
             header: 'Problema',
-            cell: ({ row }) => <span className="font-medium text-gray-800">{row.original.title}</span>,
+            cell: ({ row }) => <span style={{ fontWeight: '600', color: 'var(--color-text-primary)' }}>{row.original.title}</span>,
         },
         {
             accessorKey: 'customer.name',
@@ -59,8 +60,8 @@ export default function RecentTicketsTable({ data }: { data: RecentTicket[] }) {
             accessorKey: 'assignedTo.name',
             header: 'Técnico',
             cell: ({ row }) => (
-                <span className="text-xs text-gray-600">
-                    {row.original.assignedTo?.name || 'Sin asignar'}
+                <span className={styles['ticketDateText']} style={{ fontSize: 'var(--font-size-xs)' }}>
+                    {row.original.assignedTo?.name || <span className={styles['unassignedText']}>Sin asignar</span>}
                 </span>
             ),
         },

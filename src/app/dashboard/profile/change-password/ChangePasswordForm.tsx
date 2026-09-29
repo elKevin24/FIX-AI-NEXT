@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { changePassword } from '@/lib/user-actions';
 import { PASSWORD_POLICY } from '@/lib/password-utils';
 import { Input, Button, Alert } from '@/components/ui';
+import styles from './change-password.module.css';
 
 interface ChangePasswordFormProps {
     isForced?: boolean;
@@ -41,7 +42,7 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
     }, [state.success, router]);
 
     return (
-        <form action={formAction} className="space-y-4">
+        <form action={formAction} className={styles['form']}>
             {state.message && (
                 <Alert variant={state.success ? 'success' : 'error'}>
                     {state.message}
@@ -72,9 +73,9 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
                 />
 
                 {/* Password requirements */}
-                <div className="mt-2 text-xs text-gray-500 space-y-1">
-                    <p className="font-medium text-gray-600">Requisitos de seguridad:</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                <div className={styles['requirements']}>
+                    <p className={styles['requirementsTitle']}>Requisitos de seguridad:</p>
+                    <div className={styles['requirementsGrid']}>
                         <PasswordCheck passed={passwordChecks.minLength}>
                             Mínimo {PASSWORD_POLICY.minLength} caracteres
                         </PasswordCheck>
@@ -108,13 +109,13 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
                 />
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className={styles['actions']}>
                 {!isForced && (
                     <Button
                         type="button"
                         variant="secondary"
                         onClick={() => router.back()}
-                        className="flex-1"
+                        className={styles['buttonFlex']}
                     >
                         Cancelar
                     </Button>
@@ -123,7 +124,7 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
                     type="submit"
                     variant="primary"
                     disabled={isPending || !allChecksPassed || !passwordsMatch}
-                    className={isForced ? 'w-full' : 'flex-1'}
+                    className={isForced ? styles['buttonFull'] : styles['buttonFlex']}
                 >
                     {isPending ? 'Cambiando...' : 'Cambiar Contraseña'}
                 </Button>
@@ -134,7 +135,7 @@ export default function ChangePasswordForm({ isForced = false }: ChangePasswordF
 
 function PasswordCheck({ passed, children }: { passed: boolean; children: React.ReactNode }) {
     return (
-        <div className={`flex items-center gap-1.5 text-xs ${passed ? 'text-green-600' : 'text-gray-500'}`}>
+        <div className={`${styles['checkItem']} ${passed ? styles['checkItemPassed'] : ''}`}>
             {passed ? (
                 <svg className="shrink-0" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

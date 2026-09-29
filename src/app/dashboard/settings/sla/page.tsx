@@ -1,9 +1,9 @@
-
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { getTenantPrisma } from '@/lib/tenant-prisma';
 import { redirect } from 'next/navigation';
 import SLASettingsForm from './SLASettingsForm';
 import PageHeader from '@/components/PageHeader';
+import { Card, CardBody } from '@/components/ui';
 import { hasPermission } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 
@@ -22,7 +22,8 @@ export default async function SLASettingsPage() {
         redirect('/dashboard');
     }
 
-    const settings = await prisma.tenantSettings.findUnique({
+    const tenantPrisma = getTenantPrisma(session.user.tenantId);
+    const settings = await tenantPrisma.tenantSettings.findUnique({
         where: { tenantId: session.user.tenantId }
     });
 
@@ -33,15 +34,19 @@ export default async function SLASettingsPage() {
                 subtitle="Configura las alertas de Service Level Agreement (SLA) para tus tickets."
             />
             
-            <div className="bg-white p-6 rounded-lg shadow max-w-2xl">
-                <SLASettingsForm 
-                    initialSettings={settings || {
-                        slaWarningPercent: 70,
-                        slaCriticalPercent: 90,
-                        slaEmailEnabled: true,
-                        slaInAppEnabled: true
-                    }} 
-                />
+            <div style={{ maxWidth: '42rem' }}>
+                <Card>
+                    <CardBody>
+                        <SLASettingsForm 
+                            initialSettings={settings || {
+                                slaWarningPercent: 70,
+                                slaCriticalPercent: 90,
+                                slaEmailEnabled: true,
+                                slaInAppEnabled: true
+                            }} 
+                        />
+                    </CardBody>
+                </Card>
             </div>
         </div>
     );

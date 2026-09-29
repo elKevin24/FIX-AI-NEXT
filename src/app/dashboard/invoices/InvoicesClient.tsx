@@ -74,7 +74,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
     {
       accessorKey: 'invoiceNumber',
       header: 'No. Factura',
-      cell: ({ row }) => <span className="font-bold text-gray-800">{row.original.invoiceNumber}</span>,
+      cell: ({ row }) => <span className={styles['invoiceNumberCell']}>{row.original.invoiceNumber}</span>,
     },
     {
       accessorKey: 'createdAt',
@@ -85,9 +85,9 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
       accessorKey: 'customerName',
       header: 'Cliente',
       cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">{row.original.customerName}</span>
-          <span className="text-xs text-gray-500">NIT: {row.original.customerNIT || 'C/F'}</span>
+        <div className={styles['customerCell']}>
+          <span className={styles['customerName']}>{row.original.customerName}</span>
+          <span className={styles['customerNIT']}>NIT: {row.original.customerNIT || 'C/F'}</span>
         </div>
       ),
     },
@@ -95,11 +95,11 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
       id: 'ticket',
       header: 'Ticket',
       cell: ({ row }) => row.original.ticket ? (
-        <div className="flex flex-col text-xs text-gray-500">
+        <div className={styles['ticketCell']}>
           <span>#{row.original.ticket.ticketNumber}</span>
           <span>{row.original.ticket.deviceType} {row.original.ticket.deviceModel}</span>
         </div>
-      ) : <span className="text-gray-400">-</span>,
+      ) : <span className={styles['noTicketText']}>-</span>,
     },
     {
       accessorKey: 'status',
@@ -109,7 +109,7 @@ export default function InvoicesClient({ initialInvoices }: InvoicesClientProps)
     {
       accessorKey: 'total',
       header: 'Total',
-      cell: ({ row }) => <span className="font-bold text-gray-800">{formatCurrency(Number(row.original.total))}</span>,
+      cell: ({ row }) => <span className={styles['invoiceNumberCell']}>{formatCurrency(Number(row.original.total))}</span>,
     },
     {
       id: 'actions',
