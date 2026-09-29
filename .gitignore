@@ -57,6 +57,11 @@ lh-report*.json
 # PIDs de servidores locales
 *.pid
 
+# El proyecto usa npm (package-lock.json es el unico lockfile; lo exige
+# `npm ci` en CI y es lo que mantiene Dependabot). bun.lock aparecio por
+# error en un commit de "upgrade dependencies" y dejo la CI sin lockfile.
+bun.lock
+
 # Temp / utility scripts
 check-db.ts
 test-auth.ts
