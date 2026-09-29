@@ -2,11 +2,12 @@
 
 import { useActionState } from 'react';
 import { updateCustomer, deleteCustomer } from '@/lib/actions';
-import styles from '../../../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
-import { Button } from '@/components/ui/Button';
+import { Card, CardHeader, CardTitle, CardDescription, CardBody, Button, Input, Textarea, Alert } from '@/components/ui';
 import Link from 'next/link';
 import { useState } from 'react';
+import { ArrowLeft, User, AlertTriangle, Trash2 } from 'lucide-react';
+import formStyles from '@/components/ui/Form.module.css';
 
 interface Customer {
     id: string;
@@ -39,169 +40,209 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
     const hasTickets = customer._count.tickets > 0;
 
     return (
-        <div className={styles['container']}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <PageHeader
                 title="Editar Cliente"
                 subtitle={`Registro de cliente: ${customer.name}`}
                 actions={
-                    <Button as={Link} href="/dashboard/customers" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                    <Button as={Link} href="/dashboard/customers" variant="secondary" size="sm" leftIcon={<ArrowLeft size={16} aria-hidden="true" />}>
                         Volver a Clientes
                     </Button>
                 }
             />
 
             {isSuperAdmin && (
-                <div className={styles['superAdminBadge']} style={{ width: 'fit-content', marginBottom: '1rem' }}>
+                <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '0.25rem 0.75rem',
+                    background: 'var(--color-primary-50)',
+                    border: '1px solid var(--color-primary-200)',
+                    borderRadius: 'var(--radius-full, 9999px)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--color-primary-700)',
+                    width: 'fit-content'
+                }}>
                     Tenant: {customer.tenant.name}
                 </div>
             )}
 
-            <div className={styles['tableContainer']} style={{ padding: '2rem' }}>
-                <form action={updateAction} className={styles['form']} style={{ maxWidth: '32rem' }}>
-                    <input type="hidden" name="customerId" value={customer.id} />
+            <Card>
+                <CardHeader>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                            width: '2.25rem',
+                            height: '2.25rem',
+                            borderRadius: 'var(--radius-lg, 0.75rem)',
+                            background: 'var(--color-primary-50)',
+                            border: '1px solid var(--color-primary-200)',
+                            color: 'var(--color-primary-600)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <User size={18} aria-hidden="true" />
+                        </div>
+                        <div>
+                            <CardTitle>Datos del Cliente</CardTitle>
+                            <CardDescription>Actualiza los datos personales y fiscales del cliente</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardBody>
+                    <form action={updateAction} className="flex flex-col gap-4">
+                        <input type="hidden" name="customerId" value={customer.id} />
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="name" className={styles['label']}>Nombre *</label>
-                        <input
+                        <Input
+                            label="Nombre Completo *"
                             id="name"
                             name="name"
                             type="text"
                             required
                             defaultValue={customer.name}
                             placeholder="Nombre completo del cliente"
-                            className={styles['input']}
                         />
-                    </div>
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="email" className={styles['label']}>Email</label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            defaultValue={customer.email || ''}
-                            placeholder="cliente@ejemplo.com"
-                            className={styles['input']}
-                        />
-                    </div>
+                        <div className={formStyles['formRow']}>
+                            <Input
+                                label="📧 Correo Electrónico"
+                                id="email"
+                                name="email"
+                                type="email"
+                                defaultValue={customer.email || ''}
+                                placeholder="cliente@ejemplo.com"
+                            />
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="phone" className={styles['label']}>Teléfono</label>
-                        <input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            defaultValue={customer.phone || ''}
-                            placeholder="+52 555 123 4567"
-                            className={styles['input']}
-                        />
-                    </div>
+                            <Input
+                                label="📱 Teléfono"
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                defaultValue={customer.phone || ''}
+                                placeholder="+502 5555-1234"
+                            />
+                        </div>
 
-                    <div className={styles['gridTwoColumns']}>
-                        <div className={styles['formGroup']}>
-                            <label htmlFor="dpi" className={styles['label']}>DPI (ID)</label>
-                            <input
+                        <div className={formStyles['formRow']}>
+                            <Input
+                                label="🆔 DPI (Identificación)"
                                 id="dpi"
                                 name="dpi"
                                 type="text"
                                 defaultValue={customer.dpi || ''}
                                 placeholder="1234 56789 0101"
-                                className={styles['input']}
                             />
-                        </div>
-                        <div className={styles['formGroup']}>
-                            <label htmlFor="nit" className={styles['label']}>NIT (Tax ID)</label>
-                            <input
+                            <Input
+                                label="📄 NIT (Tributario)"
                                 id="nit"
                                 name="nit"
                                 type="text"
                                 defaultValue={customer.nit || ''}
                                 placeholder="123456-7"
-                                className={styles['input']}
                             />
                         </div>
-                    </div>
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="address" className={styles['label']}>Dirección</label>
-                        <textarea
+                        <Textarea
+                            label="📍 Dirección"
                             id="address"
                             name="address"
                             rows={2}
                             defaultValue={customer.address || ''}
                             placeholder="Calle, número, colonia, ciudad..."
-                            className={styles['input']}
-                            style={{ resize: 'vertical' }}
                         />
-                    </div>
 
-                    <div className={styles['resultsInfo']} style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-base)' }}>
-                        <p>Tickets asociados: <strong>{customer._count.tickets}</strong></p>
-                    </div>
-
-                    <div aria-live="polite">
-                        {updateState?.message && (
-                            <p className={styles['errorMessage']}>
-                                {updateState.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className={styles['actions']}>
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            size="sm"
-                            isLoading={isUpdating}
-                        >
-                            Guardar Cambios
-                        </Button>
-                        <Button
-                            as={Link}
-                            href="/dashboard/customers"
-                            variant="ghost"
-                            size="sm"
-                        >
-                            Cancelar
-                        </Button>
-                    </div>
-                </form>
-            </div>
-
-            {/* Delete Section - Solo para admins */}
-            {isAdmin && (
-                <div className={styles['dangerZone']} style={{ marginTop: '2rem' }}>
-                    <h2 className={styles['dangerTitle']}>Zona de Peligro</h2>
-
-                    {hasTickets ? (
-                        <div className={styles['errorMessage']} style={{ color: 'var(--color-warning-800)', backgroundColor: 'var(--color-warning-50)', borderColor: 'var(--color-warning-200)' }}>
-                            ⚠️ No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
+                        <div style={{
+                            backgroundColor: 'var(--color-bg-secondary, rgba(0,0,0,0.02))',
+                            padding: '0.75rem 1rem',
+                            borderRadius: 'var(--radius-md, 0.5rem)',
+                            border: '1px solid var(--color-border-light)',
+                            fontSize: '0.875rem'
+                        }}>
+                            <span>Tickets asociados: </span>
+                            <strong style={{ color: 'var(--color-primary-600)' }}>{customer._count.tickets}</strong>
                         </div>
-                    ) : !showDeleteConfirm ? (
-                        <Button
-                            type="button"
-                            onClick={() => setShowDeleteConfirm(true)}
-                            variant="danger"
-                            size="sm"
-                        >
-                            Eliminar Cliente
-                        </Button>
-                    ) : (
-                        <div className={styles['formGroup']}>
-                            <p style={{ color: 'var(--color-error-600)', margin: '0 0 1rem 0' }}>
-                                ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>? Esta acción no se puede deshacer.
-                            </p>
 
-                            <form action={deleteAction}>
-                                <input type="hidden" name="customerId" value={customer.id} />
+                        {updateState?.message && (
+                            <Alert variant={updateState.message.includes('éxito') || updateState.message.includes('correctamente') ? 'info' : 'error'}>
+                                {updateState.message}
+                            </Alert>
+                        )}
 
-                                {deleteState?.message && (
-                                    <p className={styles['errorMessage']}>
-                                        {deleteState.message}
-                                    </p>
-                                )}
+                        <div className={formStyles['actions']}>
+                            <Button
+                                as={Link}
+                                href="/dashboard/customers"
+                                variant="secondary"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                isLoading={isUpdating}
+                            >
+                                Guardar Cambios
+                            </Button>
+                        </div>
+                    </form>
+                </CardBody>
+            </Card>
 
-                                <div className={styles['actions']}>
+            {/* Danger Zone */}
+            {isAdmin && (
+                <Card style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                    <CardHeader>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{
+                                width: '2.25rem',
+                                height: '2.25rem',
+                                borderRadius: 'var(--radius-lg, 0.75rem)',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.25)',
+                                color: 'var(--color-error-600)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                            }}>
+                                <AlertTriangle size={18} aria-hidden="true" />
+                            </div>
+                            <div>
+                                <CardTitle style={{ color: 'var(--color-error-600)' }}>Zona de Peligro</CardTitle>
+                                <CardDescription>Acciones irreversibles sobre este cliente</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardBody>
+                        {hasTickets ? (
+                            <Alert variant="warning">
+                                ⚠️ No se puede eliminar este cliente porque tiene {customer._count.tickets} ticket(s) asociado(s).
+                            </Alert>
+                        ) : !showDeleteConfirm ? (
+                            <Button
+                                type="button"
+                                onClick={() => setShowDeleteConfirm(true)}
+                                variant="danger"
+                                size="sm"
+                                leftIcon={<Trash2 size={15} aria-hidden="true" />}
+                            >
+                                Eliminar Cliente
+                            </Button>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <p style={{ color: 'var(--color-error-600)', margin: 0, fontSize: '0.875rem' }}>
+                                    ¿Estás seguro de que deseas eliminar a <strong>{customer.name}</strong>? Esta acción no se puede deshacer.
+                                </p>
+
+                                <form action={deleteAction} className="flex gap-3">
+                                    <input type="hidden" name="customerId" value={customer.id} />
+
+                                    {deleteState?.message && (
+                                        <Alert variant="error">{deleteState.message}</Alert>
+                                    )}
+
                                     <Button
                                         type="submit"
                                         variant="danger"
@@ -213,16 +254,16 @@ export default function EditCustomerForm({ customer, isSuperAdmin, isAdmin }: Pr
                                     <Button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        variant="ghost"
+                                        variant="secondary"
                                         size="sm"
                                     >
                                         Cancelar
                                     </Button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-                </div>
+                                </form>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
             )}
         </div>
     );

@@ -11,7 +11,7 @@ export default function CreateCustomerForm() {
   const [state, formAction, isPending] = useActionState(createCustomer, null);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="flex flex-col gap-4">
       {state?.message && (
         <Alert variant="error">
           {state.message}
@@ -19,51 +19,53 @@ export default function CreateCustomerForm() {
       )}
 
       <Input
-        label="Customer Name"
+        label="Nombre Completo *"
         name="name"
         type="text"
-        placeholder="John Doe"
+        placeholder="Ej: Juan Pérez"
         required
-      />
-
-      <Input
-        label="Email Address"
-        name="email"
-        type="email"
-        placeholder="john@example.com"
-        helper="Optional - for sending notifications"
-      />
-
-      <Input
-        label="Phone Number"
-        name="phone"
-        type="tel"
-        placeholder="+1 (555) 123-4567"
-        helper="Optional"
       />
 
       <div className={styles['formRow']}>
         <Input
-          label="DPI (ID)"
+          label="📧 Correo Electrónico"
+          name="email"
+          type="email"
+          placeholder="cliente@ejemplo.com"
+          helper="Opcional - para enviar notificaciones"
+        />
+
+        <Input
+          label="📱 Teléfono"
+          name="phone"
+          type="tel"
+          placeholder="+502 5555-1234"
+          helper="Opcional"
+        />
+      </div>
+
+      <div className={styles['formRow']}>
+        <Input
+          label="🆔 DPI (Identificación)"
           name="dpi"
           type="text"
           placeholder="1234 56789 0101"
-          helper="Optional"
+          helper="Opcional"
         />
         <Input
-          label="NIT (Tax ID)"
+          label="📄 NIT (Tributario)"
           name="nit"
           type="text"
           placeholder="123456-7"
-          helper="Optional"
+          helper="Opcional"
         />
       </div>
 
       <Textarea
-        label="Address"
+        label="📍 Dirección"
         name="address"
-        placeholder="123 Main St, City, State 12345"
-        helper="Optional"
+        placeholder="Dirección completa del cliente..."
+        helper="Opcional"
         rows={3}
       />
 
@@ -73,7 +75,7 @@ export default function CreateCustomerForm() {
           variant="secondary"
           onClick={() => router.back()}
         >
-          Cancel
+          Cancelar
         </Button>
         <Button
           type="submit"
@@ -81,9 +83,10 @@ export default function CreateCustomerForm() {
           disabled={isPending}
           isLoading={isPending}
         >
-          Create Customer
+          Crear Cliente
         </Button>
       </div>
     </form>
   );
 }
+

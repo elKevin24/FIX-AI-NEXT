@@ -4,14 +4,15 @@ import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateUser, deleteUser } from '@/lib/user-actions';
 import { useToast } from '@/context/ToastContext';
-import styles from '../../../tickets/tickets.module.css';
 import PageHeader from '@/components/PageHeader';
-import { Button } from '@/components/ui/Button';
+import { Card, CardHeader, CardTitle, CardDescription, CardBody, Button, Input, Select, Alert } from '@/components/ui';
 import Link from 'next/link';
-
+import { ArrowLeft, User, AlertTriangle, Trash2 } from 'lucide-react';
+import formStyles from '@/components/ui/Form.module.css';
+import { ROLE_LABELS, getSelectableRoles } from '@/lib/auth-utils';
 import type { UserRole } from '@prisma/client';
 
-interface User {
+interface UserData {
     id: string;
     name: string | null;
     email: string;
@@ -23,7 +24,7 @@ interface User {
 }
 
 interface Props {
-    user: User;
+    user: UserData;
     currentUserId: string;
     isSuperAdmin: boolean;
 }
@@ -36,6 +37,11 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const isCurrentUser = user.id === currentUserId;
+
+    const roleOptions = getSelectableRoles().map((role) => ({
+        value: role,
+        label: ROLE_LABELS[role] || role,
+    }));
 
     useEffect(() => {
         if (updateState?.success) {
@@ -54,149 +60,176 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
     }, [deleteState?.success, router, addToast]);
 
     return (
-        <div className={styles['container']}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <PageHeader
                 title="Editar Usuario"
                 subtitle={`Usuario: ${user.name || user.email}`}
                 actions={
-                    <Button as={Link} href="/dashboard/users" variant="secondary" size="sm" leftIcon={<span>←</span>}>
+                    <Button as={Link} href="/dashboard/users" variant="secondary" size="sm" leftIcon={<ArrowLeft size={16} aria-hidden="true" />}>
                         Volver a Usuarios
                     </Button>
                 }
             />
 
             {isSuperAdmin && (
-                <div className={styles['superAdminBadge']} style={{ width: 'fit-content', marginBottom: '1rem' }}>
+                <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '0.25rem 0.75rem',
+                    background: 'var(--color-primary-50)',
+                    border: '1px solid var(--color-primary-200)',
+                    borderRadius: 'var(--radius-full, 9999px)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--color-primary-700)',
+                    width: 'fit-content'
+                }}>
                     Tenant: {user.tenant.name}
                 </div>
             )}
 
-            <div className={styles['tableContainer']} style={{ padding: '2rem' }}>
-                <form action={updateAction} className={styles['form']} style={{ maxWidth: '32rem' }}>
-                    <input type="hidden" name="userId" value={user.id} />
+            <Card>
+                <CardHeader>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                            width: '2.25rem',
+                            height: '2.25rem',
+                            borderRadius: 'var(--radius-lg, 0.75rem)',
+                            background: 'var(--color-primary-50)',
+                            border: '1px solid var(--color-primary-200)',
+                            color: 'var(--color-primary-600)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <User size={18} aria-hidden="true" />
+                        </div>
+                        <div>
+                            <CardTitle>Información del Usuario</CardTitle>
+                            <CardDescription>Actualiza el nombre, correo electrónico, rol o restablece la contraseña</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardBody>
+                    <form action={updateAction} className="flex flex-col gap-4">
+                        <input type="hidden" name="userId" value={user.id} />
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="name" className={styles['label']}>Nombre</label>
-                        <input
+                        <Input
                             id="name"
                             name="name"
+                            label="Nombre Completo *"
                             type="text"
                             required
                             defaultValue={user.name || ''}
                             placeholder="Nombre completo"
-                            className={styles['input']}
                         />
-                    </div>
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="email" className={styles['label']}>Email</label>
-                        <input
+                        <Input
                             id="email"
                             name="email"
+                            label="Correo Electrónico *"
                             type="email"
                             required
                             defaultValue={user.email}
                             placeholder="usuario@ejemplo.com"
-                            className={styles['input']}
                         />
-                    </div>
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="password" className={styles['label']}>Nueva Contraseña (opcional)</label>
-                        <input
+                        <Input
                             id="password"
                             name="password"
+                            label="Nueva Contraseña (opcional)"
                             type="password"
                             minLength={6}
                             placeholder="Dejar vacío para mantener la actual"
-                            className={styles['input']}
+                            helper="Solo completa este campo si deseas cambiar la contraseña del usuario"
                         />
-                        <span className={styles['textGray']} style={{ fontSize: '0.875rem' }}>
-                            Solo completa si deseas cambiar la contraseña
-                        </span>
-                    </div>
 
-                    <div className={styles['formGroup']}>
-                        <label htmlFor="role" className={styles['label']}>Rol</label>
-                        <select
+                        <Select
                             id="role"
                             name="role"
-                            required
+                            label="Rol en el Sistema"
                             defaultValue={user.role}
-                            className={styles['input']}
+                            options={roleOptions}
                             disabled={isCurrentUser}
-                        >
-                            <option value="ADMIN">Administrador</option>
-                            <option value="MANAGER">Gerente</option>
-                            <option value="TECHNICIAN">Técnico</option>
-                            <option value="VIEWER">Visualizador</option>
-                        </select>
-                        {isCurrentUser && (
-                            <span style={{ color: 'var(--color-warning-600)', fontSize: '0.875rem' }}>
-                                No puedes cambiar tu propio rol
-                            </span>
-                        )}
-                    </div>
+                            helper={isCurrentUser ? 'No puedes modificar tu propio rol de acceso' : 'Define el nivel de permisos en la plataforma'}
+                        />
 
-                    <div aria-live="polite">
-                        {updateState?.message && (
-                            <p className={styles['errorMessage']}>
+                        {updateState?.message && !updateState.success && (
+                            <Alert variant="error">
                                 {updateState.message}
-                            </p>
+                            </Alert>
                         )}
-                    </div>
 
-                    <div className={styles['actions']}>
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            size="sm"
-                            isLoading={isUpdating}
-                        >
-                            Guardar Cambios
-                        </Button>
-                        <Button
-                            as={Link}
-                            href="/dashboard/users"
-                            variant="ghost"
-                            size="sm"
-                        >
-                            Cancelar
-                        </Button>
-                    </div>
-                </form>
-            </div>
+                        <div className={formStyles['actions']}>
+                            <Button
+                                as={Link}
+                                href="/dashboard/users"
+                                variant="secondary"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                isLoading={isUpdating}
+                            >
+                                Guardar Cambios
+                            </Button>
+                        </div>
+                    </form>
+                </CardBody>
+            </Card>
 
             {/* Delete Section */}
             {!isCurrentUser && (
-                <div className={styles['dangerZone']} style={{ marginTop: '2rem' }}>
-                    <h2 className={styles['dangerTitle']}>Zona de Peligro</h2>
+                <Card style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                    <CardHeader>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{
+                                width: '2rem',
+                                height: '2rem',
+                                borderRadius: 'var(--radius-md, 0.5rem)',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.25)',
+                                color: 'var(--color-error-600)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                            }}>
+                                <AlertTriangle size={16} aria-hidden="true" />
+                            </div>
+                            <div>
+                                <CardTitle style={{ color: 'var(--color-error-600)', fontSize: '1rem' }}>Zona de Peligro</CardTitle>
+                                <CardDescription>Eliminar permanentemente este usuario</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardBody>
+                        {!showDeleteConfirm ? (
+                            <Button
+                                type="button"
+                                onClick={() => setShowDeleteConfirm(true)}
+                                variant="danger"
+                                size="sm"
+                                leftIcon={<Trash2 size={15} aria-hidden="true" />}
+                            >
+                                Eliminar Usuario
+                            </Button>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <p style={{ color: 'var(--color-error-600)', fontSize: '0.875rem', margin: 0 }}>
+                                    ¿Estás seguro de que deseas eliminar a <strong>{user.name || user.email}</strong>? Esta acción no se puede deshacer.
+                                </p>
 
-                    {!showDeleteConfirm ? (
-                        <Button
-                            type="button"
-                            onClick={() => setShowDeleteConfirm(true)}
-                            variant="danger"
-                            size="sm"
-                        >
-                            Eliminar Usuario
-                        </Button>
-                    ) : (
-                        <div className={styles['formGroup']}>
-                            <p style={{ color: 'var(--color-error-600)', margin: '0 0 1rem 0' }}>
-                                ¿Estás seguro de que deseas eliminar a <strong>{user.name || user.email}</strong>? Esta acción no se puede deshacer.
-                            </p>
+                                <form action={deleteAction} className="flex gap-3">
+                                    <input type="hidden" name="userId" value={user.id} />
 
-                            <form action={deleteAction}>
-                                <input type="hidden" name="userId" value={user.id} />
+                                    {deleteState?.message && !deleteState.success && (
+                                        <Alert variant="error">{deleteState.message}</Alert>
+                                    )}
 
-                                {deleteState?.message && (
-                                    <p className={styles['errorMessage']}>
-                                        {deleteState.message}
-                                    </p>
-                                )}
-
-                                <div className={styles['actions']}>
                                     <Button
                                         type="submit"
                                         variant="danger"
@@ -208,16 +241,16 @@ export default function EditUserForm({ user, currentUserId, isSuperAdmin }: Prop
                                     <Button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        variant="ghost"
+                                        variant="secondary"
                                         size="sm"
                                     >
                                         Cancelar
                                     </Button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-                </div>
+                                </form>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
             )}
         </div>
     );
