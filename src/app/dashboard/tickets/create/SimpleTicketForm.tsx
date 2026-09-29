@@ -9,6 +9,17 @@ import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
 import PageHeader from '@/components/PageHeader';
 import CustomerSearch from '@/components/tickets/CustomerSearch';
 import TemplateSelector, { ServiceTemplate } from '@/components/tickets/TemplateSelector';
+import { 
+    ArrowLeft, 
+    User, 
+    Layers, 
+    Plus, 
+    Trash2, 
+    Check, 
+    Laptop, 
+    FileText,
+    Smartphone
+} from 'lucide-react';
 import styles from './SimpleTicketForm.module.css';
 
 interface Customer {
@@ -129,233 +140,253 @@ export default function SimpleTicketForm() {
 
     return (
         <div className={styles['container']}>
-            <div className={styles['content']}>
-                <PageHeader
-                    title="Nuevo Ticket"
-                    subtitle="Registra una nueva orden de servicio para reparación o mantenimiento"
-                    actions={
-                        <Button as={Link} href="/dashboard/tickets" variant="secondary" size="sm" leftIcon={<span aria-hidden="true">←</span>}>
-                            Volver a Tickets
-                        </Button>
-                    }
-                />
+            <PageHeader
+                title="Nuevo Ticket"
+                subtitle="Registra una nueva orden de servicio para reparación o mantenimiento."
+                actions={
+                    <Button 
+                        as={Link} 
+                        href="/dashboard/tickets" 
+                        variant="secondary" 
+                        size="sm" 
+                        leftIcon={<ArrowLeft size={16} aria-hidden="true" />}
+                    >
+                        Volver a Tickets
+                    </Button>
+                }
+            />
 
-                {error && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <Alert variant="error">{error}</Alert>
-                    </div>
-                )}
+            {error && (
+                <div style={{ marginBottom: '1rem' }}>
+                    <Alert variant="error">{error}</Alert>
+                </div>
+            )}
 
-                <form action={handleSubmit} className={styles['form']}>
-
-                    {/* --- Template Selection --- */}
-                    <div className={styles['glassCard']}>
-                        <div className={styles['cardHeader']}>
-                            <h2 className={styles['cardTitle']}>Tipo de Servicio</h2>
-                            {selectedTemplate && (
-                                <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--color-primary-600)', fontWeight: 600 }}>
-                                    {selectedTemplate.icon || '📋'} {selectedTemplate.name}
-                                </span>
-                            )}
-                        </div>
-                        <TemplateSelector
-                            selectedTemplate={selectedTemplate}
-                            onSelect={handleTemplateChange}
-                        />
-                    </div>
-
-                    {/* --- Customer Glass Card --- */}
-                    <div className={styles['glassCard']}>
-                        <div className={styles['cardHeader']}>
-                            <div className={styles['iconCircle']}>
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <form action={handleSubmit} className={styles['form']}>
+                <div className={styles['layoutGrid']}>
+                    {/* --- Left Column: Configuración y Cliente --- */}
+                    <div className={styles['column']}>
+                        {/* --- Template Selection --- */}
+                        <div className={styles['glassCard']}>
+                            <div className={styles['cardHeader']}>
+                                <div className={styles['iconCircle']}>
+                                    <Layers size={18} aria-hidden="true" />
+                                </div>
+                                <h2 className={styles['cardTitle']}>Tipo de Servicio</h2>
+                                {selectedTemplate && (
+                                    <span className={styles['templateSelectedBadge']}>
+                                        {selectedTemplate.icon || '📋'} {selectedTemplate.name}
+                                    </span>
+                                )}
                             </div>
-                            <h2 className={styles['cardTitle']}>Información del Cliente</h2>
+                            <TemplateSelector
+                                selectedTemplate={selectedTemplate}
+                                onSelect={handleTemplateChange}
+                            />
                         </div>
 
-                        <div className={styles['customerGrid']}>
-                            <div style={{ gridColumn: '1 / -1' }}>
-                                <CustomerSearch
-                                    onSelect={(c) => setCustomer({
-                                        id: 'id' in c ? c.id : undefined,
-                                        name: c.name,
-                                        email: 'email' in c ? c.email || undefined : undefined,
-                                        phone: 'phone' in c ? c.phone || undefined : undefined,
-                                        dpi: 'dpi' in c ? c.dpi || undefined : undefined,
-                                        nit: 'nit' in c ? c.nit || undefined : undefined
-                                    })}
-                                    selectedCustomer={customer}
-                                />
+                        {/* --- Customer Glass Card --- */}
+                        <div className={styles['glassCard']}>
+                            <div className={styles['cardHeader']}>
+                                <div className={styles['iconCircle']}>
+                                    <User size={18} aria-hidden="true" />
+                                </div>
+                                <h2 className={styles['cardTitle']}>Información del Cliente</h2>
                             </div>
 
-                            {customer && !customer.id && (
-                                <>
-                                    <Input
-                                        label="📧 Email (opcional)"
-                                        type="email"
-                                        placeholder="cliente@ejemplo.com"
-                                        value={customer.email || ''}
-                                        onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                            <div className={styles['customerGrid']}>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <CustomerSearch
+                                        onSelect={(c) => setCustomer({
+                                            id: 'id' in c ? c.id : undefined,
+                                            name: c.name,
+                                            email: 'email' in c ? c.email || undefined : undefined,
+                                            phone: 'phone' in c ? c.phone || undefined : undefined,
+                                            dpi: 'dpi' in c ? c.dpi || undefined : undefined,
+                                            nit: 'nit' in c ? c.nit || undefined : undefined
+                                        })}
+                                        selectedCustomer={customer}
                                     />
-                                    <Input
-                                        label="📱 Teléfono (opcional)"
-                                        type="tel"
-                                        placeholder="+502 5555-1234"
-                                        value={customer.phone || ''}
-                                        onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
-                                    />
-                                    <Input
-                                        label="🆔 DPI (opcional)"
-                                        type="text"
-                                        placeholder="1234 56789 0101"
-                                        value={customer.dpi || ''}
-                                        onChange={(e) => setCustomer({ ...customer, dpi: e.target.value })}
-                                    />
-                                    <Input
-                                        label="📄 NIT (opcional)"
-                                        type="text"
-                                        placeholder="123456-7"
-                                        value={customer.nit || ''}
-                                        onChange={(e) => setCustomer({ ...customer, nit: e.target.value })}
-                                    />
-                                </>
-                            )}
+                                </div>
 
-                            {customer?.id && (
-                                <div className={styles['customerSelected']}>
-                                    <div className={styles['checkIcon']}>
-                                        <span>✓</span>
+                                {customer && !customer.id && (
+                                    <>
+                                        <Input
+                                            label="📧 Email (opcional)"
+                                            type="email"
+                                            placeholder="cliente@ejemplo.com"
+                                            value={customer.email || ''}
+                                            onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                                        />
+                                        <Input
+                                            label="📱 Teléfono (opcional)"
+                                            type="tel"
+                                            placeholder="+502 5555-1234"
+                                            value={customer.phone || ''}
+                                            onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                                        />
+                                        <Input
+                                            label="🆔 DPI (opcional)"
+                                            type="text"
+                                            placeholder="1234 56789 0101"
+                                            value={customer.dpi || ''}
+                                            onChange={(e) => setCustomer({ ...customer, dpi: e.target.value })}
+                                        />
+                                        <Input
+                                            label="📄 NIT (opcional)"
+                                            type="text"
+                                            placeholder="123456-7"
+                                            value={customer.nit || ''}
+                                            onChange={(e) => setCustomer({ ...customer, nit: e.target.value })}
+                                        />
+                                    </>
+                                )}
+
+                                {customer?.id && (
+                                    <div className={styles['customerSelected']}>
+                                        <div className={styles['checkIcon']}>
+                                            <Check size={16} aria-hidden="true" />
+                                        </div>
+                                        <div>
+                                            <p className={styles['customerName']}>{customer.name}</p>
+                                            {(customer.email || customer.phone || customer.nit) && (
+                                                <div className={styles['customerDetail']}>
+                                                    {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
+                                                    {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
+                                                    {customer.dpi && <span style={{ display: 'block' }}>DPI: {customer.dpi}</span>}
+                                                    {customer.nit && <span style={{ display: 'block' }}>NIT: {customer.nit}</span>}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className={styles['customerName']}>{customer.name}</p>
-                                        {(customer.email || customer.phone || customer.nit) && (
-                                            <div className={styles['customerDetail']}>
-                                                {customer.email && <span style={{ display: 'block' }}>{customer.email}</span>}
-                                                {customer.phone && <span style={{ display: 'block' }}>{customer.phone}</span>}
-                                                {customer.dpi && <span style={{ display: 'block' }}>DPI: {customer.dpi}</span>}
-                                                {customer.nit && <span style={{ display: 'block' }}>NIT: {customer.nit}</span>}
-                                            </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- Right Column: Dispositivos y Confirmación --- */}
+                    <div className={styles['column']}>
+                        {/* --- Devices Section Header --- */}
+                        <div className={styles['devicesHeader']}>
+                            <div className={styles['devicesTitleGroup']}>
+                                <div className={styles['iconCircle']}>
+                                    <Laptop size={18} aria-hidden="true" />
+                                </div>
+                                <h2 className={styles['cardTitle']}>Dispositivos y Equipos</h2>
+                                <span className={styles['deviceCount']}>
+                                    {devices.length} {devices.length === 1 ? 'equipo' : 'equipos'}
+                                </span>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={addDevice}
+                                leftIcon={<Plus size={15} aria-hidden="true" />}
+                            >
+                                Agregar Dispositivo
+                            </Button>
+                        </div>
+
+                        <div className={styles['devicesList']}>
+                            {devices.map((device, index) => (
+                                <div key={index} className={`${styles['glassCard']} ${styles['deviceCard']}`}>
+                                    <div className={styles['deviceHeader']}>
+                                        <div className={styles['deviceNumber']}>
+                                            Dispositivo #{index + 1}
+                                        </div>
+                                        {devices.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeDevice(index)}
+                                                className={styles['removeBtn']}
+                                                title="Eliminar dispositivo"
+                                                aria-label="Eliminar dispositivo"
+                                            >
+                                                <Trash2 size={16} aria-hidden="true" />
+                                            </button>
                                         )}
                                     </div>
+
+                                    <div className={styles['deviceFormFields']}>
+                                        <div className={styles['gridRow']}>
+                                            <Input
+                                                label="Problema Principal *"
+                                                value={device.title}
+                                                onChange={(e) => updateDevice(index, 'title', e.target.value)}
+                                                placeholder="Ej: Pantalla Rota / No enciende"
+                                                required
+                                            />
+                                            <Select
+                                                label="Tipo"
+                                                value={device.deviceType}
+                                                onChange={(e) => updateDevice(index, 'deviceType', e.target.value)}
+                                                options={DEVICE_TYPE_OPTIONS}
+                                            />
+                                            <Input
+                                                label="Marca / Modelo"
+                                                value={device.deviceModel || ''}
+                                                onChange={(e) => updateDevice(index, 'deviceModel', e.target.value)}
+                                                placeholder="Ej: iPhone 13 Pro"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Textarea
+                                                label="Descripción Detallada *"
+                                                value={device.description}
+                                                onChange={(e) => updateDevice(index, 'description', e.target.value)}
+                                                rows={3}
+                                                placeholder="Describe los síntomas, golpes visibles, o detalles importantes..."
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className={styles['extrasGrid']}>
+                                            <Input
+                                                label="🏷️ N° Serie / IMEI"
+                                                value={device.serialNumber || ''}
+                                                onChange={(e) => updateDevice(index, 'serialNumber', e.target.value)}
+                                                placeholder="SN-1234..."
+                                            />
+                                            <Input
+                                                label="🔌 Accesorios"
+                                                value={device.accessories || ''}
+                                                onChange={(e) => updateDevice(index, 'accessories', e.target.value)}
+                                                placeholder="Cargador, funda..."
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Input
+                                                label="🔍 Notas de Estado Físico"
+                                                value={device.checkInNotes || ''}
+                                                onChange={(e) => updateDevice(index, 'checkInNotes', e.target.value)}
+                                                placeholder="Rayones en tapa trasera, botón flojo..."
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
+                            ))}
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className={styles['footer']}>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitDisabled}
+                                className={styles['submitBtn']}
+                                isLoading={isPending}
+                                variant="primary"
+                                size="lg"
+                                leftIcon={<FileText size={18} aria-hidden="true" />}
+                            >
+                                Registrar Orden de Servicio
+                            </Button>
                         </div>
                     </div>
-
-                    {/* --- Devices Section Header --- */}
-                    <div className={styles['devicesHeader']}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                            <h2 className={styles['cardTitle']}>Dispositivos</h2>
-                            <span className={styles['deviceCount']}>
-                                {devices.length}
-                            </span>
-                        </div>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={addDevice}
-                            style={{ borderRadius: '999px' }}
-                        >
-                            + Agregar otro Dispositivo
-                        </Button>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {devices.map((device, index) => (
-                            <div key={index} className={`${styles['glassCard']} ${styles['deviceCard']}`} style={{ animationDelay: `${index * 100}ms`, marginBottom: 0 }}>
-                                <div className={styles['deviceHeader']}>
-                                    <div className={styles['deviceNumber']}>
-                                        #{index + 1}
-                                    </div>
-                                    {devices.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => removeDevice(index)}
-                                            className={styles['removeBtn']}
-                                            title="Eliminar dispositivo"
-                                        >
-                                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    <div className={styles['gridRow']}>
-                                        <Input
-                                            label="Problema Principal *"
-                                            value={device.title}
-                                            onChange={(e) => updateDevice(index, 'title', e.target.value)}
-                                            placeholder="Ej: Pantalla Rota"
-                                            required
-                                        />
-                                        <Select
-                                            label="Tipo"
-                                            value={device.deviceType}
-                                            onChange={(e) => updateDevice(index, 'deviceType', e.target.value)}
-                                            options={DEVICE_TYPE_OPTIONS}
-                                        />
-                                        <Input
-                                            label="Marca / Modelo"
-                                            value={device.deviceModel || ''}
-                                            onChange={(e) => updateDevice(index, 'deviceModel', e.target.value)}
-                                            placeholder="Ej: iPhone 13 Pro"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Textarea
-                                            label="Descripción Detallada *"
-                                            value={device.description}
-                                            onChange={(e) => updateDevice(index, 'description', e.target.value)}
-                                            rows={3}
-                                            placeholder="Describe los síntomas, golpes visibles, o detalles importantes..."
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className={styles['extrasGrid']}>
-                                        <Input
-                                            label="🏷️ N° Serie / IMEI"
-                                            value={device.serialNumber || ''}
-                                            onChange={(e) => updateDevice(index, 'serialNumber', e.target.value)}
-                                            placeholder="SN-1234..."
-                                        />
-                                        <Input
-                                            label="🔌 Accesorios"
-                                            value={device.accessories || ''}
-                                            onChange={(e) => updateDevice(index, 'accessories', e.target.value)}
-                                            placeholder="Cargador, funda..."
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Input
-                                            label="🔍 Notas de Estado Físico"
-                                            value={device.checkInNotes || ''}
-                                            onChange={(e) => updateDevice(index, 'checkInNotes', e.target.value)}
-                                            placeholder="Rayones en tapa trasera, botón flojo..."
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Footer / Submit */}
-                    <div className={styles['footer']}>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitDisabled}
-                            className={styles['submitBtn']}
-                            isLoading={isPending}
-                            variant="primary"
-                        >
-                            Crear Ticket
-                        </Button>
-                    </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     );
 }
