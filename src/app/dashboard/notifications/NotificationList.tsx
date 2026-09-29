@@ -4,7 +4,21 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { markMyNotificationAsRead, deleteMyNotification, markAllMyNotificationsAsRead } from '@/lib/notifications';
-import { Button } from '@/components/ui/Button';
+import { Button, Badge } from '@/components/ui';
+import PaginationControls from '@/components/ui/PaginationControls';
+import { 
+    Check, 
+    CheckCheck, 
+    Trash2, 
+    ExternalLink, 
+    Inbox, 
+    Info, 
+    AlertTriangle, 
+    AlertCircle, 
+    CheckCircle2, 
+    Clock,
+    Sparkles
+} from 'lucide-react';
 import styles from './notifications.module.css';
 
 interface Notification {
@@ -21,49 +35,79 @@ interface Props {
     initialNotifications: Notification[];
     totalPages: number;
     currentPage: number;
+    totalCount: number;
 }
 
-export default function NotificationList({ initialNotifications, totalPages, currentPage }: Props) {
+export default function NotificationList({ initialNotifications, totalPages, currentPage, totalCount }: Props) {
     const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
     const router = useRouter();
-    const [isPending] = useTransition();
+    const [isPending, startTransition] = useTransition();
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const handleMarkAsRead = async (id: string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         await markMyNotificationAsRead(id);
-        router.refresh();
+        startTransition(() => {
+            router.refresh();
+        });
     };
 
     const handleDelete = async (id: string) => {
         setNotifications(prev => prev.filter(n => n.id !== id));
         await deleteMyNotification(id);
-        router.refresh();
+        startTransition(() => {
+            router.refresh();
+        });
     };
 
     const handleMarkAllRead = async () => {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         await markAllMyNotificationsAsRead();
-        router.refresh();
+        startTransition(() => {
+            router.refresh();
+        });
     };
 
     return (
-        <div className={styles['container']}>
-            <div className={styles['header']}>
-                <span className={styles['pageInfo']}>Mostrando página {currentPage} de {totalPages || 1}</span>
-                <Button 
-                    onClick={handleMarkAllRead}
-                    disabled={isPending || notifications.every(n => n.isRead)}
-                    variant="secondary"
-                    size="sm"
-                >
-                    Marcar todas como leídas
-                </Button>
+        <div className={styles['card']}>
+            <div className={styles['cardHeader']}>
+                <div className={styles['headerInfo']}>
+                    <div className={styles['headerTitleRow']}>
+                        <h2 className={styles['cardTitle']}>Bandeja de Entrada</h2>
+                        {unreadCount > 0 && (
+                            <Badge variant="primary" size="sm" hasDot>
+                                {unreadCount} sin leer
+                            </Badge>
+                        )}
+                    </div>
+                    <p className={styles['cardSubtitle']}>
+                        Tienes un total de <span className={styles['bold']}>{totalCount}</span> {totalCount === 1 ? 'notificación registrada' : 'notificaciones registradas'}.
+                    </p>
+                </div>
+                <div className={styles['headerActions']}>
+                    <Button 
+                        onClick={handleMarkAllRead}
+                        disabled={isPending || notifications.every(n => n.isRead)}
+                        variant="secondary"
+                        size="sm"
+                        leftIcon={<CheckCheck size={16} />}
+                    >
+                        Marcar todas como leídas
+                    </Button>
+                </div>
             </div>
 
             <div className={styles['list']}>
                 {notifications.length === 0 ? (
-                    <div className={styles['empty']}>
-                        No tienes notificaciones.
+                    <div className={styles['emptyState']}>
+                        <div className={styles['emptyIconWrapper']}>
+                            <Inbox size={48} className={styles['emptyIcon']} aria-hidden="true" />
+                        </div>
+                        <h3 className={styles['emptyTitle']}>Sin notificaciones</h3>
+                        <p className={styles['emptyDescription']}>
+                            Actualmente no tienes notificaciones pendientes ni alertas activas en tu cuenta.
+                        </p>
                     </div>
                 ) : (
                     notifications.map((notification) => (
@@ -71,95 +115,122 @@ export default function NotificationList({ initialNotifications, totalPages, cur
                             key={notification.id} 
                             className={`${styles['item']} ${!notification.isRead ? styles['unread'] : ''}`}
                         >
-                            <div className={styles['itemContent']}>
-                                <div className={styles['mainInfo']}>
-                                    <div className={styles['titleRow']}>
-                                        <span className={`${styles['title']} ${getNotificationColor(notification.type, styles)}`}>
-                                            {notification.title}
-                                        </span>
+                            <div className={styles['itemLeading']}>
+                                <NotificationBadgeIcon type={notification.type} />
+                            </div>
+
+                            <div className={styles['itemBody']}>
+                                <div className={styles['titleRow']}>
+                                    <h4 className={styles['title']}>{notification.title}</h4>
+                                    <div className={styles['badgeRow']}>
+                                        <NotificationTypeBadge type={notification.type} />
                                         {!notification.isRead && (
-                                            <span className={styles['newBadge']}>
+                                            <span className={styles['newPill']}>
+                                                <Sparkles size={11} aria-hidden="true" />
                                                 Nueva
                                             </span>
                                         )}
                                     </div>
-                                    <p className={styles['message']}>{notification.message}</p>
-                                    <div className={styles['meta']}>
-                                        <span>{new Date(notification.createdAt).toLocaleString()}</span>
-                                        {notification.link && (
-                                            <Link href={notification.link} className={styles['link']}>
-                                                Ver detalles
-                                            </Link>
-                                        )}
-                                    </div>
                                 </div>
-                                <div className={styles['actions']}>
-                                    {!notification.isRead && (
-                                        <button 
-                                            onClick={() => handleMarkAsRead(notification.id)}
-                                            className={`${styles['iconBtn']} ${styles['checkBtn']}`}
-                                            title="Marcar como leída"
-                                        >
-                                            <CheckIcon />
-                                        </button>
+                                <p className={styles['message']}>{notification.message}</p>
+                                <div className={styles['meta']}>
+                                    <span className={styles['metaTime']}>
+                                        <Clock size={13} aria-hidden="true" />
+                                        {new Date(notification.createdAt).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </span>
+                                    {notification.link && (
+                                        <Link href={notification.link} className={styles['link']}>
+                                            <span>Ver detalles</span>
+                                            <ExternalLink size={13} aria-hidden="true" />
+                                        </Link>
                                     )}
-                                    <button 
-                                        onClick={() => handleDelete(notification.id)}
-                                        className={`${styles['iconBtn']} ${styles['trashBtn']}`}
-                                        title="Eliminar"
-                                    >
-                                        <TrashIcon />
-                                    </button>
                                 </div>
+                            </div>
+
+                            <div className={styles['actions']}>
+                                {!notification.isRead && (
+                                    <button 
+                                        onClick={() => handleMarkAsRead(notification.id)}
+                                        className={`${styles['actionBtn']} ${styles['checkBtn']}`}
+                                        title="Marcar como leída"
+                                        aria-label="Marcar como leída"
+                                    >
+                                        <Check size={16} aria-hidden="true" />
+                                    </button>
+                                )}
+                                <button 
+                                    onClick={() => handleDelete(notification.id)}
+                                    className={`${styles['actionBtn']} ${styles['trashBtn']}`}
+                                    title="Eliminar notificación"
+                                    aria-label="Eliminar notificación"
+                                >
+                                    <Trash2 size={16} aria-hidden="true" />
+                                </button>
                             </div>
                         </div>
                     ))
                 )}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
-                <div className={styles['pagination']}>
-                    <Link 
-                        href={`/dashboard/notifications?page=${Math.max(1, currentPage - 1)}`}
-                        className={`${styles['pageLink']} ${currentPage === 1 ? styles['disabledLink'] : ''}`}
-                    >
-                        Anterior
-                    </Link>
-                    <Link 
-                        href={`/dashboard/notifications?page=${Math.min(totalPages, currentPage + 1)}`}
-                        className={`${styles['pageLink']} ${currentPage === totalPages ? styles['disabledLink'] : ''}`}
-                    >
-                        Siguiente
-                    </Link>
+                <div className={styles['paginationWrapper']}>
+                    <PaginationControls
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        hasNextPage={currentPage < totalPages}
+                        hasPrevPage={currentPage > 1}
+                        totalItems={totalCount}
+                    />
                 </div>
             )}
         </div>
     );
 }
 
-function getNotificationColor(type: string, styles: any) {
+function NotificationBadgeIcon({ type }: { type: string }) {
     switch (type) {
-        case 'WARNING': return styles['typeWarning'];
-        case 'ERROR': return styles['typeError'];
-        case 'SUCCESS': return styles['typeSuccess'];
-        default: return styles['typeInfo'];
+        case 'WARNING':
+            return (
+                <div className={`${styles['iconCircle']} ${styles['iconCircleWarning']}`}>
+                    <AlertTriangle size={18} aria-hidden="true" />
+                </div>
+            );
+        case 'ERROR':
+            return (
+                <div className={`${styles['iconCircle']} ${styles['iconCircleError']}`}>
+                    <AlertCircle size={18} aria-hidden="true" />
+                </div>
+            );
+        case 'SUCCESS':
+            return (
+                <div className={`${styles['iconCircle']} ${styles['iconCircleSuccess']}`}>
+                    <CheckCircle2 size={18} aria-hidden="true" />
+                </div>
+            );
+        default:
+            return (
+                <div className={`${styles['iconCircle']} ${styles['iconCircleInfo']}`}>
+                    <Info size={18} aria-hidden="true" />
+                </div>
+            );
     }
 }
 
-function CheckIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-    )
-}
-
-function TrashIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
-    )
+function NotificationTypeBadge({ type }: { type: string }) {
+    switch (type) {
+        case 'WARNING':
+            return <Badge variant="warning" size="sm">Aviso</Badge>;
+        case 'ERROR':
+            return <Badge variant="error" size="sm">Urgente</Badge>;
+        case 'SUCCESS':
+            return <Badge variant="success" size="sm">Éxito</Badge>;
+        default:
+            return <Badge variant="info" size="sm">Info</Badge>;
+    }
 }

@@ -2,6 +2,7 @@
 import { getAllMyNotifications } from '@/lib/notifications';
 import NotificationList from './NotificationList';
 import PageHeader from '@/components/PageHeader';
+import { Suspense } from 'react';
 import styles from './notifications.module.css';
 
 export const metadata = {
@@ -20,16 +21,22 @@ export default async function NotificationsPage({
 }) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const { notifications, totalPages } = await getAllMyNotifications(page);
+  const { notifications, totalPages, total } = await getAllMyNotifications(page);
 
   return (
-    <div className={styles['container']}>
-      <PageHeader title="Notificaciones" />
-      <NotificationList 
-        initialNotifications={notifications} 
-        totalPages={totalPages} 
-        currentPage={page} 
+    <div className={styles['pageContainer']}>
+      <PageHeader 
+        title="Centro de Notificaciones" 
+        subtitle="Consulta tus alertas, avisos de tickets e interacciones del sistema."
       />
+      <Suspense fallback={<div className={styles['loadingState']}>Cargando notificaciones...</div>}>
+        <NotificationList 
+          initialNotifications={notifications} 
+          totalPages={totalPages} 
+          currentPage={page} 
+          totalCount={total}
+        />
+      </Suspense>
     </div>
   );
 }

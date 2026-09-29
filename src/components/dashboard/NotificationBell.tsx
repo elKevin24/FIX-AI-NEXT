@@ -4,6 +4,17 @@ import { useState, useEffect, useRef } from 'react';
 import { getMyNotifications, markMyNotificationAsRead, markAllMyNotificationsAsRead } from '@/lib/notifications';
 import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
+import { 
+    Bell, 
+    Check, 
+    CheckCheck, 
+    ArrowRight, 
+    Inbox,
+    Info, 
+    AlertTriangle, 
+    AlertCircle, 
+    CheckCircle2 
+} from 'lucide-react';
 import styles from './NotificationBell.module.css';
 
 // Helper for type
@@ -53,6 +64,17 @@ export default function NotificationBell() {
         return () => clearInterval(interval);
     }, [addToast]);
 
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     // Manejadores para Hover
     const handleMouseEnter = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -94,33 +116,50 @@ export default function NotificationBell() {
             onMouseLeave={handleMouseLeave}
         >
             <button 
-                className={styles['bellButton']}
+                className={`${styles['bellButton']} ${isOpen ? styles['active'] : ''}`}
                 aria-label="Notificaciones"
                 title="Notificaciones"
-                onClick={() => setIsOpen(!isOpen)} // Mantiene compatibilidad click/touch
+                onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
             >
-                <BellIcon />
+                <Bell size={20} aria-hidden="true" />
                 {unreadCount > 0 && (
-                    <span className={styles['unreadBadge']}>
-                        {unreadCount}
+                    <span className={styles['unreadBadge']} aria-label={`${unreadCount} notificaciones no leídas`}>
+                        {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div className={styles['dropdown']}>
+                <div className={styles['dropdown']} role="region" aria-label="Panel de Notificaciones">
                     <div className={styles['header']}>
-                        <h3 className={styles['title']}>Notificaciones</h3>
+                        <div className={styles['headerTitleGroup']}>
+                            <h3 className={styles['title']}>Notificaciones</h3>
+                            {unreadCount > 0 && (
+                                <span className={styles['headerUnreadPill']}>
+                                    {unreadCount} nuevas
+                                </span>
+                            )}
+                        </div>
                         {unreadCount > 0 && (
-                            <button onClick={handleMarkAllRead} className={styles['markAllRead']}>
-                                Marcar leídas
+                            <button 
+                                onClick={handleMarkAllRead} 
+                                className={styles['markAllRead']}
+                                title="Marcar todas como leídas"
+                            >
+                                <CheckCheck size={14} aria-hidden="true" />
+                                <span>Marcar leídas</span>
                             </button>
                         )}
                     </div>
                     
                     <div className={styles['list']}>
                         {notifications.length === 0 ? (
-                            <p className={styles['emptyState']}>No tienes notificaciones.</p>
+                            <div className={styles['emptyState']}>
+                                <Inbox size={36} className={styles['emptyIcon']} aria-hidden="true" />
+                                <p className={styles['emptyText']}>No tienes notificaciones.</p>
+                                <span className={styles['emptySubtext']}>Te avisaremos cuando haya actualizaciones importantes</span>
+                            </div>
                         ) : (
                             notifications.map(notification => (
                                 <div 
@@ -128,31 +167,41 @@ export default function NotificationBell() {
                                     className={`${styles['notificationItem']} ${!notification.isRead ? styles['unread'] : ''}`}
                                 >
                                     <div className={styles['itemHeader']}>
-                                        <span className={`${styles['itemTitle']} ${getNotificationTypeClass(notification.type, styles)}`}>
-                                            {notification.title}
-                                        </span>
+                                        <div className={styles['itemTitleGroup']}>
+                                            <NotificationTypeIcon type={notification.type} />
+                                            <span className={`${styles['itemTitle']} ${getNotificationTypeClass(notification.type, styles)}`}>
+                                                {notification.title}
+                                            </span>
+                                        </div>
                                         {!notification.isRead && (
                                             <button 
                                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
                                                 className={styles['closeBtn']}
                                                 title="Marcar como leída"
+                                                aria-label="Marcar como leída"
                                             >
-                                                ×
+                                                <Check size={14} aria-hidden="true" />
                                             </button>
                                         )}
                                     </div>
                                     <p className={styles['message']}>{notification.message}</p>
                                     <div className={styles['itemFooter']}>
                                         <span className={styles['date']}>
-                                            {new Date(notification.createdAt).toLocaleDateString()}
+                                            {new Date(notification.createdAt).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
                                         </span>
                                         {notification.link && (
                                             <Link 
-                                                href={notification.link}
+                                                href={notification.link} 
                                                 onClick={() => setIsOpen(false)}
                                                 className={styles['detailsLink']}
                                             >
-                                                Ver detalles &rarr;
+                                                <span>Ver detalles</span>
+                                                <ArrowRight size={13} aria-hidden="true" />
                                             </Link>
                                         )}
                                     </div>
@@ -166,11 +215,25 @@ export default function NotificationBell() {
                         className={styles['viewAll']}
                     >
                         Ver todas las notificaciones
+                        <ArrowRight size={14} aria-hidden="true" />
                     </Link>
                 </div>
             )}
         </div>
     );
+}
+
+function NotificationTypeIcon({ type }: { type: string }) {
+    switch (type) {
+        case 'WARNING': 
+            return <AlertTriangle size={15} className={styles['iconWarning']} aria-hidden="true" />;
+        case 'ERROR': 
+            return <AlertCircle size={15} className={styles['iconError']} aria-hidden="true" />;
+        case 'SUCCESS': 
+            return <CheckCircle2 size={15} className={styles['iconSuccess']} aria-hidden="true" />;
+        default: 
+            return <Info size={15} className={styles['iconInfo']} aria-hidden="true" />;
+    }
 }
 
 function getNotificationTypeClass(type: string, styles: any) {
@@ -180,13 +243,4 @@ function getNotificationTypeClass(type: string, styles: any) {
         case 'SUCCESS': return styles['typeSuccess'];
         default: return styles['typeInfo'];
     }
-}
-
-function BellIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-    );
 }
