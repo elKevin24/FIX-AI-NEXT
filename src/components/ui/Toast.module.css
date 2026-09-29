@@ -13,7 +13,7 @@
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.15),
     0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--color-border-medium, rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--color-border-medium);
   width: calc(100vw - 2rem);
   max-width: 400px;
   min-width: 280px;
@@ -97,19 +97,19 @@
 
 /* Types - High Contrast borders */
 .info {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--color-primary-500);
 }
 
 .success {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--color-success-500);
 }
 
 .warning {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--color-warning-500);
 }
 
 .error {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--color-error-500);
 }
 
 /* Dark mode support */

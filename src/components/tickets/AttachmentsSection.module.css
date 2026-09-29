@@ -78,8 +78,8 @@
   position: absolute;
   top: 0.25rem;
   right: 0.25rem;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: var(--color-gray-800);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 50%;
   width: 24px;
@@ -96,36 +96,6 @@
   .card:hover .deleteBtn {
     opacity: 1;
   }
-}
-
-.uploadZone {
-  border: 2px dashed var(--border-color);
-  border-radius: 0.5rem;
-  padding: 2rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-@media (hover: hover) {
-  .uploadZone:hover {
-    border-color: var(--primary-color);
-  }
-}
-
-.uploadText {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.loadingOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .emptyState {

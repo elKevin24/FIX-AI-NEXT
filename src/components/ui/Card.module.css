@@ -91,23 +91,3 @@
   gap: 0.75rem;
   align-items: center;
 }
-
-/* Card Variants */
-.cardCompact {
-  padding: 1rem;
-}
-
-.cardCompact .cardHeader {
-  margin-bottom: 0.75rem;
-}
-
-.cardFlat {
-  box-shadow: none;
-  border: 1px solid var(--color-border-medium);
-}
-
-@media (hover: hover) {
-  .cardFlat:hover {
-    box-shadow: var(--shadow-sm);
-  }
-}

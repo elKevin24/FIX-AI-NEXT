@@ -28,20 +28,6 @@
   pointer-events: auto;
 }
 
-.titleSection h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-1) 0;
-  letter-spacing: -0.02em;
-}
-
-.titleSection p {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
 .actions {
   display: flex;
   gap: var(--spacing-3);
@@ -199,12 +185,6 @@
 .creditNoteNumber {
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary-600);
-}
-
-.saleInfo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
 }
 
 .saleNumber {

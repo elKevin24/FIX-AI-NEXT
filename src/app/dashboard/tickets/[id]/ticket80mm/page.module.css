@@ -4,56 +4,16 @@
 
 .container {
   min-height: auto;
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  padding: 24px;
-}
-
-.header {
-  max-width: 800px;
-  margin: 0 auto 32px;
-  text-align: center;
-}
-
-.backButton {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #ffffff;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  margin-bottom: 16px;
-}
-
-@media (hover: hover) {
-  .backButton:hover {
-    background: #f9fafb;
-    border-color: #3b82f6;
-    color: #1e40af;
-    transform: translateX(-4px);
-  }
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 8px 0;
-  letter-spacing: -0.02em;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
+  background: var(--color-bg-primary);
+  padding: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .content {
   max-width: 800px;
-  margin: 0 auto 32px;
+  margin: 0 auto var(--spacing-8);
   display: flex;
   justify-content: center;
 }

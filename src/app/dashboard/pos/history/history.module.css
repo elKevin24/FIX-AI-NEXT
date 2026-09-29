@@ -156,10 +156,6 @@
   color: var(--text-secondary);
 }
 
-.totalCell {
-  font-weight: 600;
-}
-
 .actions {
   display: flex;
   gap: 0.5rem;

@@ -57,12 +57,12 @@
 }
 
 .status_OPEN {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--color-success-50);
+  color: var(--color-success-700);
 }
 .status_CLOSED {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-error-50);
+  color: var(--color-error-700);
 }
 
 .dashboardGrid {
@@ -78,18 +78,18 @@
 }
 
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardTitle {
   font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -109,7 +109,7 @@
 
 .balanceLabel {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -117,7 +117,7 @@
 .balanceValue {
   font-size: 1.5rem;
   font-weight: 700;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
 }
 
 .transactionsWrapper {
@@ -136,19 +136,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: var(--bg-tertiary);
+  background: var(--color-surface-hover);
   border-radius: 8px;
   border-left: 4px solid transparent;
 }
 
 .type_INCOME {
-  border-left-color: #16a34a;
+  border-left-color: var(--color-success-600);
 }
 .type_EXPENSE {
-  border-left-color: #dc2626;
+  border-left-color: var(--color-error-600);
 }
 .type_WITHDRAWAL {
-  border-left-color: #ea580c;
+  border-left-color: var(--color-warning-600);
 }
 
 .transInfo {
@@ -163,19 +163,19 @@
 }
 .transDate {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--color-text-tertiary);
 }
 
 .transAmount {
   font-weight: 700;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
 }
 
 .amount_IN {
-  color: #16a34a;
+  color: var(--color-success-600);
 }
 .amount_OUT {
-  color: #dc2626;
+  color: var(--color-error-600);
 }
 
 .actionCard {
@@ -217,17 +217,17 @@
 }
 
 .btnPrimary {
-  background: var(--primary-color);
-  color: white;
+  background: var(--color-primary-600);
+  color: var(--color-text-inverse);
 }
 .btnDanger {
-  background: #dc2626;
-  color: white;
+  background: var(--color-error-600);
+  color: var(--color-text-inverse);
 }
 .btnSecondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-medium);
 }
 
 .emptyState {

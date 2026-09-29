@@ -301,6 +301,7 @@
   border: 1px solid var(--color-primary-200);
 }
 
+.badgeInProgress,
 .badgeProgress {
   background: var(--color-warning-50);
   color: var(--color-warning-700);
@@ -311,72 +312,6 @@
   background: var(--color-secondary-50);
   color: var(--color-secondary-700);
   border: 1px solid var(--color-secondary-100);
-}
-
-.priorityBreakdown {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--color-border-light);
-  font-size: 0.75rem;
-}
-
-.priorityItem {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.priorityDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.dotUrgent {
-  background: var(--color-error-500);
-}
-.dotHigh {
-  background: var(--color-warning-500);
-}
-.dotMedium {
-  background: var(--color-primary-500);
-}
-.dotLow {
-  background: var(--color-gray-400);
-}
-
-.ticketsSection {
-  margin-top: 0.25rem;
-}
-
-.toggleTicketsButton {
-  width: 100%;
-  padding: 0.5rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0.625rem;
-  color: var(--color-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-}
-
-@media (hover: hover) {
-  .toggleTicketsButton:hover {
-    background: var(--color-surface-hover);
-    color: var(--color-text-primary);
-    border-color: var(--color-border-strong);
-  }
 }
 
 .ticketsList {

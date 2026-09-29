@@ -186,42 +186,6 @@
   z-index: 100;
 }
 
-.logoutBtn {
-  /* Touch Target Optimization */
-  width: 100%;
-  padding: 0.875rem;
-  /* Larger touch target */
-  background: var(--color-surface-hover);
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--color-error-500);
-  border-radius: 0.75rem;
-  cursor: pointer;
-  color: var(--color-error-600);
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  /* Prevent text selection */
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.logoutBtn:active {
-  background-color: var(--color-error-50);
-  transform: scale(0.98);
-}
-
-@media (hover: hover) {
-  .logoutBtn:hover {
-    background-color: var(--color-error-50);
-    border-color: var(--color-error-600);
-    box-shadow: var(--shadow-md);
-  }
-}
-
 /* Mobile Toggle Button */
 .mobileToggle {
   position: fixed;
@@ -347,10 +311,5 @@
   .logoIcon {
     width: 2rem;
     height: 2rem;
-  }
-
-  .logoutBtn {
-    padding: 0.75rem;
-    font-size: 0.875rem;
   }
 }

@@ -158,17 +158,6 @@
   color: var(--color-error-700);
 }
 
-.retryButton {
-  margin-top: 1rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--color-error-600);
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 @media (min-width: 768px) {
   .container {
     gap: 1.15rem;
@@ -216,24 +205,6 @@
 .error p {
   color: var(--color-text-secondary);
   font-size: var(--font-size-lg);
-}
-
-.retryButton {
-  padding: var(--spacing-3) var(--spacing-6);
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-@media (hover: hover) {
-  .retryButton:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-1px);
-  }
 }
 
 .select:focus-visible {

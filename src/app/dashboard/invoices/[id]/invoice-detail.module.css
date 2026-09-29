@@ -36,27 +36,6 @@
   pointer-events: none;
 }
 
-.backButtonContainer > * {
-  pointer-events: auto;
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: color 0.2s;
-}
-
-@media (hover: hover) {
-  .backButton:hover {
-    color: var(--color-primary-600);
-  }
-}
-
 .btnPrint {
   background-color: var(--color-secondary-600);
   color: white;

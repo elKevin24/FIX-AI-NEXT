@@ -69,7 +69,7 @@
 
 .categoryChipActive {
   background: var(--color-primary-600);
-  color: var(--color-on-primary, #ffffff);
+  color: var(--color-on-primary);
   border-color: var(--color-primary-600);
   box-shadow: var(--shadow-xs);
 }
@@ -146,30 +146,6 @@
   text-overflow: ellipsis;
 }
 
-.templateDescription {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-  margin-bottom: 0.75rem;
-}
-
-.templateParts {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-.partsCount {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
 .requiredBadge {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
@@ -188,29 +164,6 @@
   color: var(--color-primary-700);
   border: 1px solid var(--color-primary-200);
   font-weight: 600;
-}
-
-.duration {
-  display: inline-block;
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
-  margin-top: 0.5rem;
-}
-
-.checkmark {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-primary-600);
-  color: var(--color-on-primary, #ffffff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.875rem;
 }
 
 /* Preview Section - Theme-Aware Liquid Glass */

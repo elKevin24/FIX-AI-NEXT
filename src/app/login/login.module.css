@@ -1,6 +1,5 @@
 /* ========================================
    LOGIN PAGE - Ultra Premium Liquid Glass
-   CLASES CORRECTAS SEGÚN page.tsx
    ======================================== */
 
 /* Container */
@@ -194,13 +193,6 @@
   letter-spacing: 0.01em;
 }
 
-.flexBetween {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
 .forgotPassword {
   font-size: 0.8125rem;
   color: var(--color-primary-600);
@@ -253,7 +245,7 @@
 .input:focus {
   outline: none;
   border-color: var(--color-primary-600);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
   background: var(--color-surface);
 }
 
@@ -273,7 +265,7 @@
 :global([data-theme="dark"]) .input:focus,
 :global(.dark) .input:focus {
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
 .inputIcon {
@@ -315,14 +307,14 @@
 @media (hover: hover) {
   .passwordToggle:hover {
     color: var(--color-text-primary);
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--color-surface-hover);
   }
 }
 
 @media (hover: hover) {
   :global([data-theme="dark"]) .passwordToggle:hover,
   :global(.dark) .passwordToggle:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--color-surface-hover);
   }
 }
 
@@ -367,7 +359,7 @@
   padding: 1rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: white;
+  color: var(--color-text-inverse);
   background: var(--color-primary-600);
   border: none;
   border-radius: 0.875rem;
@@ -442,109 +434,6 @@
   }
 }
 
-/* Divider */
-.divider {
-  margin: 2rem 0;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dividerLine {
-  flex: 1;
-  height: 1px;
-  background: var(--color-border-light);
-}
-
-.dividerText {
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
-}
-
-/* Demo Credentials */
-.demoCredentials {
-  padding: 1.25rem;
-  background: var(--color-surface-hover);
-  border: none;
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-}
-
-@media (hover: hover) {
-  .demoCredentials:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-  }
-}
-
-.demoTitle {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 1rem 0;
-  text-align: center;
-}
-
-.demoGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.demoCard {
-  padding: 0.875rem;
-  background: var(--color-surface);
-  border: none;
-  border-radius: 0.625rem;
-  text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .demoCard:hover {
-    background: var(--color-primary-50);
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.demoCard:active {
-  transform: translateY(-2px) scale(1.02);
-}
-
-.demoUser {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  margin: 0 0 0.5rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.demoEmail {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  margin: 0 0 0.375rem 0;
-  font-family: monospace;
-}
-
-.demoEmailAdmin {
-  color: var(--color-primary-600);
-}
-
-.demoEmailTech {
-  color: var(--color-success-600);
-}
-
-.demoPassword {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
-  margin: 0;
-  font-family: monospace;
-}
-
 /* Footer */
 .footer {
   margin-top: 1.5rem;
@@ -603,9 +492,5 @@
 @media (max-width: 480px) {
   .card {
     padding: 2rem 1.5rem;
-  }
-
-  .demoGrid {
-    grid-template-columns: 1fr;
   }
 }

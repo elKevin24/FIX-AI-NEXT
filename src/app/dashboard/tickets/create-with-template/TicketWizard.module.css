@@ -75,7 +75,7 @@
 
 .stepActive .stepNumber {
   background: var(--color-primary-600);
-  color: var(--color-on-primary, #ffffff);
+  color: var(--color-on-primary);
   border-color: var(--color-primary-600);
   box-shadow: var(--shadow-sm);
   transform: scale(1.08);

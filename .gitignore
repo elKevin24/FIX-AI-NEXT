@@ -47,6 +47,15 @@ dev.log
 /test-results/
 # Ignorar solo la carpeta de Playwright MCP
 .playwright-mcp/
+# Capturas sueltas que se generan al depurar
+goto-result.png
+
+# Lighthouse / audit reports generados
+lh-report*.json
+.lighthouseci
+
+# PIDs de servidores locales
+*.pid
 
 # Temp / utility scripts
 check-db.ts

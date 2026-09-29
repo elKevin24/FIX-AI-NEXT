@@ -279,43 +279,10 @@
   }
 }
 
-.table tbody tr.lowStockRow {
-  background: rgba(254, 242, 242, 0.5);
-}
-
 .table tbody td {
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
   color: var(--color-text-primary);
-}
-
-/* ========== BADGES ========== */
-
-.lowStockBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.625rem;
-  background: rgba(254, 226, 226, 0.8);
-  color: var(--color-error-700);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.stockValue {
-  font-weight: 600;
-}
-
-.stockValue.low {
-  color: var(--color-error-600);
-}
-
-.marginPositive {
-  color: var(--color-success-600);
-}
-
-.marginNegative {
-  color: var(--color-error-600);
 }
 
 /* ========== DARK THEME ========== */
@@ -352,11 +319,6 @@
   [data-theme="dark-colorblind"] .table tbody tr:hover {
     background: rgba(255, 255, 255, 0.03);
   }
-}
-
-[data-theme="dark"] .table tbody tr.lowStockRow,
-[data-theme="dark-colorblind"] .table tbody tr.lowStockRow {
-  background: rgba(127, 29, 29, 0.2);
 }
 
 /* ========== RESPONSIVE ========== */

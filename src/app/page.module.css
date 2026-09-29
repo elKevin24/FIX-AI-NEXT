@@ -2,16 +2,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-primary, #f8fafc);
-  color: var(--color-text-primary, #0f172a);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 /* Header */
 .header {
   width: 100%;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-medium);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -33,12 +33,12 @@
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
-  color: #0f172a;
+  color: var(--color-text-primary);
 }
 
 .logoIcon {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--color-primary-600);
+  color: var(--color-surface);
   width: 42px;
   height: 42px;
   border-radius: 10px;
@@ -53,15 +53,8 @@
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--color-text-primary);
   line-height: 1.2;
-}
-
-.logoSubtitle {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 600;
-  display: block;
 }
 
 .navLinks {
@@ -80,7 +73,7 @@
 }
 
 .navMenuLink {
-  color: #475569;
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
@@ -89,7 +82,7 @@
 
 @media (hover: hover) {
   .navMenuLink:hover {
-    color: #2563eb;
+    color: var(--color-primary-600);
   }
 }
 
@@ -99,9 +92,9 @@
   gap: 0.5rem;
   padding: 0.6rem 1.15rem;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -110,9 +103,9 @@
 
 @media (hover: hover) {
   .navBtnSecondary:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #94a3b8;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-gray-400);
   }
 }
 
@@ -122,8 +115,8 @@
   gap: 0.5rem;
   padding: 0.6rem 1.25rem;
   border-radius: 8px;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--color-primary-600);
+  color: var(--color-surface);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -133,15 +126,15 @@
 
 @media (hover: hover) {
   .navBtnPrimary:hover {
-    background: #1d4ed8;
+    background: var(--color-primary-700);
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
   }
 }
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-primary) 50%, var(--color-text-primary) 100%);
+  color: var(--color-surface);
   padding: 4.5rem 1.5rem 5.5rem 1.5rem;
   position: relative;
   overflow: hidden;
@@ -161,7 +154,7 @@
   border-radius: 9999px;
   background: rgba(37, 99, 235, 0.25);
   border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #93c5fd;
+  color: var(--color-primary-300);
   font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -173,7 +166,7 @@
   line-height: 1.18;
   letter-spacing: -0.03em;
   margin-bottom: 1.5rem;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .highlightText {
@@ -183,7 +176,7 @@
 .subtitle {
   font-size: 1.15rem;
   line-height: 1.6;
-  color: #cbd5e1;
+  color: var(--color-border-strong);
   max-width: 760px;
   margin: 0 auto 2rem auto;
 }
@@ -202,7 +195,7 @@
 .quickSearchLabel {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #93c5fd;
+  color: var(--color-primary-300);
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -223,7 +216,7 @@
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
@@ -242,7 +235,7 @@
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   background: #38bdf8;
-  color: #0f172a;
+  color: var(--color-text-primary);
   font-weight: 700;
   font-size: 0.95rem;
   border: none;
@@ -271,8 +264,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--color-primary-600);
+  color: var(--color-surface);
   font-size: 1.05rem;
   font-weight: 700;
   padding: 0.875rem 2.25rem;
@@ -284,7 +277,7 @@
 
 @media (hover: hover) {
   .primaryHeroBtn:hover {
-    background: #1d4ed8;
+    background: var(--color-primary-700);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
   }
@@ -297,7 +290,7 @@
   gap: 0.625rem;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: 1.05rem;
   font-weight: 600;
   padding: 0.875rem 2.25rem;
@@ -309,7 +302,7 @@
 @media (hover: hover) {
   .secondaryHeroBtn:hover {
     background: rgba(255, 255, 255, 0.16);
-    border-color: #ffffff;
+    border-color: var(--color-surface);
     transform: translateY(-2px);
   }
 }
@@ -338,14 +331,14 @@
 
 .statLabel {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--color-gray-400);
   font-weight: 500;
 }
 
 /* Services Preview Section */
 .servicesSection {
   padding: 4.5rem 1.5rem;
-  background: #f8fafc;
+  background: var(--color-bg-primary);
 }
 
 .sectionHeader {
@@ -360,21 +353,21 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #2563eb;
+  color: var(--color-primary-600);
   margin-bottom: 0.75rem;
 }
 
 .sectionTitle {
   font-size: 2.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
 }
 
 .sectionSubtitle {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   line-height: 1.6;
 }
 
@@ -387,8 +380,8 @@
 }
 
 .serviceCard {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
   border-radius: 14px;
   padding: 1.75rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
@@ -397,7 +390,7 @@
 
 @media (hover: hover) {
   .serviceCard:hover {
-    border-color: #93c5fd;
+    border-color: var(--color-primary-300);
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
   }
@@ -407,8 +400,8 @@
   display: inline-block;
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -418,13 +411,13 @@
 .serviceTitle {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
 }
 
 .serviceDesc {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   line-height: 1.5;
   margin-bottom: 1rem;
 }
@@ -435,15 +428,15 @@
   justify-content: space-between;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #059669;
+  color: var(--color-success-600);
   padding-top: 0.75rem;
-  border-top: 1px dashed #e2e8f0;
+  border-top: 1px dashed var(--color-border-medium);
 }
 
 /* Core Business Features */
 .featuresSection {
   padding: 5rem 1.5rem;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .featureGrid {
@@ -455,8 +448,8 @@
 }
 
 .featureCard {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-medium);
   border-radius: 16px;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -466,10 +459,10 @@
 
 @media (hover: hover) {
   .featureCard:hover {
-    border-color: #93c5fd;
+    border-color: var(--color-primary-300);
     transform: translateY(-4px);
     box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08);
-    background: #ffffff;
+    background: var(--color-surface);
   }
 }
 
@@ -477,8 +470,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,13 +481,13 @@
 .featureTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin-bottom: 0.75rem;
 }
 
 .featureText {
   font-size: 0.95rem;
-  color: #475569;
+  color: var(--color-text-secondary);
   line-height: 1.6;
   flex-grow: 1;
 }
@@ -502,7 +495,7 @@
 /* Workflow Section */
 .workflowSection {
   padding: 5rem 1.5rem;
-  background: #f1f5f9;
+  background: var(--color-bg-secondary);
 }
 
 .stepsGrid {
@@ -514,10 +507,10 @@
 }
 
 .stepCard {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 14px;
   padding: 2rem 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-medium);
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
@@ -526,8 +519,8 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--color-primary-600);
+  color: var(--color-surface);
   font-weight: 800;
   font-size: 1rem;
   display: flex;
@@ -539,20 +532,20 @@
 .stepTitle {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
 }
 
 .stepDescription {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   line-height: 1.5;
 }
 
 /* Roles Section */
 .rolesSection {
   padding: 5rem 1.5rem;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .rolesGrid {
@@ -564,10 +557,10 @@
 }
 
 .roleCard {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-medium);
   border-radius: 16px;
   padding: 2rem;
-  background: #fafafa;
+  background: var(--color-bg-secondary);
 }
 
 .roleHeader {
@@ -581,8 +574,8 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -591,7 +584,7 @@
 .roleTitle {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
 }
 
 .roleList {
@@ -608,12 +601,12 @@
   align-items: flex-start;
   gap: 0.625rem;
   font-size: 0.9rem;
-  color: #475569;
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
 .checkIcon {
-  color: #10b981;
+  color: var(--color-success-500);
   flex-shrink: 0;
   margin-top: 0.15rem;
 }
@@ -621,16 +614,16 @@
 /* Customer Portal Banner */
 .portalBanner {
   padding: 4rem 1.5rem;
-  background: #f8fafc;
+  background: var(--color-bg-primary);
 }
 
 .bannerCard {
   max-width: 1000px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  background: linear-gradient(135deg, var(--color-primary-800) 0%, var(--color-text-primary) 100%);
   border-radius: 20px;
   padding: 3rem;
-  color: #ffffff;
+  color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -646,12 +639,12 @@
   font-size: 1.85rem;
   font-weight: 800;
   margin-bottom: 0.75rem;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .bannerText {
   font-size: 1.05rem;
-  color: #cbd5e1;
+  color: var(--color-border-strong);
   line-height: 1.6;
 }
 
@@ -660,7 +653,7 @@
   align-items: center;
   gap: 0.5rem;
   background: #38bdf8;
-  color: #0f172a;
+  color: var(--color-text-primary);
   font-weight: 700;
   padding: 0.875rem 1.75rem;
   border-radius: 10px;
@@ -680,10 +673,10 @@
 
 /* Footer */
 .footer {
-  background: #0f172a;
-  color: #94a3b8;
+  background: var(--color-text-primary);
+  color: var(--color-gray-400);
   padding: 3.5rem 1.5rem 2rem 1.5rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--color-text-primary);
 }
 
 .footerContent {
@@ -709,13 +702,13 @@
 .footerBrandName {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--color-surface);
   margin-bottom: 0.5rem;
 }
 
 .footerBrandDesc {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--color-gray-400);
   line-height: 1.5;
 }
 
@@ -728,14 +721,14 @@
 .footerLinksTitle {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--color-bg-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.25rem;
 }
 
 .footerLink {
-  color: #cbd5e1;
+  color: var(--color-border-strong);
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.2s ease;
@@ -749,14 +742,14 @@
 
 .footerBottom {
   padding-top: 2rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--color-text-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
 }
 
 /* Responsiveness */

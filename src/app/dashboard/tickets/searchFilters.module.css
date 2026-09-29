@@ -164,7 +164,6 @@
   flex-direction: column;
 }
 
-.searchItem :global(.SearchInputGroup_searchGroup__27XzS),
 .searchItem > div {
   height: 42px;
 }

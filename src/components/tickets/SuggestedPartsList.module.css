@@ -148,7 +148,7 @@
   padding: 0.5rem 0.875rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-on-primary, #ffffff);
+  color: var(--color-on-primary);
   background: var(--color-primary-600);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);

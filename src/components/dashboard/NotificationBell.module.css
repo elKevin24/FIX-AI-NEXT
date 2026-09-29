@@ -58,8 +58,8 @@
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1;
-  color: #ffffff;
-  background: var(--color-error-500, #ef4444);
+  color: var(--color-surface);
+  background: var(--color-error-500);
   border-radius: var(--radius-full, 9999px);
   transform: translate(25%, -25%);
   box-shadow: 0 0 0 2px var(--color-surface);
@@ -282,19 +282,19 @@
 }
 
 .iconInfo {
-  color: var(--color-info-500, #3b82f6);
+  color: var(--color-info-500);
   flex-shrink: 0;
 }
 .iconSuccess {
-  color: var(--color-success-500, #10b981);
+  color: var(--color-success-500);
   flex-shrink: 0;
 }
 .iconWarning {
-  color: var(--color-warning-500, #f59e0b);
+  color: var(--color-warning-500);
   flex-shrink: 0;
 }
 .iconError {
-  color: var(--color-error-500, #ef4444);
+  color: var(--color-error-500);
   flex-shrink: 0;
 }
 

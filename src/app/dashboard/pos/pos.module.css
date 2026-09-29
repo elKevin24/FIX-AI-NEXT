@@ -3,13 +3,6 @@
    WCAG 2.1 AA Compliant
    ======================================== */
 
-/* ========== SHARED FOCUS RING ========== */
-/* Reusable focus-visible pattern for all custom interactive elements */
-.focusable:focus-visible {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 2px;
-}
-
 .container {
   height: 100%;
   display: flex;
@@ -364,12 +357,6 @@
   background: var(--color-surface);
 }
 
-.emptyCartHint {
-  font-size: var(--font-size-sm);
-  margin-top: var(--spacing-2);
-  color: var(--color-text-tertiary);
-}
-
 .cartItem {
   display: flex;
   flex-direction: column;
@@ -407,12 +394,6 @@
 .cartItemInfo {
   display: flex;
   justify-content: space-between;
-}
-
-.cartItemName {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
 }
 
 .cartItemPrice {

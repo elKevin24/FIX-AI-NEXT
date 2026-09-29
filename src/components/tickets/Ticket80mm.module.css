@@ -294,13 +294,6 @@
   margin: 1px 0;
 }
 
-/* Truncate long text */
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* Print Media Queries */
 @media print {
   /* Solo imprimir el ticket, ocultar todo lo demás */

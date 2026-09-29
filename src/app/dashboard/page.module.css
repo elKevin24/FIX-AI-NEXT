@@ -190,15 +190,6 @@
   animation-delay: 0.2s;
 }
 
-/* ========== TABLE STYLES ========== */
-.recentTicketsTable {
-  overflow-x: auto;
-  border-radius: 0.875rem;
-  margin: 0 -0.625rem;
-  width: calc(100% + 1.25rem);
-  -webkit-overflow-scrolling: touch;
-}
-
 .table {
   width: 100%;
   border-collapse: separate;
@@ -268,19 +259,6 @@
   }
 }
 
-.auditInfo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8125rem;
-  color: var(--color-text-tertiary); /* Softest legible contrast */
-  background: var(--color-surface-hover);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  border: 1px solid var(--color-border-light);
-}
-
 /* ========== RESPONSIVE ========== */
 @media (min-width: 768px) {
   .dashboard {
@@ -293,12 +271,6 @@
     align-items: center;
     margin-bottom: 0.25rem;
     gap: 1.5rem;
-  }
-
-  .headerTitleContainer {
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
   }
 
   .searchBar {
@@ -328,11 +300,6 @@
   .chartTitle {
     font-size: 1.05rem;
     margin-bottom: 1.15rem;
-  }
-
-  .recentTicketsTable {
-    margin: 0;
-    width: 100%;
   }
 
   .table th {
@@ -365,30 +332,4 @@
 
 .card:nth-child(4) {
   animation-delay: 0.2s;
-}
-
-/* ========== SCROLL BEHAVIOR ========== */
-.recentTicketsTable {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
-}
-
-.recentTicketsTable::-webkit-scrollbar {
-  height: 8px;
-}
-
-.recentTicketsTable::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 4px;
-}
-
-.recentTicketsTable::-webkit-scrollbar-thumb {
-  background: var(--color-border-medium);
-  border-radius: 4px;
-}
-
-@media (hover: hover) {
-  .recentTicketsTable::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-strong);
-  }
 }
